@@ -14,6 +14,7 @@ export interface BlockStructure {
   id: string
   type: string
   purpose: string
+  preset?: string
 }
 
 export interface PageStructure {

@@ -63,3 +63,5 @@ export function getPresetIds(): string[] {
 export function isPresetId(id: string): boolean {
   return id in allPresets;
 }
+
+export { generateSectionPrompt } from "./ai";

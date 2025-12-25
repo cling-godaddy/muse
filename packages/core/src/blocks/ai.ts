@@ -94,3 +94,59 @@ registerAISchema({
   },
   required: ["image"],
 });
+
+registerAISchema({
+  type: "testimonials",
+  description: "Customer testimonials section with quotes",
+  properties: {
+    headline: { type: "string", description: "Optional section headline" },
+    quotes: { type: "array", description: "Array of quotes with text, author, role, company, avatar", required: true },
+  },
+  required: ["quotes"],
+});
+
+registerAISchema({
+  type: "gallery",
+  description: "Image gallery or portfolio section",
+  properties: {
+    headline: { type: "string", description: "Optional section headline" },
+    images: { type: "array", description: "Array of images with url, alt", required: true },
+    columns: { type: "number", description: "Number of columns: 2, 3, or 4" },
+  },
+  required: ["images"],
+});
+
+registerAISchema({
+  type: "pricing",
+  description: "Pricing plans and tiers section",
+  properties: {
+    headline: { type: "string", description: "Optional section headline" },
+    subheadline: { type: "string", description: "Optional supporting text" },
+    plans: { type: "array", description: "Array of plans with name, price, period, description, features, cta, highlighted", required: true },
+  },
+  required: ["plans"],
+});
+
+registerAISchema({
+  type: "faq",
+  description: "Frequently asked questions section",
+  properties: {
+    headline: { type: "string", description: "Optional section headline" },
+    subheadline: { type: "string", description: "Optional supporting text" },
+    items: { type: "array", description: "Array of FAQ items with question and answer", required: true },
+  },
+  required: ["items"],
+});
+
+registerAISchema({
+  type: "contact",
+  description: "Contact information and form section",
+  properties: {
+    headline: { type: "string", description: "Optional section headline" },
+    subheadline: { type: "string", description: "Optional supporting text" },
+    email: { type: "string", description: "Contact email address" },
+    phone: { type: "string", description: "Contact phone number" },
+    address: { type: "string", description: "Physical address" },
+  },
+  required: [],
+});
