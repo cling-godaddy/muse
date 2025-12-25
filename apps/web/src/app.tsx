@@ -1,12 +1,13 @@
-import { useRef } from "react";
-import { Editor, type EditorRef } from "@muse/editor";
+import { BlockEditor } from "@muse/editor";
+import type { Block } from "@muse/core";
 import { Chat } from "./components/chat";
+import { useBlocks } from "./hooks/useBlocks";
 
 export function App() {
-  const editorRef = useRef<EditorRef>(null);
+  const { blocks, setBlocks } = useBlocks();
 
-  const handleInsert = (text: string) => {
-    editorRef.current?.insertAtCursor(text);
+  const handleInsertBlocks = (newBlocks: Block[]) => {
+    setBlocks([...blocks, ...newBlocks]);
   };
 
   return (
@@ -16,13 +17,12 @@ export function App() {
       </header>
       <main className="flex-1 flex gap-6 p-6 overflow-hidden">
         <div className="w-[400px] shrink-0">
-          <Chat onInsert={handleInsert} />
+          <Chat onInsertBlocks={handleInsertBlocks} />
         </div>
-        <div className="flex-1 min-w-0">
-          <Editor
-            ref={editorRef}
-            className="h-full flex flex-col border border-border rounded bg-bg"
-          />
+        <div className="flex-1 min-w-0 overflow-y-auto">
+          <div className="h-full border border-border rounded bg-bg p-4">
+            <BlockEditor blocks={blocks} onChange={setBlocks} />
+          </div>
         </div>
       </main>
     </div>
