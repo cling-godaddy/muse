@@ -14,7 +14,7 @@ export {
   getThemeIds,
 } from "./registry";
 
-export { generateThemePrompt } from "./ai";
+export { generateThemePrompt, generatePaletteTypographyPrompt } from "./ai";
 
 export { themeToCssVars, themeToCssString } from "./css";
 

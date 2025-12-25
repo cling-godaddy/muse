@@ -1,5 +1,8 @@
 import { getAllThemes } from "./registry";
+import { getAllPalettes, paletteCategoryDescriptions, type PaletteCategory } from "./palettes";
+import { getAllTypography, typographyCategoryDescriptions, type TypographyCategory } from "./typography";
 
+// legacy prompt for old theme system
 export function generateThemePrompt(): string {
   const themes = getAllThemes();
 
@@ -12,4 +15,42 @@ export function generateThemePrompt(): string {
 ${lines.join("\n")}
 
 Select the most appropriate theme based on the user's prompt and include it in your response as "theme": "<theme-id>".`;
+}
+
+// new prompt for palette + typography selection
+export function generatePaletteTypographyPrompt(): string {
+  const palettes = getAllPalettes();
+  const typography = getAllTypography();
+
+  const palettesByCategory = palettes.reduce((acc, p) => {
+    if (!acc[p.category]) acc[p.category] = [];
+    acc[p.category].push(p);
+    return acc;
+  }, {} as Record<PaletteCategory, typeof palettes>);
+
+  const typographyByCategory = typography.reduce((acc, t) => {
+    if (!acc[t.category]) acc[t.category] = [];
+    acc[t.category].push(t);
+    return acc;
+  }, {} as Record<TypographyCategory, typeof typography>);
+
+  const paletteLines = Object.entries(palettesByCategory).map(([cat, items]) => {
+    const desc = paletteCategoryDescriptions[cat as PaletteCategory];
+    const itemList = items.map(p => `  - ${p.id}: ${p.description}`).join("\n");
+    return `${cat.toUpperCase()} (${desc}):\n${itemList}`;
+  });
+
+  const typographyLines = Object.entries(typographyByCategory).map(([cat, items]) => {
+    const desc = typographyCategoryDescriptions[cat as TypographyCategory];
+    const itemList = items.map(t => `  - ${t.id}: ${t.description}`).join("\n");
+    return `${cat.toUpperCase()} (${desc}):\n${itemList}`;
+  });
+
+  return `PALETTES (pick one):
+${paletteLines.join("\n\n")}
+
+TYPOGRAPHY (pick one):
+${typographyLines.join("\n\n")}
+
+Output JSON: {"palette": "<id>", "typography": "<id>"}`;
 }
