@@ -11,7 +11,8 @@ export interface AgentState {
   duration?: number
   data?: {
     blockCount?: number
-    theme?: string
+    palette?: string
+    typography?: string
   }
 }
 
@@ -75,12 +76,17 @@ export function parseStream(
           summary?: string
           duration?: number
           blockCount?: number
-          theme?: string
+          palette?: string
+          typography?: string
         };
         agent.duration = data.duration;
         agent.summary = data.summary;
-        if (data.blockCount !== undefined || data.theme) {
-          agent.data = { blockCount: data.blockCount, theme: data.theme };
+        if (data.blockCount !== undefined || data.palette || data.typography) {
+          agent.data = {
+            blockCount: data.blockCount,
+            palette: data.palette,
+            typography: data.typography,
+          };
         }
       }
       catch {

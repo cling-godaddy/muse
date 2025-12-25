@@ -155,11 +155,10 @@ function AgentTimeline({ agents, isLoading }: AgentTimelineProps) {
         agents
         {" · "}
         {formatDuration(totalDuration)}
-        {themeAgent?.data?.theme && (
+        {themeAgent?.data?.palette && (
           <span className="ml-2 text-text-subtle">
-            (
-            {themeAgent.data.theme}
-            )
+            {themeAgent.data.palette}
+            {themeAgent.data.typography && ` + ${themeAgent.data.typography}`}
           </span>
         )}
       </div>
@@ -234,10 +233,11 @@ function AgentTimeline({ agents, isLoading }: AgentTimelineProps) {
                   </span>
                 )}
                 <span className="text-text-subtle">─┘</span>
-                {themeAgent.data?.theme && (
+                {themeAgent.data?.palette && (
                   <span className="text-text-subtle">
                     →
-                    {themeAgent.data.theme}
+                    {themeAgent.data.palette}
+                    {themeAgent.data.typography && ` + ${themeAgent.data.typography}`}
                   </span>
                 )}
               </div>
