@@ -6,11 +6,13 @@ import { serve } from "@hono/node-server";
 import { Hono } from "hono";
 import { cors } from "hono/cors";
 import { chatRoute } from "./routes/chat";
+import { generateRoute } from "./routes/generate";
 
 const app = new Hono();
 
 app.use("/*", cors());
 app.route("/api/chat", chatRoute);
+app.route("/api/generate", generateRoute);
 
 app.get("/health", c => c.json({ ok: true }));
 
