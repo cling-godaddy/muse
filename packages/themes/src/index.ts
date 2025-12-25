@@ -31,3 +31,6 @@ export {
 
 // new palette system
 export * from "./palettes";
+
+// new typography system
+export * from "./typography";
