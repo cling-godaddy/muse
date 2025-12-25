@@ -1,0 +1,47 @@
+@import "tailwindcss";
+@import "./themes.css";
+
+@theme inline {
+  --color-primary: var(--muse-primary);
+  --color-primary-hover: var(--muse-primary-hover);
+  --color-success: var(--muse-success);
+  --color-border: var(--muse-border);
+  --color-border-light: var(--muse-border-light);
+  --color-bg: var(--muse-bg);
+  --color-bg-muted: var(--muse-bg-muted);
+  --color-bg-subtle: var(--muse-bg-subtle);
+  --color-text: var(--muse-text);
+  --color-text-muted: var(--muse-text-muted);
+  --color-text-subtle: var(--muse-text-subtle);
+  --color-user-bg: var(--muse-user-bg);
+  --color-user-border: var(--muse-user-border);
+  --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html, body, #root {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+}
+
+@layer components {
+  .muse-paragraph { @apply mb-2; }
+  .muse-bold { @apply font-bold; }
+  .muse-italic { @apply italic; }
+  .muse-underline { @apply underline; }
+  .muse-content { @apply min-h-[200px] p-4 outline-none flex-1 overflow-y-auto; }
+
+  .muse-toolbar {
+    @apply flex gap-1 p-2 border-b border-border bg-bg-muted;
+  }
+  .muse-toolbar button {
+    @apply px-2 py-1 bg-bg border border-border rounded cursor-pointer hover:bg-border;
+  }
+  .muse-toolbar-divider {
+    @apply w-px bg-border mx-1;
+  }
+}

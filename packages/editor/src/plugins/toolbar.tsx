@@ -1,7 +1,11 @@
 import { useLexicalComposerContext } from "@lexical/react/LexicalComposerContext";
 import { FORMAT_TEXT_COMMAND, UNDO_COMMAND, REDO_COMMAND } from "lexical";
 
-export function Toolbar() {
+interface ToolbarProps {
+  className?: string
+}
+
+export function Toolbar({ className }: ToolbarProps) {
   const [editor] = useLexicalComposerContext();
 
   const format = (type: "bold" | "italic") => {
@@ -12,7 +16,7 @@ export function Toolbar() {
   const redo = () => editor.dispatchCommand(REDO_COMMAND, undefined);
 
   return (
-    <div className="muse-toolbar">
+    <div className={className ?? "muse-toolbar"}>
       <button type="button" onClick={() => format("bold")} aria-label="Bold">
         B
       </button>

@@ -21,10 +21,10 @@ export function Chat({ onInsert }: ChatProps) {
   };
 
   return (
-    <div className="muse-chat">
-      <div className="muse-chat-messages">
+    <div className="flex flex-col h-full border border-border rounded bg-bg-subtle">
+      <div className="flex-1 overflow-y-auto p-4">
         {messages.length === 0 && (
-          <div className="muse-chat-empty">
+          <div className="text-text-subtle text-center py-8">
             Start a conversation...
           </div>
         )}
@@ -39,9 +39,9 @@ export function Chat({ onInsert }: ChatProps) {
         ))}
         <div ref={messagesEndRef} />
       </div>
-      <div className="muse-chat-input-container">
+      <div className="p-3 border-t border-border flex gap-2">
         <textarea
-          className="muse-chat-input"
+          className="flex-1 p-2 border border-border rounded resize-none font-sans text-sm focus:outline-none focus:border-primary"
           value={input}
           onChange={e => setInput(e.target.value)}
           onKeyDown={handleKeyDown}
@@ -50,7 +50,7 @@ export function Chat({ onInsert }: ChatProps) {
           disabled={isLoading}
         />
         <button
-          className="muse-chat-send"
+          className="px-4 py-2 bg-primary text-white border-none rounded cursor-pointer font-medium hover:bg-primary-hover disabled:bg-border disabled:cursor-not-allowed"
           onClick={send}
           disabled={isLoading || !input.trim()}
         >
@@ -73,16 +73,21 @@ function MessageBubble({ message, onInsert, isLast, isLoading }: MessageBubblePr
   const showInsert = isAssistant && onInsert && !(isLast && isLoading);
 
   return (
-    <div className={`muse-chat-message muse-chat-message-${message.role}`}>
-      <div className="muse-chat-message-role">
+    <div className="mb-4">
+      <div className={`text-xs font-semibold mb-1 ${isAssistant ? "text-success" : "text-primary"}`}>
         {isAssistant ? "AI" : "You"}
       </div>
-      <div className="muse-chat-message-content">
+      <div className={`rounded-lg p-3 border whitespace-pre-wrap break-words ${
+        isAssistant
+          ? "bg-bg border-border-light"
+          : "bg-user-bg border-user-border"
+      }`}
+      >
         {message.content || (isLoading ? "..." : "")}
       </div>
       {showInsert && (
         <button
-          className="muse-chat-insert"
+          className="mt-2 px-2 py-1 text-xs bg-bg-muted border border-border rounded cursor-pointer hover:bg-border"
           onClick={() => onInsert(message.content)}
         >
           Insert to editor
