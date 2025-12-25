@@ -282,6 +282,18 @@ function AgentTimeline({ agents, isLoading }: AgentTimelineProps) {
                 {agent.summary}
               </span>
             )}
+            {agent.name === "image" && agent.data?.planned !== undefined && (
+              <span className="text-text-subtle">
+                →
+                {agent.data.planned}
+                {" "}
+                planned,
+                {" "}
+                {agent.data.resolved ?? 0}
+                {" "}
+                resolved
+              </span>
+            )}
           </div>
         );
       })}

@@ -1,7 +1,7 @@
 import type { Block } from "@muse/core";
 import type { Usage } from "@muse/ai";
 
-export type AgentName = "brief" | "structure" | "theme" | "copy";
+export type AgentName = "brief" | "structure" | "theme" | "image" | "copy";
 export type AgentStatus = "pending" | "running" | "complete";
 
 export interface AgentState {
@@ -13,6 +13,8 @@ export interface AgentState {
     blockCount?: number
     palette?: string
     typography?: string
+    planned?: number
+    resolved?: number
   }
 }
 
@@ -75,14 +77,18 @@ export function parseStream(
           blockCount?: number
           palette?: string
           typography?: string
+          planned?: number
+          resolved?: number
         };
         agent.duration = data.duration;
         agent.summary = data.summary;
-        if (data.blockCount !== undefined || data.palette || data.typography) {
+        if (data.blockCount !== undefined || data.palette || data.typography || data.planned !== undefined) {
           agent.data = {
             blockCount: data.blockCount,
             palette: data.palette,
             typography: data.typography,
+            planned: data.planned,
+            resolved: data.resolved,
           };
         }
         // extract theme selection from theme agent
@@ -146,7 +152,7 @@ export function parseStream(
     .trim();
 
   // convert agents map to ordered array
-  const agentOrder: AgentName[] = ["brief", "structure", "theme", "copy"];
+  const agentOrder: AgentName[] = ["brief", "structure", "theme", "image", "copy"];
   const agentsArray = agentOrder
     .map(name => agents.get(name))
     .filter((agent): agent is AgentState => agent !== undefined);
