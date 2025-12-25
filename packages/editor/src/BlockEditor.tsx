@@ -8,7 +8,7 @@ interface BlockEditorProps {
 
 export function BlockEditor({ blocks, onChange }: BlockEditorProps) {
   const updateBlock = (id: string, data: Partial<Block>) => {
-    onChange(blocks.map(b => (b.id === id ? { ...b, ...data } : b)));
+    onChange(blocks.map(b => (b.id === id ? { ...b, ...data } as Block : b)));
   };
 
   const deleteBlock = (id: string) => {
