@@ -1,7 +1,7 @@
 import type { Message, Provider } from "../types";
 import { briefAgent, parseBrief } from "./brief";
 import { structureAgent, parseStructure } from "./structure";
-import { themeAgent } from "./theme";
+import { themeAgent, parseThemeSelection, type ThemeSelection } from "./theme";
 import { copyAgent } from "./copy";
 import type { BrandBrief, PageStructure } from "./types";
 
@@ -12,7 +12,7 @@ export interface OrchestratorInput {
 export interface OrchestratorEvents {
   onBrief?: (brief: BrandBrief) => void
   onStructure?: (structure: PageStructure) => void
-  onTheme?: (theme: string) => void
+  onTheme?: (theme: ThemeSelection) => void
 }
 
 export async function* orchestrate(
@@ -47,13 +47,14 @@ export async function* orchestrate(
     (async () => {
       const start = Date.now();
       const result = await themeAgent.run({ prompt, brief }, provider);
-      return { theme: result, duration: Date.now() - start };
+      const selection = parseThemeSelection(result);
+      return { selection, duration: Date.now() - start };
     })(),
   ]);
 
   const structure = parseStructure(structureResult.json);
   events?.onStructure?.(structure);
-  events?.onTheme?.(themeResult.theme);
+  events?.onTheme?.(themeResult.selection);
 
   yield `[AGENT:structure:complete]${JSON.stringify({
     blockCount: structure.blocks.length,
@@ -61,12 +62,13 @@ export async function* orchestrate(
   })}\n`;
 
   yield `[AGENT:theme:complete]${JSON.stringify({
-    theme: themeResult.theme,
+    palette: themeResult.selection.palette,
+    typography: themeResult.selection.typography,
     duration: themeResult.duration,
   })}\n`;
 
-  // emit theme marker for existing parser compatibility
-  yield `[THEME:${themeResult.theme}]\n`;
+  // emit theme marker for existing parser compatibility (uses palette as theme)
+  yield `[THEME:${themeResult.selection.palette}]\n`;
 
   // step 3: generate copy (streaming)
   yield "[AGENT:copy:start]\n";

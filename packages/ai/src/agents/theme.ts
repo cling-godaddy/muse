@@ -1,19 +1,24 @@
-import { generateThemePrompt } from "@muse/themes";
+import { generatePaletteTypographyPrompt } from "@muse/themes";
 import type { Provider } from "../types";
 import type { AgentInput, SyncAgent } from "./types";
 
+export interface ThemeSelection {
+  palette: string
+  typography: string
+}
+
 function buildSystemPrompt(): string {
-  return `You are a brand designer. Select the best theme for a landing page.
+  return `You are a brand designer. Select the best color palette and typography for a landing page.
 
-${generateThemePrompt()}
+${generatePaletteTypographyPrompt()}
 
-Output ONLY the theme ID, nothing else.`;
+Output ONLY valid JSON, nothing else.`;
 }
 
 export const themeAgent: SyncAgent = {
   config: {
     name: "theme",
-    description: "Selects appropriate theme based on brand brief",
+    description: "Selects palette and typography based on brand brief",
     model: "gpt-4o-mini",
   },
 
@@ -36,3 +41,16 @@ export const themeAgent: SyncAgent = {
     return response.content.trim();
   },
 };
+
+export function parseThemeSelection(json: string): ThemeSelection {
+  try {
+    const parsed = JSON.parse(json) as ThemeSelection;
+    return {
+      palette: parsed.palette || "slate",
+      typography: parsed.typography || "inter",
+    };
+  }
+  catch {
+    return { palette: "slate", typography: "inter" };
+  }
+}
