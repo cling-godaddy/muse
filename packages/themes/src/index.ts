@@ -18,6 +18,7 @@ export { generateThemePrompt } from "./ai";
 
 export { themeToCssVars, themeToCssString } from "./css";
 
+// legacy theme presets (keep for backward compat)
 import "./presets";
 
 export {
@@ -27,3 +28,6 @@ export {
   corporate,
   playful,
 } from "./presets";
+
+// new palette system
+export * from "./palettes";
