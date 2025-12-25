@@ -11,6 +11,8 @@
   },
   "dependencies": {
     "@muse/ai": "workspace:*",
+    "@muse/core": "workspace:*",
+    "@muse/themes": "workspace:*",
     "hono": "^4",
     "@hono/node-server": "^1",
     "dotenv": "^16"

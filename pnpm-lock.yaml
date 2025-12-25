@@ -56,6 +56,12 @@ importers:
       '@muse/ai':
         specifier: workspace:*
         version: link:../../packages/ai
+      '@muse/core':
+        specifier: workspace:*
+        version: link:../../packages/core
+      '@muse/themes':
+        specifier: workspace:*
+        version: link:../../packages/themes
       dotenv:
         specifier: ^16
         version: 16.6.1
@@ -81,6 +87,9 @@ importers:
       '@muse/editor':
         specifier: workspace:*
         version: link:../../packages/editor
+      '@muse/themes':
+        specifier: workspace:*
+        version: link:../../packages/themes
       react:
         specifier: ^19
         version: 19.2.3
@@ -161,6 +170,8 @@ importers:
       '@types/react-dom':
         specifier: ^19.2.3
         version: 19.2.3(@types/react@19.2.7)
+
+  packages/themes: {}
 
 packages:
 

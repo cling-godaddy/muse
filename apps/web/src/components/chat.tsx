@@ -1,10 +1,10 @@
 import { useRef, useEffect } from "react";
-import type { Block } from "@muse/core";
+import type { Block, TextBlock } from "@muse/core";
 import { createBlock } from "@muse/core";
 import { useChat, type Message } from "../hooks/useChat";
 
 interface ChatProps {
-  onInsertBlocks?: (blocks: Block[]) => void
+  onInsertBlocks?: (blocks: Block[], themeId?: string) => void
 }
 
 export function Chat({ onInsertBlocks }: ChatProps) {
@@ -34,7 +34,7 @@ export function Chat({ onInsertBlocks }: ChatProps) {
           ...b,
           id: b.id ?? crypto.randomUUID(),
         }));
-        onInsertBlocks(blocks);
+        onInsertBlocks(blocks, parsed.theme);
         return;
       }
     }
@@ -43,7 +43,7 @@ export function Chat({ onInsertBlocks }: ChatProps) {
     }
 
     // fallback: create a text block with the content
-    onInsertBlocks([createBlock("text", { content })]);
+    onInsertBlocks([createBlock<TextBlock>("text", { content })]);
   };
 
   return (

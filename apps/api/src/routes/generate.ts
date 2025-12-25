@@ -1,6 +1,7 @@
 import { Hono } from "hono";
 import { createClient, type Provider } from "@muse/ai";
 import { generateBlockSchemaPrompt, validateBlocks, type Block } from "@muse/core";
+import { generateThemePrompt, getTheme } from "@muse/themes";
 
 let client: Provider | null = null;
 
@@ -19,8 +20,11 @@ const systemPrompt = `You are a website content generator. Generate content bloc
 
 ${generateBlockSchemaPrompt()}
 
+${generateThemePrompt()}
+
 IMPORTANT: Respond with ONLY a valid JSON object in this exact format:
 {
+  "theme": "<theme-id>",
   "meta": {
     "title": "Page title",
     "description": "Optional page description"
@@ -32,6 +36,7 @@ IMPORTANT: Respond with ONLY a valid JSON object in this exact format:
 }
 
 Guidelines:
+- Select an appropriate theme based on the business/context
 - Generate 3-6 blocks for a typical landing page
 - Start with a hero block for the main message
 - Include features to highlight key benefits
@@ -56,7 +61,7 @@ generateRoute.post("/page", async (c) => {
     ],
   });
 
-  let parsed: { meta: { title: string, description?: string }, blocks: Block[] };
+  let parsed: { theme?: string, meta: { title: string, description?: string }, blocks: Block[] };
   try {
     parsed = JSON.parse(response.content);
   }
@@ -73,7 +78,10 @@ generateRoute.post("/page", async (c) => {
     }, 500);
   }
 
+  const theme = parsed.theme ? getTheme(parsed.theme) : getTheme("modern");
+
   return c.json({
+    theme: theme?.id ?? "modern",
     meta: parsed.meta,
     blocks: validation.data,
   });

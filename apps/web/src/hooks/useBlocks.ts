@@ -35,7 +35,7 @@ export function useBlocks(initial: Block[] = []): UseBlocks {
 
   const updateBlock = useCallback((id: string, data: Partial<Block>) => {
     setBlocksState(prev =>
-      prev.map(b => (b.id === id ? { ...b, ...data } : b)),
+      prev.map(b => (b.id === id ? { ...b, ...data } as Block : b)),
     );
   }, []);
 
