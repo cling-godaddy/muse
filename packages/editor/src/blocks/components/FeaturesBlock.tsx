@@ -54,12 +54,22 @@ export function FeaturesBlock({ block, onUpdate }: Props) {
       <div className="muse-block-features-grid">
         {block.items.map((item, i) => (
           <div key={i} className="muse-block-features-item">
-            <input
-              type="text"
-              value={item.icon ?? ""}
-              onChange={e => updateItem(i, { icon: e.target.value || undefined })}
-              placeholder="Icon..."
-            />
+            {item.image
+              ? (
+                <img
+                  src={item.image.url}
+                  alt={item.image.alt}
+                  className="muse-block-features-item-image"
+                />
+              )
+              : (
+                <input
+                  type="text"
+                  value={item.icon ?? ""}
+                  onChange={e => updateItem(i, { icon: e.target.value || undefined })}
+                  placeholder="Icon..."
+                />
+              )}
             <input
               type="text"
               value={item.title}

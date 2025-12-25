@@ -24,8 +24,28 @@ export function HeroBlock({ block, onUpdate }: Props) {
   const headlineRef = useAutoResize(block.headline);
   const subheadlineRef = useAutoResize(block.subheadline ?? "");
 
+  const hasBackground = !!block.backgroundImage;
+  const overlayOpacity = (block.backgroundOverlay ?? 50) / 100;
+
+  const containerStyle = block.backgroundImage
+    ? {
+      backgroundImage: `url(${block.backgroundImage.url})`,
+      backgroundSize: "cover",
+      backgroundPosition: "center",
+    }
+    : undefined;
+
   return (
-    <div className={`muse-block-hero muse-block-hero--${alignment}`}>
+    <div
+      className={`muse-block-hero muse-block-hero--${alignment} ${hasBackground ? "muse-block-hero--with-bg" : ""}`}
+      style={containerStyle}
+    >
+      {hasBackground && (
+        <div
+          className="muse-block-hero-overlay"
+          style={{ backgroundColor: `rgba(0, 0, 0, ${overlayOpacity})` }}
+        />
+      )}
       <textarea
         ref={headlineRef}
         className="muse-block-hero-headline"
