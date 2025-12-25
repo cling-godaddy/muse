@@ -4,8 +4,10 @@ export * from "./presets";
 import type { ColorPalette, PaletteCategory } from "./types";
 import { palettes, type PaletteId } from "./presets";
 
-export function getPalette(id: PaletteId): ColorPalette {
-  return palettes[id];
+export const DEFAULT_PALETTE_ID: PaletteId = "slate";
+
+export function getPalette(id: string): ColorPalette | undefined {
+  return palettes[id as PaletteId];
 }
 
 export function getAllPalettes(): ColorPalette[] {

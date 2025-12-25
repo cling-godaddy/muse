@@ -16,15 +16,20 @@ export interface AgentState {
   }
 }
 
+export interface ThemeSelection {
+  palette: string
+  typography: string
+}
+
 export interface ParseState {
-  theme?: string
+  theme?: ThemeSelection
   blockCount: number
   agents: Map<AgentName, AgentState>
 }
 
 export interface ParseResult {
   displayText: string
-  theme?: string
+  theme?: ThemeSelection
   newBlocks: Block[]
   usage?: Usage
   agents: AgentState[]
@@ -46,14 +51,6 @@ export function parseStream(
   let usage: Usage | undefined;
   const newBlocks: Block[] = [];
   const agents = new Map<AgentName, AgentState>(previousState.agents);
-
-  // extract theme if not already found
-  if (!theme) {
-    const themeMatch = accumulated.match(THEME_REGEX);
-    if (themeMatch) {
-      theme = themeMatch[1];
-    }
-  }
 
   // extract agent start events
   for (const match of accumulated.matchAll(AGENT_START_REGEX)) {
@@ -87,6 +84,10 @@ export function parseStream(
             palette: data.palette,
             typography: data.typography,
           };
+        }
+        // extract theme selection from theme agent
+        if (name === "theme" && data.palette && data.typography) {
+          theme = { palette: data.palette, typography: data.typography };
         }
       }
       catch {

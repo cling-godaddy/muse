@@ -1,7 +1,7 @@
 import { useState, useCallback, useRef } from "react";
 import type { Block } from "@muse/core";
 import type { Usage } from "@muse/ai";
-import { parseStream, type ParseState, type AgentState } from "../utils/streamParser";
+import { parseStream, type ParseState, type AgentState, type ThemeSelection } from "../utils/streamParser";
 
 export interface Message {
   role: "user" | "assistant"
@@ -9,7 +9,8 @@ export interface Message {
 }
 
 export interface UseChatOptions {
-  onBlockParsed?: (block: Block, theme?: string) => void
+  onBlockParsed?: (block: Block) => void
+  onThemeSelected?: (theme: ThemeSelection) => void
   onUsage?: (usage: Usage) => void
 }
 
@@ -37,6 +38,7 @@ export function useChat(options: UseChatOptions = {}): UseChat {
   const [agents, setAgents] = useState<AgentState[]>([]);
   const parseStateRef = useRef<ParseState>({ blockCount: 0, agents: new Map() });
   const usageProcessedRef = useRef(false);
+  const themeProcessedRef = useRef(false);
 
   const send = useCallback(async () => {
     if (!input.trim() || isLoading) return;
@@ -50,6 +52,7 @@ export function useChat(options: UseChatOptions = {}): UseChat {
     setAgents([]);
     parseStateRef.current = { blockCount: 0, agents: new Map() };
     usageProcessedRef.current = false;
+    themeProcessedRef.current = false;
 
     try {
       const response = await fetch(API_URL, {
@@ -84,7 +87,13 @@ export function useChat(options: UseChatOptions = {}): UseChat {
 
         // emit new blocks
         for (const block of result.newBlocks) {
-          options.onBlockParsed?.(block, result.theme);
+          options.onBlockParsed?.(block);
+        }
+
+        // emit theme selection (only once per response)
+        if (result.theme && !themeProcessedRef.current) {
+          themeProcessedRef.current = true;
+          options.onThemeSelected?.(result.theme);
         }
 
         // update agents if changed

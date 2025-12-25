@@ -1,39 +1,46 @@
 import { useState, useMemo, useCallback } from "react";
 import { BlockEditor } from "@muse/editor";
 import type { Block } from "@muse/core";
-import { getTheme, themeToCssVars, modern } from "@muse/themes";
+import { resolveThemeFromSelection, themeToCssVars } from "@muse/themes";
 import { Chat } from "./components/chat";
 import { useBlocks } from "./hooks/useBlocks";
+import type { ThemeSelection } from "./utils/streamParser";
+
+interface ThemeState {
+  palette: string
+  typography: string
+}
 
 export function App() {
   const { blocks, addBlock, setBlocks } = useBlocks();
-  const [themeId, setThemeId] = useState("modern");
+  const [theme, setTheme] = useState<ThemeState>({ palette: "slate", typography: "inter" });
 
   const themeStyle = useMemo(() => {
-    const theme = getTheme(themeId) ?? modern;
-    return themeToCssVars(theme);
-  }, [themeId]);
+    const resolved = resolveThemeFromSelection(theme.palette, theme.typography);
+    return themeToCssVars(resolved);
+  }, [theme]);
 
-  const handleBlockParsed = useCallback((block: Block, newThemeId?: string) => {
-    if (newThemeId && newThemeId !== themeId) {
-      setThemeId(newThemeId);
-    }
+  const handleBlockParsed = useCallback((block: Block) => {
     addBlock(block);
-  }, [themeId, addBlock]);
+  }, [addBlock]);
+
+  const handleThemeSelected = useCallback((selection: ThemeSelection) => {
+    setTheme({ palette: selection.palette, typography: selection.typography });
+  }, []);
 
   return (
     <div className="flex flex-col h-full font-sans text-text bg-bg">
       <header className="px-6 py-3 border-b border-border bg-bg flex items-center gap-4">
         <h1 className="m-0 text-xl font-semibold">Muse</h1>
         <span className="text-sm text-text-muted">
-          Theme:
-          {" "}
-          {themeId}
+          {theme.palette}
+          {" + "}
+          {theme.typography}
         </span>
       </header>
       <main className="flex-1 flex gap-6 p-6 overflow-hidden">
         <div className="w-[400px] shrink-0">
-          <Chat onBlockParsed={handleBlockParsed} />
+          <Chat onBlockParsed={handleBlockParsed} onThemeSelected={handleThemeSelected} />
         </div>
         <div className="flex-1 min-w-0 overflow-y-auto">
           <div className="h-full border border-border rounded bg-bg p-4" style={themeStyle}>

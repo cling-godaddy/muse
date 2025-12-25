@@ -4,8 +4,10 @@ export * from "./presets";
 import type { TypographyPreset, TypographyCategory } from "./types";
 import { typographyPresets, type TypographyId } from "./presets";
 
-export function getTypography(id: TypographyId): TypographyPreset {
-  return typographyPresets[id];
+export const DEFAULT_TYPOGRAPHY_ID: TypographyId = "inter";
+
+export function getTypography(id: string): TypographyPreset | undefined {
+  return typographyPresets[id as TypographyId];
 }
 
 export function getAllTypography(): TypographyPreset[] {

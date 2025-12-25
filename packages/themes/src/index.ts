@@ -34,3 +34,10 @@ export * from "./palettes";
 
 // new typography system
 export * from "./typography";
+
+// new styles system
+export * from "./styles";
+
+// composition
+export { composeTheme, type ThemeOverrides } from "./compose";
+export { resolveTheme, resolveThemeFromSelection, type ThemeConfig } from "./resolve";

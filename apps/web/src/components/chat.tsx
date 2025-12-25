@@ -1,14 +1,15 @@
 import { useRef, useEffect, useMemo, useState } from "react";
 import type { Block } from "@muse/core";
 import { useChat, type Message } from "../hooks/useChat";
-import type { AgentState } from "../utils/streamParser";
+import type { AgentState, ThemeSelection } from "../utils/streamParser";
 
 interface ChatProps {
-  onBlockParsed?: (block: Block, theme?: string) => void
+  onBlockParsed?: (block: Block) => void
+  onThemeSelected?: (theme: ThemeSelection) => void
 }
 
-export function Chat({ onBlockParsed }: ChatProps) {
-  const options = useMemo(() => ({ onBlockParsed }), [onBlockParsed]);
+export function Chat({ onBlockParsed, onThemeSelected }: ChatProps) {
+  const options = useMemo(() => ({ onBlockParsed, onThemeSelected }), [onBlockParsed, onThemeSelected]);
   const { messages, input, setInput, isLoading, send, sessionUsage, lastUsage, agents } = useChat(options);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
