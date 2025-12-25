@@ -53,3 +53,51 @@ registerBlockMeta({
   category: "cta",
   description: "CTA section with button",
 });
+
+registerBlockMeta({
+  type: "image",
+  label: "Image",
+  icon: "image",
+  category: "media",
+  description: "Image with optional caption",
+});
+
+registerBlockMeta({
+  type: "testimonials",
+  label: "Testimonials",
+  icon: "message-circle",
+  category: "content",
+  description: "Customer quotes and reviews",
+});
+
+registerBlockMeta({
+  type: "gallery",
+  label: "Gallery",
+  icon: "images",
+  category: "media",
+  description: "Image gallery or portfolio",
+});
+
+registerBlockMeta({
+  type: "pricing",
+  label: "Pricing",
+  icon: "credit-card",
+  category: "cta",
+  description: "Pricing plans and tiers",
+});
+
+registerBlockMeta({
+  type: "faq",
+  label: "FAQ",
+  icon: "help-circle",
+  category: "content",
+  description: "Frequently asked questions",
+});
+
+registerBlockMeta({
+  type: "contact",
+  label: "Contact",
+  icon: "mail",
+  category: "cta",
+  description: "Contact form and info",
+});

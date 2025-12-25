@@ -2,6 +2,7 @@ export interface BlockBase {
   id: string
   type: string
   version?: number
+  preset?: string
 }
 
 export interface ImageSource {
@@ -57,7 +58,76 @@ export interface ImageBlock extends BlockBase {
   size?: "small" | "medium" | "large" | "full"
 }
 
-export type Block = TextBlock | HeroBlock | FeaturesBlock | CtaBlock | ImageBlock;
+export interface Quote {
+  text: string
+  author: string
+  role?: string
+  company?: string
+  avatar?: ImageSource
+}
+
+export interface TestimonialsBlock extends BlockBase {
+  type: "testimonials"
+  headline?: string
+  quotes: Quote[]
+}
+
+export interface GalleryBlock extends BlockBase {
+  type: "gallery"
+  headline?: string
+  images: ImageSource[]
+  columns?: 2 | 3 | 4
+}
+
+export interface PricingPlan {
+  name: string
+  price: string
+  period?: string
+  description?: string
+  features: string[]
+  cta?: { text: string, href: string }
+  highlighted?: boolean
+}
+
+export interface PricingBlock extends BlockBase {
+  type: "pricing"
+  headline?: string
+  subheadline?: string
+  plans: PricingPlan[]
+}
+
+export interface FaqItem {
+  question: string
+  answer: string
+}
+
+export interface FaqBlock extends BlockBase {
+  type: "faq"
+  headline?: string
+  subheadline?: string
+  items: FaqItem[]
+}
+
+export interface ContactBlock extends BlockBase {
+  type: "contact"
+  headline?: string
+  subheadline?: string
+  email?: string
+  phone?: string
+  address?: string
+}
+
+export type Block
+  = | TextBlock
+    | HeroBlock
+    | FeaturesBlock
+    | CtaBlock
+    | ImageBlock
+    | TestimonialsBlock
+    | GalleryBlock
+    | PricingBlock
+    | FaqBlock
+    | ContactBlock;
 
 export type BlockType = Block["type"];
 
@@ -72,3 +142,8 @@ export const isHeroBlock = isBlockType<HeroBlock>("hero");
 export const isFeaturesBlock = isBlockType<FeaturesBlock>("features");
 export const isCtaBlock = isBlockType<CtaBlock>("cta");
 export const isImageBlock = isBlockType<ImageBlock>("image");
+export const isTestimonialsBlock = isBlockType<TestimonialsBlock>("testimonials");
+export const isGalleryBlock = isBlockType<GalleryBlock>("gallery");
+export const isPricingBlock = isBlockType<PricingBlock>("pricing");
+export const isFaqBlock = isBlockType<FaqBlock>("faq");
+export const isContactBlock = isBlockType<ContactBlock>("contact");
