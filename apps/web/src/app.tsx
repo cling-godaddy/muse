@@ -1,7 +1,7 @@
-import { useState, useMemo, useCallback } from "react";
+import { useState, useMemo, useCallback, useEffect } from "react";
 import { BlockEditor } from "@muse/editor";
 import type { Block } from "@muse/core";
-import { resolveThemeFromSelection, themeToCssVars } from "@muse/themes";
+import { resolveThemeFromSelection, themeToCssVars, getTypography, loadFonts } from "@muse/themes";
 import { Chat } from "./components/chat";
 import { useBlocks } from "./hooks/useBlocks";
 import type { ThemeSelection } from "./utils/streamParser";
@@ -19,6 +19,11 @@ export function App() {
     const resolved = resolveThemeFromSelection(theme.palette, theme.typography);
     return themeToCssVars(resolved);
   }, [theme]);
+
+  useEffect(() => {
+    const typography = getTypography(theme.typography);
+    if (typography) loadFonts(typography);
+  }, [theme.typography]);
 
   const handleBlockParsed = useCallback((block: Block) => {
     addBlock(block);

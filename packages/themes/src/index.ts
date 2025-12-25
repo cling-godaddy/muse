@@ -41,3 +41,6 @@ export * from "./styles";
 // composition
 export { composeTheme, type ThemeOverrides } from "./compose";
 export { resolveTheme, resolveThemeFromSelection, type ThemeConfig } from "./resolve";
+
+// font loading
+export { loadFonts, buildGoogleFontsUrl } from "./fonts";
