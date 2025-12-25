@@ -5,6 +5,8 @@ import {
   featuresBlockSchema,
   ctaBlockSchema,
   blockSchema,
+  validateBlock,
+  validateBlocks,
 } from "../../src/blocks/schemas";
 
 const uuid = "550e8400-e29b-41d4-a716-446655440000";
@@ -179,6 +181,61 @@ describe("block schemas", () => {
         type: "unknown",
         content: "test",
       });
+      expect(result.success).toBe(false);
+    });
+  });
+
+  describe("validateBlock", () => {
+    it("validates valid block", () => {
+      const result = validateBlock({
+        id: uuid,
+        type: "text",
+        content: "hello",
+      });
+      expect(result.success).toBe(true);
+    });
+
+    it("returns error for invalid block", () => {
+      const result = validateBlock({
+        id: uuid,
+        type: "text",
+      });
+      expect(result.success).toBe(false);
+    });
+
+    it("returns error for invalid type", () => {
+      const result = validateBlock({
+        id: uuid,
+        type: "unknown",
+      });
+      expect(result.success).toBe(false);
+    });
+  });
+
+  describe("validateBlocks", () => {
+    it("validates valid block array", () => {
+      const result = validateBlocks([
+        { id: uuid, type: "text", content: "hello" },
+        { id: "550e8400-e29b-41d4-a716-446655440001", type: "hero", headline: "Welcome" },
+      ]);
+      expect(result.success).toBe(true);
+    });
+
+    it("validates empty array", () => {
+      const result = validateBlocks([]);
+      expect(result.success).toBe(true);
+    });
+
+    it("returns error for invalid block in array", () => {
+      const result = validateBlocks([
+        { id: uuid, type: "text", content: "hello" },
+        { id: "550e8400-e29b-41d4-a716-446655440001", type: "text" },
+      ]);
+      expect(result.success).toBe(false);
+    });
+
+    it("returns error for non-array input", () => {
+      const result = validateBlocks("not an array");
       expect(result.success).toBe(false);
     });
   });
