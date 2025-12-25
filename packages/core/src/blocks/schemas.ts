@@ -5,6 +5,13 @@ const blockBase = z.object({
   version: z.number().optional(),
 });
 
+export const imageSourceSchema = z.object({
+  url: z.string().url(),
+  alt: z.string(),
+  provider: z.string().optional(),
+  providerId: z.string().optional(),
+});
+
 export const textBlockSchema = blockBase.extend({
   type: z.literal("text"),
   content: z.string(),
@@ -22,10 +29,13 @@ export const heroBlockSchema = blockBase.extend({
   cta: ctaLinkSchema.optional(),
   secondaryCta: ctaLinkSchema.optional(),
   alignment: z.enum(["left", "center", "right"]).optional(),
+  backgroundImage: imageSourceSchema.optional(),
+  backgroundOverlay: z.number().min(0).max(100).optional(),
 });
 
 const featureItemSchema = z.object({
   icon: z.string().optional(),
+  image: imageSourceSchema.optional(),
   title: z.string(),
   description: z.string(),
 });
@@ -46,11 +56,19 @@ export const ctaBlockSchema = blockBase.extend({
   variant: z.enum(["primary", "secondary"]).optional(),
 });
 
+export const imageBlockSchema = blockBase.extend({
+  type: z.literal("image"),
+  image: imageSourceSchema,
+  caption: z.string().optional(),
+  size: z.enum(["small", "medium", "large", "full"]).optional(),
+});
+
 export const blockSchema = z.discriminatedUnion("type", [
   textBlockSchema,
   heroBlockSchema,
   featuresBlockSchema,
   ctaBlockSchema,
+  imageBlockSchema,
 ]);
 
 export function validateBlock(data: unknown) {

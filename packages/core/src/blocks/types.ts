@@ -4,6 +4,13 @@ export interface BlockBase {
   version?: number
 }
 
+export interface ImageSource {
+  url: string
+  alt: string
+  provider?: string
+  providerId?: string
+}
+
 export interface TextBlock extends BlockBase {
   type: "text"
   content: string
@@ -16,10 +23,13 @@ export interface HeroBlock extends BlockBase {
   cta?: { text: string, href: string }
   secondaryCta?: { text: string, href: string }
   alignment?: "left" | "center" | "right"
+  backgroundImage?: ImageSource
+  backgroundOverlay?: number
 }
 
 export interface FeatureItem {
   icon?: string
+  image?: ImageSource
   title: string
   description: string
 }
@@ -40,7 +50,14 @@ export interface CtaBlock extends BlockBase {
   variant?: "primary" | "secondary"
 }
 
-export type Block = TextBlock | HeroBlock | FeaturesBlock | CtaBlock;
+export interface ImageBlock extends BlockBase {
+  type: "image"
+  image: ImageSource
+  caption?: string
+  size?: "small" | "medium" | "large" | "full"
+}
+
+export type Block = TextBlock | HeroBlock | FeaturesBlock | CtaBlock | ImageBlock;
 
 export type BlockType = Block["type"];
 
@@ -54,3 +71,4 @@ export const isTextBlock = isBlockType<TextBlock>("text");
 export const isHeroBlock = isBlockType<HeroBlock>("hero");
 export const isFeaturesBlock = isBlockType<FeaturesBlock>("features");
 export const isCtaBlock = isBlockType<CtaBlock>("cta");
+export const isImageBlock = isBlockType<ImageBlock>("image");
