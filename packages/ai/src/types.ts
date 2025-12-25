@@ -5,6 +5,13 @@ export interface Message {
   content: string
 }
 
+export interface Usage {
+  input: number
+  output: number
+  cost: number
+  model: string
+}
+
 export interface ChatRequest {
   messages: Message[]
   model?: string

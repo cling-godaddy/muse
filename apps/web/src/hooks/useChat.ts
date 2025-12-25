@@ -1,5 +1,6 @@
 import { useState, useCallback, useRef } from "react";
 import type { Block } from "@muse/core";
+import type { Usage } from "@muse/ai";
 import { parseStream, type ParseState } from "../utils/streamParser";
 
 export interface Message {
@@ -9,6 +10,7 @@ export interface Message {
 
 export interface UseChatOptions {
   onBlockParsed?: (block: Block, theme?: string) => void
+  onUsage?: (usage: Usage) => void
 }
 
 export interface UseChat {
@@ -17,15 +19,22 @@ export interface UseChat {
   setInput: (input: string) => void
   isLoading: boolean
   send: () => Promise<void>
+  sessionUsage: Usage
+  lastUsage?: Usage
 }
 
 const API_URL = "http://localhost:3001/api/chat";
+
+const emptyUsage: Usage = { input: 0, output: 0, cost: 0, model: "" };
 
 export function useChat(options: UseChatOptions = {}): UseChat {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [sessionUsage, setSessionUsage] = useState<Usage>(emptyUsage);
+  const [lastUsage, setLastUsage] = useState<Usage | undefined>();
   const parseStateRef = useRef<ParseState>({ blockCount: 0 });
+  const usageProcessedRef = useRef(false);
 
   const send = useCallback(async () => {
     if (!input.trim() || isLoading) return;
@@ -37,6 +46,7 @@ export function useChat(options: UseChatOptions = {}): UseChat {
     setInput("");
     setIsLoading(true);
     parseStateRef.current = { blockCount: 0 };
+    usageProcessedRef.current = false;
 
     try {
       const response = await fetch(API_URL, {
@@ -74,6 +84,20 @@ export function useChat(options: UseChatOptions = {}): UseChat {
           options.onBlockParsed?.(block, result.theme);
         }
 
+        // track usage (only once per response)
+        if (result.usage && !usageProcessedRef.current) {
+          usageProcessedRef.current = true;
+          const usage = result.usage;
+          setLastUsage(usage);
+          setSessionUsage(prev => ({
+            input: prev.input + usage.input,
+            output: prev.output + usage.output,
+            cost: prev.cost + usage.cost,
+            model: usage.model,
+          }));
+          options.onUsage?.(usage);
+        }
+
         // update parse state
         parseStateRef.current = result.state;
 
@@ -96,5 +120,5 @@ export function useChat(options: UseChatOptions = {}): UseChat {
     }
   }, [input, messages, isLoading, options]);
 
-  return { messages, input, setInput, isLoading, send };
+  return { messages, input, setInput, isLoading, send, sessionUsage, lastUsage };
 }

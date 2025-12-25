@@ -1,5 +1,6 @@
 import OpenAI from "openai";
 import type { ChatRequest, ChatResponse, Provider } from "../types";
+import { calculateCost } from "../pricing";
 
 export function createOpenAIProvider(apiKey: string): Provider {
   const client = new OpenAI({ apiKey });
@@ -31,17 +32,33 @@ export function createOpenAIProvider(apiKey: string): Provider {
     },
 
     async* chatStream(request: ChatRequest): AsyncGenerator<string> {
+      const model = request.model ?? "gpt-4o";
       const stream = await client.chat.completions.create({
-        model: request.model ?? "gpt-4o",
+        model,
         messages: request.messages,
         stream: true,
+        stream_options: { include_usage: true },
       });
+
+      let usage: { prompt_tokens: number, completion_tokens: number } | undefined;
 
       for await (const chunk of stream) {
         const content = chunk.choices[0]?.delta?.content;
         if (content) {
           yield content;
         }
+        if (chunk.usage) {
+          usage = chunk.usage;
+        }
+      }
+
+      if (usage) {
+        yield `\n[USAGE:${JSON.stringify({
+          input: usage.prompt_tokens,
+          output: usage.completion_tokens,
+          cost: calculateCost(model, usage.prompt_tokens, usage.completion_tokens),
+          model,
+        })}]`;
       }
     },
   };

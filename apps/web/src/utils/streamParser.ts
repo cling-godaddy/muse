@@ -1,4 +1,5 @@
 import type { Block } from "@muse/core";
+import type { Usage } from "@muse/ai";
 
 export interface ParseState {
   theme?: string
@@ -9,11 +10,13 @@ export interface ParseResult {
   displayText: string
   theme?: string
   newBlocks: Block[]
+  usage?: Usage
   state: ParseState
 }
 
 const THEME_REGEX = /\[THEME:([^\]]+)\]/;
 const BLOCK_REGEX = /\[BLOCK\]([\s\S]*?)\[\/BLOCK\]/g;
+const USAGE_REGEX = /\[USAGE:(\{[^}]+\})\]/;
 
 export function parseStream(
   accumulated: string,
@@ -21,6 +24,7 @@ export function parseStream(
 ): ParseResult {
   let displayText = accumulated;
   let theme = previousState.theme;
+  let usage: Usage | undefined;
   const newBlocks: Block[] = [];
 
   // extract theme if not already found
@@ -28,6 +32,17 @@ export function parseStream(
     const themeMatch = accumulated.match(THEME_REGEX);
     if (themeMatch) {
       theme = themeMatch[1];
+    }
+  }
+
+  // extract usage if present
+  const usageMatch = accumulated.match(USAGE_REGEX);
+  if (usageMatch?.[1]) {
+    try {
+      usage = JSON.parse(usageMatch[1]) as Usage;
+    }
+    catch {
+      console.warn("failed to parse usage:", usageMatch[1]);
     }
   }
 
@@ -64,6 +79,7 @@ export function parseStream(
   displayText = displayText
     .replace(THEME_REGEX, "")
     .replace(BLOCK_REGEX, "")
+    .replace(USAGE_REGEX, "")
     .replace(/\[BLOCK\][\s\S]*$/, "") // strip incomplete block at end
     .replace(/\n{3,}/g, "\n\n")
     .trim();
@@ -72,6 +88,7 @@ export function parseStream(
     displayText,
     theme,
     newBlocks,
+    usage,
     state: { theme, blockCount: newBlockCount },
   };
 }

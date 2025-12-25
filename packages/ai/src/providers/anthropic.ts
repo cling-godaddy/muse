@@ -1,5 +1,6 @@
 import Anthropic from "@anthropic-ai/sdk";
 import type { ChatRequest, ChatResponse, Provider } from "../types";
+import { calculateCost } from "../pricing";
 
 export function createAnthropicProvider(apiKey: string): Provider {
   const client = new Anthropic({ apiKey });
@@ -36,13 +37,14 @@ export function createAnthropicProvider(apiKey: string): Provider {
     },
 
     async* chatStream(request: ChatRequest): AsyncGenerator<string> {
+      const model = request.model ?? "claude-sonnet-4-20250514";
       const systemMessage = request.messages.find(m => m.role === "system");
       const messages = request.messages
         .filter(m => m.role !== "system")
         .map(m => ({ role: m.role as "user" | "assistant", content: m.content }));
 
       const stream = client.messages.stream({
-        model: request.model ?? "claude-sonnet-4-20250514",
+        model,
         max_tokens: 4096,
         system: systemMessage?.content,
         messages,
@@ -53,6 +55,14 @@ export function createAnthropicProvider(apiKey: string): Provider {
           yield event.delta.text;
         }
       }
+
+      const finalMessage = await stream.finalMessage();
+      yield `\n[USAGE:${JSON.stringify({
+        input: finalMessage.usage.input_tokens,
+        output: finalMessage.usage.output_tokens,
+        cost: calculateCost(model, finalMessage.usage.input_tokens, finalMessage.usage.output_tokens),
+        model,
+      })}]`;
     },
   };
 }
