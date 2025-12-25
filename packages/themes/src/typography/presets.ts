@@ -12,41 +12,41 @@ export const inter: TypographyPreset = {
   tags: ["versatile", "clean", "tech", "readable", "neutral"],
   description: "Geometric sans-serif, highly versatile for any context",
   fonts: {
-    heading: "Inter, -apple-system, BlinkMacSystemFont, sans-serif",
-    body: "Inter, -apple-system, BlinkMacSystemFont, sans-serif",
+    heading: "Inter, system-ui, sans-serif",
+    body: "Inter, system-ui, sans-serif",
   },
   weights: { heading: 700, body: 400 },
   googleFonts: ["Inter:wght@400;500;600;700"],
 };
 
-export const geist: TypographyPreset = {
-  id: "geist",
-  name: "Geist",
+export const outfit: TypographyPreset = {
+  id: "outfit",
+  name: "Outfit + Inter",
   category: "modern",
-  mood: "minimal",
-  tags: ["sharp", "technical", "modern", "developer", "precise"],
-  description: "Sharp technical aesthetic, ideal for dev tools and SaaS",
+  mood: "professional",
+  tags: ["modern", "display", "geometric", "startup", "clean"],
+  description: "Modern geometric display paired with versatile Inter",
   fonts: {
-    heading: "Geist, -apple-system, BlinkMacSystemFont, sans-serif",
-    body: "Geist, -apple-system, BlinkMacSystemFont, sans-serif",
+    heading: "Outfit, system-ui, sans-serif",
+    body: "Inter, system-ui, sans-serif",
   },
   weights: { heading: 600, body: 400 },
-  googleFonts: ["Geist:wght@400;500;600"],
+  googleFonts: ["Outfit:wght@500;600;700", "Inter:wght@400;500;600"],
 };
 
 export const plusJakarta: TypographyPreset = {
   id: "plus-jakarta",
-  name: "Plus Jakarta",
+  name: "Plus Jakarta + DM Sans",
   category: "modern",
   mood: "approachable",
   tags: ["friendly", "geometric", "modern", "startup", "warm"],
-  description: "Friendly geometric sans with slight warmth",
+  description: "Friendly geometric headlines with readable DM Sans body",
   fonts: {
-    heading: "Plus Jakarta Sans, -apple-system, BlinkMacSystemFont, sans-serif",
-    body: "Plus Jakarta Sans, -apple-system, BlinkMacSystemFont, sans-serif",
+    heading: "Plus Jakarta Sans, system-ui, sans-serif",
+    body: "DM Sans, system-ui, sans-serif",
   },
   weights: { heading: 700, body: 400 },
-  googleFonts: ["Plus+Jakarta+Sans:wght@400;500;600;700"],
+  googleFonts: ["Plus+Jakarta+Sans:wght@500;600;700", "DM+Sans:wght@400;500;600"],
 };
 
 // ============================================================================
@@ -59,24 +59,24 @@ export const georgia: TypographyPreset = {
   category: "classic",
   mood: "professional",
   tags: ["traditional", "trustworthy", "editorial", "readable", "timeless"],
-  description: "Traditional serif headlines, trustworthy and established",
+  description: "Traditional serif headlines with system sans body",
   fonts: {
     heading: "Georgia, Times New Roman, serif",
-    body: "-apple-system, BlinkMacSystemFont, sans-serif",
+    body: "system-ui, -apple-system, sans-serif",
   },
-  weights: { heading: 600, body: 400 },
+  weights: { heading: 700, body: 400 },
 };
 
 export const playfair: TypographyPreset = {
   id: "playfair",
-  name: "Playfair Display",
+  name: "Playfair + Lato",
   category: "classic",
   mood: "elegant",
   tags: ["elegant", "sophisticated", "luxury", "editorial", "refined"],
-  description: "Elegant display serif for luxury and editorial contexts",
+  description: "Elegant display serif paired with clean Lato body",
   fonts: {
     heading: "Playfair Display, Georgia, serif",
-    body: "Lato, -apple-system, BlinkMacSystemFont, sans-serif",
+    body: "Lato, system-ui, sans-serif",
   },
   weights: { heading: 700, body: 400 },
   googleFonts: ["Playfair+Display:wght@400;500;600;700", "Lato:wght@400;700"],
@@ -84,17 +84,17 @@ export const playfair: TypographyPreset = {
 
 export const merriweather: TypographyPreset = {
   id: "merriweather",
-  name: "Merriweather",
+  name: "Merriweather + Source Sans",
   category: "classic",
   mood: "professional",
   tags: ["readable", "warm", "editorial", "content", "literary"],
-  description: "Highly readable serif, great for content-heavy sites",
+  description: "Warm readable serif with clean Source Sans body",
   fonts: {
     heading: "Merriweather, Georgia, serif",
-    body: "Open Sans, -apple-system, BlinkMacSystemFont, sans-serif",
+    body: "Source Sans 3, system-ui, sans-serif",
   },
   weights: { heading: 700, body: 400 },
-  googleFonts: ["Merriweather:wght@400;700", "Open+Sans:wght@400;600"],
+  googleFonts: ["Merriweather:wght@400;700", "Source+Sans+3:wght@400;600"],
 };
 
 // ============================================================================
@@ -103,95 +103,96 @@ export const merriweather: TypographyPreset = {
 
 export const nunito: TypographyPreset = {
   id: "nunito",
-  name: "Nunito",
+  name: "Nunito + Mulish",
   category: "friendly",
   mood: "approachable",
   tags: ["rounded", "warm", "friendly", "casual", "soft"],
-  description: "Rounded sans-serif, warm and approachable",
+  description: "Rounded bold headlines with readable Mulish body",
   fonts: {
-    heading: "Nunito, -apple-system, BlinkMacSystemFont, sans-serif",
-    body: "Nunito, -apple-system, BlinkMacSystemFont, sans-serif",
+    heading: "Nunito, system-ui, sans-serif",
+    body: "Mulish, system-ui, sans-serif",
   },
   weights: { heading: 800, body: 400 },
-  googleFonts: ["Nunito:wght@400;600;700;800"],
+  googleFonts: ["Nunito:wght@600;700;800", "Mulish:wght@400;500;600"],
 };
 
 export const quicksand: TypographyPreset = {
   id: "quicksand",
-  name: "Quicksand",
+  name: "Quicksand + Lato",
   category: "friendly",
   mood: "approachable",
   tags: ["light", "airy", "modern", "friendly", "geometric"],
-  description: "Light and airy geometric rounded sans",
+  description: "Light airy headlines grounded by versatile Lato",
   fonts: {
-    heading: "Quicksand, -apple-system, BlinkMacSystemFont, sans-serif",
-    body: "Quicksand, -apple-system, BlinkMacSystemFont, sans-serif",
+    heading: "Quicksand, system-ui, sans-serif",
+    body: "Lato, system-ui, sans-serif",
   },
   weights: { heading: 700, body: 400 },
-  googleFonts: ["Quicksand:wght@400;500;600;700"],
+  googleFonts: ["Quicksand:wght@500;600;700", "Lato:wght@400;700"],
 };
 
 export const poppins: TypographyPreset = {
   id: "poppins",
-  name: "Poppins",
+  name: "Poppins + DM Sans",
   category: "friendly",
   mood: "approachable",
   tags: ["geometric", "modern", "versatile", "clean", "friendly"],
-  description: "Geometric sans that's both modern and approachable",
+  description: "Geometric Poppins headlines with readable DM Sans",
   fonts: {
-    heading: "Poppins, -apple-system, BlinkMacSystemFont, sans-serif",
-    body: "Poppins, -apple-system, BlinkMacSystemFont, sans-serif",
+    heading: "Poppins, system-ui, sans-serif",
+    body: "DM Sans, system-ui, sans-serif",
   },
   weights: { heading: 600, body: 400 },
-  googleFonts: ["Poppins:wght@400;500;600;700"],
+  googleFonts: ["Poppins:wght@500;600;700", "DM+Sans:wght@400;500"],
 };
 
 // ============================================================================
 // EXPRESSIVE - display fonts with personality
 // ============================================================================
 
-export const clash: TypographyPreset = {
-  id: "clash",
-  name: "Clash Display",
-  category: "expressive",
-  mood: "bold",
-  tags: ["impact", "bold", "display", "creative", "striking"],
-  description: "Bold display font for maximum visual impact",
-  fonts: {
-    heading: "Clash Display, Impact, sans-serif",
-    body: "Inter, -apple-system, BlinkMacSystemFont, sans-serif",
-  },
-  weights: { heading: 700, body: 400 },
-  googleFonts: ["Inter:wght@400;500;600"],
-};
-
 export const spaceGrotesk: TypographyPreset = {
   id: "space-grotesk",
-  name: "Space Grotesk",
+  name: "Space Grotesk + Work Sans",
   category: "expressive",
   mood: "creative",
   tags: ["quirky", "tech", "memorable", "unique", "retro-future"],
-  description: "Quirky proportional sans with memorable character",
+  description: "Quirky distinctive headlines with neutral Work Sans body",
   fonts: {
-    heading: "Space Grotesk, -apple-system, BlinkMacSystemFont, sans-serif",
-    body: "Space Grotesk, -apple-system, BlinkMacSystemFont, sans-serif",
+    heading: "Space Grotesk, system-ui, sans-serif",
+    body: "Work Sans, system-ui, sans-serif",
   },
   weights: { heading: 700, body: 400 },
-  googleFonts: ["Space+Grotesk:wght@400;500;600;700"],
+  googleFonts: ["Space+Grotesk:wght@500;600;700", "Work+Sans:wght@400;500;600"],
 };
 
-export const cabinet: TypographyPreset = {
-  id: "cabinet",
-  name: "Cabinet Grotesk",
+export const sora: TypographyPreset = {
+  id: "sora",
+  name: "Sora + Inter",
   category: "expressive",
-  mood: "creative",
-  tags: ["editorial", "modern", "sophisticated", "agency", "bold"],
-  description: "Modern editorial grotesk with agency aesthetic",
+  mood: "bold",
+  tags: ["impact", "bold", "display", "creative", "striking"],
+  description: "Bold distinctive Sora headlines with versatile Inter",
   fonts: {
-    heading: "Cabinet Grotesk, -apple-system, BlinkMacSystemFont, sans-serif",
-    body: "Satoshi, -apple-system, BlinkMacSystemFont, sans-serif",
+    heading: "Sora, system-ui, sans-serif",
+    body: "Inter, system-ui, sans-serif",
   },
   weights: { heading: 700, body: 400 },
+  googleFonts: ["Sora:wght@500;600;700;800", "Inter:wght@400;500;600"],
+};
+
+export const archivo: TypographyPreset = {
+  id: "archivo",
+  name: "Archivo Black + Archivo",
+  category: "expressive",
+  mood: "bold",
+  tags: ["bold", "impactful", "editorial", "modern", "strong"],
+  description: "Bold Archivo Black headlines with matching Archivo body",
+  fonts: {
+    heading: "Archivo Black, system-ui, sans-serif",
+    body: "Archivo, system-ui, sans-serif",
+  },
+  weights: { heading: 400, body: 400 },
+  googleFonts: ["Archivo+Black", "Archivo:wght@400;500;600"],
 };
 
 // ============================================================================
@@ -201,7 +202,7 @@ export const cabinet: TypographyPreset = {
 export const typographyPresets = {
   // modern
   inter,
-  geist,
+  outfit,
   "plus-jakarta": plusJakarta,
   // classic
   georgia,
@@ -212,9 +213,9 @@ export const typographyPresets = {
   quicksand,
   poppins,
   // expressive
-  clash,
   "space-grotesk": spaceGrotesk,
-  cabinet,
+  sora,
+  archivo,
 } as const;
 
 export type TypographyId = keyof typeof typographyPresets;
