@@ -29,3 +29,27 @@ registerBlockMeta({
   category: "content",
   description: "Text content block",
 });
+
+registerBlockMeta({
+  type: "hero",
+  label: "Hero",
+  icon: "layout",
+  category: "layout",
+  description: "Hero section with headline and CTA",
+});
+
+registerBlockMeta({
+  type: "features",
+  label: "Features",
+  icon: "grid",
+  category: "content",
+  description: "Feature grid with icons",
+});
+
+registerBlockMeta({
+  type: "cta",
+  label: "Call to Action",
+  icon: "mouse-pointer",
+  category: "cta",
+  description: "CTA section with button",
+});
