@@ -1,6 +1,7 @@
 import { useMemo } from "react";
 import type { Block } from "@muse/core";
 import { getBlockComponent, type BlockComponent } from "../registry";
+import { PresetPicker, supportsPresets } from "./PresetPicker";
 
 interface Props {
   block: Block
@@ -24,9 +25,18 @@ export function BlockWrapper({ block, onUpdate, onDelete }: Props) {
     [block.type],
   );
 
+  const showPresetPicker = supportsPresets(block.type);
+
   return (
     <div className="muse-block" data-block-type={block.type}>
       <div className="muse-block-controls">
+        {showPresetPicker && (
+          <PresetPicker
+            blockType={block.type}
+            currentPreset={block.preset}
+            onChange={preset => onUpdate({ preset })}
+          />
+        )}
         <button
           type="button"
           className="muse-block-delete"
