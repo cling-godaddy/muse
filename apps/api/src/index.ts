@@ -20,4 +20,12 @@ const port = Number(process.env.PORT) || 3001;
 
 console.log(`api server running on http://localhost:${port}`);
 
-serve({ fetch: app.fetch, port });
+const server = serve({ fetch: app.fetch, port });
+
+function shutdown() {
+  console.log("\nshutting down...");
+  server.close(() => process.exit(0));
+}
+
+process.on("SIGINT", shutdown);
+process.on("SIGTERM", shutdown);
