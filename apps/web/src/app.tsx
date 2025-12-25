@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useCallback } from "react";
 import { BlockEditor } from "@muse/editor";
 import type { Block } from "@muse/core";
 import { getTheme, themeToCssVars, modern } from "@muse/themes";
@@ -6,7 +6,7 @@ import { Chat } from "./components/chat";
 import { useBlocks } from "./hooks/useBlocks";
 
 export function App() {
-  const { blocks, setBlocks } = useBlocks();
+  const { blocks, addBlock, setBlocks } = useBlocks();
   const [themeId, setThemeId] = useState("modern");
 
   const themeStyle = useMemo(() => {
@@ -14,10 +14,12 @@ export function App() {
     return themeToCssVars(theme);
   }, [themeId]);
 
-  const handleInsertBlocks = (newBlocks: Block[], newThemeId?: string) => {
-    if (newThemeId) setThemeId(newThemeId);
-    setBlocks([...blocks, ...newBlocks]);
-  };
+  const handleBlockParsed = useCallback((block: Block, newThemeId?: string) => {
+    if (newThemeId && newThemeId !== themeId) {
+      setThemeId(newThemeId);
+    }
+    addBlock(block);
+  }, [themeId, addBlock]);
 
   return (
     <div className="flex flex-col h-full font-sans text-text bg-bg">
@@ -31,7 +33,7 @@ export function App() {
       </header>
       <main className="flex-1 flex gap-6 p-6 overflow-hidden">
         <div className="w-[400px] shrink-0">
-          <Chat onInsertBlocks={handleInsertBlocks} />
+          <Chat onBlockParsed={handleBlockParsed} />
         </div>
         <div className="flex-1 min-w-0 overflow-y-auto">
           <div className="h-full border border-border rounded bg-bg p-4" style={themeStyle}>

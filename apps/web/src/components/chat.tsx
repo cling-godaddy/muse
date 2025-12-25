@@ -1,14 +1,14 @@
-import { useRef, useEffect } from "react";
-import type { Block, TextBlock } from "@muse/core";
-import { createBlock } from "@muse/core";
+import { useRef, useEffect, useMemo } from "react";
+import type { Block } from "@muse/core";
 import { useChat, type Message } from "../hooks/useChat";
 
 interface ChatProps {
-  onInsertBlocks?: (blocks: Block[], themeId?: string) => void
+  onBlockParsed?: (block: Block, theme?: string) => void
 }
 
-export function Chat({ onInsertBlocks }: ChatProps) {
-  const { messages, input, setInput, isLoading, send } = useChat();
+export function Chat({ onBlockParsed }: ChatProps) {
+  const options = useMemo(() => ({ onBlockParsed }), [onBlockParsed]);
+  const { messages, input, setInput, isLoading, send } = useChat(options);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -20,30 +20,6 @@ export function Chat({ onInsertBlocks }: ChatProps) {
       e.preventDefault();
       send();
     }
-  };
-
-  const handleInsert = (content: string) => {
-    if (!onInsertBlocks) return;
-
-    // try to parse as JSON blocks
-    try {
-      const parsed = JSON.parse(content);
-      if (parsed.blocks && Array.isArray(parsed.blocks)) {
-        // ensure each block has an id
-        const blocks = parsed.blocks.map((b: Partial<Block>) => ({
-          ...b,
-          id: b.id ?? crypto.randomUUID(),
-        }));
-        onInsertBlocks(blocks, parsed.theme);
-        return;
-      }
-    }
-    catch {
-      // not JSON, fall through to text block
-    }
-
-    // fallback: create a text block with the content
-    onInsertBlocks([createBlock<TextBlock>("text", { content })]);
   };
 
   return (
@@ -58,7 +34,6 @@ export function Chat({ onInsertBlocks }: ChatProps) {
           <MessageBubble
             key={i}
             message={message}
-            onInsert={handleInsert}
             isLast={i === messages.length - 1}
             isLoading={isLoading}
           />
@@ -71,7 +46,7 @@ export function Chat({ onInsertBlocks }: ChatProps) {
           value={input}
           onChange={e => setInput(e.target.value)}
           onKeyDown={handleKeyDown}
-          placeholder="Ask AI to generate content..."
+          placeholder="Describe the landing page you want..."
           rows={3}
           disabled={isLoading}
         />
@@ -89,14 +64,12 @@ export function Chat({ onInsertBlocks }: ChatProps) {
 
 interface MessageBubbleProps {
   message: Message
-  onInsert?: (content: string) => void
   isLast: boolean
   isLoading: boolean
 }
 
-function MessageBubble({ message, onInsert, isLast, isLoading }: MessageBubbleProps) {
+function MessageBubble({ message, isLast, isLoading }: MessageBubbleProps) {
   const isAssistant = message.role === "assistant";
-  const showInsert = isAssistant && onInsert && !(isLast && isLoading);
 
   return (
     <div className="mb-4">
@@ -110,16 +83,8 @@ function MessageBubble({ message, onInsert, isLast, isLoading }: MessageBubblePr
             : "bg-user-bg border-user-border"
         }`}
       >
-        {message.content || (isLoading ? "..." : "")}
+        {message.content || (isLast && isLoading ? "Generating..." : "")}
       </div>
-      {showInsert && (
-        <button
-          className="mt-2 px-2 py-1 text-xs bg-bg-muted border border-border rounded cursor-pointer hover:bg-border"
-          onClick={() => onInsert(message.content)}
-        >
-          Insert blocks
-        </button>
-      )}
     </div>
   );
 }

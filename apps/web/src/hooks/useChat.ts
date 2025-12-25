@@ -1,8 +1,14 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useRef } from "react";
+import type { Block } from "@muse/core";
+import { parseStream, type ParseState } from "../utils/streamParser";
 
 export interface Message {
   role: "user" | "assistant"
   content: string
+}
+
+export interface UseChatOptions {
+  onBlockParsed?: (block: Block, theme?: string) => void
 }
 
 export interface UseChat {
@@ -15,10 +21,11 @@ export interface UseChat {
 
 const API_URL = "http://localhost:3001/api/chat";
 
-export function useChat(): UseChat {
+export function useChat(options: UseChatOptions = {}): UseChat {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const parseStateRef = useRef<ParseState>({ blockCount: 0 });
 
   const send = useCallback(async () => {
     if (!input.trim() || isLoading) return;
@@ -29,6 +36,7 @@ export function useChat(): UseChat {
     setMessages(newMessages);
     setInput("");
     setIsLoading(true);
+    parseStateRef.current = { blockCount: 0 };
 
     try {
       const response = await fetch(API_URL, {
@@ -48,7 +56,7 @@ export function useChat(): UseChat {
       if (!reader) throw new Error("No response body");
 
       const decoder = new TextDecoder();
-      let assistantContent = "";
+      let accumulated = "";
 
       setMessages([...newMessages, { role: "assistant", content: "" }]);
 
@@ -57,11 +65,22 @@ export function useChat(): UseChat {
         if (done) break;
 
         const chunk = decoder.decode(value);
-        assistantContent += chunk;
+        accumulated += chunk;
 
+        const result = parseStream(accumulated, parseStateRef.current);
+
+        // emit new blocks
+        for (const block of result.newBlocks) {
+          options.onBlockParsed?.(block, result.theme);
+        }
+
+        // update parse state
+        parseStateRef.current = result.state;
+
+        // update display (clean text without markers)
         setMessages([
           ...newMessages,
-          { role: "assistant", content: assistantContent },
+          { role: "assistant", content: result.displayText },
         ]);
       }
     }
@@ -75,7 +94,7 @@ export function useChat(): UseChat {
     finally {
       setIsLoading(false);
     }
-  }, [input, messages, isLoading]);
+  }, [input, messages, isLoading, options]);
 
   return { messages, input, setInput, isLoading, send };
 }

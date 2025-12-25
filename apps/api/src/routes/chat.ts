@@ -23,22 +23,30 @@ ${generateBlockSchemaPrompt()}
 
 ${generateThemePrompt()}
 
-Respond with a JSON object:
-{
-  "theme": "<theme-id>",
-  "blocks": [
-    { "id": "<uuid>", "type": "<block-type>", ...fields }
-  ]
-}
+RESPONSE FORMAT:
+Start with the theme marker, then describe what you're creating in natural language.
+Wrap each block's JSON in [BLOCK] markers. Example:
+
+[THEME:corporate]
+Creating a professional landing page for your business...
+
+[BLOCK]
+{"id": "uuid-here", "type": "hero", "headline": "...", ...}
+[/BLOCK]
+
+Adding features to showcase your key offerings...
+
+[BLOCK]
+{"id": "uuid-here", "type": "features", "items": [...], ...}
+[/BLOCK]
 
 Guidelines:
-- Select an appropriate theme based on the business/context
-- Generate 3-6 blocks for a landing page
-- Start with a hero block
-- Include features to highlight benefits
-- End with a CTA block
+- Start with [THEME:id] on the first line
+- Write 1-2 sentences describing each block before its [BLOCK] marker
+- Generate 3-6 blocks total (hero, features, cta, etc.)
 - Use UUIDs for block IDs
-- Respond with ONLY JSON, no markdown`;
+- Keep descriptions friendly and conversational
+- Each block JSON must be valid and complete`;
 
 export const chatRoute = new Hono();
 
