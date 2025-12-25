@@ -1,6 +1,6 @@
 import { generateBlockSchemaPrompt } from "@muse/core";
 import type { Provider } from "../types";
-import type { Agent, AgentInput } from "./types";
+import type { Agent, AgentInput, ImageSelection } from "./types";
 
 function buildSystemPrompt(input: AgentInput): string {
   const briefSection = input.brief
@@ -19,10 +19,23 @@ ${input.structure.blocks.map(b => `- ${b.id} (${b.type}): ${b.purpose}`).join("\
 `
     : "";
 
+  const images = (input.context?.images ?? []) as ImageSelection[];
+  const imageSection = images.length > 0
+    ? `AVAILABLE IMAGES (include these in the corresponding blocks):
+${images.map((img) => {
+  if (img.placement === "background") {
+    return `- Block ${img.blockId}: Add backgroundImage: ${JSON.stringify(img.image)}`;
+  }
+  return `- Block ${img.blockId} (${img.placement}): Use image: ${JSON.stringify(img.image)}`;
+}).join("\n")}
+`
+    : "";
+
   return `You are a website copywriter. Generate content blocks for landing pages.
 
 ${briefSection}
 ${structureSection}
+${imageSection}
 ${generateBlockSchemaPrompt()}
 
 RESPONSE FORMAT:

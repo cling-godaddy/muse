@@ -59,6 +59,9 @@ importers:
       '@muse/core':
         specifier: workspace:*
         version: link:../../packages/core
+      '@muse/media':
+        specifier: workspace:*
+        version: link:../../packages/media
       '@muse/themes':
         specifier: workspace:*
         version: link:../../packages/themes
@@ -124,6 +127,9 @@ importers:
       '@muse/core':
         specifier: workspace:*
         version: link:../core
+      '@muse/media':
+        specifier: workspace:*
+        version: link:../media
       '@muse/themes':
         specifier: workspace:*
         version: link:../themes
@@ -173,6 +179,12 @@ importers:
       '@types/react-dom':
         specifier: ^19.2.3
         version: 19.2.3(@types/react@19.2.7)
+
+  packages/media:
+    dependencies:
+      '@muse/core':
+        specifier: workspace:*
+        version: link:../core
 
   packages/themes: {}
 

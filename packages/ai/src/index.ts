@@ -11,8 +11,10 @@ export {
   briefAgent,
   structureAgent,
   copyAgent,
+  imageAgent,
   parseBrief,
   parseStructure,
+  parseImagePlan,
 } from "./agents";
 
 export type {
@@ -33,6 +35,9 @@ export type {
   BrandBrief,
   BlockStructure,
   PageStructure,
+  ImagePlan,
+  ImageSelection,
   OrchestratorInput,
+  OrchestratorConfig,
   OrchestratorEvents,
 } from "./agents";

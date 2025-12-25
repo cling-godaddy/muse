@@ -15,6 +15,7 @@
   "dependencies": {
     "@anthropic-ai/sdk": "^0.71.2",
     "@muse/core": "workspace:*",
+    "@muse/media": "workspace:*",
     "@muse/themes": "workspace:*",
     "openai": "^6.15.0"
   }

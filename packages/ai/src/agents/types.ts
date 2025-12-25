@@ -1,5 +1,7 @@
 import type { Message, Provider } from "../types";
 
+export type { ImagePlan, ImageSelection } from "@muse/media";
+
 export interface BrandBrief {
   targetAudience: string
   brandVoice: string[]

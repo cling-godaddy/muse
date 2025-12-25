@@ -1,7 +1,9 @@
+import type { MediaClient, ImageSelection } from "@muse/media";
 import type { Message, Provider } from "../types";
 import { briefAgent, parseBrief } from "./brief";
 import { structureAgent, parseStructure } from "./structure";
 import { themeAgent, parseThemeSelection, type ThemeSelection } from "./theme";
+import { imageAgent, parseImagePlan } from "./image";
 import { copyAgent } from "./copy";
 import type { BrandBrief, PageStructure } from "./types";
 
@@ -9,17 +11,26 @@ export interface OrchestratorInput {
   messages: Message[]
 }
 
+export interface OrchestratorConfig {
+  mediaClient?: MediaClient
+}
+
 export interface OrchestratorEvents {
   onBrief?: (brief: BrandBrief) => void
   onStructure?: (structure: PageStructure) => void
   onTheme?: (theme: ThemeSelection) => void
+  onImages?: (images: ImageSelection[]) => void
 }
 
 export async function* orchestrate(
   input: OrchestratorInput,
   provider: Provider,
-  events?: OrchestratorEvents,
+  options?: {
+    config?: OrchestratorConfig
+    events?: OrchestratorEvents
+  },
 ): AsyncGenerator<string> {
+  const { config, events } = options ?? {};
   const userMessage = input.messages.find(m => m.role === "user");
   const prompt = userMessage?.content ?? "";
 
@@ -70,12 +81,33 @@ export async function* orchestrate(
   // emit theme marker for existing parser compatibility (uses palette as theme)
   yield `[THEME:${themeResult.selection.palette}]\n`;
 
-  // step 3: generate copy (streaming)
+  // step 3: plan and resolve images
+  let images: ImageSelection[] = [];
+  if (config?.mediaClient) {
+    yield "[AGENT:image:start]\n";
+    const imageStart = Date.now();
+
+    const imagePlanJson = await imageAgent.run({ prompt, brief, structure }, provider);
+    const imagePlan = parseImagePlan(imagePlanJson);
+
+    if (imagePlan.length > 0) {
+      images = await config.mediaClient.executePlan(imagePlan);
+      events?.onImages?.(images);
+    }
+
+    yield `[AGENT:image:complete]${JSON.stringify({
+      planned: imagePlan.length,
+      resolved: images.length,
+      duration: Date.now() - imageStart,
+    })}\n`;
+  }
+
+  // step 4: generate copy (streaming)
   yield "[AGENT:copy:start]\n";
   const copyStart = Date.now();
 
   for await (const chunk of copyAgent.run(
-    { prompt, messages: input.messages, brief, structure },
+    { prompt, messages: input.messages, brief, structure, context: { images } },
     provider,
   )) {
     yield chunk;
