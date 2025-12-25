@@ -1,23 +1,24 @@
 import type { Block } from "@muse/core";
 import type { Usage } from "@muse/ai";
 
-export interface ProgressBlock {
-  type: string
-  purpose: string
-}
+export type AgentName = "brief" | "structure" | "theme" | "copy";
+export type AgentStatus = "pending" | "running" | "complete";
 
-export interface Progress {
-  stage: "brief" | "structure"
-  data: {
-    summary?: string
-    blocks?: ProgressBlock[]
+export interface AgentState {
+  name: AgentName
+  status: AgentStatus
+  summary?: string
+  duration?: number
+  data?: {
+    blockCount?: number
+    theme?: string
   }
 }
 
 export interface ParseState {
   theme?: string
   blockCount: number
-  progressCount: number
+  agents: Map<AgentName, AgentState>
 }
 
 export interface ParseResult {
@@ -25,14 +26,15 @@ export interface ParseResult {
   theme?: string
   newBlocks: Block[]
   usage?: Usage
-  progress: Progress[]
+  agents: AgentState[]
   state: ParseState
 }
 
 const THEME_REGEX = /\[THEME:([^\]]+)\]/;
 const BLOCK_REGEX = /\[BLOCK\]([\s\S]*?)\[\/BLOCK\]/g;
 const USAGE_REGEX = /\[USAGE:(\{[^}]+\})\]/;
-const PROGRESS_REGEX = /\[PROGRESS:(\w+)\]([\s\S]*?)\[\/PROGRESS\]/g;
+const AGENT_START_REGEX = /\[AGENT:(\w+):start\]/g;
+const AGENT_COMPLETE_REGEX = /\[AGENT:(\w+):complete\](\{[^}]*\})?/g;
 
 export function parseStream(
   accumulated: string,
@@ -42,7 +44,7 @@ export function parseStream(
   let theme = previousState.theme;
   let usage: Usage | undefined;
   const newBlocks: Block[] = [];
-  const progress: Progress[] = [];
+  const agents = new Map<AgentName, AgentState>(previousState.agents);
 
   // extract theme if not already found
   if (!theme) {
@@ -52,20 +54,40 @@ export function parseStream(
     }
   }
 
-  // extract all progress events
-  const progressMatches = [...accumulated.matchAll(PROGRESS_REGEX)];
-  for (const match of progressMatches) {
-    const stage = match[1] as Progress["stage"];
-    const jsonStr = match[2]?.trim();
-    if (!jsonStr) continue;
+  // extract agent start events
+  for (const match of accumulated.matchAll(AGENT_START_REGEX)) {
+    const name = match[1] as AgentName;
+    if (!agents.has(name)) {
+      agents.set(name, { name, status: "running" });
+    }
+  }
 
-    try {
-      const data = JSON.parse(jsonStr) as Progress["data"];
-      progress.push({ stage, data });
+  // extract agent complete events
+  for (const match of accumulated.matchAll(AGENT_COMPLETE_REGEX)) {
+    const name = match[1] as AgentName;
+    const jsonStr = match[2];
+    const agent = agents.get(name) ?? { name, status: "complete" };
+    agent.status = "complete";
+
+    if (jsonStr) {
+      try {
+        const data = JSON.parse(jsonStr) as {
+          summary?: string
+          duration?: number
+          blockCount?: number
+          theme?: string
+        };
+        agent.duration = data.duration;
+        agent.summary = data.summary;
+        if (data.blockCount !== undefined || data.theme) {
+          agent.data = { blockCount: data.blockCount, theme: data.theme };
+        }
+      }
+      catch {
+        console.warn("failed to parse agent data:", jsonStr);
+      }
     }
-    catch {
-      console.warn("failed to parse progress:", jsonStr);
-    }
+    agents.set(name, agent);
   }
 
   // extract usage if present
@@ -93,7 +115,6 @@ export function parseStream(
       if (!json) continue;
       const block = JSON.parse(json) as Partial<Block>;
 
-      // ensure block has required fields
       if (block.type && block.id) {
         newBlocks.push(block as Block);
       }
@@ -109,19 +130,26 @@ export function parseStream(
   // strip markers from display text
   displayText = displayText
     .replace(THEME_REGEX, "")
-    .replace(PROGRESS_REGEX, "")
+    .replace(AGENT_START_REGEX, "")
+    .replace(AGENT_COMPLETE_REGEX, "")
     .replace(BLOCK_REGEX, "")
     .replace(USAGE_REGEX, "")
     .replace(/\[BLOCK\][\s\S]*$/, "")
     .replace(/\n{3,}/g, "\n\n")
     .trim();
 
+  // convert agents map to ordered array
+  const agentOrder: AgentName[] = ["brief", "structure", "theme", "copy"];
+  const agentsArray = agentOrder
+    .map(name => agents.get(name))
+    .filter((agent): agent is AgentState => agent !== undefined);
+
   return {
     displayText,
     theme,
     newBlocks,
     usage,
-    progress,
-    state: { theme, blockCount: newBlockCount, progressCount: progress.length },
+    agents: agentsArray,
+    state: { theme, blockCount: newBlockCount, agents },
   };
 }

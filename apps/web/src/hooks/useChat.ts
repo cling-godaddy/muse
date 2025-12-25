@@ -1,7 +1,7 @@
 import { useState, useCallback, useRef } from "react";
 import type { Block } from "@muse/core";
 import type { Usage } from "@muse/ai";
-import { parseStream, type ParseState, type Progress } from "../utils/streamParser";
+import { parseStream, type ParseState, type AgentState } from "../utils/streamParser";
 
 export interface Message {
   role: "user" | "assistant"
@@ -21,7 +21,7 @@ export interface UseChat {
   send: () => Promise<void>
   sessionUsage: Usage
   lastUsage?: Usage
-  progress: Progress[]
+  agents: AgentState[]
 }
 
 const API_URL = "http://localhost:3001/api/chat";
@@ -34,8 +34,8 @@ export function useChat(options: UseChatOptions = {}): UseChat {
   const [isLoading, setIsLoading] = useState(false);
   const [sessionUsage, setSessionUsage] = useState<Usage>(emptyUsage);
   const [lastUsage, setLastUsage] = useState<Usage | undefined>();
-  const [progress, setProgress] = useState<Progress[]>([]);
-  const parseStateRef = useRef<ParseState>({ blockCount: 0, progressCount: 0 });
+  const [agents, setAgents] = useState<AgentState[]>([]);
+  const parseStateRef = useRef<ParseState>({ blockCount: 0, agents: new Map() });
   const usageProcessedRef = useRef(false);
 
   const send = useCallback(async () => {
@@ -47,8 +47,8 @@ export function useChat(options: UseChatOptions = {}): UseChat {
     setMessages(newMessages);
     setInput("");
     setIsLoading(true);
-    setProgress([]);
-    parseStateRef.current = { blockCount: 0, progressCount: 0 };
+    setAgents([]);
+    parseStateRef.current = { blockCount: 0, agents: new Map() };
     usageProcessedRef.current = false;
 
     try {
@@ -87,9 +87,9 @@ export function useChat(options: UseChatOptions = {}): UseChat {
           options.onBlockParsed?.(block, result.theme);
         }
 
-        // update progress if changed
-        if (result.progress.length > parseStateRef.current.progressCount) {
-          setProgress(result.progress);
+        // update agents if changed
+        if (result.agents.length > 0) {
+          setAgents(result.agents);
         }
 
         // track usage (only once per response)
@@ -128,5 +128,5 @@ export function useChat(options: UseChatOptions = {}): UseChat {
     }
   }, [input, messages, isLoading, options]);
 
-  return { messages, input, setInput, isLoading, send, sessionUsage, lastUsage, progress };
+  return { messages, input, setInput, isLoading, send, sessionUsage, lastUsage, agents };
 }
