@@ -169,6 +169,7 @@ html, body, #root {
     display: flex;
     flex-direction: column;
     gap: 2rem;
+    overflow: hidden;
   }
   .muse-block-features-headline {
     font-family: var(--muse-theme-heading-font, inherit);
@@ -188,6 +189,7 @@ html, body, #root {
   .muse-block-features-grid {
     display: grid;
     gap: 1.5rem;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
   }
   .muse-block-features-item {
     background: var(--muse-theme-bg, white);

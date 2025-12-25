@@ -20,7 +20,6 @@ function useAutoResize(value: string) {
 }
 
 export function FeaturesBlock({ block, onUpdate }: Props) {
-  const columns = block.columns ?? 3;
   const headlineRef = useAutoResize(block.headline ?? "");
 
   const updateItem = (index: number, data: Partial<FeatureItem>) => {
@@ -52,10 +51,7 @@ export function FeaturesBlock({ block, onUpdate }: Props) {
         onChange={e => onUpdate({ headline: e.target.value || undefined })}
         placeholder="Section headline..."
       />
-      <div
-        className="muse-block-features-grid"
-        style={{ gridTemplateColumns: `repeat(${columns}, 1fr)` }}
-      >
+      <div className="muse-block-features-grid">
         {block.items.map((item, i) => (
           <div key={i} className="muse-block-features-item">
             <input
