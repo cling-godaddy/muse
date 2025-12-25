@@ -1,8 +1,10 @@
 import { Hono } from "hono";
 import { streamText } from "hono/streaming";
 import { createClient, orchestrate, type Message, type Provider } from "@muse/ai";
+import { createLogger } from "@muse/logger";
 import { createMediaClient, type MediaClient } from "@muse/media";
 
+const logger = createLogger();
 let client: Provider | null = null;
 let mediaClient: MediaClient | null = null;
 
@@ -30,6 +32,7 @@ function getMediaClient(): MediaClient | null {
   mediaClient = createMediaClient({
     unsplashKey,
     pexelsKey,
+    logger: logger.child({ agent: "media" }),
   });
 
   return mediaClient;
@@ -43,7 +46,7 @@ chatRoute.post("/", async (c) => {
     stream?: boolean
   }>();
 
-  const config = { mediaClient: getMediaClient() ?? undefined };
+  const config = { mediaClient: getMediaClient() ?? undefined, logger };
 
   if (stream) {
     return streamText(c, async (textStream) => {

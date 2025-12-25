@@ -1,7 +1,7 @@
 import type { Provider } from "../types";
 import type { AgentInput, PageStructure, SyncAgent } from "./types";
 
-const systemPrompt = `You are a page structure planner. Given a brand brief and user request, define the block structure for a landing page.
+export const structureSystemPrompt = `You are a page structure planner. Given a brand brief and user request, define the block structure for a landing page.
 
 Available block types:
 - hero: Hero section with headline, subheadline, and CTA buttons
@@ -42,7 +42,7 @@ export const structureAgent: SyncAgent = {
 
     const response = await provider.chat({
       messages: [
-        { role: "system", content: systemPrompt },
+        { role: "system", content: structureSystemPrompt },
         { role: "user", content: `${briefContext}\nUser Request: ${input.prompt}` },
       ],
     });

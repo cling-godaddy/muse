@@ -1,3 +1,4 @@
+import type { Logger } from "@muse/logger";
 import type { MediaClient, MediaProvider, ImagePlan, ImageSelection, ImageSearchOptions, ImageSearchResult } from "./types";
 import { createUnsplashProvider } from "./unsplash";
 import { createPexelsProvider } from "./pexels";
@@ -6,7 +7,16 @@ export interface MediaClientConfig {
   unsplashKey?: string
   pexelsKey?: string
   cacheTtlMs?: number
+  logger?: Logger
 }
+
+const noopLogger: Logger = {
+  debug: () => {},
+  info: () => {},
+  warn: () => {},
+  error: () => {},
+  child: () => noopLogger,
+};
 
 interface CacheEntry {
   results: ImageSearchResult[]
@@ -19,6 +29,7 @@ export function createMediaClient(config: MediaClientConfig): MediaClient {
   const providers = new Map<string, MediaProvider>();
   const cache = new Map<string, CacheEntry>();
   const cacheTtl = config.cacheTtlMs ?? DEFAULT_CACHE_TTL;
+  const log = config.logger ?? noopLogger;
 
   function getCacheKey(provider: string, query: string, orientation?: string): string {
     return `${provider}:${query}:${orientation ?? "any"}`;
@@ -47,27 +58,33 @@ export function createMediaClient(config: MediaClientConfig): MediaClient {
   }
 
   if (providers.size === 0) {
-    console.warn("No media provider credentials configured - image search disabled");
+    log.warn("no_providers", { message: "No media provider credentials configured - image search disabled" });
+  }
+  else {
+    log.info("init", { providers: Array.from(providers.keys()) });
   }
 
   return {
     async search(options: ImageSearchOptions) {
       const provider = providers.get(options.provider);
       if (!provider) {
-        console.warn(`Provider ${options.provider} not configured, skipping search`);
+        log.warn("provider_not_configured", { provider: options.provider });
         return [];
       }
 
       const cacheKey = getCacheKey(options.provider, options.query, options.orientation);
       const cached = getCached(cacheKey);
       if (cached) {
+        log.debug("cache_hit", { provider: options.provider, query: options.query });
         return cached.slice(0, options.count);
       }
 
+      log.debug("search", { provider: options.provider, query: options.query, orientation: options.orientation });
       const results = await provider.search(options.query, {
         orientation: options.orientation,
         count: options.count,
       });
+      log.debug("search_results", { provider: options.provider, query: options.query, count: results.length });
 
       setCache(cacheKey, results);
       return results;
@@ -85,7 +102,7 @@ export function createMediaClient(config: MediaClientConfig): MediaClient {
           const fallbackEntry = providers.entries().next().value as [string, MediaProvider] | undefined;
           if (!fallbackEntry) continue;
 
-          console.warn(`Provider ${item.provider} not configured, falling back to ${fallbackEntry[0]}`);
+          log.warn("provider_fallback", { requested: item.provider, fallback: fallbackEntry[0], blockId: item.blockId });
           providerName = fallbackEntry[0];
           activeProvider = fallbackEntry[1];
         }
@@ -95,11 +112,16 @@ export function createMediaClient(config: MediaClientConfig): MediaClient {
           let results = getCached(cacheKey);
 
           if (!results) {
+            log.debug("search", { provider: providerName, query: item.searchQuery, blockId: item.blockId });
             results = await activeProvider.search(item.searchQuery, {
               orientation: item.orientation,
               count: 1,
             });
+            log.debug("search_results", { provider: providerName, query: item.searchQuery, count: results.length });
             setCache(cacheKey, results);
+          }
+          else {
+            log.debug("cache_hit", { provider: providerName, query: item.searchQuery, blockId: item.blockId });
           }
 
           const result = results[0];
@@ -117,7 +139,11 @@ export function createMediaClient(config: MediaClientConfig): MediaClient {
           }
         }
         catch (err) {
-          console.error(`Image search failed for ${item.blockId}:`, err);
+          log.error("search_failed", {
+            blockId: item.blockId,
+            query: item.searchQuery,
+            error: err instanceof Error ? err.message : String(err),
+          });
         }
       }
 

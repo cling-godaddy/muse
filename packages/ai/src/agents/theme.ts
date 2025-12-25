@@ -7,7 +7,7 @@ export interface ThemeSelection {
   typography: string
 }
 
-function buildSystemPrompt(): string {
+export function themeSystemPrompt(): string {
   return `You are a brand designer. Select the best color palette and typography for a landing page.
 
 ${generatePaletteTypographyPrompt()}
@@ -33,7 +33,7 @@ export const themeAgent: SyncAgent = {
 
     const response = await provider.chat({
       messages: [
-        { role: "system", content: buildSystemPrompt() },
+        { role: "system", content: themeSystemPrompt() },
         { role: "user", content: `${briefContext}\nUser Request: ${input.prompt}` },
       ],
     });

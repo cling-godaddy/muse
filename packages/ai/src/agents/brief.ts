@@ -1,7 +1,7 @@
 import type { Provider } from "../types";
 import type { AgentInput, BrandBrief, SyncAgent } from "./types";
 
-const systemPrompt = `You are a brand analyst. Extract a concise brand brief from the user's request.
+export const briefSystemPrompt = `You are a brand analyst. Extract a concise brand brief from the user's request.
 
 Output ONLY valid JSON matching this schema:
 {
@@ -29,7 +29,7 @@ export const briefAgent: SyncAgent = {
   async run(input: AgentInput, provider: Provider): Promise<string> {
     const response = await provider.chat({
       messages: [
-        { role: "system", content: systemPrompt },
+        { role: "system", content: briefSystemPrompt },
         { role: "user", content: input.prompt },
       ],
     });

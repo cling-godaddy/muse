@@ -13,6 +13,10 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@muse/core": "workspace:*"
+    "@muse/core": "workspace:*",
+    "@muse/logger": "workspace:*"
+  },
+  "devDependencies": {
+    "@types/node": "^22"
   }
 }

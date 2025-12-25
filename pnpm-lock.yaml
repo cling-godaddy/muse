@@ -59,6 +59,9 @@ importers:
       '@muse/core':
         specifier: workspace:*
         version: link:../../packages/core
+      '@muse/logger':
+        specifier: workspace:*
+        version: link:../../packages/logger
       '@muse/media':
         specifier: workspace:*
         version: link:../../packages/media
@@ -127,6 +130,9 @@ importers:
       '@muse/core':
         specifier: workspace:*
         version: link:../core
+      '@muse/logger':
+        specifier: workspace:*
+        version: link:../logger
       '@muse/media':
         specifier: workspace:*
         version: link:../media
@@ -136,6 +142,10 @@ importers:
       openai:
         specifier: ^6.15.0
         version: 6.15.0(zod@4.2.1)
+    devDependencies:
+      '@types/node':
+        specifier: ^22
+        version: 22.19.3
 
   packages/core:
     dependencies:
@@ -180,11 +190,24 @@ importers:
         specifier: ^19.2.3
         version: 19.2.3(@types/react@19.2.7)
 
+  packages/logger:
+    devDependencies:
+      '@types/node':
+        specifier: ^22
+        version: 22.19.3
+
   packages/media:
     dependencies:
       '@muse/core':
         specifier: workspace:*
         version: link:../core
+      '@muse/logger':
+        specifier: workspace:*
+        version: link:../logger
+    devDependencies:
+      '@types/node':
+        specifier: ^22
+        version: 22.19.3
 
   packages/themes: {}
 

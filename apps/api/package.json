@@ -12,6 +12,7 @@
   "dependencies": {
     "@muse/ai": "workspace:*",
     "@muse/core": "workspace:*",
+    "@muse/logger": "workspace:*",
     "@muse/media": "workspace:*",
     "@muse/themes": "workspace:*",
     "hono": "^4",
