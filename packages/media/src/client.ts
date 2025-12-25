@@ -1,14 +1,42 @@
-import type { MediaClient, MediaProvider, ImagePlan, ImageSelection, ImageSearchOptions } from "./types";
+import type { MediaClient, MediaProvider, ImagePlan, ImageSelection, ImageSearchOptions, ImageSearchResult } from "./types";
 import { createUnsplashProvider } from "./unsplash";
 import { createPexelsProvider } from "./pexels";
 
 export interface MediaClientConfig {
   unsplashKey?: string
   pexelsKey?: string
+  cacheTtlMs?: number
 }
+
+interface CacheEntry {
+  results: ImageSearchResult[]
+  expiresAt: number
+}
+
+const DEFAULT_CACHE_TTL = 15 * 60 * 1000; // 15 minutes
 
 export function createMediaClient(config: MediaClientConfig): MediaClient {
   const providers = new Map<string, MediaProvider>();
+  const cache = new Map<string, CacheEntry>();
+  const cacheTtl = config.cacheTtlMs ?? DEFAULT_CACHE_TTL;
+
+  function getCacheKey(provider: string, query: string, orientation?: string): string {
+    return `${provider}:${query}:${orientation ?? "any"}`;
+  }
+
+  function getCached(key: string): ImageSearchResult[] | null {
+    const entry = cache.get(key);
+    if (!entry) return null;
+    if (Date.now() > entry.expiresAt) {
+      cache.delete(key);
+      return null;
+    }
+    return entry.results;
+  }
+
+  function setCache(key: string, results: ImageSearchResult[]): void {
+    cache.set(key, { results, expiresAt: Date.now() + cacheTtl });
+  }
 
   if (config.unsplashKey) {
     providers.set("unsplash", createUnsplashProvider(config.unsplashKey));
@@ -30,33 +58,49 @@ export function createMediaClient(config: MediaClientConfig): MediaClient {
         return [];
       }
 
-      return provider.search(options.query, {
+      const cacheKey = getCacheKey(options.provider, options.query, options.orientation);
+      const cached = getCached(cacheKey);
+      if (cached) {
+        return cached.slice(0, options.count);
+      }
+
+      const results = await provider.search(options.query, {
         orientation: options.orientation,
         count: options.count,
       });
+
+      setCache(cacheKey, results);
+      return results;
     },
 
     async executePlan(plan: ImagePlan[]): Promise<ImageSelection[]> {
       const selections: ImageSelection[] = [];
 
       for (const item of plan) {
-        const provider = providers.get(item.provider);
-        if (!provider) {
-          // Fall back to any available provider
-          const fallback = providers.values().next().value;
-          if (!fallback) continue;
+        let providerName: string = item.provider;
+        let activeProvider = providers.get(item.provider);
 
-          console.warn(`Provider ${item.provider} not configured, falling back to ${fallback.name}`);
+        if (!activeProvider) {
+          // Fall back to any available provider
+          const fallbackEntry = providers.entries().next().value as [string, MediaProvider] | undefined;
+          if (!fallbackEntry) continue;
+
+          console.warn(`Provider ${item.provider} not configured, falling back to ${fallbackEntry[0]}`);
+          providerName = fallbackEntry[0];
+          activeProvider = fallbackEntry[1];
         }
 
-        const activeProvider = provider ?? providers.values().next().value;
-        if (!activeProvider) continue;
-
         try {
-          const results = await activeProvider.search(item.searchQuery, {
-            orientation: item.orientation,
-            count: 1,
-          });
+          const cacheKey = getCacheKey(providerName, item.searchQuery, item.orientation);
+          let results = getCached(cacheKey);
+
+          if (!results) {
+            results = await activeProvider.search(item.searchQuery, {
+              orientation: item.orientation,
+              count: 1,
+            });
+            setCache(cacheKey, results);
+          }
 
           const result = results[0];
           if (result) {
