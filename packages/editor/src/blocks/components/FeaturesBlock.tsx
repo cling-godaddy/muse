@@ -1,3 +1,4 @@
+import { useEffect, useRef } from "react";
 import type { FeaturesBlock as FeaturesBlockType, FeatureItem } from "@muse/core";
 
 interface Props {
@@ -5,8 +6,22 @@ interface Props {
   onUpdate: (data: Partial<FeaturesBlockType>) => void
 }
 
+function useAutoResize(value: string) {
+  const ref = useRef<HTMLTextAreaElement>(null);
+
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    el.style.height = "auto";
+    el.style.height = `${el.scrollHeight}px`;
+  }, [value]);
+
+  return ref;
+}
+
 export function FeaturesBlock({ block, onUpdate }: Props) {
   const columns = block.columns ?? 3;
+  const headlineRef = useAutoResize(block.headline ?? "");
 
   const updateItem = (index: number, data: Partial<FeatureItem>) => {
     const items = block.items.map((item, i) =>
@@ -29,9 +44,10 @@ export function FeaturesBlock({ block, onUpdate }: Props) {
 
   return (
     <div className="muse-block-features">
-      <input
+      <textarea
+        ref={headlineRef}
         className="muse-block-features-headline"
-        type="text"
+        rows={1}
         value={block.headline ?? ""}
         onChange={e => onUpdate({ headline: e.target.value || undefined })}
         placeholder="Section headline..."

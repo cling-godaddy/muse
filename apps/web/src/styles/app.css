@@ -35,6 +35,17 @@ html, body, #root {
   .muse-underline { @apply underline; }
   .muse-content { @apply min-h-[200px] p-4 outline-none flex-1 overflow-y-auto; }
 
+  /* Base overflow protection for all block inputs */
+  .muse-block input,
+  .muse-block textarea {
+    overflow-wrap: break-word;
+    word-wrap: break-word;
+  }
+  .muse-block textarea {
+    resize: none;
+    overflow: hidden;
+  }
+
   .muse-toolbar {
     @apply flex gap-1 p-2 border-b border-border bg-bg-muted;
   }
@@ -93,7 +104,7 @@ html, body, #root {
   .muse-block-hero-headline {
     font-family: var(--muse-theme-heading-font, inherit);
     font-weight: var(--muse-theme-heading-weight, 700);
-    font-size: 2.5rem;
+    font-size: clamp(1.5rem, 5vw, 2.5rem);
     color: white;
     background: transparent;
     border: 1px dashed transparent;
@@ -110,7 +121,7 @@ html, body, #root {
 
   .muse-block-hero-subheadline {
     font-family: var(--muse-theme-body-font, inherit);
-    font-size: 1.25rem;
+    font-size: clamp(1rem, 3vw, 1.25rem);
     color: rgba(255,255,255,0.9);
     background: transparent;
     border: 1px dashed transparent;
@@ -162,7 +173,7 @@ html, body, #root {
   .muse-block-features-headline {
     font-family: var(--muse-theme-heading-font, inherit);
     font-weight: var(--muse-theme-heading-weight, 700);
-    font-size: 1.75rem;
+    font-size: clamp(1.25rem, 4vw, 1.75rem);
     color: var(--muse-theme-text, #0f172a);
     background: transparent;
     border: 1px dashed transparent;
@@ -254,7 +265,7 @@ html, body, #root {
   .muse-block-cta-headline {
     font-family: var(--muse-theme-heading-font, inherit);
     font-weight: var(--muse-theme-heading-weight, 700);
-    font-size: 1.75rem;
+    font-size: clamp(1.25rem, 4vw, 1.75rem);
     background: transparent;
     border: 1px dashed transparent;
     padding: 0.5rem;

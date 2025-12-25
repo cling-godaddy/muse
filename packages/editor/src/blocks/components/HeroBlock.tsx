@@ -1,3 +1,4 @@
+import { useEffect, useRef } from "react";
 import type { HeroBlock as HeroBlockType } from "@muse/core";
 
 interface Props {
@@ -5,21 +6,38 @@ interface Props {
   onUpdate: (data: Partial<HeroBlockType>) => void
 }
 
+function useAutoResize(value: string) {
+  const ref = useRef<HTMLTextAreaElement>(null);
+
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    el.style.height = "auto";
+    el.style.height = `${el.scrollHeight}px`;
+  }, [value]);
+
+  return ref;
+}
+
 export function HeroBlock({ block, onUpdate }: Props) {
   const alignment = block.alignment ?? "center";
+  const headlineRef = useAutoResize(block.headline);
+  const subheadlineRef = useAutoResize(block.subheadline ?? "");
 
   return (
     <div className={`muse-block-hero muse-block-hero--${alignment}`}>
-      <input
+      <textarea
+        ref={headlineRef}
         className="muse-block-hero-headline"
-        type="text"
+        rows={1}
         value={block.headline}
         onChange={e => onUpdate({ headline: e.target.value })}
         placeholder="Headline..."
       />
-      <input
+      <textarea
+        ref={subheadlineRef}
         className="muse-block-hero-subheadline"
-        type="text"
+        rows={1}
         value={block.subheadline ?? ""}
         onChange={e => onUpdate({ subheadline: e.target.value || undefined })}
         placeholder="Subheadline..."
