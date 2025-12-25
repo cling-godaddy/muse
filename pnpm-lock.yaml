@@ -124,6 +124,9 @@ importers:
       '@muse/core':
         specifier: workspace:*
         version: link:../core
+      '@muse/themes':
+        specifier: workspace:*
+        version: link:../themes
       openai:
         specifier: ^6.15.0
         version: 6.15.0(zod@4.2.1)

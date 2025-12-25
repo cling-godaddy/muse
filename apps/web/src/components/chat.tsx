@@ -1,6 +1,7 @@
 import { useRef, useEffect, useMemo } from "react";
 import type { Block } from "@muse/core";
 import { useChat, type Message } from "../hooks/useChat";
+import type { Progress } from "../utils/streamParser";
 
 interface ChatProps {
   onBlockParsed?: (block: Block, theme?: string) => void
@@ -8,7 +9,7 @@ interface ChatProps {
 
 export function Chat({ onBlockParsed }: ChatProps) {
   const options = useMemo(() => ({ onBlockParsed }), [onBlockParsed]);
-  const { messages, input, setInput, isLoading, send, sessionUsage, lastUsage } = useChat(options);
+  const { messages, input, setInput, isLoading, send, sessionUsage, lastUsage, progress } = useChat(options);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -62,6 +63,7 @@ export function Chat({ onBlockParsed }: ChatProps) {
             message={message}
             isLast={i === messages.length - 1}
             isLoading={isLoading}
+            progress={i === messages.length - 1 && message.role === "assistant" ? progress : []}
           />
         ))}
         <div ref={messagesEndRef} />
@@ -92,10 +94,12 @@ interface MessageBubbleProps {
   message: Message
   isLast: boolean
   isLoading: boolean
+  progress: Progress[]
 }
 
-function MessageBubble({ message, isLast, isLoading }: MessageBubbleProps) {
+function MessageBubble({ message, isLast, isLoading, progress }: MessageBubbleProps) {
   const isAssistant = message.role === "assistant";
+  const showProgress = isAssistant && isLast && (progress.length > 0 || isLoading);
 
   return (
     <div className="mb-4">
@@ -103,14 +107,60 @@ function MessageBubble({ message, isLast, isLoading }: MessageBubbleProps) {
         {isAssistant ? "AI" : "You"}
       </div>
       <div
-        className={`rounded-lg p-3 border whitespace-pre-wrap break-words ${
+        className={`rounded-lg border overflow-hidden ${
           isAssistant
             ? "bg-bg border-border-light"
             : "bg-user-bg border-user-border"
         }`}
       >
-        {message.content || (isLast && isLoading ? "Generating..." : "")}
+        {showProgress && <ProgressTimeline progress={progress} isLoading={isLoading} hasContent={!!message.content} />}
+        <div className={`p-3 whitespace-pre-wrap break-words ${showProgress && message.content ? "border-t border-border-light" : ""}`}>
+          {message.content || (isLast && isLoading && progress.length === 0 ? "Generating..." : "")}
+        </div>
       </div>
+    </div>
+  );
+}
+
+interface ProgressTimelineProps {
+  progress: Progress[]
+  isLoading: boolean
+  hasContent: boolean
+}
+
+function ProgressTimeline({ progress, isLoading, hasContent }: ProgressTimelineProps) {
+  if (progress.length === 0 && !isLoading) return null;
+
+  return (
+    <div className="px-3 py-2 text-xs text-text-subtle bg-bg-subtle">
+      {progress.map((p, i) => (
+        <div key={i} className="flex items-center gap-2 py-0.5">
+          <span className="text-success">✓</span>
+          {p.stage === "brief" && (
+            <span>
+              Analyzed:
+              {p.data.summary}
+            </span>
+          )}
+          {p.stage === "structure" && (
+            <span>
+              Planned:
+              {" "}
+              {p.data.blocks?.length}
+              {" "}
+              blocks (
+              {p.data.blocks?.map(b => b.type).join(", ")}
+              )
+            </span>
+          )}
+        </div>
+      ))}
+      {isLoading && progress.length > 0 && !hasContent && (
+        <div className="flex items-center gap-2 py-0.5">
+          <span className="animate-pulse text-primary">●</span>
+          <span>Writing content...</span>
+        </div>
+      )}
     </div>
   );
 }

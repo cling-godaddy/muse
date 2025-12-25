@@ -1,9 +1,23 @@
 import type { Block } from "@muse/core";
 import type { Usage } from "@muse/ai";
 
+export interface ProgressBlock {
+  type: string
+  purpose: string
+}
+
+export interface Progress {
+  stage: "brief" | "structure"
+  data: {
+    summary?: string
+    blocks?: ProgressBlock[]
+  }
+}
+
 export interface ParseState {
   theme?: string
   blockCount: number
+  progressCount: number
 }
 
 export interface ParseResult {
@@ -11,12 +25,14 @@ export interface ParseResult {
   theme?: string
   newBlocks: Block[]
   usage?: Usage
+  progress: Progress[]
   state: ParseState
 }
 
 const THEME_REGEX = /\[THEME:([^\]]+)\]/;
 const BLOCK_REGEX = /\[BLOCK\]([\s\S]*?)\[\/BLOCK\]/g;
 const USAGE_REGEX = /\[USAGE:(\{[^}]+\})\]/;
+const PROGRESS_REGEX = /\[PROGRESS:(\w+)\]([\s\S]*?)\[\/PROGRESS\]/g;
 
 export function parseStream(
   accumulated: string,
@@ -26,12 +42,29 @@ export function parseStream(
   let theme = previousState.theme;
   let usage: Usage | undefined;
   const newBlocks: Block[] = [];
+  const progress: Progress[] = [];
 
   // extract theme if not already found
   if (!theme) {
     const themeMatch = accumulated.match(THEME_REGEX);
     if (themeMatch) {
       theme = themeMatch[1];
+    }
+  }
+
+  // extract all progress events
+  const progressMatches = [...accumulated.matchAll(PROGRESS_REGEX)];
+  for (const match of progressMatches) {
+    const stage = match[1] as Progress["stage"];
+    const jsonStr = match[2]?.trim();
+    if (!jsonStr) continue;
+
+    try {
+      const data = JSON.parse(jsonStr) as Progress["data"];
+      progress.push({ stage, data });
+    }
+    catch {
+      console.warn("failed to parse progress:", jsonStr);
     }
   }
 
@@ -65,12 +98,10 @@ export function parseStream(
         newBlocks.push(block as Block);
       }
       else if (block.type) {
-        // add missing id
         newBlocks.push({ ...block, id: crypto.randomUUID() } as Block);
       }
     }
     catch {
-      // malformed JSON - skip this block
       console.warn("Failed to parse block JSON:", match[1]);
     }
   }
@@ -78,9 +109,10 @@ export function parseStream(
   // strip markers from display text
   displayText = displayText
     .replace(THEME_REGEX, "")
+    .replace(PROGRESS_REGEX, "")
     .replace(BLOCK_REGEX, "")
     .replace(USAGE_REGEX, "")
-    .replace(/\[BLOCK\][\s\S]*$/, "") // strip incomplete block at end
+    .replace(/\[BLOCK\][\s\S]*$/, "")
     .replace(/\n{3,}/g, "\n\n")
     .trim();
 
@@ -89,6 +121,7 @@ export function parseStream(
     theme,
     newBlocks,
     usage,
-    state: { theme, blockCount: newBlockCount },
+    progress,
+    state: { theme, blockCount: newBlockCount, progressCount: progress.length },
   };
 }

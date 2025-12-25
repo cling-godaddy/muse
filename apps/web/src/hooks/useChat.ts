@@ -1,7 +1,7 @@
 import { useState, useCallback, useRef } from "react";
 import type { Block } from "@muse/core";
 import type { Usage } from "@muse/ai";
-import { parseStream, type ParseState } from "../utils/streamParser";
+import { parseStream, type ParseState, type Progress } from "../utils/streamParser";
 
 export interface Message {
   role: "user" | "assistant"
@@ -21,6 +21,7 @@ export interface UseChat {
   send: () => Promise<void>
   sessionUsage: Usage
   lastUsage?: Usage
+  progress: Progress[]
 }
 
 const API_URL = "http://localhost:3001/api/chat";
@@ -33,7 +34,8 @@ export function useChat(options: UseChatOptions = {}): UseChat {
   const [isLoading, setIsLoading] = useState(false);
   const [sessionUsage, setSessionUsage] = useState<Usage>(emptyUsage);
   const [lastUsage, setLastUsage] = useState<Usage | undefined>();
-  const parseStateRef = useRef<ParseState>({ blockCount: 0 });
+  const [progress, setProgress] = useState<Progress[]>([]);
+  const parseStateRef = useRef<ParseState>({ blockCount: 0, progressCount: 0 });
   const usageProcessedRef = useRef(false);
 
   const send = useCallback(async () => {
@@ -45,7 +47,8 @@ export function useChat(options: UseChatOptions = {}): UseChat {
     setMessages(newMessages);
     setInput("");
     setIsLoading(true);
-    parseStateRef.current = { blockCount: 0 };
+    setProgress([]);
+    parseStateRef.current = { blockCount: 0, progressCount: 0 };
     usageProcessedRef.current = false;
 
     try {
@@ -84,6 +87,11 @@ export function useChat(options: UseChatOptions = {}): UseChat {
           options.onBlockParsed?.(block, result.theme);
         }
 
+        // update progress if changed
+        if (result.progress.length > parseStateRef.current.progressCount) {
+          setProgress(result.progress);
+        }
+
         // track usage (only once per response)
         if (result.usage && !usageProcessedRef.current) {
           usageProcessedRef.current = true;
@@ -120,5 +128,5 @@ export function useChat(options: UseChatOptions = {}): UseChat {
     }
   }, [input, messages, isLoading, options]);
 
-  return { messages, input, setInput, isLoading, send, sessionUsage, lastUsage };
+  return { messages, input, setInput, isLoading, send, sessionUsage, lastUsage, progress };
 }
