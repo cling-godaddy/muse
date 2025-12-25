@@ -1,5 +1,4 @@
 import { generateBlockSchemaPrompt } from "@muse/core";
-import { generateThemePrompt } from "@muse/themes";
 import type { Provider } from "../types";
 import type { Agent, AgentInput } from "./types";
 
@@ -26,24 +25,25 @@ ${briefSection}
 ${structureSection}
 ${generateBlockSchemaPrompt()}
 
-${generateThemePrompt()}
-
 RESPONSE FORMAT:
-Start with the theme marker, then describe what you're creating in natural language.
-Wrap each block's JSON in [BLOCK] markers.
+Describe what you're creating in natural, conversational language.
+Embed each block's JSON in [BLOCK] markers (these are parsed separately, not displayed to users).
 
-[THEME:theme-id]
-Brief description of what you're creating...
-
+Example flow:
+Let me create a compelling hero section to capture attention right away...
 [BLOCK]
-{"id": "block-id-from-structure", "type": "...", ...content fields...}
+{"id": "hero-1", "type": "hero", "headline": "...", ...}
+[/BLOCK]
+
+Now I'll add some features to showcase your key offerings...
+[BLOCK]
+{"id": "features-1", "type": "features", "items": [...], ...}
 [/BLOCK]
 
 Guidelines:
+- Write naturally, as if explaining your creative choices
 - Use the block IDs from the structure above
 - Match the brand voice in your copy
-- Write compelling, conversion-focused content
-- Keep descriptions friendly and conversational
 - Each block JSON must be valid and complete`;
 }
 
