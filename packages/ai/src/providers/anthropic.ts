@@ -14,6 +14,36 @@ export function createAnthropicProvider(apiKey: string): Provider {
         .filter(m => m.role !== "system")
         .map(m => ({ role: m.role as "user" | "assistant", content: m.content }));
 
+      // Use tool use for schema-based structured output
+      if (request.responseSchema) {
+        const response = await client.messages.create({
+          model: request.model ?? "claude-sonnet-4-20250514",
+          max_tokens: 4096,
+          system: systemMessage?.content,
+          messages,
+          tools: [{
+            name: request.responseSchema.name,
+            description: request.responseSchema.description ?? "Generate structured output",
+            input_schema: request.responseSchema.schema as Anthropic.Tool.InputSchema,
+          }],
+          tool_choice: { type: "tool", name: request.responseSchema.name },
+        });
+
+        const toolBlock = response.content.find(block => block.type === "tool_use");
+        if (!toolBlock || toolBlock.type !== "tool_use") {
+          throw new Error("no tool use response from anthropic");
+        }
+
+        return {
+          content: JSON.stringify(toolBlock.input),
+          model: response.model,
+          usage: {
+            input: response.usage.input_tokens,
+            output: response.usage.output_tokens,
+          },
+        };
+      }
+
       const response = await client.messages.create({
         model: request.model ?? "claude-sonnet-4-20250514",
         max_tokens: 4096,

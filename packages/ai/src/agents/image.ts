@@ -1,8 +1,35 @@
 import { createLogger } from "@muse/logger";
-import type { Provider } from "../types";
+import type { JsonSchema, Provider } from "../types";
 import type { AgentInput, SyncAgent, PageStructure, BrandBrief, ImagePlan } from "./types";
 
 const log = createLogger().child({ agent: "image" });
+
+const imagePlanSchema: JsonSchema = {
+  name: "image_plan",
+  description: "Array of image search plans for landing page blocks",
+  schema: {
+    type: "object",
+    properties: {
+      items: {
+        type: "array",
+        items: {
+          type: "object",
+          properties: {
+            blockId: { type: "string", description: "Block ID to attach image to" },
+            placement: { type: "string", enum: ["background", "content", "gallery"], description: "Where the image goes" },
+            provider: { type: "string", enum: ["unsplash", "pexels"], description: "Image provider" },
+            searchQuery: { type: "string", description: "Search query for the image" },
+            orientation: { type: "string", enum: ["horizontal", "vertical", "square"], description: "Image orientation" },
+          },
+          required: ["blockId", "placement", "provider", "searchQuery", "orientation"],
+          additionalProperties: false,
+        },
+      },
+    },
+    required: ["items"],
+    additionalProperties: false,
+  },
+};
 
 function buildPlanningPrompt(brief: BrandBrief, structure: PageStructure): string {
   return `You are an image curator for landing pages. Given a brand brief and page structure, plan which blocks need images and what to search for.
@@ -15,31 +42,16 @@ BRAND BRIEF:
 PAGE STRUCTURE:
 ${structure.blocks.map(b => `- ${b.id} (${b.type}, preset: ${b.preset}): ${b.purpose}`).join("\n")}
 
-For each block that would benefit from an image, output a plan.
-
 RULES:
 - Hero blocks: 1 background image (horizontal)
-- Gallery blocks: multiple images (4-6 varied queries) - we'll fetch extras to fill the grid
-- Feature blocks: 1 image per feature item if appropriate
+- Gallery blocks: 4-6 varied queries with mixed orientations
+- Feature blocks: 1 image per feature if appropriate
 - Testimonials: 1 image for single testimonial preset, none for grids/carousels
 - Only add images where they enhance the message
 - Search queries should be specific and evocative
-- Choose provider based on content type:
-  - "unsplash" for editorial, lifestyle, abstract backgrounds
-  - "pexels" for objects, products, specific scenes
+- Provider: "unsplash" for editorial/lifestyle, "pexels" for objects/products
 
-OUTPUT FORMAT (JSON array only, no markdown):
-[
-  { "blockId": "block-1", "placement": "background", "provider": "unsplash", "searchQuery": "...", "orientation": "horizontal" },
-  { "blockId": "block-2", "placement": "content", "provider": "unsplash", "searchQuery": "query 1", "orientation": "vertical" },
-  { "blockId": "block-2", "placement": "content", "provider": "unsplash", "searchQuery": "query 2", "orientation": "horizontal" },
-  { "blockId": "block-2", "placement": "content", "provider": "pexels", "searchQuery": "query 3", "orientation": "square" },
-  { "blockId": "block-2", "placement": "content", "provider": "unsplash", "searchQuery": "query 4", "orientation": "vertical" }
-]
-
-For galleries, use varied search queries with different orientations.
-
-If no images are needed, output: []`;
+Return empty items array if no images needed.`;
 }
 
 export const imageAgent: SyncAgent = {
@@ -63,7 +75,7 @@ export const imageAgent: SyncAgent = {
 
     const response = await provider.chat({
       messages,
-      jsonMode: true,
+      responseSchema: imagePlanSchema,
     });
 
     return response.content;
@@ -74,14 +86,27 @@ export function parseImagePlan(json: string): ImagePlan[] {
   try {
     const cleaned = json.trim().replace(/^```json\n?/, "").replace(/\n?```$/, "");
     const parsed = JSON.parse(cleaned);
-    if (!Array.isArray(parsed)) return [];
-    return parsed.filter((item): item is ImagePlan =>
-      typeof item.blockId === "string"
-      && typeof item.placement === "string"
-      && typeof item.provider === "string"
-      && typeof item.searchQuery === "string"
-      && typeof item.orientation === "string",
-    );
+    // Handle: {items: [...]}, bare array [...], wrapped {"plan": [...]}, or single object {...}
+    const items = Array.isArray(parsed.items)
+      ? parsed.items
+      : Array.isArray(parsed)
+        ? parsed
+        : Array.isArray(parsed.plan)
+          ? parsed.plan
+          : (parsed.blockId ? [parsed] : []);
+    if (items.length === 0) return [];
+
+    function isImagePlan(item: unknown): item is ImagePlan {
+      if (!item || typeof item !== "object") return false;
+      const obj = item as Record<string, unknown>;
+      return typeof obj.blockId === "string"
+        && typeof obj.placement === "string"
+        && typeof obj.provider === "string"
+        && typeof obj.searchQuery === "string"
+        && typeof obj.orientation === "string";
+    }
+
+    return items.filter(isImagePlan);
   }
   catch (err) {
     log.warn("parse_failed", {

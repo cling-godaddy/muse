@@ -42,10 +42,53 @@ describe("parseImagePlan", () => {
     expect(parseImagePlan("")).toEqual([]);
   });
 
-  it("returns empty array for non-array JSON", () => {
+  it("returns empty array for unrecognized JSON structures", () => {
     expect(parseImagePlan("{\"foo\": \"bar\"}")).toEqual([]);
     expect(parseImagePlan("\"string\"")).toEqual([]);
     expect(parseImagePlan("123")).toEqual([]);
+  });
+
+  it("parses {items: [...]} structured output format", () => {
+    const input = JSON.stringify({
+      items: [
+        { blockId: "hero_1", placement: "background", provider: "unsplash", searchQuery: "sunset", orientation: "horizontal" },
+        { blockId: "gallery_1", placement: "content", provider: "pexels", searchQuery: "food", orientation: "square" },
+      ],
+    });
+
+    const result = parseImagePlan(input);
+
+    expect(result).toHaveLength(2);
+    expect(result.at(0)?.blockId).toBe("hero_1");
+    expect(result.at(1)?.blockId).toBe("gallery_1");
+  });
+
+  it("parses {plan: [...]} wrapped format", () => {
+    const input = JSON.stringify({
+      plan: [
+        { blockId: "hero_1", placement: "background", provider: "unsplash", searchQuery: "mountain", orientation: "horizontal" },
+      ],
+    });
+
+    const result = parseImagePlan(input);
+
+    expect(result).toHaveLength(1);
+    expect(result.at(0)?.searchQuery).toBe("mountain");
+  });
+
+  it("parses single object format", () => {
+    const input = JSON.stringify({
+      blockId: "hero_1",
+      placement: "background",
+      provider: "unsplash",
+      searchQuery: "ocean waves",
+      orientation: "horizontal",
+    });
+
+    const result = parseImagePlan(input);
+
+    expect(result).toHaveLength(1);
+    expect(result.at(0)?.searchQuery).toBe("ocean waves");
   });
 
   it("filters out items with missing required fields", () => {

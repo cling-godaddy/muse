@@ -12,11 +12,20 @@ export interface Usage {
   model: string
 }
 
+export interface JsonSchema {
+  name: string
+  description?: string
+  schema: Record<string, unknown>
+  strict?: boolean
+}
+
 export interface ChatRequest {
   messages: Message[]
   model?: string
   stream?: boolean
   jsonMode?: boolean
+  /** OpenAI: json_schema response format. Anthropic: tool use. Takes precedence over jsonMode. */
+  responseSchema?: JsonSchema
 }
 
 export interface ChatResponse {

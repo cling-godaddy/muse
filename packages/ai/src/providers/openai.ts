@@ -9,10 +9,25 @@ export function createOpenAIProvider(apiKey: string): Provider {
     name: "openai",
 
     async chat(request: ChatRequest): Promise<ChatResponse> {
+      // Schema-based structured output takes precedence over jsonMode
+      const responseFormat = request.responseSchema
+        ? {
+          type: "json_schema" as const,
+          json_schema: {
+            name: request.responseSchema.name,
+            ...(request.responseSchema.description && { description: request.responseSchema.description }),
+            schema: request.responseSchema.schema,
+            strict: request.responseSchema.strict ?? true,
+          },
+        }
+        : request.jsonMode
+          ? { type: "json_object" as const }
+          : undefined;
+
       const response = await client.chat.completions.create({
         model: request.model ?? "gpt-4o",
         messages: request.messages,
-        ...(request.jsonMode && { response_format: { type: "json_object" as const } }),
+        ...(responseFormat && { response_format: responseFormat }),
       });
 
       const choice = response.choices[0];
