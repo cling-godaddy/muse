@@ -1,0 +1,152 @@
+[
+  {
+    "id": "photography-portfolio-1",
+    "request": "Photography portfolio with masonry gallery of wedding photos",
+    "industry": "photography",
+    "keywords": ["portfolio", "gallery", "masonry", "wedding", "creative", "visual", "showcase"],
+    "structure": {
+      "blocks": [
+        { "type": "hero", "preset": "hero-overlay", "rationale": "Full-bleed image showcases photography style immediately" },
+        { "type": "gallery", "preset": "gallery-masonry", "rationale": "Masonry layout handles mixed aspect ratios common in wedding photography" },
+        { "type": "testimonials", "preset": "testimonials-single", "rationale": "Featured client testimonial adds credibility and emotional connection" },
+        { "type": "cta", "preset": "cta-centered", "rationale": "Clear call to action for booking consultations" }
+      ]
+    }
+  },
+  {
+    "id": "saas-landing-1",
+    "request": "SaaS product landing page for project management tool",
+    "industry": "saas",
+    "keywords": ["saas", "product", "software", "features", "pricing", "startup", "technology"],
+    "structure": {
+      "blocks": [
+        { "type": "hero", "preset": "hero-split-left", "rationale": "Product screenshot on right, compelling headline on left" },
+        { "type": "features", "preset": "features-grid-icons", "rationale": "Icon grid highlights key features at a glance" },
+        { "type": "pricing", "preset": "pricing-cards", "rationale": "Clear pricing tiers for conversion" },
+        { "type": "testimonials", "preset": "testimonials-carousel", "rationale": "Social proof from multiple customers" },
+        { "type": "cta", "preset": "cta-centered", "rationale": "Final push to sign up" }
+      ]
+    }
+  },
+  {
+    "id": "restaurant-website-1",
+    "request": "Restaurant website with food gallery and reservation info",
+    "industry": "hospitality",
+    "keywords": ["restaurant", "food", "dining", "menu", "gallery", "reservations", "local"],
+    "structure": {
+      "blocks": [
+        { "type": "hero", "preset": "hero-overlay", "rationale": "Appetizing hero image sets the mood" },
+        { "type": "gallery", "preset": "gallery-grid", "rationale": "Grid layout for consistent food photography" },
+        { "type": "testimonials", "preset": "testimonials-grid", "rationale": "Multiple reviews build trust" },
+        { "type": "contact", "preset": "contact-form", "rationale": "Reservation and contact information" },
+        { "type": "cta", "preset": "cta-centered", "rationale": "Book a table or view menu" }
+      ]
+    }
+  },
+  {
+    "id": "consultant-landing-1",
+    "request": "Business consultant landing page with services and pricing",
+    "industry": "consulting",
+    "keywords": ["consultant", "coach", "services", "pricing", "professional", "business", "expertise"],
+    "structure": {
+      "blocks": [
+        { "type": "hero", "preset": "hero-centered", "rationale": "Professional headshot or abstract establishes credibility" },
+        { "type": "features", "preset": "features-grid-icons", "rationale": "Service offerings presented clearly" },
+        { "type": "testimonials", "preset": "testimonials-carousel", "rationale": "Client success stories" },
+        { "type": "pricing", "preset": "pricing-cards", "rationale": "Service tiers or packages" },
+        { "type": "faq", "preset": "faq-accordion", "rationale": "Address common objections" },
+        { "type": "cta", "preset": "cta-centered", "rationale": "Book a discovery call" }
+      ]
+    }
+  },
+  {
+    "id": "real-estate-listing-1",
+    "request": "Real estate property listing with photo carousel",
+    "industry": "real-estate",
+    "keywords": ["real estate", "property", "listing", "homes", "carousel", "gallery", "contact"],
+    "structure": {
+      "blocks": [
+        { "type": "hero", "preset": "hero-overlay", "rationale": "Hero image of property exterior" },
+        { "type": "gallery", "preset": "gallery-carousel", "rationale": "Carousel for focused viewing of property photos" },
+        { "type": "features", "preset": "features-list", "rationale": "Property features and amenities" },
+        { "type": "contact", "preset": "contact-form", "rationale": "Schedule viewing or inquire" },
+        { "type": "cta", "preset": "cta-centered", "rationale": "Request more information" }
+      ]
+    }
+  },
+  {
+    "id": "tech-startup-1",
+    "request": "Tech startup launch page with product features",
+    "industry": "technology",
+    "keywords": ["startup", "tech", "launch", "product", "innovation", "features", "modern"],
+    "structure": {
+      "blocks": [
+        { "type": "hero", "preset": "hero-split-left", "rationale": "Product visual with bold headline" },
+        { "type": "features", "preset": "features-alternating", "rationale": "Alternating layout for storytelling about features" },
+        { "type": "testimonials", "preset": "testimonials-grid", "rationale": "Early adopter testimonials" },
+        { "type": "cta", "preset": "cta-split", "rationale": "Dual CTA for different user segments" }
+      ]
+    }
+  },
+  {
+    "id": "ecommerce-product-1",
+    "request": "E-commerce product page with product images and reviews",
+    "industry": "ecommerce",
+    "keywords": ["ecommerce", "product", "shopping", "reviews", "gallery", "buy", "retail"],
+    "structure": {
+      "blocks": [
+        { "type": "hero", "preset": "hero-split-right", "rationale": "Product image on right, details on left" },
+        { "type": "features", "preset": "features-grid-icons", "rationale": "Product features and specifications" },
+        { "type": "gallery", "preset": "gallery-grid", "rationale": "Additional product images" },
+        { "type": "testimonials", "preset": "testimonials-carousel", "rationale": "Customer reviews" },
+        { "type": "cta", "preset": "cta-centered", "rationale": "Add to cart or buy now" }
+      ]
+    }
+  },
+  {
+    "id": "creative-agency-1",
+    "request": "Creative agency portfolio with work samples",
+    "industry": "creative",
+    "keywords": ["agency", "creative", "portfolio", "design", "work", "masonry", "showcase"],
+    "structure": {
+      "blocks": [
+        { "type": "hero", "preset": "hero-overlay", "rationale": "Bold creative statement with visual impact" },
+        { "type": "gallery", "preset": "gallery-masonry", "rationale": "Masonry layout showcases diverse project sizes and formats" },
+        { "type": "testimonials", "preset": "testimonials-single", "rationale": "Featured client quote" },
+        { "type": "contact", "preset": "contact-form", "rationale": "Start a project inquiry" },
+        { "type": "cta", "preset": "cta-centered", "rationale": "Let's work together" }
+      ]
+    }
+  },
+  {
+    "id": "local-service-1",
+    "request": "Local service business website for plumber or electrician",
+    "industry": "services",
+    "keywords": ["local", "service", "business", "plumber", "electrician", "contractor", "reviews"],
+    "structure": {
+      "blocks": [
+        { "type": "hero", "preset": "hero-centered", "rationale": "Trust-building headline with service area" },
+        { "type": "features", "preset": "features-grid-icons", "rationale": "Services offered" },
+        { "type": "testimonials", "preset": "testimonials-grid", "rationale": "Local customer reviews" },
+        { "type": "faq", "preset": "faq-accordion", "rationale": "Common questions about services and pricing" },
+        { "type": "contact", "preset": "contact-form", "rationale": "Request a quote" },
+        { "type": "cta", "preset": "cta-centered", "rationale": "Call now or schedule service" }
+      ]
+    }
+  },
+  {
+    "id": "event-landing-1",
+    "request": "Event or conference landing page with schedule and tickets",
+    "industry": "events",
+    "keywords": ["event", "conference", "tickets", "schedule", "speakers", "registration"],
+    "structure": {
+      "blocks": [
+        { "type": "hero", "preset": "hero-overlay", "rationale": "Event branding and date prominently displayed" },
+        { "type": "features", "preset": "features-alternating", "rationale": "Speaker lineup or session highlights" },
+        { "type": "pricing", "preset": "pricing-cards", "rationale": "Ticket tiers" },
+        { "type": "faq", "preset": "faq-accordion", "rationale": "Event logistics and policies" },
+        { "type": "cta", "preset": "cta-centered", "rationale": "Register now" }
+      ]
+    }
+  }
+]

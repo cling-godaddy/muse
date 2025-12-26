@@ -1,0 +1,5 @@
+{
+  "name": "structure",
+  "version": 1,
+  "embedFields": ["request", "industry", "keywords"]
+}
