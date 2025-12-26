@@ -10,13 +10,15 @@ BRAND BRIEF:
 - Brand Voice: ${brief.brandVoice.join(", ")}
 
 PAGE STRUCTURE:
-${structure.blocks.map(b => `- ${b.id} (${b.type}): ${b.purpose}`).join("\n")}
+${structure.blocks.map(b => `- ${b.id} (${b.type}, preset: ${b.preset}): ${b.purpose}`).join("\n")}
 
 For each block that would benefit from an image, output a plan.
 
 RULES:
-- Hero blocks: Consider background images (horizontal orientation)
-- Feature blocks: Consider small images per feature item if appropriate
+- Hero blocks: 1 background image (horizontal)
+- Gallery blocks: multiple images (4-6 varied queries) - we'll fetch extras to fill the grid
+- Feature blocks: 1 image per feature item if appropriate
+- Testimonials: 1 image for single testimonial preset, none for grids/carousels
 - Only add images where they enhance the message
 - Search queries should be specific and evocative
 - Choose provider based on content type:
@@ -25,8 +27,14 @@ RULES:
 
 OUTPUT FORMAT (JSON array only, no markdown):
 [
-  { "blockId": "...", "placement": "background|content|feature", "provider": "unsplash|pexels", "searchQuery": "...", "orientation": "horizontal|vertical|square" }
+  { "blockId": "block-1", "placement": "background", "provider": "unsplash", "searchQuery": "...", "orientation": "horizontal" },
+  { "blockId": "block-2", "placement": "content", "provider": "unsplash", "searchQuery": "query 1", "orientation": "vertical" },
+  { "blockId": "block-2", "placement": "content", "provider": "unsplash", "searchQuery": "query 2", "orientation": "horizontal" },
+  { "blockId": "block-2", "placement": "content", "provider": "pexels", "searchQuery": "query 3", "orientation": "square" },
+  { "blockId": "block-2", "placement": "content", "provider": "unsplash", "searchQuery": "query 4", "orientation": "vertical" }
 ]
+
+For galleries, use varied search queries with different orientations.
 
 If no images are needed, output: []`;
 }

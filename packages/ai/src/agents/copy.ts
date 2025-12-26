@@ -15,7 +15,7 @@ function buildSystemPrompt(input: AgentInput): string {
 
   const structureSection = input.structure
     ? `PAGE STRUCTURE (generate content for these blocks in order):
-${input.structure.blocks.map(b => `- ${b.id} (${b.type}): ${b.purpose}`).join("\n")}
+${input.structure.blocks.map(b => `- ${b.id} (${b.type}, preset: ${b.preset}): ${b.purpose}`).join("\n")}
 `
     : "";
 
@@ -45,17 +45,18 @@ Embed each block's JSON in [BLOCK] markers (these are parsed separately, not dis
 Example flow:
 Let me create a compelling hero section to capture attention right away...
 [BLOCK]
-{"id": "hero-1", "type": "hero", "headline": "...", ...}
+{"id": "hero-1", "type": "hero", "preset": "hero-overlay", "headline": "...", ...}
 [/BLOCK]
 
 Now I'll add some features to showcase your key offerings...
 [BLOCK]
-{"id": "features-1", "type": "features", "items": [...], ...}
+{"id": "features-1", "type": "features", "preset": "features-grid-icons", "items": [...], ...}
 [/BLOCK]
 
 Guidelines:
 - Write naturally, as if explaining your creative choices
-- Use the block IDs from the structure above
+- Use the block IDs and presets from the structure above
+- Include the "preset" field in each block JSON
 - Match the brand voice in your copy
 - Each block JSON must be valid and complete`;
 }
