@@ -5,9 +5,11 @@
   "main": "./src/index.ts",
   "types": "./src/index.ts",
   "exports": {
-    ".": "./src/index.ts"
+    ".": "./src/index.ts",
+    "./rag": "./src/rag/index.ts"
   },
   "scripts": {
+    "kb": "tsx scripts/kb.ts",
     "lint": "eslint src",
     "test": "vitest run",
     "typecheck": "tsc --noEmit"
@@ -18,9 +20,12 @@
     "@muse/logger": "workspace:*",
     "@muse/media": "workspace:*",
     "@muse/themes": "workspace:*",
+    "dotenv": "^16.6.1",
+    "faiss-node": "^0.5.1",
     "openai": "^6.15.0"
   },
   "devDependencies": {
-    "@types/node": "^22"
+    "@types/node": "^22",
+    "tsx": "^4.19.0"
   }
 }
