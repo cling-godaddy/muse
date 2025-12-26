@@ -65,7 +65,7 @@ registerAISchema({
   description: "Grid of features with icon or image, title, and description",
   properties: {
     headline: { type: "string", description: "Optional section headline" },
-    items: { type: "array", description: "Array of feature items with icon or image, title, description", required: true },
+    items: { type: "array", description: "Array of feature items: { icon: string (emoji like '🚀'), title: string, description: string }", required: true },
     columns: { type: "number", description: "Number of columns: 2, 3, or 4" },
   },
   required: ["items"],

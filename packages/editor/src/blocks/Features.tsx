@@ -67,7 +67,7 @@ export function Features({ block, onUpdate }: Props) {
                 <input
                   type="text"
                   className={styles.itemIcon}
-                  value={item.icon ?? ""}
+                  value={typeof item.icon === "string" ? item.icon : ""}
                   onChange={e => updateItem(i, { icon: e.target.value || undefined })}
                   placeholder="Icon..."
                 />
