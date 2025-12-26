@@ -1,31 +1,43 @@
 import faiss from "faiss-node";
 import type { Logger } from "@muse/logger";
 import type { ImageSearchResult } from "../types";
-import type { BankConfig, BankEntry, BankData, BankSearchOptions, EmbedFn } from "./types";
+import type { BankConfig, BankEntry, BankData, BankSearchOptions, EmbedFn, AnalyzeFn, ImageMetadata } from "./types";
 import { createS3Operations, type S3Operations } from "./s3";
 
 const { IndexFlatIP } = faiss;
 type IndexFlatIPType = InstanceType<typeof IndexFlatIP>;
 
 const EMBEDDING_DIM = 1536; // text-embedding-3-small dimension
-const DEFAULT_MIN_SCORE = 0.85;
+const DEFAULT_MIN_SCORE = 0.8; // Lowered slightly for multi-vector approach
 const BANK_DATA_KEY = "bank/entries.json";
 const BANK_INDEX_KEY = "bank/index.faiss";
 
+// Vector type weights for scoring
+const VECTOR_WEIGHTS = {
+  caption: 1.0, // Ground truth - highest weight
+  query: 0.85, // Original search queries
+  expansion: 0.7, // LLM-generated related terms
+};
+
+type VectorType = keyof typeof VECTOR_WEIGHTS;
+
+interface VectorMapping {
+  entryId: string
+  type: VectorType
+}
+
 interface StoreState {
   entries: Map<string, BankEntry>
-  queryToEntryId: Map<number, string> // embeddingIndex -> entryId
+  vectorToEntry: Map<number, VectorMapping> // embeddingIndex -> {entryId, type}
   index: IndexFlatIPType
   nextIndex: number
   dirty: boolean
 }
 
-type Orientation = "horizontal" | "vertical" | "square";
-
 export interface ImageBankStore {
   load(): Promise<void>
   search(query: string, opts?: BankSearchOptions): Promise<BankEntry[]>
-  store(image: ImageSearchResult, query: string, orientation?: Orientation): Promise<void>
+  store(image: ImageSearchResult, query: string): Promise<void>
   getImageUrl(entry: BankEntry, size: "preview" | "display"): string
   sync(): Promise<void>
 }
@@ -33,6 +45,7 @@ export interface ImageBankStore {
 export function createImageBankStore(config: BankConfig): ImageBankStore {
   const { bucket, region, prefix = "", minScore = DEFAULT_MIN_SCORE } = config;
   const embed: EmbedFn = config.embed;
+  const analyze: AnalyzeFn = config.analyze;
   const log: Logger = config.logger ?? {
     debug: () => {},
     info: () => {},
@@ -45,7 +58,7 @@ export function createImageBankStore(config: BankConfig): ImageBankStore {
 
   const state: StoreState = {
     entries: new Map(),
-    queryToEntryId: new Map(),
+    vectorToEntry: new Map(),
     index: new IndexFlatIP(EMBEDDING_DIM),
     nextIndex: 0,
     dirty: false,
@@ -69,9 +82,24 @@ export function createImageBankStore(config: BankConfig): ImageBankStore {
       if (data) {
         for (const entry of data.entries) {
           state.entries.set(entry.id, entry);
-          for (const q of entry.queries) {
-            state.queryToEntryId.set(q.embeddingIndex, entry.id);
-            state.nextIndex = Math.max(state.nextIndex, q.embeddingIndex + 1);
+
+          // Rebuild vector mappings from entry.vectors
+          if (entry.vectors) {
+            // Caption vector
+            state.vectorToEntry.set(entry.vectors.caption, { entryId: entry.id, type: "caption" });
+            state.nextIndex = Math.max(state.nextIndex, entry.vectors.caption + 1);
+
+            // Query vectors
+            for (const idx of entry.vectors.queries) {
+              state.vectorToEntry.set(idx, { entryId: entry.id, type: "query" });
+              state.nextIndex = Math.max(state.nextIndex, idx + 1);
+            }
+
+            // Expansion vectors
+            for (const idx of entry.vectors.expansions) {
+              state.vectorToEntry.set(idx, { entryId: entry.id, type: "expansion" });
+              state.nextIndex = Math.max(state.nextIndex, idx + 1);
+            }
           }
         }
         log.info("bank_entries_loaded", { count: data.entries.length });
@@ -100,43 +128,51 @@ export function createImageBankStore(config: BankConfig): ImageBankStore {
       // Embed the query
       const vec = await embed(query);
 
-      // Search FAISS
-      const k = Math.min(limit * 3, state.nextIndex); // over-fetch to filter by orientation
+      // Search FAISS - over-fetch to aggregate by image
+      const k = Math.min(limit * 10, state.nextIndex);
       if (k === 0) return [];
 
       const result = state.index.search(Array.from(vec), k);
 
-      // Map results to entries, filtering by score and orientation
-      const matches: Array<{ entry: BankEntry, score: number }> = [];
+      // Aggregate scores by entry, applying vector type weights
+      const entryScores = new Map<string, { entry: BankEntry, score: number, matchType: VectorType }>();
 
       for (let i = 0; i < result.labels.length; i++) {
         const embeddingIndex = result.labels[i];
-        const score = result.distances[i];
+        const rawScore = result.distances[i];
 
-        if (embeddingIndex === undefined || score === undefined) continue;
-        if (score < minScore) continue;
+        if (embeddingIndex === undefined || rawScore === undefined) continue;
+        if (rawScore < minScore) continue;
 
-        const entryId = state.queryToEntryId.get(embeddingIndex);
-        if (!entryId) continue;
+        const mapping = state.vectorToEntry.get(embeddingIndex);
+        if (!mapping) continue;
 
-        const entry = state.entries.get(entryId);
+        const entry = state.entries.get(mapping.entryId);
         if (!entry) continue;
 
-        // Check orientation if specified
-        if (orientation) {
-          const matchingQuery = entry.queries.find(
-            q => q.embeddingIndex === embeddingIndex && q.orientation === orientation,
-          );
-          if (!matchingQuery) continue;
+        // Apply weight based on vector type
+        const weightedScore = rawScore * VECTOR_WEIGHTS[mapping.type];
+
+        // Keep best score per entry
+        const existing = entryScores.get(entry.id);
+        if (!existing || weightedScore > existing.score) {
+          entryScores.set(entry.id, { entry, score: weightedScore, matchType: mapping.type });
         }
-
-        // Avoid duplicates
-        if (matches.some(m => m.entry.id === entry.id)) continue;
-
-        matches.push({ entry, score });
       }
 
-      // Sort by score and limit
+      // Convert to array, filter by orientation if specified, sort by score
+      let matches = Array.from(entryScores.values());
+
+      if (orientation) {
+        // Filter by aspect ratio derived from dimensions
+        matches = matches.filter(({ entry }) => {
+          const ratio = entry.width / entry.height;
+          if (orientation === "horizontal") return ratio > 1.1;
+          if (orientation === "vertical") return ratio < 0.9;
+          return ratio >= 0.9 && ratio <= 1.1; // square
+        });
+      }
+
       matches.sort((a, b) => b.score - a.score);
       const limited = matches.slice(0, limit);
 
@@ -145,59 +181,76 @@ export function createImageBankStore(config: BankConfig): ImageBankStore {
         orientation,
         found: limited.length,
         topScore: limited[0]?.score,
+        topMatchType: limited[0]?.matchType,
       });
 
       return limited.map(m => m.entry);
     },
 
-    async store(image: ImageSearchResult, query: string, orientation?: Orientation): Promise<void> {
+    async store(image: ImageSearchResult, query: string): Promise<void> {
       const entryId = `${image.provider}:${image.id}`;
 
-      // Check if this exact query+orientation is already stored for this image
+      // Skip if image already exists (we have full analysis already)
       const existing = state.entries.get(entryId);
       if (existing) {
-        const hasQuery = existing.queries.some(
-          q => q.text === query && q.orientation === orientation,
-        );
-        if (hasQuery) {
-          log.debug("bank_store_skip", { entryId, query, reason: "already_exists" });
-          return;
-        }
-      }
-
-      // Embed the query
-      const vec = await embed(query);
-
-      // Add to FAISS index
-      const embeddingIndex = state.nextIndex++;
-      state.index.add(Array.from(vec));
-      state.queryToEntryId.set(embeddingIndex, entryId);
-
-      if (existing) {
-        // Add new query mapping to existing entry
-        existing.queries.push({ text: query, orientation, embeddingIndex });
-        state.dirty = true;
-        log.debug("bank_store_query", { entryId, query, orientation });
+        log.debug("bank_store_skip", { entryId, reason: "already_analyzed" });
         return;
       }
 
-      // New image - download and upload to S3
       log.debug("bank_store_new", { entryId, query });
 
+      // Download and upload images to S3 first
       const previewKey = `images/${image.provider}/${image.id}/preview.jpg`;
       const displayKey = `images/${image.provider}/${image.id}/display.jpg`;
 
-      // Download images from provider
       const [previewBuffer, displayBuffer] = await Promise.all([
         downloadImage(image.previewUrl),
         downloadImage(image.displayUrl),
       ]);
 
-      // Upload to S3
       await Promise.all([
         s3.uploadBuffer(previewKey, previewBuffer, "image/jpeg"),
         s3.uploadBuffer(displayKey, displayBuffer, "image/jpeg"),
       ]);
+
+      // Analyze image with vision model
+      log.debug("bank_analyze_start", { entryId });
+      const analysis = await analyze(image.displayUrl);
+      log.debug("bank_analyze_complete", { entryId, subjects: analysis.subjects });
+
+      // Create embeddings for caption, query, and expansions
+      const captionVec = await embed(analysis.caption);
+      const queryVec = await embed(query);
+      const expansionVecs = await Promise.all(analysis.expansions.map(t => embed(t)));
+
+      // Add all vectors to FAISS index
+      const captionIndex = state.nextIndex++;
+      state.index.add(Array.from(captionVec));
+      state.vectorToEntry.set(captionIndex, { entryId, type: "caption" });
+
+      const queryIndex = state.nextIndex++;
+      state.index.add(Array.from(queryVec));
+      state.vectorToEntry.set(queryIndex, { entryId, type: "query" });
+
+      const expansionIndices: number[] = [];
+      for (const vec of expansionVecs) {
+        const idx = state.nextIndex++;
+        state.index.add(Array.from(vec));
+        state.vectorToEntry.set(idx, { entryId, type: "expansion" });
+        expansionIndices.push(idx);
+      }
+
+      // Build metadata
+      const metadata: ImageMetadata = {
+        caption: analysis.caption,
+        subjects: analysis.subjects,
+        colors: analysis.colors,
+        style: analysis.style,
+        composition: analysis.composition,
+        lighting: analysis.lighting,
+        mood: analysis.mood,
+        context: analysis.context,
+      };
 
       // Create entry
       const entry: BankEntry = {
@@ -214,14 +267,24 @@ export function createImageBankStore(config: BankConfig): ImageBankStore {
           name: "Unknown",
           sourceUrl: image.displayUrl,
         },
-        queries: [{ text: query, orientation, embeddingIndex }],
+        metadata,
+        vectors: {
+          caption: captionIndex,
+          queries: [queryIndex],
+          expansions: expansionIndices,
+        },
         createdAt: new Date().toISOString(),
       };
 
       state.entries.set(entryId, entry);
       state.dirty = true;
 
-      log.info("bank_store_complete", { entryId, query, orientation });
+      log.info("bank_store_complete", {
+        entryId,
+        caption: analysis.caption.slice(0, 50),
+        expansions: analysis.expansions.length,
+        vectors: 2 + expansionIndices.length,
+      });
     },
 
     getImageUrl(entry: BankEntry, size: "preview" | "display"): string {
@@ -239,7 +302,7 @@ export function createImageBankStore(config: BankConfig): ImageBankStore {
 
       // Save entries
       const data: BankData = {
-        version: 1,
+        version: 2, // v2: added metadata, vectors (multi-vector approach)
         entries: Array.from(state.entries.values()),
       };
       await s3.uploadJson(BANK_DATA_KEY, data);

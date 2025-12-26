@@ -108,7 +108,7 @@ export function createMediaClient(config: MediaClientConfig): MediaClient {
       // Store in bank (async, don't block)
       if (bank && results.length > 0) {
         Promise.all(
-          results.map(r => bank.store(r, options.query, options.orientation)),
+          results.map(r => bank.store(r, options.query)),
         ).then(() => bank.sync()).catch((err) => {
           log.error("bank_store_failed", { error: err instanceof Error ? err.message : String(err) });
         });
@@ -185,7 +185,7 @@ export function createMediaClient(config: MediaClientConfig): MediaClient {
                 // Store in bank (async, don't block)
                 if (bank && results.length > 0) {
                   Promise.all(
-                    results.map(r => bank.store(r, item.searchQuery, item.orientation)),
+                    results.map(r => bank.store(r, item.searchQuery)),
                   ).then(() => bank.sync()).catch((err) => {
                     log.error("bank_store_failed", { error: err instanceof Error ? err.message : String(err) });
                   });

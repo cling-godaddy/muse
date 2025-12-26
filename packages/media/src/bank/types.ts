@@ -9,6 +9,33 @@ export interface QueryMapping {
   embeddingIndex: number
 }
 
+export interface ImageMetadata {
+  // Content understanding
+  caption: string
+  subjects: string[]
+
+  // Visual properties
+  colors: {
+    dominant: string[]
+    mood: "warm" | "cool" | "neutral"
+  }
+
+  // Composition
+  style: string[]
+  composition: "centered" | "rule-of-thirds" | "symmetrical" | "asymmetrical" | "other"
+  lighting: "natural" | "studio" | "dramatic" | "soft" | "mixed"
+
+  // Semantic
+  mood: string[]
+  context: string[]
+}
+
+export interface VectorIndices {
+  caption: number // Primary: what image actually shows
+  queries: number[] // Original search queries
+  expansions: number[] // LLM-generated related terms
+}
+
 export interface BankEntry {
   id: string // "unsplash:abc123"
   provider: string
@@ -20,11 +47,28 @@ export interface BankEntry {
   previewKey: string // S3 key for preview image
   displayKey: string // S3 key for display image
   attribution: Attribution
-  queries: QueryMapping[]
+  metadata: ImageMetadata
+  vectors: VectorIndices
   createdAt: string
 }
 
+export interface ImageAnalysis {
+  caption: string
+  subjects: string[]
+  colors: {
+    dominant: string[]
+    mood: "warm" | "cool" | "neutral"
+  }
+  style: string[]
+  composition: "centered" | "rule-of-thirds" | "symmetrical" | "asymmetrical" | "other"
+  lighting: "natural" | "studio" | "dramatic" | "soft" | "mixed"
+  mood: string[]
+  context: string[]
+  expansions: string[]
+}
+
 export type EmbedFn = (text: string) => Promise<Float32Array>;
+export type AnalyzeFn = (imageUrl: string) => Promise<ImageAnalysis>;
 
 export interface BankConfig {
   bucket: string
@@ -32,6 +76,7 @@ export interface BankConfig {
   prefix?: string // S3 key prefix, e.g., "media/"
   minScore?: number // similarity threshold (default 0.85)
   embed: EmbedFn // embedding function (injected to avoid circular dep)
+  analyze: AnalyzeFn // vision analysis function
   logger?: Logger
 }
 
