@@ -27,6 +27,7 @@ export interface AgentInput {
   brief?: BrandBrief
   structure?: PageStructure
   context?: Record<string, unknown>
+  retryFeedback?: string
 }
 
 export interface AgentConfig {

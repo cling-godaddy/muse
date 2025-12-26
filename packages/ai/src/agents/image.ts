@@ -1,5 +1,8 @@
+import { createLogger } from "@muse/logger";
 import type { Provider } from "../types";
 import type { AgentInput, SyncAgent, PageStructure, BrandBrief, ImagePlan } from "./types";
+
+const log = createLogger().child({ agent: "image" });
 
 function buildPlanningPrompt(brief: BrandBrief, structure: PageStructure): string {
   return `You are an image curator for landing pages. Given a brand brief and page structure, plan which blocks need images and what to search for.
@@ -50,11 +53,17 @@ export const imageAgent: SyncAgent = {
       return "[]";
     }
 
+    const messages = [
+      { role: "system" as const, content: buildPlanningPrompt(input.brief, input.structure) },
+      { role: "user" as const, content: `Plan images for a page about: ${input.prompt}` },
+    ];
+    if (input.retryFeedback) {
+      messages.push({ role: "user" as const, content: input.retryFeedback });
+    }
+
     const response = await provider.chat({
-      messages: [
-        { role: "system", content: buildPlanningPrompt(input.brief, input.structure) },
-        { role: "user", content: `Plan images for a page about: ${input.prompt}` },
-      ],
+      messages,
+      jsonMode: true,
     });
 
     return response.content;
@@ -74,7 +83,12 @@ export function parseImagePlan(json: string): ImagePlan[] {
       && typeof item.orientation === "string",
     );
   }
-  catch {
+  catch (err) {
+    log.warn("parse_failed", {
+      error: String(err),
+      input: json.slice(0, 500),
+      usingDefaults: true,
+    });
     return [];
   }
 }

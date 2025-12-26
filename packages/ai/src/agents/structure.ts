@@ -100,11 +100,17 @@ export const structureAgent: SyncAgent = {
 `
       : "";
 
+    const messages = [
+      { role: "system" as const, content: systemPrompt },
+      { role: "user" as const, content: `${briefContext}\nUser Request: ${input.prompt}` },
+    ];
+    if (input.retryFeedback) {
+      messages.push({ role: "user" as const, content: input.retryFeedback });
+    }
+
     const response = await provider.chat({
-      messages: [
-        { role: "system", content: systemPrompt },
-        { role: "user", content: `${briefContext}\nUser Request: ${input.prompt}` },
-      ],
+      messages,
+      jsonMode: true,
     });
 
     log.debug("llm_response", { content: response.content });

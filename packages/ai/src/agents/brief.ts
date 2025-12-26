@@ -1,5 +1,8 @@
+import { createLogger } from "@muse/logger";
 import type { Provider } from "../types";
 import type { AgentInput, BrandBrief, SyncAgent } from "./types";
+
+const log = createLogger().child({ agent: "brief" });
 
 export const briefSystemPrompt = `You are a brand analyst. Extract a concise brand brief from the user's request.
 
@@ -27,11 +30,17 @@ export const briefAgent: SyncAgent = {
   },
 
   async run(input: AgentInput, provider: Provider): Promise<string> {
+    const messages = [
+      { role: "system" as const, content: briefSystemPrompt },
+      { role: "user" as const, content: input.prompt },
+    ];
+    if (input.retryFeedback) {
+      messages.push({ role: "user" as const, content: input.retryFeedback });
+    }
+
     const response = await provider.chat({
-      messages: [
-        { role: "system", content: briefSystemPrompt },
-        { role: "user", content: input.prompt },
-      ],
+      messages,
+      jsonMode: true,
     });
 
     return response.content;
@@ -49,7 +58,12 @@ export function parseBrief(json: string): BrandBrief {
       constraints: parsed.constraints ?? [],
     };
   }
-  catch {
+  catch (err) {
+    log.warn("parse_failed", {
+      error: String(err),
+      input: json.slice(0, 500),
+      usingDefaults: true,
+    });
     return {
       targetAudience: "general audience",
       brandVoice: ["professional", "friendly"],

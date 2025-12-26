@@ -1,6 +1,9 @@
 import { generatePaletteTypographyPrompt } from "@muse/themes";
+import { createLogger } from "@muse/logger";
 import type { Provider } from "../types";
 import type { AgentInput, SyncAgent } from "./types";
+
+const log = createLogger().child({ agent: "theme" });
 
 export interface ThemeSelection {
   palette: string
@@ -31,11 +34,17 @@ export const themeAgent: SyncAgent = {
 `
       : "";
 
+    const messages = [
+      { role: "system" as const, content: themeSystemPrompt() },
+      { role: "user" as const, content: `${briefContext}\nUser Request: ${input.prompt}` },
+    ];
+    if (input.retryFeedback) {
+      messages.push({ role: "user" as const, content: input.retryFeedback });
+    }
+
     const response = await provider.chat({
-      messages: [
-        { role: "system", content: themeSystemPrompt() },
-        { role: "user", content: `${briefContext}\nUser Request: ${input.prompt}` },
-      ],
+      messages,
+      jsonMode: true,
     });
 
     return response.content.trim();
@@ -50,7 +59,12 @@ export function parseThemeSelection(json: string): ThemeSelection {
       typography: parsed.typography || "inter",
     };
   }
-  catch {
+  catch (err) {
+    log.warn("parse_failed", {
+      error: String(err),
+      input: json.slice(0, 500),
+      usingDefaults: true,
+    });
     return { palette: "slate", typography: "inter" };
   }
 }

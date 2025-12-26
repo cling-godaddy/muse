@@ -6,6 +6,9 @@ export { createAnthropicProvider } from "./providers/anthropic";
 
 export { calculateCost, MODEL_PRICING } from "./pricing";
 
+export { runWithRetry } from "./retry";
+export type { RetryOptions, RetryResult } from "./retry";
+
 export {
   orchestrate,
   briefAgent,
