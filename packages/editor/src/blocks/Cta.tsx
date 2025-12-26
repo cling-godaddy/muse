@@ -1,6 +1,6 @@
 import { useEffect, useRef } from "react";
 import type { CtaBlock as CtaBlockType } from "@muse/core";
-import styles from "./CtaBlock.module.css";
+import styles from "./Cta.module.css";
 
 interface Props {
   block: CtaBlockType
@@ -20,7 +20,7 @@ function useAutoResize(value: string) {
   return ref;
 }
 
-export function CtaBlock({ block, onUpdate }: Props) {
+export function Cta({ block, onUpdate }: Props) {
   const variant = block.variant ?? "primary";
   const headlineRef = useAutoResize(block.headline);
   const variantClass = variant === "primary" ? styles.primary : styles.secondary;

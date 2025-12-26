@@ -5,7 +5,7 @@ interface Props {
   onUpdate: (data: Partial<ContactBlockType>) => void
 }
 
-export function ContactBlock({ block, onUpdate }: Props) {
+export function Contact({ block, onUpdate }: Props) {
   return (
     <div className="muse-block-contact">
       {block.headline !== undefined && (

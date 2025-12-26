@@ -1,6 +1,6 @@
 import { useEffect, useRef } from "react";
 import type { FeaturesBlock as FeaturesBlockType, FeatureItem } from "@muse/core";
-import styles from "./FeaturesBlock.module.css";
+import styles from "./Features.module.css";
 
 interface Props {
   block: FeaturesBlockType
@@ -20,7 +20,7 @@ function useAutoResize(value: string) {
   return ref;
 }
 
-export function FeaturesBlock({ block, onUpdate }: Props) {
+export function Features({ block, onUpdate }: Props) {
   const headlineRef = useAutoResize(block.headline ?? "");
 
   const updateItem = (index: number, data: Partial<FeatureItem>) => {

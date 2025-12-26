@@ -5,7 +5,7 @@ interface Props {
   onUpdate: (data: Partial<ImageBlockType>) => void
 }
 
-export function ImageBlock({ block, onUpdate }: Props) {
+export function Image({ block, onUpdate }: Props) {
   const size = block.size ?? "medium";
 
   return (

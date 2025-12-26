@@ -1,6 +1,6 @@
 import { useEffect, useRef } from "react";
 import type { HeroBlock as HeroBlockType } from "@muse/core";
-import styles from "./HeroBlock.module.css";
+import styles from "./Hero.module.css";
 
 interface Props {
   block: HeroBlockType
@@ -20,7 +20,7 @@ function useAutoResize(value: string) {
   return ref;
 }
 
-export function HeroBlock({ block, onUpdate }: Props) {
+export function Hero({ block, onUpdate }: Props) {
   const alignment = block.alignment ?? "center";
   const headlineRef = useAutoResize(block.headline);
   const subheadlineRef = useAutoResize(block.subheadline ?? "");

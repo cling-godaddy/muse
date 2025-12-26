@@ -5,7 +5,7 @@ interface Props {
   onUpdate: (data: Partial<GalleryBlockType>) => void
 }
 
-export function GalleryBlock({ block, onUpdate }: Props) {
+export function Gallery({ block, onUpdate }: Props) {
   const columns = block.columns ?? 3;
 
   return (

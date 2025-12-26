@@ -5,7 +5,7 @@ interface Props {
   onUpdate: (data: Partial<FaqBlockType>) => void
 }
 
-export function FaqBlock({ block, onUpdate }: Props) {
+export function Faq({ block, onUpdate }: Props) {
   const updateItem = (index: number, data: Partial<FaqItem>) => {
     const items = block.items.map((item, i) =>
       i === index ? { ...item, ...data } : item,

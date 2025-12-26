@@ -1,13 +1,14 @@
 import type { TestimonialsBlock as TestimonialsBlockType } from "@muse/core";
 import { getDefaultPreset } from "@muse/core";
-import { Single, Grid } from "./testimonials";
+import { Single } from "./Single";
+import { Grid } from "./Grid";
 
 interface Props {
   block: TestimonialsBlockType
   onUpdate: (data: Partial<TestimonialsBlockType>) => void
 }
 
-export function TestimonialsBlock({ block, onUpdate }: Props) {
+export function Testimonials({ block, onUpdate }: Props) {
   const preset = block.preset ?? getDefaultPreset("testimonials");
 
   switch (preset) {

@@ -5,7 +5,7 @@ interface Props {
   onUpdate: (data: Partial<TextBlockType>) => void
 }
 
-export function TextBlock({ block, onUpdate }: Props) {
+export function Text({ block, onUpdate }: Props) {
   return (
     <div className="muse-block-text">
       <textarea

@@ -5,7 +5,7 @@ interface Props {
   onUpdate: (data: Partial<PricingBlockType>) => void
 }
 
-export function PricingBlock({ block, onUpdate }: Props) {
+export function Pricing({ block, onUpdate }: Props) {
   const updatePlan = (index: number, data: Partial<PricingPlan>) => {
     const plans = block.plans.map((p, i) =>
       i === index ? { ...p, ...data } : p,

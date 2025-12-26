@@ -1,5 +1,5 @@
 import type { Block } from "@muse/core";
-import { BlockWrapper } from "./blocks/components/BlockWrapper";
+import { BlockWrapper } from "./blocks/BlockWrapper";
 
 interface BlockEditorProps {
   blocks: Block[]
