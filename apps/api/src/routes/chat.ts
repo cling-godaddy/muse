@@ -1,6 +1,6 @@
 import { Hono } from "hono";
 import { streamText } from "hono/streaming";
-import { createClient, orchestrate, type Message, type Provider } from "@muse/ai";
+import { createClient, createImageAnalyzer, orchestrate, type Message, type Provider } from "@muse/ai";
 import { embed } from "@muse/ai/rag";
 import { createLogger } from "@muse/logger";
 import { createMediaClient, createImageBank, type MediaClient, type ImageBank } from "@muse/media";
@@ -28,16 +28,25 @@ async function getImageBank(): Promise<ImageBank | null> {
 
   const bucket = process.env.S3_BUCKET;
   const region = process.env.AWS_REGION;
+  const openaiKey = process.env.OPENAI_API_KEY;
 
   if (!bucket || !region) {
     logger.debug("bank_disabled", { reason: "S3_BUCKET or AWS_REGION not set" });
     return null;
   }
 
+  if (!openaiKey) {
+    logger.debug("bank_disabled", { reason: "OPENAI_API_KEY not set (needed for vision analysis)" });
+    return null;
+  }
+
+  const analyze = createImageAnalyzer(openaiKey);
+
   imageBankPromise = createImageBank({
     bucket,
     region,
     embed,
+    analyze,
     logger: logger.child({ agent: "bank" }),
   }).then((bank) => {
     imageBank = bank;
