@@ -1,12 +1,12 @@
 import type { GalleryBlock as GalleryBlockType } from "@muse/core";
-import styles from "./Gallery.module.css";
+import styles from "./Grid.module.css";
 
 interface Props {
   block: GalleryBlockType
   onUpdate: (data: Partial<GalleryBlockType>) => void
 }
 
-export function Gallery({ block, onUpdate }: Props) {
+export function Grid({ block, onUpdate }: Props) {
   const columns = block.columns ?? 3;
 
   return (
