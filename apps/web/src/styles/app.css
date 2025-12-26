@@ -341,4 +341,159 @@ html, body, #root {
   .muse-block-cta--secondary .muse-block-cta-variant {
     color: var(--muse-theme-text-muted, #64748b);
   }
+
+  /* Testimonials Block - Single */
+  .muse-block-testimonials-single {
+    @apply py-16 px-6;
+    background: var(--muse-theme-bg-alt, #f8fafc);
+    border-radius: var(--muse-theme-radius-lg, 1rem);
+  }
+  .muse-block-testimonials-single-header {
+    @apply mx-auto max-w-2xl text-center mb-8;
+  }
+  .muse-block-testimonials-single-headline {
+    font-family: var(--muse-theme-heading-font, inherit);
+    font-weight: var(--muse-theme-heading-weight, 700);
+    font-size: clamp(1.25rem, 4vw, 1.75rem);
+    color: var(--muse-theme-text, #0f172a);
+    background: transparent;
+    border: 1px dashed transparent;
+    padding: 0.5rem;
+    width: 100%;
+    text-align: center;
+  }
+  .muse-block-testimonials-single-headline:focus {
+    border-color: var(--muse-theme-primary, #6366f1);
+    outline: none;
+  }
+  .muse-block-testimonials-single-card {
+    @apply mx-auto max-w-3xl p-8 sm:p-12;
+    background: var(--muse-theme-bg, white);
+    border-radius: var(--muse-theme-radius-lg, 1rem);
+    box-shadow: var(--muse-theme-shadow-card, 0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -2px rgba(0,0,0,0.1));
+  }
+  .muse-block-testimonials-single-icon {
+    @apply h-8 w-8 mb-6;
+    color: var(--muse-theme-text-muted, #9ca3af);
+  }
+  .muse-block-testimonials-single-quote {
+    font-family: var(--muse-theme-body-font, inherit);
+    @apply w-full text-xl sm:text-2xl font-medium leading-relaxed;
+    color: var(--muse-theme-text, #0f172a);
+    background: transparent;
+    border: 1px dashed transparent;
+    resize: none;
+  }
+  .muse-block-testimonials-single-quote:focus {
+    border-color: var(--muse-theme-primary, #6366f1);
+    outline: none;
+  }
+  .muse-block-testimonials-single-author {
+    @apply mt-8 flex items-center gap-x-4;
+  }
+  .muse-block-testimonials-single-avatar {
+    @apply h-12 w-12 rounded-full flex items-center justify-center text-white font-semibold text-lg;
+    background: var(--muse-theme-primary, #6366f1);
+  }
+  .muse-block-testimonials-single-name {
+    font-family: var(--muse-theme-body-font, inherit);
+    @apply block font-semibold;
+    color: var(--muse-theme-text, #0f172a);
+    background: transparent;
+    border: 1px dashed transparent;
+  }
+  .muse-block-testimonials-single-name:focus {
+    border-color: var(--muse-theme-primary, #6366f1);
+    outline: none;
+  }
+  .muse-block-testimonials-single-role {
+    font-family: var(--muse-theme-body-font, inherit);
+    @apply block text-sm;
+    color: #52525b;
+    background: transparent;
+    border: 1px dashed transparent;
+  }
+  .muse-block-testimonials-single-role:focus {
+    border-color: var(--muse-theme-primary, #6366f1);
+    outline: none;
+  }
+
+  /* Testimonials Block - Grid */
+  .muse-block-testimonials-grid {
+    @apply py-16 px-6 overflow-hidden;
+    background: var(--muse-theme-bg, white);
+    border-radius: var(--muse-theme-radius-lg, 1rem);
+  }
+  .muse-block-testimonials-grid-header {
+    @apply mx-auto max-w-2xl text-center mb-12;
+  }
+  .muse-block-testimonials-grid-headline {
+    font-family: var(--muse-theme-heading-font, inherit);
+    font-weight: var(--muse-theme-heading-weight, 700);
+    font-size: clamp(1.25rem, 4vw, 1.75rem);
+    color: var(--muse-theme-text, #0f172a);
+    background: transparent;
+    border: 1px dashed transparent;
+    padding: 0.5rem;
+    width: 100%;
+    text-align: center;
+  }
+  .muse-block-testimonials-grid-headline:focus {
+    border-color: var(--muse-theme-primary, #6366f1);
+    outline: none;
+  }
+  .muse-block-testimonials-grid-container {
+    @apply mx-auto w-full grid grid-cols-1 gap-6;
+  }
+  @media (min-width: 768px) {
+    .muse-block-testimonials-grid-container { grid-template-columns: repeat(2, 1fr); }
+  }
+  .muse-block-testimonials-grid-card {
+    @apply p-6 min-w-0;
+    background: var(--muse-theme-bg-alt, #f8fafc);
+    border-radius: var(--muse-theme-radius-lg, 1rem);
+    box-shadow: var(--muse-theme-shadow-card, 0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -2px rgba(0,0,0,0.1));
+  }
+  .muse-block-testimonials-grid-quote {
+    font-family: var(--muse-theme-body-font, inherit);
+    @apply w-full leading-relaxed break-words;
+    color: var(--muse-theme-text, #0f172a);
+    background: transparent;
+    border: 1px dashed transparent;
+    resize: none;
+  }
+  .muse-block-testimonials-grid-quote:focus {
+    border-color: var(--muse-theme-primary, #6366f1);
+    outline: none;
+  }
+  .muse-block-testimonials-grid-author {
+    @apply mt-6 flex items-center gap-x-4;
+  }
+  .muse-block-testimonials-grid-avatar {
+    @apply h-10 w-10 shrink-0 rounded-full flex items-center justify-center text-sm font-medium;
+    background: var(--muse-theme-bg-muted, #e5e7eb);
+    color: var(--muse-theme-text-muted, #64748b);
+  }
+  .muse-block-testimonials-grid-name {
+    font-family: var(--muse-theme-body-font, inherit);
+    @apply block font-semibold text-sm;
+    color: var(--muse-theme-text, #0f172a);
+    background: transparent;
+    border: 1px dashed transparent;
+  }
+  .muse-block-testimonials-grid-name:focus {
+    border-color: var(--muse-theme-primary, #6366f1);
+    outline: none;
+  }
+  .muse-block-testimonials-grid-role {
+    font-family: var(--muse-theme-body-font, inherit);
+    @apply block text-sm;
+    color: #52525b;
+    background: transparent;
+    border: 1px dashed transparent;
+  }
+  .muse-block-testimonials-grid-role:focus {
+    border-color: var(--muse-theme-primary, #6366f1);
+    outline: none;
+  }
 }
