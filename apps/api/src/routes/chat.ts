@@ -1,12 +1,15 @@
 import { Hono } from "hono";
 import { streamText } from "hono/streaming";
 import { createClient, orchestrate, type Message, type Provider } from "@muse/ai";
+import { embed } from "@muse/ai/rag";
 import { createLogger } from "@muse/logger";
-import { createMediaClient, type MediaClient } from "@muse/media";
+import { createMediaClient, createImageBank, type MediaClient, type ImageBank } from "@muse/media";
 
 const logger = createLogger();
 let client: Provider | null = null;
 let mediaClient: MediaClient | null = null;
+let imageBank: ImageBank | null = null;
+let imageBankPromise: Promise<ImageBank | null> | null = null;
 
 function getClient(): Provider {
   if (!client) {
@@ -19,9 +22,35 @@ function getClient(): Provider {
   return client;
 }
 
-function getMediaClient(): MediaClient | null {
-  if (mediaClient) return mediaClient;
+async function getImageBank(): Promise<ImageBank | null> {
+  if (imageBank) return imageBank;
+  if (imageBankPromise) return imageBankPromise;
 
+  const bucket = process.env.S3_BUCKET;
+  const region = process.env.AWS_REGION;
+
+  if (!bucket || !region) {
+    logger.debug("bank_disabled", { reason: "S3_BUCKET or AWS_REGION not set" });
+    return null;
+  }
+
+  imageBankPromise = createImageBank({
+    bucket,
+    region,
+    embed,
+    logger: logger.child({ agent: "bank" }),
+  }).then((bank) => {
+    imageBank = bank;
+    return bank;
+  }).catch((err) => {
+    logger.error("bank_init_failed", { error: err instanceof Error ? err.message : String(err) });
+    return null;
+  });
+
+  return imageBankPromise;
+}
+
+async function getMediaClient(): Promise<MediaClient | null> {
   const unsplashKey = process.env.UNSPLASH_ACCESS_KEY;
   const pexelsKey = process.env.PEXELS_API_KEY;
 
@@ -29,9 +58,15 @@ function getMediaClient(): MediaClient | null {
     return null;
   }
 
+  const bank = await getImageBank();
+
+  // Recreate client if bank became available
+  if (mediaClient && !bank) return mediaClient;
+
   mediaClient = createMediaClient({
     unsplashKey,
     pexelsKey,
+    bank: bank ?? undefined,
     logger: logger.child({ agent: "media" }),
   });
 
@@ -46,7 +81,7 @@ chatRoute.post("/", async (c) => {
     stream?: boolean
   }>();
 
-  const config = { mediaClient: getMediaClient() ?? undefined, logger };
+  const config = { mediaClient: (await getMediaClient()) ?? undefined, logger };
 
   if (stream) {
     return streamText(c, async (textStream) => {

@@ -1,5 +1,6 @@
 import type { Logger } from "@muse/logger";
 import type { MediaClient, MediaProvider, ImagePlan, ImageSelection, ImageSearchOptions, ImageSearchResult, ExecutePlanOptions } from "./types";
+import type { ImageBank } from "./bank";
 import { createUnsplashProvider } from "./unsplash";
 import { createPexelsProvider } from "./pexels";
 
@@ -8,6 +9,7 @@ export interface MediaClientConfig {
   pexelsKey?: string
   cacheTtlMs?: number
   logger?: Logger
+  bank?: ImageBank
 }
 
 const noopLogger: Logger = {
@@ -30,6 +32,7 @@ export function createMediaClient(config: MediaClientConfig): MediaClient {
   const cache = new Map<string, CacheEntry>();
   const cacheTtl = config.cacheTtlMs ?? DEFAULT_CACHE_TTL;
   const log = config.logger ?? noopLogger;
+  const bank = config.bank;
 
   function getCacheKey(provider: string, query: string, orientation?: string): string {
     return `${provider}:${query}:${orientation ?? "any"}`;
@@ -66,12 +69,25 @@ export function createMediaClient(config: MediaClientConfig): MediaClient {
 
   return {
     async search(options: ImageSearchOptions) {
+      // Check bank first (semantic search)
+      if (bank) {
+        const bankResults = await bank.search(options.query, {
+          orientation: options.orientation,
+          limit: options.count,
+        });
+        if (bankResults.length > 0) {
+          log.debug("bank_hit", { query: options.query, count: bankResults.length });
+          return bankResults;
+        }
+      }
+
       const provider = providers.get(options.provider);
       if (!provider) {
         log.warn("provider_not_configured", { provider: options.provider });
         return [];
       }
 
+      // Check in-memory cache
       const cacheKey = getCacheKey(options.provider, options.query, options.orientation);
       const cached = getCached(cacheKey);
       if (cached) {
@@ -79,6 +95,7 @@ export function createMediaClient(config: MediaClientConfig): MediaClient {
         return cached.slice(0, options.count);
       }
 
+      // Fetch from provider
       log.debug("search", { provider: options.provider, query: options.query, orientation: options.orientation });
       const results = await provider.search(options.query, {
         orientation: options.orientation,
@@ -87,6 +104,16 @@ export function createMediaClient(config: MediaClientConfig): MediaClient {
       log.debug("search_results", { provider: options.provider, query: options.query, count: results.length });
 
       setCache(cacheKey, results);
+
+      // Store in bank (async, don't block)
+      if (bank && results.length > 0) {
+        Promise.all(
+          results.map(r => bank.store(r, options.query, options.orientation)),
+        ).then(() => bank.sync()).catch((err) => {
+          log.error("bank_store_failed", { error: err instanceof Error ? err.message : String(err) });
+        });
+      }
+
       return results;
     },
 
@@ -111,33 +138,59 @@ export function createMediaClient(config: MediaClientConfig): MediaClient {
         let blockSelections: ImageSelection[] = [];
 
         for (const item of blockPlan) {
-          let providerName: string = item.provider;
-          let activeProvider = providers.get(item.provider);
-
-          if (!activeProvider) {
-            const fallbackEntry = providers.entries().next().value as [string, MediaProvider] | undefined;
-            if (!fallbackEntry) continue;
-
-            log.warn("provider_fallback", { requested: item.provider, fallback: fallbackEntry[0], blockId: item.blockId });
-            providerName = fallbackEntry[0];
-            activeProvider = fallbackEntry[1];
-          }
-
           try {
-            const cacheKey = getCacheKey(providerName, item.searchQuery, item.orientation);
-            let results = getCached(cacheKey);
+            let results: ImageSearchResult[] = [];
 
-            if (!results) {
-              log.debug("search", { provider: providerName, query: item.searchQuery, blockId: item.blockId });
-              results = await activeProvider.search(item.searchQuery, {
+            // Check bank first (semantic search)
+            if (bank) {
+              results = await bank.search(item.searchQuery, {
                 orientation: item.orientation,
-                count: resultsPerQuery,
+                limit: resultsPerQuery,
               });
-              log.debug("search_results", { provider: providerName, query: item.searchQuery, count: results.length });
-              setCache(cacheKey, results);
+              if (results.length > 0) {
+                log.debug("bank_hit", { query: item.searchQuery, blockId: item.blockId, count: results.length });
+              }
             }
-            else {
-              log.debug("cache_hit", { provider: providerName, query: item.searchQuery, blockId: item.blockId });
+
+            // Fall back to provider if bank miss
+            if (results.length === 0) {
+              let providerName: string = item.provider;
+              let activeProvider = providers.get(item.provider);
+
+              if (!activeProvider) {
+                const fallbackEntry = providers.entries().next().value as [string, MediaProvider] | undefined;
+                if (!fallbackEntry) continue;
+
+                log.warn("provider_fallback", { requested: item.provider, fallback: fallbackEntry[0], blockId: item.blockId });
+                providerName = fallbackEntry[0];
+                activeProvider = fallbackEntry[1];
+              }
+
+              const cacheKey = getCacheKey(providerName, item.searchQuery, item.orientation);
+              const cached = getCached(cacheKey);
+
+              if (cached) {
+                results = cached;
+                log.debug("cache_hit", { provider: providerName, query: item.searchQuery, blockId: item.blockId });
+              }
+              else {
+                log.debug("search", { provider: providerName, query: item.searchQuery, blockId: item.blockId });
+                results = await activeProvider.search(item.searchQuery, {
+                  orientation: item.orientation,
+                  count: resultsPerQuery,
+                });
+                log.debug("search_results", { provider: providerName, query: item.searchQuery, count: results.length });
+                setCache(cacheKey, results);
+
+                // Store in bank (async, don't block)
+                if (bank && results.length > 0) {
+                  Promise.all(
+                    results.map(r => bank.store(r, item.searchQuery, item.orientation)),
+                  ).then(() => bank.sync()).catch((err) => {
+                    log.error("bank_store_failed", { error: err instanceof Error ? err.message : String(err) });
+                  });
+                }
+              }
             }
 
             // Add all results up to what we need

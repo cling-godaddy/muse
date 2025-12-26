@@ -1,5 +1,11 @@
 import type { ImageSource } from "@muse/core";
 
+export interface ImageAttribution {
+  name: string
+  url?: string
+  sourceUrl: string
+}
+
 export interface ImageSearchResult {
   id: string
   title: string
@@ -9,6 +15,7 @@ export interface ImageSearchResult {
   width: number
   height: number
   provider: string
+  attribution?: ImageAttribution
 }
 
 export interface ImageSearchOptions {

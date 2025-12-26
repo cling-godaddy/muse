@@ -17,6 +17,7 @@ interface PexelsPhoto {
     tiny: string
   }
   photographer: string
+  photographer_url: string
 }
 
 interface PexelsSearchResponse {
@@ -62,6 +63,11 @@ export function createPexelsProvider(apiKey: string): MediaProvider {
         width: photo.width,
         height: photo.height,
         provider: "pexels",
+        attribution: {
+          name: photo.photographer,
+          url: photo.photographer_url,
+          sourceUrl: photo.url,
+        },
       }));
     },
   };

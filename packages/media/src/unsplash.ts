@@ -15,6 +15,12 @@ interface UnsplashPhoto {
   height: number
   user: {
     name: string
+    links: {
+      html: string
+    }
+  }
+  links: {
+    html: string
   }
 }
 
@@ -61,6 +67,11 @@ export function createUnsplashProvider(accessKey: string): MediaProvider {
         width: photo.width,
         height: photo.height,
         provider: "unsplash",
+        attribution: {
+          name: photo.user.name,
+          url: photo.user.links.html,
+          sourceUrl: photo.links.html,
+        },
       }));
     },
   };
