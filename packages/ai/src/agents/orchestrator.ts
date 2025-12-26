@@ -2,12 +2,54 @@ import type { MediaClient, ImageSelection } from "@muse/media";
 import { createLogger, type Logger } from "@muse/logger";
 import { getMinimumImages } from "@muse/core";
 import type { Message, Provider } from "../types";
+import { runWithRetry } from "../retry";
 import { briefAgent, briefSystemPrompt, parseBrief } from "./brief";
 import { structureAgent, parseStructure } from "./structure";
 import { themeAgent, themeSystemPrompt, parseThemeSelection, type ThemeSelection } from "./theme";
 import { imageAgent, parseImagePlan } from "./image";
 import { copyAgent } from "./copy";
 import type { BrandBrief, PageStructure } from "./types";
+
+// Strict parsers that throw on failure (for retry logic)
+function parseBriefStrict(json: string): BrandBrief {
+  const cleaned = json.replace(/^```(?:json)?\s*\n?/gm, "").replace(/\n?```\s*$/gm, "").trim();
+  const parsed = JSON.parse(cleaned);
+  if (!parsed.targetAudience || !Array.isArray(parsed.brandVoice)) {
+    throw new Error("Missing required fields: targetAudience or brandVoice");
+  }
+  return {
+    targetAudience: parsed.targetAudience,
+    brandVoice: parsed.brandVoice,
+    colorDirection: parsed.colorDirection ?? "modern, neutral palette",
+    imageryStyle: parsed.imageryStyle ?? "clean, professional imagery",
+    constraints: parsed.constraints ?? [],
+  };
+}
+
+function parseStructureStrict(json: string): PageStructure {
+  const cleaned = json.replace(/^```(?:json)?\s*\n?/gm, "").replace(/\n?```\s*$/gm, "").trim();
+  const parsed = JSON.parse(cleaned);
+  if (!Array.isArray(parsed.blocks) || parsed.blocks.length === 0) {
+    throw new Error("Invalid structure: blocks must be a non-empty array");
+  }
+  return {
+    blocks: parsed.blocks.map((b: { id?: string, type?: string, preset?: string, purpose?: string }, i: number) => ({
+      id: b.id ?? `block-${i + 1}`,
+      type: b.type ?? "text",
+      preset: b.preset,
+      purpose: b.purpose ?? "",
+    })),
+  };
+}
+
+function parseThemeStrict(json: string): ThemeSelection {
+  const cleaned = json.replace(/^```(?:json)?\s*\n?/gm, "").replace(/\n?```\s*$/gm, "").trim();
+  const parsed = JSON.parse(cleaned);
+  if (!parsed.palette || !parsed.typography) {
+    throw new Error("Missing required fields: palette or typography");
+  }
+  return { palette: parsed.palette, typography: parsed.typography };
+}
 
 export interface OrchestratorInput {
   messages: Message[]
@@ -45,13 +87,13 @@ export async function* orchestrate(
   briefLog.debug("system_prompt", { prompt: briefSystemPrompt });
   briefLog.debug("user_input", { prompt });
 
-  const briefJson = await briefAgent.run({ prompt }, provider);
-  briefLog.debug("raw_response", { response: briefJson });
+  const briefResult = await runWithRetry(briefAgent, { prompt }, provider, parseBriefStrict);
+  const brief = briefResult.data ?? parseBrief(briefResult.raw);
+  briefLog.debug("raw_response", { response: briefResult.raw, attempts: briefResult.attempts });
 
-  const brief = parseBrief(briefJson);
   events?.onBrief?.(brief);
   const briefDuration = Date.now() - briefStart;
-  briefLog.info("complete", { duration: briefDuration, brief });
+  briefLog.info("complete", { duration: briefDuration, brief, retried: briefResult.attempts > 1 });
   yield `[AGENT:brief:complete]${JSON.stringify({
     summary: `${brief.targetAudience}, ${brief.brandVoice.join(", ")} tone`,
     duration: briefDuration,
@@ -70,20 +112,21 @@ export async function* orchestrate(
   const [structureResult, themeResult] = await Promise.all([
     (async () => {
       const start = Date.now();
-      const json = await structureAgent.run({ prompt, brief }, provider);
-      structureLog.debug("raw_response", { response: json });
-      return { json, duration: Date.now() - start };
+      const result = await runWithRetry(structureAgent, { prompt, brief }, provider, parseStructureStrict);
+      const structure = result.data ?? parseStructure(result.raw);
+      structureLog.debug("raw_response", { response: result.raw, attempts: result.attempts });
+      return { structure, duration: Date.now() - start, retried: result.attempts > 1 };
     })(),
     (async () => {
       const start = Date.now();
-      const result = await themeAgent.run({ prompt, brief }, provider);
-      themeLog.debug("raw_response", { response: result });
-      const selection = parseThemeSelection(result);
-      return { selection, duration: Date.now() - start };
+      const result = await runWithRetry(themeAgent, { prompt, brief }, provider, parseThemeStrict);
+      const selection = result.data ?? parseThemeSelection(result.raw);
+      themeLog.debug("raw_response", { response: result.raw, attempts: result.attempts });
+      return { selection, duration: Date.now() - start, retried: result.attempts > 1 };
     })(),
   ]);
 
-  const structure = parseStructure(structureResult.json);
+  const structure = structureResult.structure;
   events?.onStructure?.(structure);
   events?.onTheme?.(themeResult.selection);
 
