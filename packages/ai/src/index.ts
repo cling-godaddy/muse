@@ -1,6 +1,9 @@
 export { createClient } from "./client";
 export type { ClientConfig } from "./client";
 
+export { createImageAnalyzer } from "./vision";
+export type { ImageAnalysis } from "./vision";
+
 export { createOpenAIProvider } from "./providers/openai";
 export { createAnthropicProvider } from "./providers/anthropic";
 
