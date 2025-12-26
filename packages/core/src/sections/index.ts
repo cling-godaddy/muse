@@ -40,6 +40,16 @@ export const DEFAULT_PRESETS: Record<SectionType, string> = {
   cta: "cta-centered",
 };
 
+export const GALLERY_IMAGE_MINIMUMS: Record<string, number> = {
+  "gallery-masonry": 9,
+  "gallery-grid": 6,
+  "gallery-carousel": 5,
+};
+
+export function getMinimumImages(preset: string): number {
+  return GALLERY_IMAGE_MINIMUMS[preset] ?? 1;
+}
+
 export function getPreset(id: string): SectionPreset | undefined {
   return allPresets[id];
 }

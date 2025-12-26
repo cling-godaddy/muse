@@ -1,8 +1,9 @@
 import type { MediaClient, ImageSelection } from "@muse/media";
 import { createLogger, type Logger } from "@muse/logger";
+import { getMinimumImages } from "@muse/core";
 import type { Message, Provider } from "../types";
 import { briefAgent, briefSystemPrompt, parseBrief } from "./brief";
-import { structureAgent, structureSystemPrompt, parseStructure } from "./structure";
+import { structureAgent, parseStructure } from "./structure";
 import { themeAgent, themeSystemPrompt, parseThemeSelection, type ThemeSelection } from "./theme";
 import { imageAgent, parseImagePlan } from "./image";
 import { copyAgent } from "./copy";
@@ -63,7 +64,7 @@ export async function* orchestrate(
   const structureLog = log.child({ agent: "structure" });
   const themeLog = log.child({ agent: "theme" });
 
-  structureLog.debug("system_prompt", { prompt: structureSystemPrompt });
+  structureLog.debug("starting", { prompt });
   themeLog.debug("system_prompt", { prompt: themeSystemPrompt() });
 
   const [structureResult, themeResult] = await Promise.all([
@@ -117,7 +118,15 @@ export async function* orchestrate(
     imageLog.debug("parsed_plan", { plan: imagePlan });
 
     if (imagePlan.length > 0) {
-      images = await config.mediaClient.executePlan(imagePlan);
+      // Compute minimum image counts per gallery block
+      const minPerBlock: Record<string, number> = {};
+      for (const block of structure.blocks) {
+        if (block.type === "gallery" && block.preset) {
+          minPerBlock[block.id] = getMinimumImages(block.preset);
+        }
+      }
+
+      images = await config.mediaClient.executePlan(imagePlan, { minPerBlock });
       events?.onImages?.(images);
     }
 

@@ -1,5 +1,5 @@
 import type { Logger } from "@muse/logger";
-import type { MediaClient, MediaProvider, ImagePlan, ImageSelection, ImageSearchOptions, ImageSearchResult } from "./types";
+import type { MediaClient, MediaProvider, ImagePlan, ImageSelection, ImageSearchOptions, ImageSearchResult, ExecutePlanOptions } from "./types";
 import { createUnsplashProvider } from "./unsplash";
 import { createPexelsProvider } from "./pexels";
 
@@ -90,61 +90,85 @@ export function createMediaClient(config: MediaClientConfig): MediaClient {
       return results;
     },
 
-    async executePlan(plan: ImagePlan[]): Promise<ImageSelection[]> {
+    async executePlan(plan: ImagePlan[], options?: ExecutePlanOptions): Promise<ImageSelection[]> {
       const selections: ImageSelection[] = [];
+      const minPerBlock = options?.minPerBlock ?? {};
 
+      // Group plan items by blockId to handle minimums
+      const planByBlock = new Map<string, ImagePlan[]>();
       for (const item of plan) {
-        let providerName: string = item.provider;
-        let activeProvider = providers.get(item.provider);
+        const existing = planByBlock.get(item.blockId) ?? [];
+        existing.push(item);
+        planByBlock.set(item.blockId, existing);
+      }
 
-        if (!activeProvider) {
-          // Fall back to any available provider
-          const fallbackEntry = providers.entries().next().value as [string, MediaProvider] | undefined;
-          if (!fallbackEntry) continue;
+      for (const [blockId, blockPlan] of planByBlock) {
+        const minimum = minPerBlock[blockId] ?? 1;
+        const queryCount = blockPlan.length;
+        // Calculate how many results to fetch per query to meet minimum
+        const resultsPerQuery = Math.max(1, Math.ceil(minimum / queryCount));
 
-          log.warn("provider_fallback", { requested: item.provider, fallback: fallbackEntry[0], blockId: item.blockId });
-          providerName = fallbackEntry[0];
-          activeProvider = fallbackEntry[1];
-        }
+        let blockSelections: ImageSelection[] = [];
 
-        try {
-          const cacheKey = getCacheKey(providerName, item.searchQuery, item.orientation);
-          let results = getCached(cacheKey);
+        for (const item of blockPlan) {
+          let providerName: string = item.provider;
+          let activeProvider = providers.get(item.provider);
 
-          if (!results) {
-            log.debug("search", { provider: providerName, query: item.searchQuery, blockId: item.blockId });
-            results = await activeProvider.search(item.searchQuery, {
-              orientation: item.orientation,
-              count: 1,
-            });
-            log.debug("search_results", { provider: providerName, query: item.searchQuery, count: results.length });
-            setCache(cacheKey, results);
-          }
-          else {
-            log.debug("cache_hit", { provider: providerName, query: item.searchQuery, blockId: item.blockId });
+          if (!activeProvider) {
+            const fallbackEntry = providers.entries().next().value as [string, MediaProvider] | undefined;
+            if (!fallbackEntry) continue;
+
+            log.warn("provider_fallback", { requested: item.provider, fallback: fallbackEntry[0], blockId: item.blockId });
+            providerName = fallbackEntry[0];
+            activeProvider = fallbackEntry[1];
           }
 
-          const result = results[0];
-          if (result) {
-            selections.push({
+          try {
+            const cacheKey = getCacheKey(providerName, item.searchQuery, item.orientation);
+            let results = getCached(cacheKey);
+
+            if (!results) {
+              log.debug("search", { provider: providerName, query: item.searchQuery, blockId: item.blockId });
+              results = await activeProvider.search(item.searchQuery, {
+                orientation: item.orientation,
+                count: resultsPerQuery,
+              });
+              log.debug("search_results", { provider: providerName, query: item.searchQuery, count: results.length });
+              setCache(cacheKey, results);
+            }
+            else {
+              log.debug("cache_hit", { provider: providerName, query: item.searchQuery, blockId: item.blockId });
+            }
+
+            // Add all results up to what we need
+            for (const result of results.slice(0, resultsPerQuery)) {
+              blockSelections.push({
+                blockId: item.blockId,
+                placement: item.placement,
+                image: {
+                  url: result.displayUrl,
+                  alt: result.title,
+                  provider: result.provider,
+                  providerId: result.id,
+                },
+              });
+            }
+          }
+          catch (err) {
+            log.error("search_failed", {
               blockId: item.blockId,
-              placement: item.placement,
-              image: {
-                url: result.displayUrl,
-                alt: result.title,
-                provider: result.provider,
-                providerId: result.id,
-              },
+              query: item.searchQuery,
+              error: err instanceof Error ? err.message : String(err),
             });
           }
         }
-        catch (err) {
-          log.error("search_failed", {
-            blockId: item.blockId,
-            query: item.searchQuery,
-            error: err instanceof Error ? err.message : String(err),
-          });
+
+        // Trim to exactly the minimum if we have more
+        if (blockSelections.length > minimum && minimum > 1) {
+          blockSelections = blockSelections.slice(0, minimum);
         }
+
+        selections.push(...blockSelections);
       }
 
       return selections;

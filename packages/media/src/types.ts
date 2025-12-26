@@ -40,7 +40,11 @@ export interface MediaProvider {
   }): Promise<ImageSearchResult[]>
 }
 
+export interface ExecutePlanOptions {
+  minPerBlock?: Record<string, number>
+}
+
 export interface MediaClient {
   search(options: ImageSearchOptions): Promise<ImageSearchResult[]>
-  executePlan(plan: ImagePlan[]): Promise<ImageSelection[]>
+  executePlan(plan: ImagePlan[], options?: ExecutePlanOptions): Promise<ImageSelection[]>
 }
