@@ -1,13 +1,29 @@
 import { generateSectionPrompt } from "@muse/core";
+import { createLogger } from "@muse/logger";
 import type { Provider } from "../types";
 import type { AgentInput, PageStructure, SyncAgent } from "./types";
+import { retrieve, formatStructureContext, type StructureKBEntry } from "../rag";
 
-export function buildStructurePrompt(): string {
+const log = createLogger().child({ agent: "structure-rag" });
+
+export function buildStructurePrompt(context: string, isTemplate: boolean): string {
+  if (isTemplate) {
+    // Template mode: minimal prompt, just copy the template
+    return `You are a page structure planner.
+
+${context}
+
+Your task: Copy the template structure above EXACTLY. Add a "purpose" field to each block describing what it should accomplish for the user's request.
+
+Output ONLY valid JSON. Do not change, add, or remove any blocks. Do not change any type or preset values.`;
+  }
+
+  // Non-template mode: full prompt with all options
   return `You are a page structure planner. Given a brand brief and user request, define the block structure for a landing page.
 
 SECTION TYPES AND PRESETS:
 ${generateSectionPrompt()}
-
+${context ? `\n${context}\n` : ""}
 Output ONLY valid JSON matching this schema:
 {
   "blocks": [
@@ -16,6 +32,7 @@ Output ONLY valid JSON matching this schema:
 }
 
 Guidelines:
+- When similar examples are provided, use them as guidance for block selection.
 - Generate 3-6 blocks for a typical landing page
 - Start with a hero block
 - End with a cta block
@@ -24,7 +41,38 @@ Guidelines:
 - Purpose should guide the copy specialist on what content to generate`;
 }
 
-export const structureSystemPrompt = buildStructurePrompt();
+interface RAGContext {
+  text: string
+  isTemplate: boolean
+}
+
+async function getRAGContext(prompt: string): Promise<RAGContext> {
+  try {
+    const examples = await retrieve<StructureKBEntry>("structure", prompt, {
+      topK: 3,
+      minScore: 0.5,
+    });
+
+    if (examples.length > 0) {
+      const { text, isTemplate } = formatStructureContext(examples);
+      log.info("rag_retrieved", {
+        kb: "structure",
+        count: examples.length,
+        isTemplate,
+        matches: examples.map(e => ({ id: e.entry.id, score: e.score.toFixed(3) })),
+      });
+      return { text, isTemplate };
+    }
+    else {
+      log.debug("rag_no_matches", { kb: "structure", prompt: prompt.slice(0, 100) });
+      return { text: "", isTemplate: false };
+    }
+  }
+  catch (err) {
+    log.debug("rag_unavailable", { error: String(err) });
+    return { text: "", isTemplate: false };
+  }
+}
 
 export const structureAgent: SyncAgent = {
   config: {
@@ -34,6 +82,15 @@ export const structureAgent: SyncAgent = {
   },
 
   async run(input: AgentInput, provider: Provider): Promise<string> {
+    const { text: context, isTemplate } = await getRAGContext(input.prompt);
+    const systemPrompt = buildStructurePrompt(context, isTemplate);
+
+    log.debug("prompt_built", {
+      isTemplate,
+      promptLength: systemPrompt.length,
+      systemPrompt: systemPrompt.slice(0, 500),
+    });
+
     const briefContext = input.brief
       ? `Brand Brief:
 - Target Audience: ${input.brief.targetAudience}
@@ -45,10 +102,12 @@ export const structureAgent: SyncAgent = {
 
     const response = await provider.chat({
       messages: [
-        { role: "system", content: structureSystemPrompt },
+        { role: "system", content: systemPrompt },
         { role: "user", content: `${briefContext}\nUser Request: ${input.prompt}` },
       ],
     });
+
+    log.debug("llm_response", { content: response.content });
 
     return response.content;
   },
@@ -63,7 +122,9 @@ interface RawBlock {
 
 export function parseStructure(json: string): PageStructure {
   try {
-    const parsed = JSON.parse(json);
+    // Strip markdown code fences if present
+    const cleaned = json.replace(/^```(?:json)?\s*\n?/gm, "").replace(/\n?```\s*$/gm, "").trim();
+    const parsed = JSON.parse(cleaned);
     if (!Array.isArray(parsed.blocks)) {
       throw new Error("Invalid structure: blocks must be an array");
     }
@@ -76,7 +137,8 @@ export function parseStructure(json: string): PageStructure {
       })),
     };
   }
-  catch {
+  catch (err) {
+    log.warn("parse_failed", { error: String(err), input: json.slice(0, 200) });
     return {
       blocks: [
         { id: "block-1", type: "hero", preset: "hero-centered", purpose: "introduce the product" },
