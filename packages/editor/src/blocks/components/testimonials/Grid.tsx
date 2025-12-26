@@ -1,4 +1,5 @@
 import type { TestimonialsBlock as TestimonialsBlockType, Quote } from "@muse/core";
+import styles from "./Grid.module.css";
 
 interface Props {
   block: TestimonialsBlockType
@@ -14,24 +15,24 @@ export function Grid({ block, onUpdate }: Props) {
   };
 
   return (
-    <section className="muse-block-testimonials-grid">
+    <section className={styles.section}>
       {block.headline !== undefined && (
-        <div className="muse-block-testimonials-grid-header">
+        <div className={styles.header}>
           <input
             type="text"
-            className="muse-block-testimonials-grid-headline"
+            className={styles.headline}
             value={block.headline}
             onChange={e => onUpdate({ headline: e.target.value || undefined })}
             placeholder="Section headline..."
           />
         </div>
       )}
-      <div className="muse-block-testimonials-grid-container">
+      <div className={styles.container}>
         {block.quotes.map((quote, i) => (
-          <figure key={i} className="muse-block-testimonials-grid-card">
+          <figure key={i} className={styles.card}>
             <blockquote>
               <textarea
-                className="muse-block-testimonials-grid-quote"
+                className={styles.quote}
                 value={`"${quote.text}"`}
                 onChange={(e) => {
                   const text = e.target.value.replace(/^"|"$/g, "");
@@ -41,21 +42,21 @@ export function Grid({ block, onUpdate }: Props) {
                 rows={4}
               />
             </blockquote>
-            <figcaption className="muse-block-testimonials-grid-author">
-              <div className="muse-block-testimonials-grid-avatar">
+            <figcaption className={styles.author}>
+              <div className={styles.avatar}>
                 {quote.author.charAt(0)}
               </div>
               <div>
                 <input
                   type="text"
-                  className="muse-block-testimonials-grid-name"
+                  className={styles.name}
                   value={quote.author}
                   onChange={e => updateQuote(i, { author: e.target.value })}
                   placeholder="Author name"
                 />
                 <input
                   type="text"
-                  className="muse-block-testimonials-grid-role"
+                  className={styles.role}
                   value={[quote.role, quote.company].filter(Boolean).join(", ")}
                   onChange={(e) => {
                     const parts = e.target.value.split(", ");

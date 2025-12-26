@@ -1,0 +1,135 @@
+.section {
+  padding: 4rem 2rem;
+  border-radius: var(--muse-theme-radius-lg, 1rem);
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  align-items: center;
+  text-align: center;
+}
+
+.primary {
+  background: var(--muse-theme-cta-bg, var(--muse-theme-primary, #6366f1));
+}
+
+.secondary {
+  background: var(--muse-theme-bg-alt, #f8fafc);
+  border: 2px solid var(--muse-theme-primary, #6366f1);
+}
+
+.headline {
+  font-family: var(--muse-theme-heading-font, inherit);
+  font-weight: var(--muse-theme-heading-weight, 700);
+  font-size: clamp(1.25rem, 4vw, 1.75rem);
+  background: transparent;
+  border: 1px dashed transparent;
+  padding: 0.5rem;
+  width: 100%;
+  max-width: 600px;
+  text-align: center;
+  resize: none;
+}
+
+.primary .headline {
+  color: white;
+}
+
+.primary .headline:focus {
+  border-color: rgba(255, 255, 255, 0.5);
+}
+
+.primary .headline::placeholder {
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.secondary .headline {
+  color: var(--muse-theme-text, #0f172a);
+}
+
+.secondary .headline:focus {
+  border-color: var(--muse-theme-primary, #6366f1);
+}
+
+.description {
+  font-family: var(--muse-theme-body-font, inherit);
+  font-size: 1rem;
+  background: transparent;
+  border: 1px dashed transparent;
+  padding: 0.5rem;
+  width: 100%;
+  max-width: 500px;
+  text-align: center;
+  resize: none;
+}
+
+.primary .description {
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.primary .description:focus {
+  border-color: rgba(255, 255, 255, 0.5);
+}
+
+.primary .description::placeholder {
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.secondary .description {
+  color: var(--muse-theme-text-muted, #64748b);
+}
+
+.secondary .description:focus {
+  border-color: var(--muse-theme-primary, #6366f1);
+}
+
+.button {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+}
+
+.button input {
+  padding: 0.75rem 1rem;
+  border-radius: var(--muse-theme-radius, 0.5rem);
+  border: none;
+  font-size: 0.875rem;
+}
+
+.primary .button input:first-child {
+  background: white;
+  color: var(--muse-theme-primary, #6366f1);
+  font-weight: 600;
+}
+
+.primary .button input:last-child {
+  background: rgba(255, 255, 255, 0.2);
+  color: white;
+}
+
+.secondary .button input:first-child {
+  background: var(--muse-theme-primary, #6366f1);
+  color: white;
+  font-weight: 600;
+}
+
+.secondary .button input:last-child {
+  background: var(--muse-theme-bg-alt, #e5e7eb);
+  color: var(--muse-theme-text, #0f172a);
+}
+
+.variantSelect {
+  padding: 0.25rem 0.5rem;
+  font-size: 0.75rem;
+  border-radius: 0.25rem;
+  border: 1px solid currentColor;
+  background: transparent;
+  margin-top: 0.5rem;
+}
+
+.primary .variantSelect {
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.secondary .variantSelect {
+  color: var(--muse-theme-text-muted, #64748b);
+}

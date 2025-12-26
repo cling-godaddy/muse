@@ -1,5 +1,6 @@
 import { useEffect, useRef } from "react";
 import type { FeaturesBlock as FeaturesBlockType, FeatureItem } from "@muse/core";
+import styles from "./FeaturesBlock.module.css";
 
 interface Props {
   block: FeaturesBlockType
@@ -42,29 +43,30 @@ export function FeaturesBlock({ block, onUpdate }: Props) {
   };
 
   return (
-    <div className="muse-block-features">
+    <div className={styles.section}>
       <textarea
         ref={headlineRef}
-        className="muse-block-features-headline"
+        className={styles.headline}
         rows={1}
         value={block.headline ?? ""}
         onChange={e => onUpdate({ headline: e.target.value || undefined })}
         placeholder="Section headline..."
       />
-      <div className="muse-block-features-grid">
+      <div className={styles.grid}>
         {block.items.map((item, i) => (
-          <div key={i} className="muse-block-features-item">
+          <div key={i} className={styles.item}>
             {item.image
               ? (
                 <img
                   src={item.image.url}
                   alt={item.image.alt}
-                  className="muse-block-features-item-image"
+                  className={styles.itemImage}
                 />
               )
               : (
                 <input
                   type="text"
+                  className={styles.itemIcon}
                   value={item.icon ?? ""}
                   onChange={e => updateItem(i, { icon: e.target.value || undefined })}
                   placeholder="Icon..."
@@ -72,11 +74,13 @@ export function FeaturesBlock({ block, onUpdate }: Props) {
               )}
             <input
               type="text"
+              className={styles.itemTitle}
               value={item.title}
               onChange={e => updateItem(i, { title: e.target.value })}
               placeholder="Title..."
             />
             <textarea
+              className={styles.itemDescription}
               value={item.description}
               onChange={e => updateItem(i, { description: e.target.value })}
               placeholder="Description..."
@@ -85,7 +89,7 @@ export function FeaturesBlock({ block, onUpdate }: Props) {
             <button
               type="button"
               onClick={() => removeItem(i)}
-              className="muse-block-features-remove"
+              className={styles.removeButton}
             >
               Remove
             </button>
@@ -95,7 +99,7 @@ export function FeaturesBlock({ block, onUpdate }: Props) {
       <button
         type="button"
         onClick={addItem}
-        className="muse-block-features-add"
+        className={styles.addButton}
       >
         Add Feature
       </button>

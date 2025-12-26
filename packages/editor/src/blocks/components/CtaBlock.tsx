@@ -1,5 +1,6 @@
 import { useEffect, useRef } from "react";
 import type { CtaBlock as CtaBlockType } from "@muse/core";
+import styles from "./CtaBlock.module.css";
 
 interface Props {
   block: CtaBlockType
@@ -22,25 +23,26 @@ function useAutoResize(value: string) {
 export function CtaBlock({ block, onUpdate }: Props) {
   const variant = block.variant ?? "primary";
   const headlineRef = useAutoResize(block.headline);
+  const variantClass = variant === "primary" ? styles.primary : styles.secondary;
 
   return (
-    <div className={`muse-block-cta muse-block-cta--${variant}`}>
+    <div className={`${styles.section} ${variantClass}`}>
       <textarea
         ref={headlineRef}
-        className="muse-block-cta-headline"
+        className={styles.headline}
         rows={1}
         value={block.headline}
         onChange={e => onUpdate({ headline: e.target.value })}
         placeholder="CTA headline..."
       />
       <textarea
-        className="muse-block-cta-description"
+        className={styles.description}
         value={block.description ?? ""}
         onChange={e => onUpdate({ description: e.target.value || undefined })}
         placeholder="Description..."
         rows={2}
       />
-      <div className="muse-block-cta-button">
+      <div className={styles.button}>
         <input
           type="text"
           value={block.buttonText}
@@ -57,7 +59,7 @@ export function CtaBlock({ block, onUpdate }: Props) {
       <select
         value={variant}
         onChange={e => onUpdate({ variant: e.target.value as "primary" | "secondary" })}
-        className="muse-block-cta-variant"
+        className={styles.variantSelect}
       >
         <option value="primary">Primary</option>
         <option value="secondary">Secondary</option>

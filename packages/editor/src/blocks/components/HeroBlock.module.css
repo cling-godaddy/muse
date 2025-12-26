@@ -1,0 +1,113 @@
+.section {
+  padding: 4rem 2rem;
+  background: var(--muse-theme-hero-gradient, var(--muse-theme-primary, #6366f1));
+  border-radius: var(--muse-theme-radius-lg, 1rem);
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  align-items: center;
+  position: relative;
+}
+
+.left {
+  text-align: left;
+  align-items: flex-start;
+}
+
+.right {
+  text-align: right;
+  align-items: flex-end;
+}
+
+.withBg {
+  background-size: cover;
+  background-position: center;
+}
+
+.overlay {
+  position: absolute;
+  inset: 0;
+  border-radius: var(--muse-theme-radius-lg, 1rem);
+  pointer-events: none;
+}
+
+.headline {
+  font-family: var(--muse-theme-heading-font, inherit);
+  font-weight: var(--muse-theme-heading-weight, 700);
+  font-size: clamp(1.5rem, 5vw, 2.5rem);
+  color: white;
+  background: transparent;
+  border: 1px dashed transparent;
+  padding: 0.5rem;
+  width: 100%;
+  max-width: 800px;
+  text-align: inherit;
+  resize: none;
+  position: relative;
+  z-index: 1;
+}
+
+.headline:focus {
+  border-color: rgba(255, 255, 255, 0.5);
+  outline: none;
+}
+
+.headline::placeholder {
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.subheadline {
+  font-family: var(--muse-theme-body-font, inherit);
+  font-size: clamp(1rem, 3vw, 1.25rem);
+  color: rgba(255, 255, 255, 0.9);
+  background: transparent;
+  border: 1px dashed transparent;
+  padding: 0.5rem;
+  width: 100%;
+  max-width: 600px;
+  text-align: inherit;
+  resize: none;
+  position: relative;
+  z-index: 1;
+}
+
+.subheadline:focus {
+  border-color: rgba(255, 255, 255, 0.5);
+  outline: none;
+}
+
+.subheadline::placeholder {
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.ctas {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 1rem;
+  position: relative;
+  z-index: 1;
+}
+
+.cta {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.cta input {
+  padding: 0.75rem 1rem;
+  border-radius: var(--muse-theme-radius, 0.5rem);
+  border: none;
+  font-size: 0.875rem;
+}
+
+.cta input:first-child {
+  background: white;
+  color: var(--muse-theme-primary, #6366f1);
+  font-weight: 600;
+}
+
+.cta input:last-child {
+  background: rgba(255, 255, 255, 0.2);
+  color: white;
+}

@@ -1,5 +1,6 @@
 import { useEffect, useRef } from "react";
 import type { HeroBlock as HeroBlockType } from "@muse/core";
+import styles from "./HeroBlock.module.css";
 
 interface Props {
   block: HeroBlockType
@@ -35,20 +36,20 @@ export function HeroBlock({ block, onUpdate }: Props) {
     }
     : undefined;
 
+  const alignmentClass = alignment === "left" ? styles.left : alignment === "right" ? styles.right : "";
+  const sectionClasses = [styles.section, alignmentClass, hasBackground ? styles.withBg : ""].filter(Boolean).join(" ");
+
   return (
-    <div
-      className={`muse-block-hero muse-block-hero--${alignment} ${hasBackground ? "muse-block-hero--with-bg" : ""}`}
-      style={containerStyle}
-    >
+    <div className={sectionClasses} style={containerStyle}>
       {hasBackground && (
         <div
-          className="muse-block-hero-overlay"
+          className={styles.overlay}
           style={{ backgroundColor: `rgba(0, 0, 0, ${overlayOpacity})` }}
         />
       )}
       <textarea
         ref={headlineRef}
-        className="muse-block-hero-headline"
+        className={styles.headline}
         rows={1}
         value={block.headline}
         onChange={e => onUpdate({ headline: e.target.value })}
@@ -56,14 +57,14 @@ export function HeroBlock({ block, onUpdate }: Props) {
       />
       <textarea
         ref={subheadlineRef}
-        className="muse-block-hero-subheadline"
+        className={styles.subheadline}
         rows={1}
         value={block.subheadline ?? ""}
         onChange={e => onUpdate({ subheadline: e.target.value || undefined })}
         placeholder="Subheadline..."
       />
-      <div className="muse-block-hero-ctas">
-        <div className="muse-block-hero-cta">
+      <div className={styles.ctas}>
+        <div className={styles.cta}>
           <input
             type="text"
             value={block.cta?.text ?? ""}
