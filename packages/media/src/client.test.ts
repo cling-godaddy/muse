@@ -28,22 +28,34 @@ describe("createMediaClient", () => {
     expect(client).toBeDefined();
   });
 
-  it("warns when no providers configured", () => {
-    const warnSpy = vi.spyOn(console, "warn").mockImplementation(() => {});
+  it("logs warning when no providers configured", () => {
+    const mockLogger = {
+      debug: vi.fn(),
+      info: vi.fn(),
+      warn: vi.fn(),
+      error: vi.fn(),
+      child: vi.fn(),
+    };
 
-    createMediaClient({});
+    createMediaClient({ logger: mockLogger });
 
-    expect(warnSpy).toHaveBeenCalledWith(
-      "No media provider credentials configured - image search disabled",
+    expect(mockLogger.warn).toHaveBeenCalledWith(
+      "no_providers",
+      { message: "No media provider credentials configured - image search disabled" },
     );
-
-    warnSpy.mockRestore();
   });
 
   it("search returns empty array for unconfigured provider", async () => {
-    const warnSpy = vi.spyOn(console, "warn").mockImplementation(() => {});
+    const mockLogger = {
+      debug: vi.fn(),
+      info: vi.fn(),
+      warn: vi.fn(),
+      error: vi.fn(),
+      child: vi.fn(),
+    };
     const client = createMediaClient({
       unsplashKey: "test-unsplash",
+      logger: mockLogger,
     });
 
     const results = await client.search({
@@ -52,15 +64,13 @@ describe("createMediaClient", () => {
     });
 
     expect(results).toEqual([]);
-    expect(warnSpy).toHaveBeenCalledWith(
-      "Provider pexels not configured, skipping search",
+    expect(mockLogger.warn).toHaveBeenCalledWith(
+      "provider_not_configured",
+      { provider: "pexels" },
     );
-
-    warnSpy.mockRestore();
   });
 
   it("executePlan returns empty array when no providers", async () => {
-    const warnSpy = vi.spyOn(console, "warn").mockImplementation(() => {});
     const client = createMediaClient({});
 
     const results = await client.executePlan([
@@ -74,7 +84,5 @@ describe("createMediaClient", () => {
     ]);
 
     expect(results).toEqual([]);
-
-    warnSpy.mockRestore();
   });
 });
