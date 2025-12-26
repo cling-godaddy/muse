@@ -1,0 +1,95 @@
+.section {
+  padding: 3rem 2rem;
+  background: var(--muse-theme-surface, #f9fafb);
+  border-radius: var(--muse-theme-radius-lg, 1rem);
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+  align-items: center;
+}
+
+.headline {
+  font-family: var(--muse-theme-heading-font, inherit);
+  font-weight: var(--muse-theme-heading-weight, 700);
+  font-size: clamp(1.25rem, 4vw, 2rem);
+  color: var(--muse-theme-text, #111827);
+  background: transparent;
+  border: 1px dashed transparent;
+  padding: 0.5rem;
+  width: 100%;
+  max-width: 600px;
+  text-align: center;
+}
+
+.headline:focus {
+  border-color: var(--muse-theme-primary, #6366f1);
+  outline: none;
+}
+
+.headline::placeholder {
+  color: var(--muse-theme-muted, #9ca3af);
+}
+
+.subheadline {
+  font-family: var(--muse-theme-body-font, inherit);
+  font-size: 1rem;
+  color: var(--muse-theme-muted, #6b7280);
+  background: transparent;
+  border: 1px dashed transparent;
+  padding: 0.5rem;
+  width: 100%;
+  max-width: 500px;
+  text-align: center;
+}
+
+.subheadline:focus {
+  border-color: var(--muse-theme-primary, #6366f1);
+  outline: none;
+}
+
+.subheadline::placeholder {
+  color: var(--muse-theme-muted, #9ca3af);
+}
+
+.info {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  width: 100%;
+  max-width: 400px;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.field label {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--muse-theme-text, #374151);
+}
+
+.field input,
+.field textarea {
+  padding: 0.75rem 1rem;
+  border: 1px solid var(--muse-theme-border, #e5e7eb);
+  border-radius: var(--muse-theme-radius, 0.5rem);
+  font-family: var(--muse-theme-body-font, inherit);
+  font-size: 1rem;
+  background: white;
+  color: var(--muse-theme-text, #111827);
+  resize: none;
+}
+
+.field input:focus,
+.field textarea:focus {
+  border-color: var(--muse-theme-primary, #6366f1);
+  outline: none;
+}
+
+.field input::placeholder,
+.field textarea::placeholder {
+  color: var(--muse-theme-muted, #9ca3af);
+}

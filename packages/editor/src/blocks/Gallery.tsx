@@ -1,4 +1,5 @@
 import type { GalleryBlock as GalleryBlockType } from "@muse/core";
+import styles from "./Gallery.module.css";
 
 interface Props {
   block: GalleryBlockType
@@ -9,22 +10,22 @@ export function Gallery({ block, onUpdate }: Props) {
   const columns = block.columns ?? 3;
 
   return (
-    <div className="muse-block-gallery">
+    <div className={styles.section}>
       {block.headline !== undefined && (
         <input
           type="text"
-          className="muse-block-gallery-headline"
+          className={styles.headline}
           value={block.headline}
           onChange={e => onUpdate({ headline: e.target.value || undefined })}
           placeholder="Section headline..."
         />
       )}
       <div
-        className="muse-block-gallery-grid"
+        className={styles.grid}
         style={{ gridTemplateColumns: `repeat(${columns}, 1fr)` }}
       >
         {block.images.map((image, i) => (
-          <div key={i} className="muse-block-gallery-item">
+          <div key={i} className={styles.item}>
             <img src={image.url} alt={image.alt} />
           </div>
         ))}

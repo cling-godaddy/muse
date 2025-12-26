@@ -1,4 +1,5 @@
 import type { ContactBlock as ContactBlockType } from "@muse/core";
+import styles from "./Contact.module.css";
 
 interface Props {
   block: ContactBlockType
@@ -7,11 +8,11 @@ interface Props {
 
 export function Contact({ block, onUpdate }: Props) {
   return (
-    <div className="muse-block-contact">
+    <div className={styles.section}>
       {block.headline !== undefined && (
         <input
           type="text"
-          className="muse-block-contact-headline"
+          className={styles.headline}
           value={block.headline}
           onChange={e => onUpdate({ headline: e.target.value || undefined })}
           placeholder="Section headline..."
@@ -20,14 +21,14 @@ export function Contact({ block, onUpdate }: Props) {
       {block.subheadline !== undefined && (
         <input
           type="text"
-          className="muse-block-contact-subheadline"
+          className={styles.subheadline}
           value={block.subheadline}
           onChange={e => onUpdate({ subheadline: e.target.value || undefined })}
           placeholder="Subheadline..."
         />
       )}
-      <div className="muse-block-contact-info">
-        <div className="muse-block-contact-field">
+      <div className={styles.info}>
+        <div className={styles.field}>
           <label>Email</label>
           <input
             type="email"
@@ -36,7 +37,7 @@ export function Contact({ block, onUpdate }: Props) {
             placeholder="contact@example.com"
           />
         </div>
-        <div className="muse-block-contact-field">
+        <div className={styles.field}>
           <label>Phone</label>
           <input
             type="tel"
@@ -45,7 +46,7 @@ export function Contact({ block, onUpdate }: Props) {
             placeholder="+1 (555) 123-4567"
           />
         </div>
-        <div className="muse-block-contact-field">
+        <div className={styles.field}>
           <label>Address</label>
           <textarea
             value={block.address ?? ""}

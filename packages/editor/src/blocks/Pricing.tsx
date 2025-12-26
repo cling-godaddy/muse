@@ -1,4 +1,5 @@
 import type { PricingBlock as PricingBlockType, PricingPlan } from "@muse/core";
+import styles from "./Pricing.module.css";
 
 interface Props {
   block: PricingBlockType
@@ -14,11 +15,11 @@ export function Pricing({ block, onUpdate }: Props) {
   };
 
   return (
-    <div className="muse-block-pricing">
+    <div className={styles.section}>
       {block.headline !== undefined && (
         <input
           type="text"
-          className="muse-block-pricing-headline"
+          className={styles.headline}
           value={block.headline}
           onChange={e => onUpdate({ headline: e.target.value || undefined })}
           placeholder="Section headline..."
@@ -27,26 +28,26 @@ export function Pricing({ block, onUpdate }: Props) {
       {block.subheadline !== undefined && (
         <input
           type="text"
-          className="muse-block-pricing-subheadline"
+          className={styles.subheadline}
           value={block.subheadline}
           onChange={e => onUpdate({ subheadline: e.target.value || undefined })}
           placeholder="Subheadline..."
         />
       )}
-      <div className="muse-block-pricing-plans">
+      <div className={styles.plans}>
         {block.plans.map((plan, i) => (
           <div
             key={i}
-            className={`muse-block-pricing-plan ${plan.highlighted ? "muse-block-pricing-plan--highlighted" : ""}`}
+            className={`${styles.plan} ${plan.highlighted ? styles.highlighted : ""}`}
           >
             <input
               type="text"
-              className="muse-block-pricing-name"
+              className={styles.name}
               value={plan.name}
               onChange={e => updatePlan(i, { name: e.target.value })}
               placeholder="Plan name"
             />
-            <div className="muse-block-pricing-price">
+            <div className={styles.price}>
               <input
                 type="text"
                 value={plan.price}
@@ -61,13 +62,13 @@ export function Pricing({ block, onUpdate }: Props) {
               />
             </div>
             <textarea
-              className="muse-block-pricing-description"
+              className={styles.description}
               value={plan.description ?? ""}
               onChange={e => updatePlan(i, { description: e.target.value || undefined })}
               placeholder="Plan description..."
               rows={2}
             />
-            <ul className="muse-block-pricing-features">
+            <ul className={styles.features}>
               {plan.features.map((feature, j) => (
                 <li key={j}>
                   <input

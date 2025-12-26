@@ -1,4 +1,5 @@
 import type { FaqBlock as FaqBlockType, FaqItem } from "@muse/core";
+import styles from "./Faq.module.css";
 
 interface Props {
   block: FaqBlockType
@@ -14,11 +15,11 @@ export function Faq({ block, onUpdate }: Props) {
   };
 
   return (
-    <div className="muse-block-faq">
+    <div className={styles.section}>
       {block.headline !== undefined && (
         <input
           type="text"
-          className="muse-block-faq-headline"
+          className={styles.headline}
           value={block.headline}
           onChange={e => onUpdate({ headline: e.target.value || undefined })}
           placeholder="Section headline..."
@@ -27,24 +28,24 @@ export function Faq({ block, onUpdate }: Props) {
       {block.subheadline !== undefined && (
         <input
           type="text"
-          className="muse-block-faq-subheadline"
+          className={styles.subheadline}
           value={block.subheadline}
           onChange={e => onUpdate({ subheadline: e.target.value || undefined })}
           placeholder="Subheadline..."
         />
       )}
-      <div className="muse-block-faq-items">
+      <div className={styles.items}>
         {block.items.map((item, i) => (
-          <div key={i} className="muse-block-faq-item">
+          <div key={i} className={styles.item}>
             <input
               type="text"
-              className="muse-block-faq-question"
+              className={styles.question}
               value={item.question}
               onChange={e => updateItem(i, { question: e.target.value })}
               placeholder="Question?"
             />
             <textarea
-              className="muse-block-faq-answer"
+              className={styles.answer}
               value={item.answer}
               onChange={e => updateItem(i, { answer: e.target.value })}
               placeholder="Answer..."
