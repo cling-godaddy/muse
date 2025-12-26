@@ -1,7 +1,8 @@
 import { useMemo } from "react";
 import type { Block } from "@muse/core";
 import { getBlockComponent, type BlockComponent } from "./registry";
-import { PresetPicker, supportsPresets } from "../controls/PresetPicker";
+import { PresetPicker } from "../controls/PresetPicker";
+import { supportsPresets } from "../controls/presets";
 
 interface Props {
   block: Block
