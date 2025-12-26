@@ -12,6 +12,7 @@ export function createOpenAIProvider(apiKey: string): Provider {
       const response = await client.chat.completions.create({
         model: request.model ?? "gpt-4o",
         messages: request.messages,
+        ...(request.jsonMode && { response_format: { type: "json_object" as const } }),
       });
 
       const choice = response.choices[0];

@@ -16,6 +16,7 @@ export interface ChatRequest {
   messages: Message[]
   model?: string
   stream?: boolean
+  jsonMode?: boolean
 }
 
 export interface ChatResponse {
