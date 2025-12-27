@@ -100,7 +100,7 @@ export function App() {
           <Chat onBlockParsed={handleBlockParsed} onThemeSelected={handleThemeSelected} onImages={handleImages} />
         </div>
         <div className="flex-1 min-w-0 overflow-y-auto">
-          <div className="h-full border border-border rounded bg-bg p-4" style={themeStyle} data-effects={effectsId}>
+          <div className="h-full overflow-y-auto" style={themeStyle} data-effects={effectsId}>
             <BlockEditor blocks={blocks} onChange={setBlocks} />
           </div>
         </div>

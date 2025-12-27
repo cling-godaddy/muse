@@ -24,7 +24,7 @@ export const sharp: StylePreset = {
   description: "Crisp edges with no border radius",
   spacing: {
     blockPadding: "3rem 2rem",
-    sectionGap: "4rem",
+    sectionGap: "0",
   },
   borders: {
     radius: "0",
