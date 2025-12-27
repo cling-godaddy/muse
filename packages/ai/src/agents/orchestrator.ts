@@ -1,6 +1,6 @@
 import type { MediaClient, ImageSelection } from "@muse/media";
 import { createLogger, type Logger } from "@muse/logger";
-import { getMinimumImages } from "@muse/core";
+import { getMinimumImages, getImageRequirements } from "@muse/core";
 import type { Message, Provider } from "../types";
 import { runWithRetry } from "../retry";
 import { briefAgent, briefSystemPrompt, parseBrief } from "./brief";
@@ -157,8 +157,15 @@ export async function* orchestrate(
     const imagePlanJson = await imageAgent.run({ prompt, brief, structure }, provider);
     imageLog.debug("raw_response", { response: imagePlanJson });
 
-    const imagePlan = parseImagePlan(imagePlanJson);
-    imageLog.debug("parsed_plan", { plan: imagePlan });
+    // Identify blocks that need mixed orientations for masonry-style layouts
+    const mixedOrientationBlocks = new Set(
+      structure.blocks
+        .filter(b => b.preset && getImageRequirements(b.preset)?.orientation === "mixed")
+        .map(b => b.id),
+    );
+
+    const imagePlan = parseImagePlan(imagePlanJson, mixedOrientationBlocks);
+    imageLog.debug("parsed_plan", { plan: imagePlan, mixedBlocks: Array.from(mixedOrientationBlocks) });
 
     if (imagePlan.length > 0) {
       // Compute minimum image counts per gallery block

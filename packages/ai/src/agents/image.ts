@@ -1,3 +1,4 @@
+import { shuffle } from "lodash-es";
 import { createLogger } from "@muse/logger";
 import { getMaxImageRequirements, type SectionType } from "@muse/core";
 import type { JsonSchema, Provider } from "../types";
@@ -100,7 +101,7 @@ export const imageAgent: SyncAgent = {
   },
 };
 
-export function parseImagePlan(json: string): ImagePlan[] {
+export function parseImagePlan(json: string, mixedOrientationBlocks?: Set<string>): ImagePlan[] {
   try {
     const cleaned = json.trim().replace(/^```json\n?/, "").replace(/\n?```$/, "");
     const parsed = JSON.parse(cleaned);
@@ -124,7 +125,33 @@ export function parseImagePlan(json: string): ImagePlan[] {
         && typeof obj.orientation === "string";
     }
 
-    return items.filter(isImagePlan);
+    const plans = items.filter(isImagePlan);
+
+    // Expand mixed orientation blocks into separate items per orientation
+    if (!mixedOrientationBlocks || mixedOrientationBlocks.size === 0) {
+      return plans;
+    }
+
+    const expanded: ImagePlan[] = [];
+    for (const item of plans) {
+      if (mixedOrientationBlocks.has(item.blockId)) {
+        const count = item.count ?? 1;
+        const perOrientation = Math.ceil(count / 3);
+        const orientations = ["horizontal", "vertical", "square"] as const;
+        // Create one item per image, cycling through orientations
+        const items: ImagePlan[] = [];
+        for (let i = 0; i < perOrientation; i++) {
+          for (const orientation of orientations) {
+            items.push({ ...item, orientation, count: 1 });
+          }
+        }
+        expanded.push(...shuffle(items));
+      }
+      else {
+        expanded.push(item);
+      }
+    }
+    return expanded;
   }
   catch (err) {
     log.warn("parse_failed", {

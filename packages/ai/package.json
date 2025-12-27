@@ -22,9 +22,11 @@
     "@muse/themes": "workspace:*",
     "dotenv": "^16.6.1",
     "faiss-node": "^0.5.1",
+    "lodash-es": "^4.17.22",
     "openai": "^6.15.0"
   },
   "devDependencies": {
+    "@types/lodash-es": "^4.17.12",
     "@types/node": "^22",
     "tsx": "^4.19.0"
   }
