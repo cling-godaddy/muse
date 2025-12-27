@@ -23,10 +23,10 @@ ${input.structure.blocks.map(b => `- ${b.id} (${b.type}, preset: ${b.preset}): $
   const imageSection = images.length > 0
     ? `AVAILABLE IMAGES (include these in the corresponding blocks):
 ${images.map((img) => {
-  if (img.placement === "background") {
+  if (img.category === "ambient") {
     return `- Block ${img.blockId}: Add backgroundImage: ${JSON.stringify(img.image)}`;
   }
-  return `- Block ${img.blockId} (${img.placement}): Use image: ${JSON.stringify(img.image)}`;
+  return `- Block ${img.blockId} (${img.category}): Use image: ${JSON.stringify(img.image)}`;
 }).join("\n")}
 `
     : "";

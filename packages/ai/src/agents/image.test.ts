@@ -6,7 +6,7 @@ describe("parseImagePlan", () => {
     const input = JSON.stringify([
       {
         blockId: "hero_1",
-        placement: "background",
+        category: "ambient",
         provider: "unsplash",
         searchQuery: "mountain landscape",
         orientation: "horizontal",
@@ -18,7 +18,7 @@ describe("parseImagePlan", () => {
     expect(result).toHaveLength(1);
     expect(result[0]).toEqual({
       blockId: "hero_1",
-      placement: "background",
+      category: "ambient",
       provider: "unsplash",
       searchQuery: "mountain landscape",
       orientation: "horizontal",
@@ -27,7 +27,7 @@ describe("parseImagePlan", () => {
 
   it("handles markdown code blocks", () => {
     const input = `\`\`\`json
-[{"blockId": "hero_1", "placement": "background", "provider": "pexels", "searchQuery": "office", "orientation": "horizontal"}]
+[{"blockId": "hero_1", "category": "ambient", "provider": "pexels", "searchQuery": "office", "orientation": "horizontal"}]
 \`\`\``;
 
     const result = parseImagePlan(input);
@@ -51,8 +51,8 @@ describe("parseImagePlan", () => {
   it("parses {items: [...]} structured output format", () => {
     const input = JSON.stringify({
       items: [
-        { blockId: "hero_1", placement: "background", provider: "unsplash", searchQuery: "sunset", orientation: "horizontal" },
-        { blockId: "gallery_1", placement: "content", provider: "pexels", searchQuery: "food", orientation: "square" },
+        { blockId: "hero_1", category: "ambient", provider: "unsplash", searchQuery: "sunset", orientation: "horizontal" },
+        { blockId: "gallery_1", category: "subject", provider: "pexels", searchQuery: "food", orientation: "square" },
       ],
     });
 
@@ -66,7 +66,7 @@ describe("parseImagePlan", () => {
   it("parses {plan: [...]} wrapped format", () => {
     const input = JSON.stringify({
       plan: [
-        { blockId: "hero_1", placement: "background", provider: "unsplash", searchQuery: "mountain", orientation: "horizontal" },
+        { blockId: "hero_1", category: "ambient", provider: "unsplash", searchQuery: "mountain", orientation: "horizontal" },
       ],
     });
 
@@ -79,7 +79,7 @@ describe("parseImagePlan", () => {
   it("parses single object format", () => {
     const input = JSON.stringify({
       blockId: "hero_1",
-      placement: "background",
+      category: "ambient",
       provider: "unsplash",
       searchQuery: "ocean waves",
       orientation: "horizontal",
@@ -93,10 +93,10 @@ describe("parseImagePlan", () => {
 
   it("filters out items with missing required fields", () => {
     const input = JSON.stringify([
-      { blockId: "valid", placement: "background", provider: "unsplash", searchQuery: "test", orientation: "horizontal" },
-      { blockId: "missing_placement", provider: "unsplash", searchQuery: "test", orientation: "horizontal" },
-      { placement: "background", provider: "unsplash", searchQuery: "test", orientation: "horizontal" },
-      { blockId: "missing_query", placement: "background", provider: "unsplash", orientation: "horizontal" },
+      { blockId: "valid", category: "ambient", provider: "unsplash", searchQuery: "test", orientation: "horizontal" },
+      { blockId: "missing_category", provider: "unsplash", searchQuery: "test", orientation: "horizontal" },
+      { category: "ambient", provider: "unsplash", searchQuery: "test", orientation: "horizontal" },
+      { blockId: "missing_query", category: "ambient", provider: "unsplash", orientation: "horizontal" },
     ]);
 
     const result = parseImagePlan(input);
@@ -107,12 +107,23 @@ describe("parseImagePlan", () => {
 
   it("handles multiple valid items", () => {
     const input = JSON.stringify([
-      { blockId: "hero_1", placement: "background", provider: "unsplash", searchQuery: "nature", orientation: "horizontal" },
-      { blockId: "features_1", placement: "feature", provider: "pexels", searchQuery: "icon", orientation: "square" },
+      { blockId: "hero_1", category: "ambient", provider: "unsplash", searchQuery: "nature", orientation: "horizontal" },
+      { blockId: "features_1", category: "subject", provider: "pexels", searchQuery: "icon", orientation: "square" },
     ]);
 
     const result = parseImagePlan(input);
 
     expect(result).toHaveLength(2);
+  });
+
+  it("preserves count field when present", () => {
+    const input = JSON.stringify([
+      { blockId: "gallery_1", category: "subject", provider: "unsplash", searchQuery: "food", orientation: "square", count: 4 },
+    ]);
+
+    const result = parseImagePlan(input);
+
+    expect(result).toHaveLength(1);
+    expect(result[0]).toHaveProperty("count", 4);
   });
 });

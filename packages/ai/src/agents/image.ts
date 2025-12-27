@@ -16,12 +16,13 @@ const imagePlanSchema: JsonSchema = {
           type: "object",
           properties: {
             blockId: { type: "string", description: "Block ID to attach image to" },
-            placement: { type: "string", enum: ["background", "content", "gallery"], description: "Where the image goes" },
+            category: { type: "string", enum: ["ambient", "subject", "people"], description: "Image category: ambient (backgrounds/textures), subject (main content), people (portraits/teams)" },
             provider: { type: "string", enum: ["unsplash", "pexels"], description: "Image provider" },
             searchQuery: { type: "string", description: "Search query for the image" },
             orientation: { type: "string", enum: ["horizontal", "vertical", "square"], description: "Image orientation" },
+            count: { type: "number", description: "Number of images needed (default 1)" },
           },
-          required: ["blockId", "placement", "provider", "searchQuery", "orientation"],
+          required: ["blockId", "category", "provider", "searchQuery", "orientation"],
           additionalProperties: false,
         },
       },
@@ -42,11 +43,17 @@ BRAND BRIEF:
 PAGE STRUCTURE:
 ${structure.blocks.map(b => `- ${b.id} (${b.type}, preset: ${b.preset}): ${b.purpose}`).join("\n")}
 
+IMAGE CATEGORIES:
+- "ambient": backgrounds, textures, mood shots (hero backgrounds, section dividers)
+- "subject": main content, objects, scenes (feature images, product shots)
+- "people": portraits, teams, human subjects (team sections, testimonials)
+
 RULES:
-- Hero blocks: 1 background image (horizontal)
-- Gallery blocks: 4-6 varied queries with mixed orientations
-- Feature blocks: 1 image per feature if appropriate
-- Testimonials: 1 image for single testimonial preset, none for grids/carousels
+- Hero blocks: category "ambient", orientation "horizontal", count 1
+- Gallery blocks: category "subject", mixed orientations, count 4-6
+- Feature blocks: category "subject", count 1 per feature if appropriate
+- Team sections: category "people", count based on team size
+- Testimonials: category "people" for single testimonial, skip for grids/carousels
 - Only add images where they enhance the message
 - Search queries should be specific and evocative
 - Provider: "unsplash" for editorial/lifestyle, "pexels" for objects/products
@@ -100,7 +107,7 @@ export function parseImagePlan(json: string): ImagePlan[] {
       if (!item || typeof item !== "object") return false;
       const obj = item as Record<string, unknown>;
       return typeof obj.blockId === "string"
-        && typeof obj.placement === "string"
+        && typeof obj.category === "string"
         && typeof obj.provider === "string"
         && typeof obj.searchQuery === "string"
         && typeof obj.orientation === "string";

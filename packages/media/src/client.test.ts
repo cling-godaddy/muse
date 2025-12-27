@@ -76,7 +76,7 @@ describe("createMediaClient", () => {
     const results = await client.executePlan([
       {
         blockId: "hero_1",
-        placement: "background",
+        category: "ambient",
         provider: "unsplash",
         searchQuery: "test",
         orientation: "horizontal",

@@ -25,17 +25,20 @@ export interface ImageSearchOptions {
   count?: number
 }
 
+export type ImageCategory = "ambient" | "subject" | "people";
+
 export interface ImagePlan {
   blockId: string
-  placement: "background" | "content" | "feature"
+  category: ImageCategory
   provider: "unsplash" | "pexels"
   searchQuery: string
   orientation: "horizontal" | "vertical" | "square"
+  count?: number
 }
 
 export interface ImageSelection {
   blockId: string
-  placement: string
+  category: ImageCategory
   image: ImageSource
 }
 
