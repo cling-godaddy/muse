@@ -1,8 +1,10 @@
-import { useRef, useEffect, useMemo, useState } from "react";
+import { useRef, useEffect, useMemo } from "react";
 import type { Block } from "@muse/core";
 import type { ImageSelection } from "@muse/media";
+import { Spinner } from "@muse/editor";
 import { useChat, type Message } from "../hooks/useChat";
 import type { AgentState, ThemeSelection } from "../utils/streamParser";
+import { TimelineModal } from "./modals/timeline";
 
 interface ChatProps {
   onBlockParsed?: (block: Block) => void
@@ -131,174 +133,58 @@ interface AgentTimelineProps {
 }
 
 function AgentTimeline({ agents, isLoading }: AgentTimelineProps) {
-  const [expanded, setExpanded] = useState(false);
-
   if (agents.length === 0 && !isLoading) return null;
 
   const formatDuration = (ms?: number) => ms ? `${(ms / 1000).toFixed(1)}s` : "";
 
   const allComplete = agents.length > 0 && agents.every(a => a.status === "complete");
+  const runningAgent = agents.find(a => a.status === "running");
+  const completedCount = agents.filter(a => a.status === "complete").length;
   const totalDuration = agents.reduce((sum, a) => sum + (a.duration ?? 0), 0);
-
-  // auto-expand while loading, collapse when done (unless user expanded)
-  const showExpanded = isLoading || expanded;
-
-  // collapsed view when all complete
-  if (!showExpanded && allComplete) {
-    const themeAgent = agents.find(a => a.name === "theme");
-    return (
-      <div
-        onClick={() => setExpanded(true)}
-        className="px-3 py-2 text-xs text-text-subtle bg-bg-subtle font-mono cursor-pointer hover:bg-bg-subtle/80"
-      >
-        <span className="text-success">✓</span>
-        {" "}
-        {agents.length}
-        {" "}
-        agents
-        {" · "}
-        {formatDuration(totalDuration)}
-        {themeAgent?.data?.palette && (
-          <span className="ml-2 text-text-subtle">
-            {themeAgent.data.palette}
-            {themeAgent.data.typography && ` + ${themeAgent.data.typography}`}
-          </span>
-        )}
-      </div>
-    );
-  }
-
-  // check if structure and theme ran in parallel
-  const structureAgent = agents.find(a => a.name === "structure");
   const themeAgent = agents.find(a => a.name === "theme");
-  const isParallel = structureAgent && themeAgent;
+
+  const trigger = (
+    <button className="text-primary hover:underline ml-2">
+      Details
+    </button>
+  );
 
   return (
-    <div
-      className="px-3 py-2 text-xs text-text-subtle bg-bg-subtle font-mono cursor-pointer"
-      onClick={() => allComplete && setExpanded(false)}
-    >
-      {agents.map((agent, i) => {
-        const isComplete = agent.status === "complete";
-        const isRunning = agent.status === "running";
-
-        // skip theme if we're showing it with structure
-        if (agent.name === "theme" && isParallel) return null;
-
-        // show structure + theme together if parallel
-        if (agent.name === "structure" && isParallel) {
-          return (
-            <div key={i} className="flex items-start gap-2 py-0.5">
-              <span className="text-text-subtle">├─</span>
-              <div className="flex-1">
-                <div className="flex items-center gap-2">
-                  {isComplete
-                    ? <span className="text-success">●</span>
-                    : <span className="animate-pulse text-warning">◐</span>}
-                  <span>Structure</span>
-                  {structureAgent?.duration && (
-                    <span className="text-text-subtle">
-                      (
-                      {formatDuration(structureAgent.duration)}
-                      )
-                    </span>
-                  )}
-                  <span className="text-text-subtle">─┐</span>
-                  {structureAgent?.data?.blockCount !== undefined && (
-                    <span className="text-text-subtle">
-                      (
-                      {structureAgent.data.blockCount}
-                      {" "}
-                      blocks)
-                    </span>
-                  )}
-                </div>
-              </div>
-            </div>
-          );
-        }
-
-        // show theme completion after structure in parallel view
-        if (agent.name === "copy" && isParallel && themeAgent) {
-          return (
-            <div key={i}>
-              <div className="flex items-center gap-2 py-0.5">
-                <span className="text-text-subtle">├─</span>
-                {themeAgent.status === "complete"
-                  ? <span className="text-success">●</span>
-                  : <span className="animate-pulse text-warning">◐</span>}
-                <span>Theme</span>
-                {themeAgent.duration && (
-                  <span className="text-text-subtle">
-                    (
-                    {formatDuration(themeAgent.duration)}
-                    )
-                  </span>
-                )}
-                <span className="text-text-subtle">─┘</span>
-                {themeAgent.data?.palette && (
-                  <span className="text-text-subtle">
-                    →
-                    {themeAgent.data.palette}
-                    {themeAgent.data.typography && ` + ${themeAgent.data.typography}`}
-                  </span>
-                )}
-              </div>
-              <div className="flex items-center gap-2 py-0.5">
-                <span className="text-text-subtle">└─</span>
-                {isComplete
-                  ? <span className="text-success">●</span>
-                  : <span className="animate-pulse text-warning">◐</span>}
-                <span>Copy</span>
-                {agent.duration && (
-                  <span className="text-text-subtle">
-                    (
-                    {formatDuration(agent.duration)}
-                    )
-                  </span>
-                )}
-              </div>
-            </div>
-          );
-        }
-
-        return (
-          <div key={i} className="flex items-center gap-2 py-0.5">
-            <span className="text-text-subtle">{i === agents.length - 1 ? "└─" : "├─"}</span>
-            {isComplete
-              ? <span className="text-success">●</span>
-              : isRunning
-                ? <span className="animate-pulse text-warning">◐</span>
-                : <span className="text-text-subtle">○</span>}
-            <span className="capitalize">{agent.name}</span>
-            {agent.duration && (
+    <div className="px-3 py-2 text-xs text-text-subtle bg-bg-subtle font-mono flex items-center gap-2">
+      {allComplete
+        ? (
+          <>
+            <span className="text-success">✓</span>
+            <span>
+              {agents.length}
+              {" "}
+              agents ·
+              {formatDuration(totalDuration)}
+            </span>
+            {themeAgent?.data?.palette && (
               <span className="text-text-subtle">
-                (
-                {formatDuration(agent.duration)}
-                )
+                {themeAgent.data.palette}
+                {themeAgent.data.typography && ` + ${themeAgent.data.typography}`}
               </span>
             )}
-            {agent.summary && (
-              <span className="text-text-subtle truncate max-w-xs">
-                →
-                {agent.summary}
-              </span>
-            )}
-            {agent.name === "image" && agent.data?.planned !== undefined && (
-              <span className="text-text-subtle">
-                →
-                {agent.data.planned}
-                {" "}
-                planned,
-                {" "}
-                {agent.data.resolved ?? 0}
-                {" "}
-                resolved
-              </span>
-            )}
-          </div>
-        );
-      })}
+          </>
+        )
+        : (
+          <>
+            <Spinner size="sm" />
+            <span className="capitalize">
+              {runningAgent?.name ?? "Starting"}
+            </span>
+            <span className="text-text-subtle">
+              (
+              {completedCount}
+              /
+              {agents.length || "?"}
+              )
+            </span>
+          </>
+        )}
+      <TimelineModal agents={agents} isLoading={isLoading} trigger={trigger} />
     </div>
   );
 }
