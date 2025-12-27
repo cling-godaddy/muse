@@ -145,13 +145,16 @@ export function createMediaClient(config: MediaClientConfig): MediaClient {
 
       setCache(cacheKey, results);
 
-      // Store in bank (async, don't block)
+      // Store in bank and get S3 URLs
       if (bank && results.length > 0) {
-        Promise.all(
+        const stored = await Promise.all(
           results.map(r => bank.store(r, queryString)),
-        ).then(() => bank.sync()).catch((err) => {
-          log.error("bank_store_failed", { error: err instanceof Error ? err.message : String(err) });
+        );
+        // Sync to S3 in background (don't block)
+        bank.sync().catch((err) => {
+          log.error("bank_sync_failed", { error: err instanceof Error ? err.message : String(err) });
         });
+        return stored;
       }
 
       return results;
@@ -226,12 +229,14 @@ export function createMediaClient(config: MediaClientConfig): MediaClient {
               log.debug("search_results", { provider: providerName, query: queryString, count: results.length });
               setCache(cacheKey, results);
 
-              // Store in bank (async, don't block)
+              // Store in bank and get S3 URLs
               if (bank && results.length > 0) {
-                Promise.all(
+                results = await Promise.all(
                   results.map(r => bank.store(r, queryString)),
-                ).then(() => bank.sync()).catch((err) => {
-                  log.error("bank_store_failed", { error: err instanceof Error ? err.message : String(err) });
+                );
+                // Sync to S3 in background (don't block)
+                bank.sync().catch((err) => {
+                  log.error("bank_sync_failed", { error: err instanceof Error ? err.message : String(err) });
                 });
               }
             }

@@ -7,7 +7,7 @@ export type { Attribution, QueryMapping, BankData, ImageMetadata, VectorIndices,
 
 export interface ImageBank {
   search(query: string, opts?: BankSearchOptions): Promise<ImageSearchResult[]>
-  store(result: ImageSearchResult, query: string): Promise<void>
+  store(result: ImageSearchResult, query: string): Promise<ImageSearchResult>
   sync(): Promise<void>
 }
 
@@ -35,8 +35,20 @@ export async function createImageBank(config: BankConfig): Promise<ImageBank> {
       }));
     },
 
-    async store(result: ImageSearchResult, query: string): Promise<void> {
-      await store.store(result, query);
+    async store(result: ImageSearchResult, query: string): Promise<ImageSearchResult> {
+      const entry = await store.store(result, query);
+      // Return with S3 URLs
+      return {
+        id: entry.providerId,
+        title: entry.title,
+        description: entry.description,
+        previewUrl: store.getImageUrl(entry, "preview"),
+        displayUrl: store.getImageUrl(entry, "display"),
+        width: entry.width,
+        height: entry.height,
+        provider: entry.provider,
+        attribution: entry.attribution,
+      };
     },
 
     async sync(): Promise<void> {

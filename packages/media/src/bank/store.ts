@@ -37,7 +37,7 @@ interface StoreState {
 export interface ImageBankStore {
   load(): Promise<void>
   search(query: string, opts?: BankSearchOptions): Promise<BankEntry[]>
-  store(image: ImageSearchResult, query: string): Promise<void>
+  store(image: ImageSearchResult, query: string): Promise<BankEntry>
   getImageUrl(entry: BankEntry, size: "preview" | "display"): string
   sync(): Promise<void>
 }
@@ -108,10 +108,8 @@ export function createImageBankStore(config: BankConfig): ImageBankStore {
       // Load FAISS index
       const indexBuffer = await s3.downloadBuffer(BANK_INDEX_KEY);
       if (indexBuffer) {
-        // faiss-node can read from a file path, so we need a temp approach
-        // For now, we'll rebuild from scratch if we can't load
-        // TODO: implement proper index loading from buffer
-        log.info("bank_index_loaded", { vectors: state.nextIndex });
+        state.index = faiss.Index.fromBuffer(indexBuffer);
+        log.info("bank_index_loaded", { vectors: state.index.ntotal() });
       }
       else {
         log.info("bank_index_new", { message: "Starting with empty index" });
@@ -189,14 +187,14 @@ export function createImageBankStore(config: BankConfig): ImageBankStore {
       return limited.map(m => m.entry);
     },
 
-    async store(image: ImageSearchResult, query: string): Promise<void> {
+    async store(image: ImageSearchResult, query: string): Promise<BankEntry> {
       const entryId = `${image.provider}:${image.id}`;
 
-      // Skip if image already exists (we have full analysis already)
+      // Return existing entry if already stored
       const existing = state.entries.get(entryId);
       if (existing) {
-        log.debug("bank_store_skip", { entryId, reason: "already_analyzed" });
-        return;
+        log.debug("bank_store_existing", { entryId });
+        return existing;
       }
 
       log.debug("bank_store_new", { entryId, query });
@@ -287,6 +285,8 @@ export function createImageBankStore(config: BankConfig): ImageBankStore {
         expansions: analysis.expansions.length,
         vectors: 2 + expansionIndices.length,
       });
+
+      return entry;
     },
 
     getImageUrl(entry: BankEntry, size: "preview" | "display"): string {
@@ -309,9 +309,12 @@ export function createImageBankStore(config: BankConfig): ImageBankStore {
       };
       await s3.uploadJson(BANK_DATA_KEY, data);
 
-      // TODO: Save FAISS index to S3
-      // faiss-node writes to file, would need temp file approach
-      // For now, index is rebuilt on load
+      // Save FAISS index to S3
+      if (state.index.ntotal() > 0) {
+        const indexBuffer = state.index.toBuffer();
+        await s3.uploadBuffer(BANK_INDEX_KEY, indexBuffer, "application/octet-stream");
+        log.info("bank_index_saved", { vectors: state.index.ntotal() });
+      }
 
       state.dirty = false;
       log.info("bank_sync_complete", { entries: state.entries.size });
