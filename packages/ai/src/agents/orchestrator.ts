@@ -8,7 +8,7 @@ import { structureAgent, parseStructure } from "./structure";
 import { themeAgent, themeSystemPrompt, parseThemeSelection, type ThemeSelection } from "./theme";
 import { imageAgent, parseImagePlan } from "./image";
 import { copyAgent } from "./copy";
-import type { BrandBrief, PageStructure } from "./types";
+import type { BrandBrief, PageStructure, CopyBlockContent } from "./types";
 
 // Strict parsers that throw on failure (for retry logic)
 function parseBriefStrict(json: string): BrandBrief {
@@ -49,6 +49,27 @@ function parseThemeStrict(json: string): ThemeSelection {
     throw new Error("Missing required fields: palette or typography");
   }
   return { palette: parsed.palette, typography: parsed.typography };
+}
+
+const BLOCK_REGEX = /\[BLOCK\]([\s\S]*?)\[\/BLOCK\]/g;
+
+function extractCopyBlocks(copyOutput: string): CopyBlockContent[] {
+  const results: CopyBlockContent[] = [];
+  for (const match of copyOutput.matchAll(BLOCK_REGEX)) {
+    const json = match[1];
+    if (!json) continue;
+    try {
+      const block = JSON.parse(json.trim());
+      results.push({
+        id: block.id,
+        headline: block.headline,
+        subheadline: block.subheadline,
+        itemTitles: block.items?.map((i: { title?: string }) => i.title).filter(Boolean),
+      });
+    }
+    catch { /* skip malformed */ }
+  }
+  return results;
 }
 
 export interface OrchestratorInput {
@@ -147,14 +168,38 @@ export async function* orchestrate(
   // emit theme marker for existing parser compatibility (uses palette as theme)
   yield `[THEME:${themeResult.selection.palette}]\n`;
 
-  // step 3: plan and resolve images
+  // step 3: generate copy (streaming)
+  yield "[AGENT:copy:start]\n";
+  const copyStart = Date.now();
+  const copyLog = log.child({ agent: "copy" });
+  copyLog.debug("context", { brief, structure });
+
+  let copyOutput = "";
+  for await (const chunk of copyAgent.run(
+    { prompt, messages: input.messages, brief, structure },
+    provider,
+  )) {
+    copyOutput += chunk;
+    yield chunk;
+  }
+
+  const copyDuration = Date.now() - copyStart;
+  copyLog.info("complete", { duration: copyDuration });
+
+  yield `[AGENT:copy:complete]${JSON.stringify({
+    duration: copyDuration,
+  })}\n`;
+
+  const copyBlocks = extractCopyBlocks(copyOutput);
+
+  // step 4: plan and resolve images (using copy context)
   let images: ImageSelection[] = [];
   if (config?.mediaClient) {
     yield "[AGENT:image:start]\n";
     const imageStart = Date.now();
     const imageLog = log.child({ agent: "image" });
 
-    const imagePlanJson = await imageAgent.run({ prompt, brief, structure }, provider);
+    const imagePlanJson = await imageAgent.run({ prompt, brief, structure, copyBlocks }, provider);
     imageLog.debug("raw_response", { response: imagePlanJson });
 
     // Identify blocks that need mixed orientations for masonry-style layouts
@@ -194,24 +239,4 @@ export async function* orchestrate(
       yield `[IMAGES:${JSON.stringify(images)}]\n`;
     }
   }
-
-  // step 4: generate copy (streaming)
-  yield "[AGENT:copy:start]\n";
-  const copyStart = Date.now();
-  const copyLog = log.child({ agent: "copy" });
-  copyLog.debug("context", { brief, structure, imageCount: images.length });
-
-  for await (const chunk of copyAgent.run(
-    { prompt, messages: input.messages, brief, structure },
-    provider,
-  )) {
-    yield chunk;
-  }
-
-  const copyDuration = Date.now() - copyStart;
-  copyLog.info("complete", { duration: copyDuration });
-
-  yield `[AGENT:copy:complete]${JSON.stringify({
-    duration: copyDuration,
-  })}\n`;
 }

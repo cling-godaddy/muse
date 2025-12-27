@@ -21,11 +21,19 @@ export interface PageStructure {
   blocks: BlockStructure[]
 }
 
+export interface CopyBlockContent {
+  id: string
+  headline?: string
+  subheadline?: string
+  itemTitles?: string[]
+}
+
 export interface AgentInput {
   prompt: string
   messages?: Message[]
   brief?: BrandBrief
   structure?: PageStructure
+  copyBlocks?: CopyBlockContent[]
   context?: Record<string, unknown>
   retryFeedback?: string
 }

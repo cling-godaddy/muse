@@ -1,7 +1,7 @@
 import { createLogger } from "@muse/logger";
 import { getMaxImageRequirements, type SectionType } from "@muse/core";
 import type { JsonSchema, Provider } from "../types";
-import type { AgentInput, SyncAgent, PageStructure, BrandBrief, ImagePlan } from "./types";
+import type { AgentInput, SyncAgent, PageStructure, BrandBrief, ImagePlan, CopyBlockContent } from "./types";
 
 const log = createLogger().child({ agent: "image" });
 
@@ -33,7 +33,7 @@ const imagePlanSchema: JsonSchema = {
   },
 };
 
-function buildPlanningPrompt(brief: BrandBrief, structure: PageStructure): string {
+function buildPlanningPrompt(brief: BrandBrief, structure: PageStructure, copyBlocks?: CopyBlockContent[]): string {
   const blocksWithImages = structure.blocks
     .map((b) => {
       // Use max requirements for section type to support preset switching
@@ -58,7 +58,13 @@ BRAND BRIEF:
 - Brand Voice: ${brief.brandVoice.join(", ")}
 
 PAGE CONTEXT:
-${structure.blocks.map(b => `- ${b.id} (${b.type}): ${b.purpose}`).join("\n")}
+${structure.blocks.map((b) => {
+  const copy = copyBlocks?.find(c => c.id === b.id);
+  const copyLine = copy?.headline
+    ? `\n  Headline: "${copy.headline}"${copy.subheadline ? ` | Subheadline: "${copy.subheadline}"` : ""}`
+    : "";
+  return `- ${b.id} (${b.type}): ${b.purpose}${copyLine}`;
+}).join("\n")}
 
 ${requirementsSection}
 
@@ -66,7 +72,7 @@ RULES:
 - Output exactly ONE plan item per block listed above
 - Use the exact category, count, and orientation specified
 - Do NOT split blocks into multiple plan items
-- Search queries should be specific and evocative
+- Search queries should be specific and evocative, using the headline/copy context when available
 - Provider: "unsplash" for editorial/lifestyle, "pexels" for objects/products
 
 Return empty items array if no images needed.`;
@@ -84,7 +90,7 @@ export const imageAgent: SyncAgent = {
     }
 
     const messages = [
-      { role: "system" as const, content: buildPlanningPrompt(input.brief, input.structure) },
+      { role: "system" as const, content: buildPlanningPrompt(input.brief, input.structure, input.copyBlocks) },
       { role: "user" as const, content: `Plan images for a page about: ${input.prompt}` },
     ];
     if (input.retryFeedback) {
