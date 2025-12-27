@@ -69,13 +69,16 @@ html, body, #root {
     @apply border-primary/30;
   }
   .muse-block-controls {
-    @apply absolute -top-3 right-2 flex gap-1 opacity-0 transition-opacity;
+    @apply absolute -top-3 right-2 z-10 flex gap-1 opacity-0 transition-opacity;
   }
   .muse-block:hover .muse-block-controls {
     @apply opacity-100;
   }
   .muse-block-delete {
-    @apply w-6 h-6 flex items-center justify-center bg-bg border border-border rounded text-text-muted cursor-pointer hover:bg-border hover:text-text;
+    @apply w-6 h-6 flex items-center justify-center bg-white border border-gray-200 rounded-md text-gray-400 cursor-pointer shadow-sm transition-colors;
+  }
+  .muse-block-delete:hover {
+    @apply border-gray-300 text-gray-600;
   }
   .muse-block--unknown {
     @apply p-4 bg-bg-muted text-text-muted;
