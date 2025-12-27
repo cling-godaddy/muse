@@ -9,3 +9,4 @@ dist
 coverage
 .claude
 .idea
+pnpm-approve-builds.txt
