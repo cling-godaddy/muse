@@ -1,8 +1,18 @@
 import type { Theme } from "./types";
 
+function hexToRgb(hex: string): string {
+  const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+  if (!result || result.length < 4) return "0, 0, 0";
+  const r = parseInt(result[1] ?? "0", 16);
+  const g = parseInt(result[2] ?? "0", 16);
+  const b = parseInt(result[3] ?? "0", 16);
+  return `${r}, ${g}, ${b}`;
+}
+
 export function themeToCssVars(theme: Theme): Record<string, string> {
   return {
     "--muse-theme-primary": theme.colors.primary,
+    "--muse-theme-primary-rgb": hexToRgb(theme.colors.primary),
     "--muse-theme-primary-hover": theme.colors.primaryHover,
     "--muse-theme-accent": theme.colors.accent,
     "--muse-theme-bg": theme.colors.background,

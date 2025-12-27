@@ -38,9 +38,22 @@ export * from "./typography";
 // new styles system
 export * from "./styles";
 
+// effects system
+export * from "./effects";
+
+// theme bundles
+export * from "./bundles";
+
 // composition
 export { composeTheme, type ThemeOverrides } from "./compose";
-export { resolveTheme, resolveThemeFromSelection, type ThemeConfig } from "./resolve";
+export {
+  resolveTheme,
+  resolveThemeFromSelection,
+  resolveThemeWithEffects,
+  resolveThemeFromBundle,
+  type ThemeConfig,
+  type ResolvedTheme,
+} from "./resolve";
 
 // font loading
 export { loadFonts, buildGoogleFontsUrl } from "./fonts";

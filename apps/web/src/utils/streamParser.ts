@@ -23,6 +23,7 @@ export interface AgentState {
 export interface ThemeSelection {
   palette: string
   typography: string
+  effects?: string
 }
 
 export interface ParseState {

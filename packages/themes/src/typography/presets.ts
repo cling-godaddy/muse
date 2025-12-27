@@ -196,6 +196,25 @@ export const archivo: TypographyPreset = {
 };
 
 // ============================================================================
+// TECHNICAL - monospace fonts
+// ============================================================================
+
+export const terminalTypography: TypographyPreset = {
+  id: "terminal",
+  name: "JetBrains Mono",
+  category: "expressive",
+  mood: "creative",
+  tags: ["monospace", "developer", "hacker", "technical", "code"],
+  description: "Monospace font for terminal/hacker aesthetic",
+  fonts: {
+    heading: "\"JetBrains Mono\", \"Fira Code\", \"SF Mono\", monospace",
+    body: "\"JetBrains Mono\", \"Fira Code\", \"SF Mono\", monospace",
+  },
+  weights: { heading: 400, body: 400 },
+  googleFonts: ["JetBrains+Mono:wght@400;500;700"],
+};
+
+// ============================================================================
 // ALL PRESETS
 // ============================================================================
 
@@ -216,6 +235,8 @@ export const typographyPresets = {
   "space-grotesk": spaceGrotesk,
   sora,
   archivo,
+  // technical
+  "terminal": terminalTypography,
 } as const;
 
 export type TypographyId = keyof typeof typographyPresets;

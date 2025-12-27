@@ -61,3 +61,16 @@
 .caption::placeholder {
   color: var(--muse-theme-muted, #9ca3af);
 }
+
+/* ============================================
+   CRT EFFECTS
+   Scanlines, glow for terminal/retro aesthetic
+   ============================================ */
+:global([data-effects="crt"]) .container {
+  border: 1px solid rgba(var(--muse-theme-primary-rgb, 0, 255, 0), 0.2);
+  box-shadow: 0 0 20px rgba(var(--muse-theme-primary-rgb, 0, 255, 0), 0.15);
+}
+
+:global([data-effects="crt"]) .caption {
+  text-shadow: 0 0 6px rgba(var(--muse-theme-primary-rgb, 0, 255, 0), 0.3);
+}

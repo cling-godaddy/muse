@@ -3,7 +3,7 @@ import { groupBy } from "lodash-es";
 import { BlockEditor } from "@muse/editor";
 import type { Block } from "@muse/core";
 import type { ImageSelection } from "@muse/media";
-import { resolveThemeFromSelection, themeToCssVars, getTypography, loadFonts } from "@muse/themes";
+import { resolveThemeWithEffects, themeToCssVars, getTypography, loadFonts } from "@muse/themes";
 import { Chat } from "./components/chat";
 import { useBlocks } from "./hooks/useBlocks";
 import type { ThemeSelection } from "./utils/streamParser";
@@ -11,20 +11,25 @@ import type { ThemeSelection } from "./utils/streamParser";
 interface ThemeState {
   palette: string
   typography: string
+  effects: string
 }
 
 export function App() {
   const { blocks, addBlock, updateBlock, setBlocks } = useBlocks();
   const blocksRef = useRef(blocks);
-  const [theme, setTheme] = useState<ThemeState>({ palette: "slate", typography: "inter" });
+  const [theme, setTheme] = useState<ThemeState>({ palette: "slate", typography: "inter", effects: "neutral" });
 
   useLayoutEffect(() => {
     blocksRef.current = blocks;
   }, [blocks]);
 
-  const themeStyle = useMemo(() => {
-    const resolved = resolveThemeFromSelection(theme.palette, theme.typography);
-    return themeToCssVars(resolved);
+  const { themeStyle, effectsId } = useMemo(() => {
+    const { theme: resolved, effects } = resolveThemeWithEffects({
+      palette: theme.palette,
+      typography: theme.typography,
+      effects: theme.effects,
+    });
+    return { themeStyle: themeToCssVars(resolved), effectsId: effects.id };
   }, [theme]);
 
   useEffect(() => {
@@ -37,7 +42,9 @@ export function App() {
   }, [addBlock]);
 
   const handleThemeSelected = useCallback((selection: ThemeSelection) => {
-    setTheme({ palette: selection.palette, typography: selection.typography });
+    // auto-apply CRT effects when terminal palette is selected
+    const effects = selection.effects ?? (selection.palette === "terminal" ? "crt" : "neutral");
+    setTheme({ palette: selection.palette, typography: selection.typography, effects });
   }, []);
 
   const handleImages = useCallback((images: ImageSelection[]) => {
@@ -93,7 +100,7 @@ export function App() {
           <Chat onBlockParsed={handleBlockParsed} onThemeSelected={handleThemeSelected} onImages={handleImages} />
         </div>
         <div className="flex-1 min-w-0 overflow-y-auto">
-          <div className="h-full border border-border rounded bg-bg p-4" style={themeStyle}>
+          <div className="h-full border border-border rounded bg-bg p-4" style={themeStyle} data-effects={effectsId}>
             <BlockEditor blocks={blocks} onChange={setBlocks} />
           </div>
         </div>

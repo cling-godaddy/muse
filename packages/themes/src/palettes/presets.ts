@@ -577,6 +577,33 @@ export const bordeaux: ColorPalette = {
 };
 
 // ============================================================================
+// TECHNICAL
+// ============================================================================
+
+export const terminalPalette: ColorPalette = {
+  id: "terminal",
+  name: "Terminal",
+  category: "neutral",
+  mood: "edgy",
+  temperature: "neutral",
+  contrast: "dark",
+  tags: ["hacker", "developer", "technical", "monochrome", "retro"],
+  industries: ["developer-tools", "security", "crypto", "gaming", "tech"],
+  description: "Green phosphor on black, classic terminal aesthetic",
+  colors: {
+    primary: "#00ff00",
+    primaryHover: "#00cc00",
+    accent: "#00ff00",
+    background: "#0a0a0a",
+    backgroundAlt: "#0f0f0f",
+    text: "#00ff00",
+    textMuted: "#00aa00",
+    heroGradient: "#0a0a0a",
+    ctaBackground: "#00ff00",
+  },
+};
+
+// ============================================================================
 // ALL PALETTES
 // ============================================================================
 
@@ -611,6 +638,8 @@ export const palettes = {
   noir,
   champagne,
   bordeaux,
+  // technical
+  terminal: terminalPalette,
 } as const;
 
 export type PaletteId = keyof typeof palettes;
