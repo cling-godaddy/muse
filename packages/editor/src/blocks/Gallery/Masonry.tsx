@@ -43,7 +43,6 @@ export function Masonry({ block, onUpdate }: Props) {
             <Image
               image={image}
               onUpdate={img => updateImage(i, img)}
-              onReplace={() => { /* TODO: open picker */ }}
               onRemove={() => removeImage(i)}
             />
           </div>

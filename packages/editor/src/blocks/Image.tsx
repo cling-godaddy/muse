@@ -16,7 +16,6 @@ export function Image({ block, onUpdate }: Props) {
         <ImageControl
           image={block.image}
           onUpdate={image => onUpdate({ image })}
-          onReplace={() => { /* TODO: open picker */ }}
           className={styles.img}
         />
         {block.image.provider && (
