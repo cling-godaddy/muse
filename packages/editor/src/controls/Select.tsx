@@ -29,7 +29,7 @@ export function Select({ value, options, onChange, placeholder, ariaLabel }: Pro
       </SelectPrimitive.Trigger>
 
       <SelectPrimitive.Portal>
-        <SelectPrimitive.Content className={styles.content} position="popper" sideOffset={4}>
+        <SelectPrimitive.Content className={styles.content} position="popper" sideOffset={4} side="bottom">
           <SelectPrimitive.Viewport className={styles.viewport}>
             {options.map(option => (
               <SelectPrimitive.Item

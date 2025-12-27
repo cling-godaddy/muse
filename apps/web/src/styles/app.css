@@ -71,7 +71,7 @@ html, body, #root {
     outline-offset: -1px;
   }
   .muse-block-controls {
-    @apply absolute -top-3 right-2 z-10 flex gap-1 opacity-0 transition-opacity;
+    @apply absolute top-2 right-2 z-10 flex gap-1 opacity-0 transition-opacity;
   }
   .muse-block:hover .muse-block-controls {
     @apply opacity-100;
