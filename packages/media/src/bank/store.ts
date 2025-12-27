@@ -129,8 +129,10 @@ export function createImageBankStore(config: BankConfig): ImageBankStore {
       const vec = await embed(query);
 
       // Search FAISS - over-fetch to aggregate by image
-      const k = Math.min(limit * 10, state.nextIndex);
-      if (k === 0) return [];
+      const indexSize = state.index.ntotal();
+      if (indexSize === 0) return [];
+
+      const k = Math.min(limit * 10, indexSize);
 
       const result = state.index.search(Array.from(vec), k);
 
