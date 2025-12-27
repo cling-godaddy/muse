@@ -17,9 +17,11 @@
     "@muse/core": "workspace:*",
     "@muse/logger": "workspace:*",
     "faiss-node": "^0.5.1",
+    "lodash-es": "^4.17.22",
     "openai": "^6.15.0"
   },
   "devDependencies": {
+    "@types/lodash-es": "^4.17.12",
     "@types/node": "^22"
   }
 }
