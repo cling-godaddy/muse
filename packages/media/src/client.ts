@@ -78,24 +78,15 @@ export function createMediaClient(config: MediaClientConfig): MediaClient {
     cache.set(key, { results, expiresAt: Date.now() + cacheTtl });
   }
 
-  async function storeSafe(
-    results: ImageSearchResult[],
-    query: string,
-  ): Promise<ImageSearchResult[]> {
-    if (!bank || results.length === 0) return results;
+  // Fire-and-forget bank storage - don't block on vision/embedding
+  function storeAsync(results: ImageSearchResult[], query: string): void {
+    if (!bank || results.length === 0) return;
 
-    const settled = await Promise.allSettled(
-      results.map(r => bank.store(r, query)),
-    );
-    const stored = settled
-      .filter((r): r is PromiseFulfilledResult<ImageSearchResult> => r.status === "fulfilled")
-      .map(r => r.value);
-
-    bank.sync().catch((err) => {
-      log.error("bank_sync_failed", { error: err instanceof Error ? err.message : String(err) });
-    });
-
-    return stored.length > 0 ? stored : results;
+    Promise.allSettled(results.map(r => bank.store(r, query)))
+      .then(() => bank.sync())
+      .catch((err) => {
+        log.error("bank_store_failed", { error: err instanceof Error ? err.message : String(err) });
+      });
   }
 
   if (config.unsplashKey) {
@@ -172,15 +163,18 @@ export function createMediaClient(config: MediaClientConfig): MediaClient {
       log.debug("search_results", { provider: options.provider, query: queryString, count: results.length });
 
       setCache(cacheKey, results);
+      storeAsync(results, queryString);
 
-      return storeSafe(results, queryString);
+      return results;
     },
 
     async executePlan(plan: ImagePlan[]): Promise<ImageSelection[]> {
       const selections: ImageSelection[] = [];
       const seen = new Set<string>(); // Track provider:id to dedupe
 
-      for (const item of plan) {
+      // Parallelize block processing - fetches run concurrently,
+      // selection phase serialized by event loop (seen set is safe)
+      await Promise.all(plan.map(async (item) => {
         try {
           const count = item.count ?? 1;
 
@@ -222,7 +216,7 @@ export function createMediaClient(config: MediaClientConfig): MediaClient {
           // Fall back to providers if no confident bank hit
           if (results.length === 0) {
             const allProviders = Array.from(providers.entries());
-            if (allProviders.length === 0) continue;
+            if (allProviders.length === 0) return;
 
             // Determine orientations to fetch
             const orientations = item.orientation === "mixed"
@@ -264,7 +258,7 @@ export function createMediaClient(config: MediaClientConfig): MediaClient {
               return true;
             });
 
-            results = await storeSafe(results, queryString);
+            storeAsync(results, queryString);
           }
 
           // Add results up to requested count, skipping duplicates
@@ -315,17 +309,17 @@ export function createMediaClient(config: MediaClientConfig): MediaClient {
                   if (seen.has(key)) continue;
                   seen.add(key);
 
-                  // Store in bank if available
-                  const stored = bank ? await bank.store(result, fillQuery) : result;
+                  // Fire-and-forget bank storage
+                  storeAsync([result], fillQuery);
 
                   selections.push({
                     blockId: item.blockId,
                     category: item.category,
                     image: {
-                      url: stored.displayUrl,
-                      alt: stored.title,
-                      provider: stored.provider,
-                      providerId: stored.id,
+                      url: result.displayUrl,
+                      alt: result.title,
+                      provider: result.provider,
+                      providerId: result.id,
                     },
                   });
                   added++;
@@ -351,7 +345,7 @@ export function createMediaClient(config: MediaClientConfig): MediaClient {
             error: err instanceof Error ? err.message : String(err),
           });
         }
-      }
+      }));
 
       // Shuffle selections within each block for visual variety (masonry)
       const byBlock = new Map<string, ImageSelection[]>();
