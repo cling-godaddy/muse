@@ -1,5 +1,5 @@
 export * from "./types";
-export * from "./presets";
+export { palettes, type PaletteId } from "./presets";
 
 import type { ColorPalette, PaletteCategory } from "./types";
 import { palettes, type PaletteId } from "./presets";

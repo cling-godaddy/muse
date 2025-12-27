@@ -580,7 +580,7 @@ export const bordeaux: ColorPalette = {
 // TECHNICAL
 // ============================================================================
 
-export const terminalPalette: ColorPalette = {
+export const terminal: ColorPalette = {
   id: "terminal",
   name: "Terminal",
   category: "neutral",
@@ -609,7 +609,7 @@ export const terminalPalette: ColorPalette = {
 // SYNTHWAVE
 // ============================================================================
 
-export const synthwavePalette: ColorPalette = {
+export const synthwave: ColorPalette = {
   id: "synthwave",
   name: "Synthwave",
   category: "vibrant",
@@ -638,7 +638,7 @@ export const synthwavePalette: ColorPalette = {
 // BUBBLEGUM
 // ============================================================================
 
-export const bubblegumPalette: ColorPalette = {
+export const bubblegum: ColorPalette = {
   id: "bubblegum",
   name: "Bubblegum",
   category: "vibrant",
@@ -694,14 +694,14 @@ export const palettes = {
   electric,
   aurora,
   candy,
-  synthwave: synthwavePalette,
-  bubblegum: bubblegumPalette,
+  synthwave,
+  bubblegum,
   // luxury
   noir,
   champagne,
   bordeaux,
   // technical
-  terminal: terminalPalette,
+  terminal,
 } as const;
 
 export type PaletteId = keyof typeof palettes;

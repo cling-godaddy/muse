@@ -199,7 +199,7 @@ export const archivo: TypographyPreset = {
 // TECHNICAL - monospace fonts
 // ============================================================================
 
-export const terminalTypography: TypographyPreset = {
+export const terminal: TypographyPreset = {
   id: "terminal",
   name: "JetBrains Mono",
   category: "expressive",
@@ -218,7 +218,7 @@ export const terminalTypography: TypographyPreset = {
 // BUBBLEGUM
 // ============================================================================
 
-export const bubblegumTypography: TypographyPreset = {
+export const bubblegum: TypographyPreset = {
   id: "bubblegum",
   name: "Quicksand + Nunito",
   category: "friendly",
@@ -237,7 +237,7 @@ export const bubblegumTypography: TypographyPreset = {
 // RETRO-FUTURISTIC
 // ============================================================================
 
-export const synthwaveTypography: TypographyPreset = {
+export const synthwave: TypographyPreset = {
   id: "synthwave",
   name: "Orbitron + Inter",
   category: "expressive",
@@ -274,11 +274,11 @@ export const typographyPresets = {
   sora,
   archivo,
   // technical
-  "terminal": terminalTypography,
+  terminal,
   // retro-futuristic
-  "synthwave": synthwaveTypography,
+  synthwave,
   // bubblegum
-  "bubblegum": bubblegumTypography,
+  bubblegum,
 } as const;
 
 export type TypographyId = keyof typeof typographyPresets;

@@ -1,5 +1,5 @@
 export * from "./types";
-export * from "./presets";
+export { typographyPresets, type TypographyId } from "./presets";
 
 import type { TypographyPreset, TypographyCategory } from "./types";
 import { typographyPresets, type TypographyId } from "./presets";
