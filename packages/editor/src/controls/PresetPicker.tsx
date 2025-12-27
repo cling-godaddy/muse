@@ -1,4 +1,5 @@
 import { getPresetsForType, getDefaultPreset, type SectionType } from "@muse/core";
+import { Select } from "./Select";
 
 interface Props {
   blockType: string
@@ -13,18 +14,17 @@ export function PresetPicker({ blockType, currentPreset, onChange }: Props) {
 
   if (presets.length === 0) return null;
 
+  const options = presets.map(preset => ({
+    value: preset.id,
+    label: preset.name,
+  }));
+
   return (
-    <select
-      className="muse-preset-picker"
+    <Select
       value={selected}
-      onChange={e => onChange(e.target.value)}
-      aria-label="Select layout"
-    >
-      {presets.map(preset => (
-        <option key={preset.id} value={preset.id}>
-          {preset.name}
-        </option>
-      ))}
-    </select>
+      options={options}
+      onChange={onChange}
+      ariaLabel="Select layout"
+    />
   );
 }
