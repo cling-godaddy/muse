@@ -219,82 +219,52 @@ export function createMediaClient(config: MediaClientConfig): MediaClient {
             }
           }
 
-          // Fall back to provider if no confident bank hit
+          // Fall back to providers if no confident bank hit
           if (results.length === 0) {
-            let providerName: string = item.provider;
-            let activeProvider = providers.get(item.provider);
+            const allProviders = Array.from(providers.entries());
+            if (allProviders.length === 0) continue;
 
-            if (!activeProvider) {
-              const fallbackEntry = providers.entries().next().value as [string, MediaProvider] | undefined;
-              if (!fallbackEntry) continue;
+            // Determine orientations to fetch
+            const orientations = item.orientation === "mixed"
+              ? MIXED_ORIENTATIONS
+              : [item.orientation] as const;
 
-              log.warn("provider_fallback", { requested: item.provider, fallback: fallbackEntry[0], blockId: item.blockId });
-              providerName = fallbackEntry[0];
-              activeProvider = fallbackEntry[1];
-            }
+            const numRequests = allProviders.length * orientations.length;
+            const perRequest = Math.ceil(count / numRequests) + DEDUP_BUFFER;
 
-            // Handle mixed orientation: parallel fetch from all orientations AND all providers
-            if (item.orientation === "mixed") {
-              const perOrientation = Math.ceil(count / 3) + DEDUP_BUFFER;
-              const allProviders = Array.from(providers.entries());
+            // Parallel fetch from ALL providers × orientations
+            const batches = await Promise.all(
+              allProviders.flatMap(([pName, prov]) =>
+                orientations.map(async (orientation) => {
+                  const cacheKey = normalizeResult
+                    ? buildCacheKey(pName, normalizeResult.intent, orientation, item.category)
+                    : simpleCacheKey(pName, item.searchQuery, orientation, item.category);
 
-              const batches = await Promise.all(
-                allProviders.flatMap(([pName, prov]) =>
-                  MIXED_ORIENTATIONS.map(async (orientation) => {
-                    const cacheKey = normalizeResult
-                      ? buildCacheKey(pName, normalizeResult.intent, orientation, item.category)
-                      : simpleCacheKey(pName, item.searchQuery, orientation, item.category);
+                  const cached = getCached(cacheKey);
+                  if (cached) {
+                    log.debug("cache_hit", { provider: pName, cacheKey, blockId: item.blockId, orientation });
+                    return cached;
+                  }
 
-                    const cached = getCached(cacheKey);
-                    if (cached) {
-                      log.debug("cache_hit", { provider: pName, cacheKey, blockId: item.blockId, orientation });
-                      return cached;
-                    }
+                  log.debug("search", { provider: pName, query: queryString, blockId: item.blockId, orientation });
+                  const batch = await prov.search(queryString, { orientation, count: perRequest });
+                  log.debug("search_results", { provider: pName, query: queryString, orientation, count: batch.length });
+                  setCache(cacheKey, batch);
+                  return batch;
+                }),
+              ),
+            );
 
-                    log.debug("search", { provider: pName, query: queryString, blockId: item.blockId, orientation });
-                    const batch = await prov.search(queryString, { orientation, count: perOrientation });
-                    log.debug("search_results", { provider: pName, query: queryString, orientation, count: batch.length });
-                    setCache(cacheKey, batch);
-                    return batch;
-                  }),
-                ),
-              );
+            // Dedupe within batch
+            const batchSeen = new Set<string>();
+            results = batches.flat().filter((r) => {
+              const key = `${r.provider}:${r.id}`;
+              if (batchSeen.has(key)) return false;
+              batchSeen.add(key);
+              return true;
+            });
 
-              // Dedupe within batch (same image might appear in multiple orientations)
-              const batchSeen = new Set<string>();
-              results = batches.flat().filter((r) => {
-                const key = `${r.provider}:${r.id}`;
-                if (batchSeen.has(key)) return false;
-                batchSeen.add(key);
-                return true;
-              });
-
-              results = await storeSafe(results, queryString);
-            }
-            else {
-              // Single orientation fetch
-              const cacheKey = normalizeResult
-                ? buildCacheKey(providerName, normalizeResult.intent, item.orientation, item.category)
-                : simpleCacheKey(providerName, item.searchQuery, item.orientation, item.category);
-
-              const cached = getCached(cacheKey);
-
-              if (cached) {
-                results = cached;
-                log.debug("cache_hit", { provider: providerName, cacheKey, blockId: item.blockId });
-              }
-              else {
-                log.debug("search", { provider: providerName, query: queryString, blockId: item.blockId, category: item.category });
-                results = await activeProvider.search(queryString, {
-                  orientation: item.orientation,
-                  count,
-                });
-                log.debug("search_results", { provider: providerName, query: queryString, count: results.length });
-                setCache(cacheKey, results);
-
-                results = await storeSafe(results, queryString);
-              }
-            }
+            results = await storeSafe(results, queryString);
           }
 
           // Add results up to requested count, skipping duplicates
