@@ -1,3 +1,4 @@
+import { sample, shuffle } from "lodash-es";
 import type { Logger } from "@muse/logger";
 import type { MediaClient, MediaProvider, ImagePlan, ImageSelection, ImageSearchOptions, ImageSearchResult, ImageCategory } from "./types";
 import type { ImageBank } from "./bank";
@@ -28,6 +29,9 @@ interface CacheEntry {
 }
 
 const DEFAULT_CACHE_TTL = 15 * 60 * 1000; // 15 minutes
+const CONFIDENT_SCORE = 0.90; // Only use bank when highly confident
+const MIXED_ORIENTATIONS = ["horizontal", "vertical", "square"] as const;
+const DEDUP_BUFFER = 5; // Extra images per orientation to handle cross-block dedup
 
 export function createMediaClient(config: MediaClientConfig): MediaClient {
   const providers = new Map<string, MediaProvider>();
@@ -74,6 +78,26 @@ export function createMediaClient(config: MediaClientConfig): MediaClient {
     cache.set(key, { results, expiresAt: Date.now() + cacheTtl });
   }
 
+  async function storeSafe(
+    results: ImageSearchResult[],
+    query: string,
+  ): Promise<ImageSearchResult[]> {
+    if (!bank || results.length === 0) return results;
+
+    const settled = await Promise.allSettled(
+      results.map(r => bank.store(r, query)),
+    );
+    const stored = settled
+      .filter((r): r is PromiseFulfilledResult<ImageSearchResult> => r.status === "fulfilled")
+      .map(r => r.value);
+
+    bank.sync().catch((err) => {
+      log.error("bank_sync_failed", { error: err instanceof Error ? err.message : String(err) });
+    });
+
+    return stored.length > 0 ? stored : results;
+  }
+
   if (config.unsplashKey) {
     providers.set("unsplash", createUnsplashProvider(config.unsplashKey));
   }
@@ -106,15 +130,19 @@ export function createMediaClient(config: MediaClientConfig): MediaClient {
         });
       }
 
-      // Check bank first (semantic search)
+      // Check bank first (semantic search) - only use if confident
       if (bank) {
-        const bankResults = await bank.search(queryString, {
+        const bankResult = await bank.search(queryString, {
           orientation: options.orientation,
           limit: options.count,
         });
-        if (bankResults.length > 0) {
-          log.debug("bank_hit", { query: queryString, count: bankResults.length });
-          return bankResults;
+        if (bankResult.results.length > 0 && bankResult.topScore >= CONFIDENT_SCORE) {
+          log.debug("bank_hit_confident", { query: queryString, score: bankResult.topScore, count: bankResult.results.length });
+          return bankResult.results;
+        }
+        if (bankResult.results.length > 0) {
+          log.debug("bank_hit_borderline", { query: queryString, score: bankResult.topScore });
+          // Fall through to provider - borderline match not trusted
         }
       }
 
@@ -145,19 +173,7 @@ export function createMediaClient(config: MediaClientConfig): MediaClient {
 
       setCache(cacheKey, results);
 
-      // Store in bank and get S3 URLs
-      if (bank && results.length > 0) {
-        const stored = await Promise.all(
-          results.map(r => bank.store(r, queryString)),
-        );
-        // Sync to S3 in background (don't block)
-        bank.sync().catch((err) => {
-          log.error("bank_sync_failed", { error: err instanceof Error ? err.message : String(err) });
-        });
-        return stored;
-      }
-
-      return results;
+      return storeSafe(results, queryString);
     },
 
     async executePlan(plan: ImagePlan[]): Promise<ImageSelection[]> {
@@ -186,18 +202,24 @@ export function createMediaClient(config: MediaClientConfig): MediaClient {
 
           let results: ImageSearchResult[] = [];
 
-          // Check bank first (semantic search)
-          if (bank) {
-            results = await bank.search(queryString, {
+          // Check bank first (semantic search) - only use if confident
+          // Skip bank for mixed orientation - parallel fetch handles it
+          if (bank && item.orientation !== "mixed") {
+            const bankResult = await bank.search(queryString, {
               orientation: item.orientation,
               limit: count,
             });
-            if (results.length > 0) {
-              log.debug("bank_hit", { query: queryString, blockId: item.blockId, count: results.length });
+            if (bankResult.results.length > 0 && bankResult.topScore >= CONFIDENT_SCORE) {
+              results = bankResult.results;
+              log.debug("bank_hit_confident", { query: queryString, blockId: item.blockId, score: bankResult.topScore, count: results.length });
+            }
+            else if (bankResult.results.length > 0) {
+              log.debug("bank_hit_borderline", { query: queryString, blockId: item.blockId, score: bankResult.topScore });
+              // Fall through to provider - borderline match not trusted
             }
           }
 
-          // Fall back to provider if bank miss
+          // Fall back to provider if no confident bank hit
           if (results.length === 0) {
             let providerName: string = item.provider;
             let activeProvider = providers.get(item.provider);
@@ -211,34 +233,66 @@ export function createMediaClient(config: MediaClientConfig): MediaClient {
               activeProvider = fallbackEntry[1];
             }
 
-            const cacheKey = normalizeResult
-              ? buildCacheKey(providerName, normalizeResult.intent, item.orientation, item.category)
-              : simpleCacheKey(providerName, item.searchQuery, item.orientation, item.category);
+            // Handle mixed orientation: parallel fetch from all orientations AND all providers
+            if (item.orientation === "mixed") {
+              const perOrientation = Math.ceil(count / 3) + DEDUP_BUFFER;
+              const allProviders = Array.from(providers.entries());
 
-            const cached = getCached(cacheKey);
+              const batches = await Promise.all(
+                allProviders.flatMap(([pName, prov]) =>
+                  MIXED_ORIENTATIONS.map(async (orientation) => {
+                    const cacheKey = normalizeResult
+                      ? buildCacheKey(pName, normalizeResult.intent, orientation, item.category)
+                      : simpleCacheKey(pName, item.searchQuery, orientation, item.category);
 
-            if (cached) {
-              results = cached;
-              log.debug("cache_hit", { provider: providerName, cacheKey, blockId: item.blockId });
+                    const cached = getCached(cacheKey);
+                    if (cached) {
+                      log.debug("cache_hit", { provider: pName, cacheKey, blockId: item.blockId, orientation });
+                      return cached;
+                    }
+
+                    log.debug("search", { provider: pName, query: queryString, blockId: item.blockId, orientation });
+                    const batch = await prov.search(queryString, { orientation, count: perOrientation });
+                    log.debug("search_results", { provider: pName, query: queryString, orientation, count: batch.length });
+                    setCache(cacheKey, batch);
+                    return batch;
+                  }),
+                ),
+              );
+
+              // Dedupe within batch (same image might appear in multiple orientations)
+              const batchSeen = new Set<string>();
+              results = batches.flat().filter((r) => {
+                const key = `${r.provider}:${r.id}`;
+                if (batchSeen.has(key)) return false;
+                batchSeen.add(key);
+                return true;
+              });
+
+              results = await storeSafe(results, queryString);
             }
             else {
-              log.debug("search", { provider: providerName, query: queryString, blockId: item.blockId, category: item.category });
-              results = await activeProvider.search(queryString, {
-                orientation: item.orientation,
-                count,
-              });
-              log.debug("search_results", { provider: providerName, query: queryString, count: results.length });
-              setCache(cacheKey, results);
+              // Single orientation fetch
+              const cacheKey = normalizeResult
+                ? buildCacheKey(providerName, normalizeResult.intent, item.orientation, item.category)
+                : simpleCacheKey(providerName, item.searchQuery, item.orientation, item.category);
 
-              // Store in bank and get S3 URLs
-              if (bank && results.length > 0) {
-                results = await Promise.all(
-                  results.map(r => bank.store(r, queryString)),
-                );
-                // Sync to S3 in background (don't block)
-                bank.sync().catch((err) => {
-                  log.error("bank_sync_failed", { error: err instanceof Error ? err.message : String(err) });
+              const cached = getCached(cacheKey);
+
+              if (cached) {
+                results = cached;
+                log.debug("cache_hit", { provider: providerName, cacheKey, blockId: item.blockId });
+              }
+              else {
+                log.debug("search", { provider: providerName, query: queryString, blockId: item.blockId, category: item.category });
+                results = await activeProvider.search(queryString, {
+                  orientation: item.orientation,
+                  count,
                 });
+                log.debug("search_results", { provider: providerName, query: queryString, count: results.length });
+                setCache(cacheKey, results);
+
+                results = await storeSafe(results, queryString);
               }
             }
           }
@@ -262,6 +316,63 @@ export function createMediaClient(config: MediaClientConfig): MediaClient {
             });
             added++;
           }
+
+          // Fill loop for mixed orientation if we didn't get enough
+          if (added < count && item.orientation === "mixed") {
+            log.warn("mixed_fill_needed", { blockId: item.blockId, requested: count, got: added });
+
+            const allProviders = Array.from(providers.values());
+            const maxAttempts = (count - added) * 2; // Don't loop forever
+            let attempts = 0;
+
+            // Try broader fallback queries if original is too specific
+            const fallbackQueries = [queryString, item.searchQuery, "restaurant interior", "food photography"];
+
+            fillLoop: while (added < count && attempts < maxAttempts) {
+              attempts++;
+              const orientation = sample(MIXED_ORIENTATIONS) ?? "horizontal";
+              const fillProvider = sample(allProviders);
+              const fillQuery = fallbackQueries[Math.min(attempts - 1, fallbackQueries.length - 1)] ?? "restaurant";
+
+              if (!fillProvider) break;
+
+              try {
+                const fillResults = await fillProvider.search(fillQuery, { orientation, count: 5 });
+
+                for (const result of fillResults) {
+                  if (added >= count) break fillLoop;
+                  const key = `${result.provider}:${result.id}`;
+                  if (seen.has(key)) continue;
+                  seen.add(key);
+
+                  // Store in bank if available
+                  const stored = bank ? await bank.store(result, fillQuery) : result;
+
+                  selections.push({
+                    blockId: item.blockId,
+                    category: item.category,
+                    image: {
+                      url: stored.displayUrl,
+                      alt: stored.title,
+                      provider: stored.provider,
+                      providerId: stored.id,
+                    },
+                  });
+                  added++;
+                }
+              }
+              catch (fillErr) {
+                log.warn("fill_attempt_failed", { blockId: item.blockId, orientation, error: String(fillErr) });
+              }
+            }
+
+            if (added < count) {
+              log.warn("mixed_fill_incomplete", { blockId: item.blockId, requested: count, final: added });
+            }
+            else {
+              log.debug("mixed_fill_complete", { blockId: item.blockId, count: added });
+            }
+          }
         }
         catch (err) {
           log.error("search_failed", {
@@ -272,7 +383,19 @@ export function createMediaClient(config: MediaClientConfig): MediaClient {
         }
       }
 
-      return selections;
+      // Shuffle selections within each block for visual variety (masonry)
+      const byBlock = new Map<string, ImageSelection[]>();
+      for (const sel of selections) {
+        const arr = byBlock.get(sel.blockId) ?? [];
+        arr.push(sel);
+        byBlock.set(sel.blockId, arr);
+      }
+      const shuffled: ImageSelection[] = [];
+      for (const arr of byBlock.values()) {
+        shuffled.push(...shuffle(arr));
+      }
+
+      return shuffled;
     },
   };
 }
