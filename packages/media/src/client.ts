@@ -162,6 +162,7 @@ export function createMediaClient(config: MediaClientConfig): MediaClient {
 
     async executePlan(plan: ImagePlan[]): Promise<ImageSelection[]> {
       const selections: ImageSelection[] = [];
+      const seen = new Set<string>(); // Track provider:id to dedupe
 
       for (const item of plan) {
         try {
@@ -242,8 +243,13 @@ export function createMediaClient(config: MediaClientConfig): MediaClient {
             }
           }
 
-          // Add results up to requested count
-          for (const result of results.slice(0, count)) {
+          // Add results up to requested count, skipping duplicates
+          let added = 0;
+          for (const result of results) {
+            if (added >= count) break;
+            const key = `${result.provider}:${result.id}`;
+            if (seen.has(key)) continue;
+            seen.add(key);
             selections.push({
               blockId: item.blockId,
               category: item.category,
@@ -254,6 +260,7 @@ export function createMediaClient(config: MediaClientConfig): MediaClient {
                 providerId: result.id,
               },
             });
+            added++;
           }
         }
         catch (err) {
