@@ -30,4 +30,6 @@ export interface ColorPalette {
   description: string
 
   colors: PaletteColors
+
+  defaultStyle?: string
 }

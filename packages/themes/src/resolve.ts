@@ -27,7 +27,8 @@ export interface ResolvedTheme {
 export function resolveTheme(config: ThemeConfig): Theme {
   const palette = getPalette(config.palette) ?? slate;
   const typography = getTypography(config.typography) ?? inter;
-  const style = getStyle(config.style ?? DEFAULT_STYLE_ID) ?? rounded;
+  const styleId = config.style ?? palette.defaultStyle ?? DEFAULT_STYLE_ID;
+  const style = getStyle(styleId) ?? rounded;
 
   return composeTheme(palette, typography, style, config.overrides);
 }

@@ -602,6 +602,7 @@ export const terminalPalette: ColorPalette = {
     ctaBackground: "#00ff00",
     ctaText: "#0a0a0a",
   },
+  defaultStyle: "sharp",
 };
 
 // ============================================================================
