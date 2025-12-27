@@ -9,15 +9,14 @@ export {
   stylePresets,
 } from "./presets";
 
+import { keyBy } from "lodash-es";
 import { stylePresets } from "./presets";
 import type { StylePreset } from "./types";
 
-const styleMap = new Map<string, StylePreset>(
-  stylePresets.map(s => [s.id, s]),
-);
+const styleMap = keyBy(stylePresets, s => s.id);
 
 export function getStyle(id: string): StylePreset | undefined {
-  return styleMap.get(id);
+  return styleMap[id];
 }
 
 export function getAllStyles(): StylePreset[] {

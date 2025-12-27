@@ -1,3 +1,4 @@
+import { groupBy } from "lodash-es";
 import { getAllThemes } from "./registry";
 import { getAllPalettes, paletteCategoryDescriptions, type PaletteCategory } from "./palettes";
 import { getAllTypography, typographyCategoryDescriptions, type TypographyCategory } from "./typography";
@@ -22,17 +23,8 @@ export function generatePaletteTypographyPrompt(): string {
   const palettes = getAllPalettes();
   const typography = getAllTypography();
 
-  const palettesByCategory = palettes.reduce((acc, p) => {
-    if (!acc[p.category]) acc[p.category] = [];
-    acc[p.category].push(p);
-    return acc;
-  }, {} as Record<PaletteCategory, typeof palettes>);
-
-  const typographyByCategory = typography.reduce((acc, t) => {
-    if (!acc[t.category]) acc[t.category] = [];
-    acc[t.category].push(t);
-    return acc;
-  }, {} as Record<TypographyCategory, typeof typography>);
+  const palettesByCategory = groupBy(palettes, p => p.category);
+  const typographyByCategory = groupBy(typography, t => t.category);
 
   const paletteLines = Object.entries(palettesByCategory).map(([cat, items]) => {
     const desc = paletteCategoryDescriptions[cat as PaletteCategory];

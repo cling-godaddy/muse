@@ -99,6 +99,9 @@ importers:
       '@muse/themes':
         specifier: workspace:*
         version: link:../../packages/themes
+      lodash-es:
+        specifier: ^4.17.21
+        version: 4.17.22
       react:
         specifier: ^19
         version: 19.2.3
@@ -109,6 +112,9 @@ importers:
       '@tailwindcss/vite':
         specifier: ^4.1.18
         version: 4.1.18(vite@6.4.1(@types/node@22.19.3)(jiti@2.6.1)(lightningcss@1.30.2)(tsx@4.21.0)(yaml@2.8.2))
+      '@types/lodash-es':
+        specifier: ^4.17.12
+        version: 4.17.12
       '@types/react':
         specifier: ^19
         version: 19.2.7
@@ -242,7 +248,15 @@ importers:
         specifier: ^22
         version: 22.19.3
 
-  packages/themes: {}
+  packages/themes:
+    dependencies:
+      lodash-es:
+        specifier: ^4.17.21
+        version: 4.17.22
+    devDependencies:
+      '@types/lodash-es':
+        specifier: ^4.17.12
+        version: 4.17.12
 
 packages:
 

@@ -1,3 +1,4 @@
+import { groupBy } from "lodash-es";
 import type { Block } from "@muse/core";
 import type { Usage } from "@muse/ai";
 import type { ImageSelection } from "@muse/media";
@@ -132,12 +133,7 @@ export function parseStream(
   }
 
   // group images by blockId for injection
-  const imagesByBlock = new Map<string, ImageSelection[]>();
-  for (const img of images) {
-    const existing = imagesByBlock.get(img.blockId) ?? [];
-    existing.push(img);
-    imagesByBlock.set(img.blockId, existing);
-  }
+  const imagesByBlock = groupBy(images, img => img.blockId);
 
   // find all complete blocks
   const blockMatches = [...accumulated.matchAll(BLOCK_REGEX)];
@@ -155,7 +151,7 @@ export function parseStream(
       const blockId = block.id ?? crypto.randomUUID();
 
       // inject images for this block
-      const blockImages = imagesByBlock.get(blockId);
+      const blockImages = imagesByBlock[blockId];
       if (blockImages && blockImages.length > 0) {
         const imgSources = blockImages.map(s => s.image);
         if (block.type === "gallery") {
