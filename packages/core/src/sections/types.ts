@@ -30,6 +30,15 @@ export type SectionCategory
     | "conversion"
     | "content";
 
+export type ImageCategory = "ambient" | "subject" | "people";
+export type ImageOrientation = "horizontal" | "vertical" | "square" | "mixed";
+
+export interface ImageRequirements {
+  category: ImageCategory
+  count: number
+  orientation: ImageOrientation
+}
+
 export interface SectionPreset {
   id: string
   name: string
@@ -46,6 +55,8 @@ export interface SectionPreset {
   optionalFields: string[]
 
   className: string
+
+  imageRequirements?: ImageRequirements
 }
 
 export type PresetId = string;

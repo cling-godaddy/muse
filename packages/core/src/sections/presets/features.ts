@@ -43,6 +43,7 @@ export const featuresAlternating: SectionPreset = {
   requiredFields: ["items"],
   optionalFields: ["headline"],
   className: "muse-features--alternating",
+  imageRequirements: { category: "subject", count: 5, orientation: "horizontal" },
 };
 
 export const featuresNumbered: SectionPreset = {

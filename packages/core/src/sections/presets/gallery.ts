@@ -13,6 +13,7 @@ export const galleryGrid: SectionPreset = {
   requiredFields: ["images"],
   optionalFields: ["headline", "columns"],
   className: "muse-gallery--grid",
+  imageRequirements: { category: "subject", count: 6, orientation: "horizontal" },
 };
 
 export const galleryMasonry: SectionPreset = {
@@ -28,6 +29,7 @@ export const galleryMasonry: SectionPreset = {
   requiredFields: ["images"],
   optionalFields: ["headline"],
   className: "muse-gallery--masonry",
+  imageRequirements: { category: "subject", count: 9, orientation: "mixed" },
 };
 
 export const galleryCarousel: SectionPreset = {
@@ -43,6 +45,7 @@ export const galleryCarousel: SectionPreset = {
   requiredFields: ["images"],
   optionalFields: ["headline"],
   className: "muse-gallery--carousel",
+  imageRequirements: { category: "subject", count: 5, orientation: "horizontal" },
 };
 
 export const galleryPresets = {

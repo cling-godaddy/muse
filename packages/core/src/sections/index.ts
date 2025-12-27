@@ -4,6 +4,9 @@ export type {
   SectionCategory,
   SectionPreset,
   PresetId,
+  ImageCategory,
+  ImageOrientation,
+  ImageRequirements,
 } from "./types";
 
 export {
@@ -26,7 +29,7 @@ export {
   type CtaPresetId,
 } from "./presets";
 
-import type { SectionPreset, SectionType } from "./types";
+import type { SectionPreset, SectionType, ImageRequirements } from "./types";
 import { allPresets } from "./presets";
 
 export const DEFAULT_PRESETS: Record<SectionType, string> = {
@@ -52,6 +55,22 @@ export function getMinimumImages(preset: string): number {
 
 export function getPreset(id: string): SectionPreset | undefined {
   return allPresets[id];
+}
+
+export function getImageRequirements(presetId: string): ImageRequirements | undefined {
+  return getPreset(presetId)?.imageRequirements;
+}
+
+/** Get maximum image requirements across all presets for a section type */
+export function getMaxImageRequirements(sectionType: SectionType): ImageRequirements | undefined {
+  const presets = getPresetsForType(sectionType);
+  const requirements = presets
+    .map(p => p.imageRequirements)
+    .filter((r): r is ImageRequirements => r !== undefined);
+  if (requirements.length === 0) return undefined;
+
+  // Find requirement with highest count
+  return requirements.reduce((max, r) => r.count > max.count ? r : max);
 }
 
 export function getPresetsForType(sectionType: SectionType): SectionPreset[] {
