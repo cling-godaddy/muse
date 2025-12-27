@@ -6,11 +6,11 @@ export const rounded: StylePreset = {
   description: "Modern and approachable with soft corners",
   spacing: {
     blockPadding: "3rem 2rem",
-    sectionGap: "4rem",
+    sectionGap: "0",
   },
   borders: {
     radius: "0.75rem",
-    radiusLarge: "1.5rem",
+    radiusLarge: "0",
   },
   shadows: {
     card: "0 1px 3px rgba(0, 0, 0, 0.1), 0 1px 2px rgba(0, 0, 0, 0.06)",
