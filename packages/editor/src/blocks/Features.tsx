@@ -7,21 +7,76 @@ interface Props {
   onUpdate: (data: Partial<FeaturesBlockType>) => void
 }
 
-function useAutoResize(value: string) {
-  const ref = useRef<HTMLTextAreaElement>(null);
-
+function useAutoResize<T extends HTMLTextAreaElement>(ref: React.RefObject<T | null>, value: string) {
   useEffect(() => {
     const el = ref.current;
     if (!el) return;
     el.style.height = "auto";
     el.style.height = `${el.scrollHeight}px`;
-  }, [value]);
+  }, [ref, value]);
+}
 
-  return ref;
+interface FeatureCardProps {
+  item: FeatureItem
+  onUpdate: (data: Partial<FeatureItem>) => void
+  onRemove: () => void
+}
+
+function FeatureCard({ item, onUpdate, onRemove }: FeatureCardProps) {
+  const titleRef = useRef<HTMLTextAreaElement>(null);
+  const descRef = useRef<HTMLTextAreaElement>(null);
+  useAutoResize(titleRef, item.title);
+  useAutoResize(descRef, item.description);
+
+  return (
+    <div className={styles.item}>
+      {item.image
+        ? (
+          <img
+            src={item.image.url}
+            alt={item.image.alt}
+            className={styles.itemImage}
+          />
+        )
+        : (
+          <input
+            type="text"
+            className={styles.itemIcon}
+            value={typeof item.icon === "string" ? item.icon : ""}
+            onChange={e => onUpdate({ icon: e.target.value || undefined })}
+            placeholder="Icon..."
+          />
+        )}
+      <textarea
+        ref={titleRef}
+        className={styles.itemTitle}
+        rows={1}
+        value={item.title}
+        onChange={e => onUpdate({ title: e.target.value })}
+        placeholder="Title..."
+      />
+      <textarea
+        ref={descRef}
+        className={styles.itemDescription}
+        rows={2}
+        value={item.description}
+        onChange={e => onUpdate({ description: e.target.value })}
+        placeholder="Description..."
+      />
+      <button
+        type="button"
+        onClick={onRemove}
+        className={styles.removeButton}
+      >
+        Remove
+      </button>
+    </div>
+  );
 }
 
 export function Features({ block, onUpdate }: Props) {
-  const headlineRef = useAutoResize(block.headline ?? "");
+  const headlineRef = useRef<HTMLTextAreaElement>(null);
+  useAutoResize(headlineRef, block.headline ?? "");
 
   const updateItem = (index: number, data: Partial<FeatureItem>) => {
     const items = block.items.map((item, i) =>
@@ -54,46 +109,12 @@ export function Features({ block, onUpdate }: Props) {
       />
       <div className={styles.grid}>
         {block.items.map((item, i) => (
-          <div key={i} className={styles.item}>
-            {item.image
-              ? (
-                <img
-                  src={item.image.url}
-                  alt={item.image.alt}
-                  className={styles.itemImage}
-                />
-              )
-              : (
-                <input
-                  type="text"
-                  className={styles.itemIcon}
-                  value={typeof item.icon === "string" ? item.icon : ""}
-                  onChange={e => updateItem(i, { icon: e.target.value || undefined })}
-                  placeholder="Icon..."
-                />
-              )}
-            <input
-              type="text"
-              className={styles.itemTitle}
-              value={item.title}
-              onChange={e => updateItem(i, { title: e.target.value })}
-              placeholder="Title..."
-            />
-            <textarea
-              className={styles.itemDescription}
-              value={item.description}
-              onChange={e => updateItem(i, { description: e.target.value })}
-              placeholder="Description..."
-              rows={2}
-            />
-            <button
-              type="button"
-              onClick={() => removeItem(i)}
-              className={styles.removeButton}
-            >
-              Remove
-            </button>
-          </div>
+          <FeatureCard
+            key={i}
+            item={item}
+            onUpdate={data => updateItem(i, data)}
+            onRemove={() => removeItem(i)}
+          />
         ))}
       </div>
       <button
