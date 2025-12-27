@@ -127,49 +127,43 @@ describe("parseImagePlan", () => {
     expect(result[0]).toHaveProperty("count", 4);
   });
 
-  it("expands mixed orientation blocks into separate items", () => {
+  it("marks mixed orientation blocks with orientation='mixed'", () => {
     const input = JSON.stringify([
-      { blockId: "gallery_1", category: "subject", provider: "unsplash", searchQuery: "wedding", orientation: "horizontal", count: 9 },
+      { blockId: "gallery_1", category: "subject", provider: "unsplash", searchQuery: "wedding", orientation: "horizontal", count: 10 },
     ]);
     const mixedBlocks = new Set(["gallery_1"]);
 
     const result = parseImagePlan(input, mixedBlocks);
 
-    // 9 images / 3 orientations = 3 per orientation = 9 items total
-    expect(result).toHaveLength(9);
-    expect(result.every(r => r.count === 1)).toBe(true);
-    expect(result.every(r => r.blockId === "gallery_1")).toBe(true);
-
-    // Should have mix of orientations
-    const orientations = result.map(r => r.orientation);
-    expect(orientations.filter(o => o === "horizontal")).toHaveLength(3);
-    expect(orientations.filter(o => o === "vertical")).toHaveLength(3);
-    expect(orientations.filter(o => o === "square")).toHaveLength(3);
+    expect(result).toHaveLength(1);
+    expect(result[0]?.orientation).toBe("mixed");
+    expect(result[0]?.count).toBe(10);
+    expect(result[0]?.blockId).toBe("gallery_1");
   });
 
-  it("does not expand blocks not in mixedOrientationBlocks", () => {
+  it("does not mark blocks not in mixedOrientationBlocks", () => {
     const input = JSON.stringify([
       { blockId: "hero_1", category: "ambient", provider: "unsplash", searchQuery: "sunset", orientation: "horizontal", count: 1 },
-      { blockId: "gallery_1", category: "subject", provider: "unsplash", searchQuery: "wedding", orientation: "horizontal", count: 9 },
+      { blockId: "gallery_1", category: "subject", provider: "unsplash", searchQuery: "wedding", orientation: "horizontal", count: 10 },
     ]);
     const mixedBlocks = new Set(["gallery_1"]);
 
     const result = parseImagePlan(input, mixedBlocks);
 
-    // hero_1 stays as 1 item, gallery_1 expands to 9
-    expect(result).toHaveLength(10);
-    expect(result.filter(r => r.blockId === "hero_1")).toHaveLength(1);
-    expect(result.filter(r => r.blockId === "gallery_1")).toHaveLength(9);
+    expect(result).toHaveLength(2);
+    expect(result.find(r => r.blockId === "hero_1")?.orientation).toBe("horizontal");
+    expect(result.find(r => r.blockId === "gallery_1")?.orientation).toBe("mixed");
   });
 
   it("handles empty mixedOrientationBlocks set", () => {
     const input = JSON.stringify([
-      { blockId: "gallery_1", category: "subject", provider: "unsplash", searchQuery: "food", orientation: "horizontal", count: 9 },
+      { blockId: "gallery_1", category: "subject", provider: "unsplash", searchQuery: "food", orientation: "horizontal", count: 10 },
     ]);
 
     const result = parseImagePlan(input, new Set());
 
     expect(result).toHaveLength(1);
-    expect(result[0]).toHaveProperty("count", 9);
+    expect(result[0]).toHaveProperty("count", 10);
+    expect(result[0]).toHaveProperty("orientation", "horizontal");
   });
 });
