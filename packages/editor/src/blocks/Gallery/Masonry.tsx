@@ -1,5 +1,6 @@
-import type { GalleryBlock as GalleryBlockType } from "@muse/core";
+import type { GalleryBlock as GalleryBlockType, ImageSource } from "@muse/core";
 import { useAutoResize } from "../../hooks";
+import { Image } from "../../controls/Image";
 import styles from "./Masonry.module.css";
 
 interface Props {
@@ -10,6 +11,16 @@ interface Props {
 export function Masonry({ block, onUpdate }: Props) {
   const columns = block.columns ?? 3;
   const headlineRef = useAutoResize(block.headline ?? "");
+
+  const updateImage = (index: number, image: ImageSource) => {
+    const images = [...block.images];
+    images[index] = image;
+    onUpdate({ images });
+  };
+
+  const removeImage = (index: number) => {
+    onUpdate({ images: block.images.filter((_, i) => i !== index) });
+  };
 
   return (
     <div className={styles.section}>
@@ -29,7 +40,12 @@ export function Masonry({ block, onUpdate }: Props) {
       >
         {block.images.map((image, i) => (
           <div key={i} className={styles.item}>
-            <img src={image.url} alt={image.alt} />
+            <Image
+              image={image}
+              onUpdate={img => updateImage(i, img)}
+              onReplace={() => { /* TODO: open picker */ }}
+              onRemove={() => removeImage(i)}
+            />
           </div>
         ))}
       </div>

@@ -1,4 +1,5 @@
 import type { ImageBlock as ImageBlockType } from "@muse/core";
+import { Image as ImageControl } from "../controls/Image";
 import styles from "./Image.module.css";
 
 interface Props {
@@ -12,9 +13,10 @@ export function Image({ block, onUpdate }: Props) {
   return (
     <div className={`${styles.section} ${styles[size]}`}>
       <div className={styles.container}>
-        <img
-          src={block.image.url}
-          alt={block.image.alt}
+        <ImageControl
+          image={block.image}
+          onUpdate={image => onUpdate({ image })}
+          onReplace={() => { /* TODO: open picker */ }}
           className={styles.img}
         />
         {block.image.provider && (
