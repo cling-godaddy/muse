@@ -12,9 +12,16 @@ export const crt: Effects = {
   description: "Scanlines, glow, retro monitor aesthetic",
 };
 
+export const neon: Effects = {
+  id: "neon",
+  name: "Neon",
+  description: "Glowing text and elements, retro-futuristic aesthetic",
+};
+
 export const effectsPresets = {
   neutral,
   crt,
+  neon,
 } as const;
 
 export type EffectsId = keyof typeof effectsPresets;

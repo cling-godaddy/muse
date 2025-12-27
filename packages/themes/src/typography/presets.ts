@@ -215,6 +215,25 @@ export const terminalTypography: TypographyPreset = {
 };
 
 // ============================================================================
+// RETRO-FUTURISTIC
+// ============================================================================
+
+export const synthwaveTypography: TypographyPreset = {
+  id: "synthwave",
+  name: "Orbitron + Inter",
+  category: "expressive",
+  mood: "bold",
+  tags: ["retro", "futuristic", "sci-fi", "display", "geometric"],
+  description: "Retro-futuristic display font with clean body text",
+  fonts: {
+    heading: "Orbitron, system-ui, sans-serif",
+    body: "Inter, system-ui, sans-serif",
+  },
+  weights: { heading: 700, body: 400 },
+  googleFonts: ["Orbitron:wght@400;500;600;700;800;900", "Inter:wght@400;500;600"],
+};
+
+// ============================================================================
 // ALL PRESETS
 // ============================================================================
 
@@ -237,6 +256,8 @@ export const typographyPresets = {
   archivo,
   // technical
   "terminal": terminalTypography,
+  // retro-futuristic
+  "synthwave": synthwaveTypography,
 } as const;
 
 export type TypographyId = keyof typeof typographyPresets;

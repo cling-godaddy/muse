@@ -42,8 +42,11 @@ export function App() {
   }, [addBlock]);
 
   const handleThemeSelected = useCallback((selection: ThemeSelection) => {
-    // auto-apply CRT effects when terminal palette is selected
-    const effects = selection.effects ?? (selection.palette === "terminal" ? "crt" : "neutral");
+    // auto-apply effects based on palette
+    const effects = selection.effects
+      ?? (selection.palette === "terminal"
+        ? "crt"
+        : selection.palette === "synthwave" ? "neon" : "neutral");
     setTheme({ palette: selection.palette, typography: selection.typography, effects });
   }, []);
 

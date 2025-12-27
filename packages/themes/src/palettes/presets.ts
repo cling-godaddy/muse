@@ -606,6 +606,35 @@ export const terminalPalette: ColorPalette = {
 };
 
 // ============================================================================
+// SYNTHWAVE
+// ============================================================================
+
+export const synthwavePalette: ColorPalette = {
+  id: "synthwave",
+  name: "Synthwave",
+  category: "vibrant",
+  mood: "energetic",
+  temperature: "warm",
+  contrast: "dark",
+  tags: ["retro", "neon", "80s", "vaporwave", "gaming", "futuristic"],
+  industries: ["gaming", "music", "entertainment", "nightlife", "creative"],
+  description: "Retro-futuristic neon aesthetic with pink and cyan on dark purple",
+  colors: {
+    primary: "#ff2a6d",
+    primaryHover: "#ff1a5c",
+    accent: "#05ffa1",
+    background: "#1a1a2e",
+    backgroundAlt: "#16213e",
+    text: "#ffffff",
+    textMuted: "#b794f6",
+    heroGradient: "linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%)",
+    ctaBackground: "#ff2a6d",
+    ctaText: "#ffffff",
+  },
+  defaultStyle: "rounded",
+};
+
+// ============================================================================
 // ALL PALETTES
 // ============================================================================
 
@@ -636,6 +665,7 @@ export const palettes = {
   electric,
   aurora,
   candy,
+  synthwave: synthwavePalette,
   // luxury
   noir,
   champagne,
