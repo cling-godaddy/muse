@@ -36,6 +36,7 @@ export interface ParseResult {
   displayText: string
   theme?: ThemeSelection
   newBlocks: Block[]
+  newImages: ImageSelection[]
   usage?: Usage
   agents: AgentState[]
   state: ParseState
@@ -159,10 +160,10 @@ export function parseStream(
           block.images = imgSources;
         }
         else if (block.type === "hero") {
-          // hero uses backgroundImage for ambient images
-          const ambient = blockImages.find(s => s.category === "ambient");
-          if (ambient) {
-            (block as { backgroundImage?: unknown }).backgroundImage = ambient.image;
+          // hero uses backgroundImage (ambient for overlay, subject for split)
+          const img = blockImages.find(s => s.category === "ambient" || s.category === "subject");
+          if (img) {
+            (block as { backgroundImage?: unknown }).backgroundImage = img.image;
           }
         }
         else if (block.type === "testimonials") {
@@ -210,15 +211,21 @@ export function parseStream(
     .trim();
 
   // convert agents map to ordered array
-  const agentOrder: AgentName[] = ["brief", "structure", "theme", "image", "copy"];
+  const agentOrder: AgentName[] = ["brief", "structure", "theme", "copy", "image"];
   const agentsArray = agentOrder
     .map(name => agents.get(name))
     .filter((agent): agent is AgentState => agent !== undefined);
+
+  // detect newly arrived images (for post-block injection)
+  const newImages = images.length > 0 && previousState.images.length === 0
+    ? images
+    : [];
 
   return {
     displayText,
     theme,
     newBlocks,
+    newImages,
     usage,
     agents: agentsArray,
     state: { theme, blockCount: newBlockCount, agents, images },

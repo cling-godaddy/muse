@@ -1,6 +1,7 @@
 import { useState, useCallback, useRef } from "react";
 import type { Block } from "@muse/core";
 import type { Usage } from "@muse/ai";
+import type { ImageSelection } from "@muse/media";
 import { parseStream, type ParseState, type AgentState, type ThemeSelection } from "../utils/streamParser";
 
 export interface Message {
@@ -11,6 +12,7 @@ export interface Message {
 export interface UseChatOptions {
   onBlockParsed?: (block: Block) => void
   onThemeSelected?: (theme: ThemeSelection) => void
+  onImages?: (images: ImageSelection[]) => void
   onUsage?: (usage: Usage) => void
 }
 
@@ -94,6 +96,11 @@ export function useChat(options: UseChatOptions = {}): UseChat {
         if (result.theme && !themeProcessedRef.current) {
           themeProcessedRef.current = true;
           options.onThemeSelected?.(result.theme);
+        }
+
+        // emit images when they arrive (for post-block injection)
+        if (result.newImages.length > 0) {
+          options.onImages?.(result.newImages);
         }
 
         // update agents if changed

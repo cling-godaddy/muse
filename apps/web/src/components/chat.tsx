@@ -1,15 +1,17 @@
 import { useRef, useEffect, useMemo, useState } from "react";
 import type { Block } from "@muse/core";
+import type { ImageSelection } from "@muse/media";
 import { useChat, type Message } from "../hooks/useChat";
 import type { AgentState, ThemeSelection } from "../utils/streamParser";
 
 interface ChatProps {
   onBlockParsed?: (block: Block) => void
   onThemeSelected?: (theme: ThemeSelection) => void
+  onImages?: (images: ImageSelection[]) => void
 }
 
-export function Chat({ onBlockParsed, onThemeSelected }: ChatProps) {
-  const options = useMemo(() => ({ onBlockParsed, onThemeSelected }), [onBlockParsed, onThemeSelected]);
+export function Chat({ onBlockParsed, onThemeSelected, onImages }: ChatProps) {
+  const options = useMemo(() => ({ onBlockParsed, onThemeSelected, onImages }), [onBlockParsed, onThemeSelected, onImages]);
   const { messages, input, setInput, isLoading, send, sessionUsage, lastUsage, agents } = useChat(options);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
