@@ -32,7 +32,7 @@ export interface ImagePlan {
   category: ImageCategory
   provider: "unsplash" | "pexels"
   searchQuery: string
-  orientation: "horizontal" | "vertical" | "square"
+  orientation: "horizontal" | "vertical" | "square" | "mixed"
   count?: number
 }
 
