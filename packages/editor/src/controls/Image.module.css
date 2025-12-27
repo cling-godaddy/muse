@@ -10,6 +10,33 @@
   outline-offset: 2px;
 }
 
+.placeholder {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  min-height: 120px;
+  padding: 24px;
+  color: #9ca3af;
+  background: #f9fafb;
+  border: 2px dashed #e5e7eb;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: border-color 0.15s, color 0.15s;
+}
+
+.placeholder:hover {
+  color: #6366f1;
+  border-color: #6366f1;
+}
+
+.placeholder span {
+  font-size: 13px;
+  font-weight: 500;
+}
+
 .content {
   background: white;
   border: 1px solid #e5e7eb;
