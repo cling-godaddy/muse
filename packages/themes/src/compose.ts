@@ -36,6 +36,7 @@ export function composeTheme(
       textMuted: palette.colors.textMuted,
       heroGradient: palette.colors.heroGradient,
       ctaBackground: palette.colors.ctaBackground,
+      ctaText: palette.colors.ctaText,
       ...overrides?.colors,
     },
 

@@ -13,6 +13,7 @@ export interface PaletteColors {
   textMuted: string
   heroGradient?: string
   ctaBackground?: string
+  ctaText?: string
 }
 
 export interface ColorPalette {

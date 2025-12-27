@@ -8,6 +8,7 @@ export interface ThemeColors {
   textMuted: string
   heroGradient?: string
   ctaBackground?: string
+  ctaText?: string
 }
 
 export interface ThemeTypography {

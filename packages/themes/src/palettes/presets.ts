@@ -600,6 +600,7 @@ export const terminalPalette: ColorPalette = {
     textMuted: "#00aa00",
     heroGradient: "#0a0a0a",
     ctaBackground: "#00ff00",
+    ctaText: "#0a0a0a",
   },
 };
 
