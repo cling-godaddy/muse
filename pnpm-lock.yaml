@@ -219,6 +219,9 @@ importers:
       faiss-node:
         specifier: ^0.5.1
         version: 0.5.1
+      openai:
+        specifier: ^6.15.0
+        version: 6.15.0(zod@4.2.1)
     devDependencies:
       '@types/node':
         specifier: ^22
