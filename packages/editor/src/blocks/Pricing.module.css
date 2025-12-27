@@ -1,6 +1,6 @@
 .section {
   padding: 3rem 2rem;
-  background: var(--muse-theme-bg, white);
+  background: var(--muse-theme-bg-alt, #f8fafc);
   border-radius: var(--muse-theme-radius-lg, 1rem);
   display: flex;
   flex-direction: column;
@@ -33,7 +33,7 @@
 .subheadline {
   font-family: var(--muse-theme-body-font, inherit);
   font-size: 1rem;
-  color: var(--muse-theme-muted, #6b7280);
+  color: var(--muse-theme-text-muted, #6b7280);
   background: transparent;
   border: 1px dashed transparent;
   padding: 0.5rem;
@@ -60,7 +60,7 @@
 }
 
 .plan {
-  background: white;
+  background: var(--muse-theme-bg, white);
   border: 1px solid var(--muse-theme-border, #e5e7eb);
   border-radius: var(--muse-theme-radius-lg, 1rem);
   padding: 2rem;
@@ -113,7 +113,7 @@
 
 .price input:last-child {
   font-size: 1rem;
-  color: var(--muse-theme-muted, #6b7280);
+  color: var(--muse-theme-text-muted, #6b7280);
   background: transparent;
   border: 1px dashed transparent;
   padding: 0.25rem;
@@ -133,7 +133,7 @@
   font-family: var(--muse-theme-body-font, inherit);
   font-size: 0.9375rem;
   line-height: 1.5;
-  color: var(--muse-theme-muted, #6b7280);
+  color: var(--muse-theme-text-muted, #6b7280);
   background: transparent;
   border: 1px dashed transparent;
   padding: 0.25rem;
