@@ -1,7 +1,6 @@
 .section {
   padding: 3rem 2rem;
   background: var(--muse-theme-bg-alt, #f8fafc);
-  border-radius: var(--muse-theme-radius-lg, 1rem);
   display: flex;
   flex-direction: column;
   gap: 2rem;

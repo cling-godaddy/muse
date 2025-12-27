@@ -1,7 +1,6 @@
 .section {
   padding: 4rem 2rem;
   background: var(--muse-theme-hero-gradient, var(--muse-theme-primary, #6366f1));
-  border-radius: var(--muse-theme-radius-lg, 1rem);
   text-align: center;
   display: flex;
   flex-direction: column;
@@ -28,7 +27,6 @@
 .overlay {
   position: absolute;
   inset: 0;
-  border-radius: var(--muse-theme-radius-lg, 1rem);
   pointer-events: none;
 }
 

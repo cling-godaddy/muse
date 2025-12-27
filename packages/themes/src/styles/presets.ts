@@ -42,7 +42,7 @@ export const minimal: StylePreset = {
   description: "Subtle shadows and clean lines",
   spacing: {
     blockPadding: "2.5rem 1.5rem",
-    sectionGap: "3rem",
+    sectionGap: "0",
   },
   borders: {
     radius: "0.25rem",
@@ -60,7 +60,7 @@ export const elevated: StylePreset = {
   description: "Strong shadows for floating card effect",
   spacing: {
     blockPadding: "3rem 2rem",
-    sectionGap: "5rem",
+    sectionGap: "0",
   },
   borders: {
     radius: "1rem",
@@ -78,7 +78,7 @@ export const cozy: StylePreset = {
   description: "Extra generous padding for a warm feel",
   spacing: {
     blockPadding: "4rem 3rem",
-    sectionGap: "6rem",
+    sectionGap: "0",
   },
   borders: {
     radius: "1rem",
@@ -96,7 +96,7 @@ export const compact: StylePreset = {
   description: "Tighter spacing for dense content",
   spacing: {
     blockPadding: "2rem 1.5rem",
-    sectionGap: "2.5rem",
+    sectionGap: "0",
   },
   borders: {
     radius: "0.5rem",

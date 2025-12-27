@@ -1,7 +1,6 @@
 .section {
   padding: 4rem 1.5rem;
   background: var(--muse-theme-bg-alt, #f8fafc);
-  border-radius: var(--muse-theme-radius-lg, 1rem);
 }
 
 .header {

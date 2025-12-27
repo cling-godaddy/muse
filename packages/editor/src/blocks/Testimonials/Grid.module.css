@@ -2,7 +2,6 @@
   padding: 4rem 1.5rem;
   overflow: hidden;
   background: var(--muse-theme-bg, white);
-  border-radius: var(--muse-theme-radius-lg, 1rem);
 }
 
 .header {
