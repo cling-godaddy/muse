@@ -1,6 +1,6 @@
 import { generateBlockSchemaPrompt } from "@muse/core";
 import type { Provider } from "../types";
-import type { Agent, AgentInput, ImageSelection } from "./types";
+import type { Agent, AgentInput } from "./types";
 
 function buildSystemPrompt(input: AgentInput): string {
   const briefSection = input.brief
@@ -19,23 +19,10 @@ ${input.structure.blocks.map(b => `- ${b.id} (${b.type}, preset: ${b.preset}): $
 `
     : "";
 
-  const images = (input.context?.images ?? []) as ImageSelection[];
-  const imageSection = images.length > 0
-    ? `AVAILABLE IMAGES (include these in the corresponding blocks):
-${images.map((img) => {
-  if (img.category === "ambient") {
-    return `- Block ${img.blockId}: Add backgroundImage: ${JSON.stringify(img.image)}`;
-  }
-  return `- Block ${img.blockId} (${img.category}): Use image: ${JSON.stringify(img.image)}`;
-}).join("\n")}
-`
-    : "";
-
   return `You are a website copywriter. Generate content blocks for landing pages.
 
 ${briefSection}
 ${structureSection}
-${imageSection}
 ${generateBlockSchemaPrompt()}
 
 RESPONSE FORMAT:
@@ -45,20 +32,21 @@ Embed each block's JSON in [BLOCK] markers (these are parsed separately, not dis
 Example flow:
 Let me create a compelling hero section to capture attention right away...
 [BLOCK]
-{"id": "hero-1", "type": "hero", "preset": "hero-overlay", "headline": "...", ...}
+{"id": "block-1", "type": "hero", "preset": "hero-overlay", "headline": "...", ...}
 [/BLOCK]
 
 Now I'll add some features to showcase your key offerings...
 [BLOCK]
-{"id": "features-1", "type": "features", "preset": "features-grid-icons", "items": [...], ...}
+{"id": "block-2", "type": "features", "preset": "features-grid-icons", "items": [...], ...}
 [/BLOCK]
 
 Guidelines:
 - Write naturally, as if explaining your creative choices
-- Use the block IDs and presets from the structure above
+- Use the EXACT block IDs from the structure above (e.g., block-1, block-2)
 - Include the "preset" field in each block JSON
 - Match the brand voice in your copy
-- Each block JSON must be valid and complete`;
+- Each block JSON must be valid and complete
+- Do NOT include images/backgroundImage - they are added automatically`;
 }
 
 export const copyAgent: Agent = {

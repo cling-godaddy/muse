@@ -93,6 +93,9 @@ importers:
       '@muse/editor':
         specifier: workspace:*
         version: link:../../packages/editor
+      '@muse/media':
+        specifier: workspace:*
+        version: link:../../packages/media
       '@muse/themes':
         specifier: workspace:*
         version: link:../../packages/themes

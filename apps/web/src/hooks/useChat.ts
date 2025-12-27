@@ -36,7 +36,7 @@ export function useChat(options: UseChatOptions = {}): UseChat {
   const [sessionUsage, setSessionUsage] = useState<Usage>(emptyUsage);
   const [lastUsage, setLastUsage] = useState<Usage | undefined>();
   const [agents, setAgents] = useState<AgentState[]>([]);
-  const parseStateRef = useRef<ParseState>({ blockCount: 0, agents: new Map() });
+  const parseStateRef = useRef<ParseState>({ blockCount: 0, agents: new Map(), images: [] });
   const usageProcessedRef = useRef(false);
   const themeProcessedRef = useRef(false);
 
@@ -50,7 +50,7 @@ export function useChat(options: UseChatOptions = {}): UseChat {
     setInput("");
     setIsLoading(true);
     setAgents([]);
-    parseStateRef.current = { blockCount: 0, agents: new Map() };
+    parseStateRef.current = { blockCount: 0, agents: new Map(), images: [] };
     usageProcessedRef.current = false;
     themeProcessedRef.current = false;
 

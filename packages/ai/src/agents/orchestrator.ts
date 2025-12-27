@@ -181,6 +181,11 @@ export async function* orchestrate(
       resolved: images.length,
       duration: imageDuration,
     })}\n`;
+
+    // emit images for client-side injection into blocks
+    if (images.length > 0) {
+      yield `[IMAGES:${JSON.stringify(images)}]\n`;
+    }
   }
 
   // step 4: generate copy (streaming)
@@ -190,7 +195,7 @@ export async function* orchestrate(
   copyLog.debug("context", { brief, structure, imageCount: images.length });
 
   for await (const chunk of copyAgent.run(
-    { prompt, messages: input.messages, brief, structure, context: { images } },
+    { prompt, messages: input.messages, brief, structure },
     provider,
   )) {
     yield chunk;

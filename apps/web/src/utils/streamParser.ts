@@ -1,5 +1,6 @@
 import type { Block } from "@muse/core";
 import type { Usage } from "@muse/ai";
+import type { ImageSelection } from "@muse/media";
 
 export type AgentName = "brief" | "structure" | "theme" | "image" | "copy";
 export type AgentStatus = "pending" | "running" | "complete";
@@ -27,6 +28,7 @@ export interface ParseState {
   theme?: ThemeSelection
   blockCount: number
   agents: Map<AgentName, AgentState>
+  images: ImageSelection[]
 }
 
 export interface ParseResult {
@@ -41,6 +43,7 @@ export interface ParseResult {
 const THEME_REGEX = /\[THEME:([^\]]+)\]/;
 const BLOCK_REGEX = /\[BLOCK\]([\s\S]*?)\[\/BLOCK\]/g;
 const USAGE_REGEX = /\[USAGE:(\{[^}]+\})\]/;
+const IMAGES_REGEX = /\[IMAGES:(\[[\s\S]*?\])\]/;
 const AGENT_START_REGEX = /\[AGENT:(\w+):start\]/g;
 const AGENT_COMPLETE_REGEX = /\[AGENT:(\w+):complete\](\{[^}]*\})?/g;
 
@@ -114,6 +117,28 @@ export function parseStream(
     }
   }
 
+  // extract images if present (parse once, carry forward in state)
+  let images = previousState.images;
+  if (images.length === 0) {
+    const imagesMatch = accumulated.match(IMAGES_REGEX);
+    if (imagesMatch?.[1]) {
+      try {
+        images = JSON.parse(imagesMatch[1]) as ImageSelection[];
+      }
+      catch {
+        console.warn("failed to parse images:", imagesMatch[1]);
+      }
+    }
+  }
+
+  // group images by blockId for injection
+  const imagesByBlock = new Map<string, ImageSelection[]>();
+  for (const img of images) {
+    const existing = imagesByBlock.get(img.blockId) ?? [];
+    existing.push(img);
+    imagesByBlock.set(img.blockId, existing);
+  }
+
   // find all complete blocks
   const blockMatches = [...accumulated.matchAll(BLOCK_REGEX)];
   const newBlockCount = blockMatches.length;
@@ -127,12 +152,48 @@ export function parseStream(
       const json = match[1]?.trim();
       if (!json) continue;
       const block = JSON.parse(json) as Partial<Block>;
+      const blockId = block.id ?? crypto.randomUUID();
+
+      // inject images for this block
+      const blockImages = imagesByBlock.get(blockId);
+      if (blockImages && blockImages.length > 0) {
+        const imgSources = blockImages.map(s => s.image);
+        if (block.type === "gallery") {
+          // gallery uses images array
+          block.images = imgSources;
+        }
+        else if (block.type === "hero") {
+          // hero uses backgroundImage for ambient images
+          const ambient = blockImages.find(s => s.category === "ambient");
+          if (ambient) {
+            (block as { backgroundImage?: unknown }).backgroundImage = ambient.image;
+          }
+        }
+        else if (block.type === "testimonials") {
+          // testimonials: assign images to quotes
+          const quotes = (block as { quotes?: { image?: unknown }[] }).quotes;
+          if (quotes) {
+            quotes.forEach((q, idx) => {
+              if (imgSources[idx]) q.image = imgSources[idx];
+            });
+          }
+        }
+        else if (block.type === "features") {
+          // features-alternating: assign images to items
+          const items = (block as { items?: { image?: unknown }[] }).items;
+          if (items) {
+            items.forEach((item, idx) => {
+              if (imgSources[idx]) item.image = imgSources[idx];
+            });
+          }
+        }
+      }
 
       if (block.type && block.id) {
         newBlocks.push(block as Block);
       }
       else if (block.type) {
-        newBlocks.push({ ...block, id: crypto.randomUUID() } as Block);
+        newBlocks.push({ ...block, id: blockId } as Block);
       }
     }
     catch {
@@ -147,6 +208,7 @@ export function parseStream(
     .replace(AGENT_COMPLETE_REGEX, "")
     .replace(BLOCK_REGEX, "")
     .replace(USAGE_REGEX, "")
+    .replace(IMAGES_REGEX, "")
     .replace(/\[BLOCK\][\s\S]*$/, "")
     .replace(/\n{3,}/g, "\n\n")
     .trim();
@@ -163,6 +225,6 @@ export function parseStream(
     newBlocks,
     usage,
     agents: agentsArray,
-    state: { theme, blockCount: newBlockCount, agents },
+    state: { theme, blockCount: newBlockCount, agents, images },
   };
 }

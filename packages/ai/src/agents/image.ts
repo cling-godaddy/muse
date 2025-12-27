@@ -1,4 +1,5 @@
 import { createLogger } from "@muse/logger";
+import { getMaxImageRequirements, type SectionType } from "@muse/core";
 import type { JsonSchema, Provider } from "../types";
 import type { AgentInput, SyncAgent, PageStructure, BrandBrief, ImagePlan } from "./types";
 
@@ -33,28 +34,38 @@ const imagePlanSchema: JsonSchema = {
 };
 
 function buildPlanningPrompt(brief: BrandBrief, structure: PageStructure): string {
-  return `You are an image curator for landing pages. Given a brand brief and page structure, plan which blocks need images and what to search for.
+  const blocksWithImages = structure.blocks
+    .map((b) => {
+      // Use max requirements for section type to support preset switching
+      const req = getMaxImageRequirements(b.type as SectionType);
+      if (!req) return null;
+      return { block: b, req };
+    })
+    .filter((x): x is NonNullable<typeof x> => x !== null);
+
+  const requirementsSection = blocksWithImages.length > 0
+    ? `IMAGE REQUIREMENTS (one plan item per block):
+${blocksWithImages.map(({ block, req }) =>
+  `- ${block.id}: ${req.count} ${req.category} image(s), orientation: ${req.orientation === "mixed" ? "horizontal OR vertical OR square" : req.orientation}`,
+).join("\n")}`
+    : "No blocks require images.";
+
+  return `You are an image curator for landing pages. Generate search queries for the required images.
 
 BRAND BRIEF:
 - Target Audience: ${brief.targetAudience}
 - Imagery Style: ${brief.imageryStyle}
 - Brand Voice: ${brief.brandVoice.join(", ")}
 
-PAGE STRUCTURE:
-${structure.blocks.map(b => `- ${b.id} (${b.type}, preset: ${b.preset}): ${b.purpose}`).join("\n")}
+PAGE CONTEXT:
+${structure.blocks.map(b => `- ${b.id} (${b.type}): ${b.purpose}`).join("\n")}
 
-IMAGE CATEGORIES:
-- "ambient": backgrounds, textures, mood shots (hero backgrounds, section dividers)
-- "subject": main content, objects, scenes (feature images, product shots)
-- "people": portraits, teams, human subjects (team sections, testimonials)
+${requirementsSection}
 
 RULES:
-- Hero blocks: category "ambient", orientation "horizontal", count 1
-- Gallery blocks: category "subject", mixed orientations, count 4-6
-- Feature blocks: category "subject", count 1 per feature if appropriate
-- Team sections: category "people", count based on team size
-- Testimonials: category "people" for single testimonial, skip for grids/carousels
-- Only add images where they enhance the message
+- Output exactly ONE plan item per block listed above
+- Use the exact category, count, and orientation specified
+- Do NOT split blocks into multiple plan items
 - Search queries should be specific and evocative
 - Provider: "unsplash" for editorial/lifestyle, "pexels" for objects/products
 
