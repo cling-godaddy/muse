@@ -10,17 +10,18 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
+    "@hono/node-server": "^1",
     "@muse/ai": "workspace:*",
     "@muse/core": "workspace:*",
     "@muse/logger": "workspace:*",
     "@muse/media": "workspace:*",
     "@muse/themes": "workspace:*",
+    "dotenv": "^16",
     "hono": "^4",
-    "@hono/node-server": "^1",
-    "dotenv": "^16"
+    "sharp": "^0.34.5"
   },
   "devDependencies": {
-    "tsx": "^4",
-    "@types/node": "^22"
+    "@types/node": "^22",
+    "tsx": "^4"
   }
 }

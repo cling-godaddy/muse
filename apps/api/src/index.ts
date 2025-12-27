@@ -7,12 +7,14 @@ import { Hono } from "hono";
 import { cors } from "hono/cors";
 import { chatRoute } from "./routes/chat";
 import { generateRoute } from "./routes/generate";
+import { uploadRoute } from "./routes/upload";
 
 const app = new Hono();
 
 app.use("/*", cors());
 app.route("/api/chat", chatRoute);
 app.route("/api/generate", generateRoute);
+app.route("/api/upload", uploadRoute);
 
 app.get("/health", c => c.json({ ok: true }));
 
