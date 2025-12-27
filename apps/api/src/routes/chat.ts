@@ -3,13 +3,24 @@ import { streamText } from "hono/streaming";
 import { createClient, createImageAnalyzer, orchestrate, type Message, type Provider } from "@muse/ai";
 import { embed } from "@muse/ai/rag";
 import { createLogger } from "@muse/logger";
-import { createMediaClient, createImageBank, type MediaClient, type ImageBank } from "@muse/media";
+import { createMediaClient, createImageBank, createQueryNormalizer, type MediaClient, type ImageBank, type QueryNormalizer } from "@muse/media";
 
 const logger = createLogger();
 let client: Provider | null = null;
 let mediaClient: MediaClient | null = null;
 let imageBank: ImageBank | null = null;
 let imageBankPromise: Promise<ImageBank | null> | null = null;
+let normalizer: QueryNormalizer | null = null;
+
+function getNormalizer(): QueryNormalizer | undefined {
+  const openaiKey = process.env.OPENAI_API_KEY;
+  if (!openaiKey) return undefined;
+
+  if (!normalizer) {
+    normalizer = createQueryNormalizer(openaiKey);
+  }
+  return normalizer;
+}
 
 function getClient(): Provider {
   if (!client) {
@@ -76,6 +87,7 @@ async function getMediaClient(): Promise<MediaClient | null> {
     unsplashKey,
     pexelsKey,
     bank: bank ?? undefined,
+    normalizer: getNormalizer(),
     logger: logger.child({ agent: "media" }),
   });
 
