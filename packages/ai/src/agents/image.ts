@@ -22,7 +22,7 @@ const imagePlanSchema: JsonSchema = {
             orientation: { type: "string", enum: ["horizontal", "vertical", "square"], description: "Image orientation" },
             count: { type: "number", description: "Number of images needed (default 1)" },
           },
-          required: ["blockId", "category", "provider", "searchQuery", "orientation"],
+          required: ["blockId", "category", "provider", "searchQuery", "orientation", "count"],
           additionalProperties: false,
         },
       },
