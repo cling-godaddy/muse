@@ -5,8 +5,13 @@ import { createImageBankStore, type ImageBankStore } from "./store";
 export type { BankConfig, BankEntry, BankSearchOptions, EmbedFn, AnalyzeFn } from "./types";
 export type { Attribution, QueryMapping, BankData, ImageMetadata, VectorIndices, ImageAnalysis } from "./types";
 
+export interface ImageBankSearchResult {
+  results: ImageSearchResult[]
+  topScore: number
+}
+
 export interface ImageBank {
-  search(query: string, opts?: BankSearchOptions): Promise<ImageSearchResult[]>
+  search(query: string, opts?: BankSearchOptions): Promise<ImageBankSearchResult>
   store(result: ImageSearchResult, query: string): Promise<ImageSearchResult>
   sync(): Promise<void>
 }
@@ -18,11 +23,11 @@ export async function createImageBank(config: BankConfig): Promise<ImageBank> {
   await store.load();
 
   return {
-    async search(query: string, opts?: BankSearchOptions): Promise<ImageSearchResult[]> {
-      const entries = await store.search(query, opts);
+    async search(query: string, opts?: BankSearchOptions): Promise<ImageBankSearchResult> {
+      const { entries, topScore } = await store.search(query, opts);
 
       // Convert BankEntry to ImageSearchResult
-      return entries.map((entry): ImageSearchResult => ({
+      const results = entries.map((entry): ImageSearchResult => ({
         id: entry.providerId,
         title: entry.title,
         description: entry.description,
@@ -33,6 +38,8 @@ export async function createImageBank(config: BankConfig): Promise<ImageBank> {
         provider: entry.provider,
         attribution: entry.attribution,
       }));
+
+      return { results, topScore };
     },
 
     async store(result: ImageSearchResult, query: string): Promise<ImageSearchResult> {

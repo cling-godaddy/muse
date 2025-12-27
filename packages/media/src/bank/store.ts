@@ -8,7 +8,7 @@ const { IndexFlatIP } = faiss;
 type IndexFlatIPType = InstanceType<typeof IndexFlatIP>;
 
 const EMBEDDING_DIM = 1536; // text-embedding-3-small dimension
-const DEFAULT_MIN_SCORE = 0.8; // Lowered slightly for multi-vector approach
+const DEFAULT_MIN_SCORE = 0.88; // Raised to filter weak expansion matches
 const BANK_DATA_KEY = "bank/entries.json";
 const BANK_INDEX_KEY = "bank/index.faiss";
 
@@ -34,9 +34,14 @@ interface StoreState {
   dirty: boolean
 }
 
+export interface BankSearchResult {
+  entries: BankEntry[]
+  topScore: number
+}
+
 export interface ImageBankStore {
   load(): Promise<void>
-  search(query: string, opts?: BankSearchOptions): Promise<BankEntry[]>
+  search(query: string, opts?: BankSearchOptions): Promise<BankSearchResult>
   store(image: ImageSearchResult, query: string): Promise<BankEntry>
   getImageUrl(entry: BankEntry, size: "preview" | "display"): string
   sync(): Promise<void>
@@ -116,11 +121,11 @@ export function createImageBankStore(config: BankConfig): ImageBankStore {
       }
     },
 
-    async search(query: string, opts: BankSearchOptions = {}): Promise<BankEntry[]> {
+    async search(query: string, opts: BankSearchOptions = {}): Promise<BankSearchResult> {
       const { orientation, limit = 5 } = opts;
 
       if (state.entries.size === 0) {
-        return [];
+        return { entries: [], topScore: 0 };
       }
 
       // Embed the query
@@ -128,7 +133,7 @@ export function createImageBankStore(config: BankConfig): ImageBankStore {
 
       // Search FAISS - over-fetch to aggregate by image
       const indexSize = state.index.ntotal();
-      if (indexSize === 0) return [];
+      if (indexSize === 0) return { entries: [], topScore: 0 };
 
       const k = Math.min(limit * 10, indexSize);
 
@@ -175,16 +180,17 @@ export function createImageBankStore(config: BankConfig): ImageBankStore {
 
       matches.sort((a, b) => b.score - a.score);
       const limited = matches.slice(0, limit);
+      const topScore = limited[0]?.score ?? 0;
 
       log.debug("bank_search", {
         query,
         orientation,
         found: limited.length,
-        topScore: limited[0]?.score,
+        topScore,
         topMatchType: limited[0]?.matchType,
       });
 
-      return limited.map(m => m.entry);
+      return { entries: limited.map(m => m.entry), topScore };
     },
 
     async store(image: ImageSearchResult, query: string): Promise<BankEntry> {
