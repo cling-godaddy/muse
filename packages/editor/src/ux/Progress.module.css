@@ -1,0 +1,25 @@
+.track {
+  width: 100%;
+  background: #e5e7eb;
+  border-radius: 9999px;
+  overflow: hidden;
+}
+
+.bar {
+  height: 100%;
+  background: var(--muse-theme-primary, #6366f1);
+  border-radius: 9999px;
+  transition: width 0.2s ease-out;
+}
+
+.sm {
+  height: 4px;
+}
+
+.md {
+  height: 6px;
+}
+
+.lg {
+  height: 8px;
+}
