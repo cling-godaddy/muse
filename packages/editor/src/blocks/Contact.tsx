@@ -1,4 +1,5 @@
 import type { ContactBlock as ContactBlockType } from "@muse/core";
+import { useAutoResize } from "../hooks";
 import styles from "./Contact.module.css";
 
 interface Props {
@@ -7,12 +8,15 @@ interface Props {
 }
 
 export function Contact({ block, onUpdate }: Props) {
+  const headlineRef = useAutoResize(block.headline ?? "");
+
   return (
     <div className={styles.section}>
       {block.headline !== undefined && (
-        <input
-          type="text"
+        <textarea
+          ref={headlineRef}
           className={styles.headline}
+          rows={1}
           value={block.headline}
           onChange={e => onUpdate({ headline: e.target.value || undefined })}
           placeholder="Section headline..."

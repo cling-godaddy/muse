@@ -1,19 +1,10 @@
-import { useEffect, useRef } from "react";
 import type { FeaturesBlock as FeaturesBlockType, FeatureItem } from "@muse/core";
+import { useAutoResize } from "../hooks";
 import styles from "./Features.module.css";
 
 interface Props {
   block: FeaturesBlockType
   onUpdate: (data: Partial<FeaturesBlockType>) => void
-}
-
-function useAutoResize<T extends HTMLTextAreaElement>(ref: React.RefObject<T | null>, value: string) {
-  useEffect(() => {
-    const el = ref.current;
-    if (!el) return;
-    el.style.height = "auto";
-    el.style.height = `${el.scrollHeight}px`;
-  }, [ref, value]);
 }
 
 interface FeatureCardProps {
@@ -23,10 +14,8 @@ interface FeatureCardProps {
 }
 
 function FeatureCard({ item, onUpdate, onRemove }: FeatureCardProps) {
-  const titleRef = useRef<HTMLTextAreaElement>(null);
-  const descRef = useRef<HTMLTextAreaElement>(null);
-  useAutoResize(titleRef, item.title);
-  useAutoResize(descRef, item.description);
+  const titleRef = useAutoResize(item.title);
+  const descRef = useAutoResize(item.description);
 
   return (
     <div className={styles.item}>
@@ -75,8 +64,7 @@ function FeatureCard({ item, onUpdate, onRemove }: FeatureCardProps) {
 }
 
 export function Features({ block, onUpdate }: Props) {
-  const headlineRef = useRef<HTMLTextAreaElement>(null);
-  useAutoResize(headlineRef, block.headline ?? "");
+  const headlineRef = useAutoResize(block.headline ?? "");
 
   const updateItem = (index: number, data: Partial<FeatureItem>) => {
     const items = block.items.map((item, i) =>

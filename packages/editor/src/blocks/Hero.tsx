@@ -1,23 +1,10 @@
-import { useEffect, useRef } from "react";
 import type { HeroBlock as HeroBlockType } from "@muse/core";
+import { useAutoResize } from "../hooks";
 import styles from "./Hero.module.css";
 
 interface Props {
   block: HeroBlockType
   onUpdate: (data: Partial<HeroBlockType>) => void
-}
-
-function useAutoResize(value: string) {
-  const ref = useRef<HTMLTextAreaElement>(null);
-
-  useEffect(() => {
-    const el = ref.current;
-    if (!el) return;
-    el.style.height = "auto";
-    el.style.height = `${el.scrollHeight}px`;
-  }, [value]);
-
-  return ref;
 }
 
 export function Hero({ block, onUpdate }: Props) {

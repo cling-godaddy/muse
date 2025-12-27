@@ -1,4 +1,5 @@
 import type { GalleryBlock as GalleryBlockType } from "@muse/core";
+import { useAutoResize } from "../../hooks";
 import styles from "./Grid.module.css";
 
 interface Props {
@@ -8,13 +9,15 @@ interface Props {
 
 export function Grid({ block, onUpdate }: Props) {
   const columns = block.columns ?? 3;
+  const headlineRef = useAutoResize(block.headline ?? "");
 
   return (
     <div className={styles.section}>
       {block.headline !== undefined && (
-        <input
-          type="text"
+        <textarea
+          ref={headlineRef}
           className={styles.headline}
+          rows={1}
           value={block.headline}
           onChange={e => onUpdate({ headline: e.target.value || undefined })}
           placeholder="Section headline..."

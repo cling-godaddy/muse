@@ -1,4 +1,5 @@
 import type { TestimonialsBlock as TestimonialsBlockType, Quote } from "@muse/core";
+import { useAutoResize } from "../../hooks";
 import styles from "./Grid.module.css";
 
 interface Props {
@@ -7,6 +8,8 @@ interface Props {
 }
 
 export function Grid({ block, onUpdate }: Props) {
+  const headlineRef = useAutoResize(block.headline ?? "");
+
   const updateQuote = (index: number, data: Partial<Quote>) => {
     const quotes = block.quotes.map((q, i) =>
       i === index ? { ...q, ...data } : q,
@@ -18,9 +21,10 @@ export function Grid({ block, onUpdate }: Props) {
     <section className={styles.section}>
       {block.headline !== undefined && (
         <div className={styles.header}>
-          <input
-            type="text"
+          <textarea
+            ref={headlineRef}
             className={styles.headline}
+            rows={1}
             value={block.headline}
             onChange={e => onUpdate({ headline: e.target.value || undefined })}
             placeholder="Section headline..."

@@ -1,23 +1,10 @@
-import { useEffect, useRef } from "react";
 import type { CtaBlock as CtaBlockType } from "@muse/core";
+import { useAutoResize } from "../hooks";
 import styles from "./Cta.module.css";
 
 interface Props {
   block: CtaBlockType
   onUpdate: (data: Partial<CtaBlockType>) => void
-}
-
-function useAutoResize(value: string) {
-  const ref = useRef<HTMLTextAreaElement>(null);
-
-  useEffect(() => {
-    const el = ref.current;
-    if (!el) return;
-    el.style.height = "auto";
-    el.style.height = `${el.scrollHeight}px`;
-  }, [value]);
-
-  return ref;
 }
 
 export function Cta({ block, onUpdate }: Props) {
