@@ -29,7 +29,7 @@ export const galleryMasonry: SectionPreset = {
   requiredFields: ["images"],
   optionalFields: ["headline"],
   className: "muse-gallery--masonry",
-  imageRequirements: { category: "subject", count: 9, orientation: "mixed" },
+  imageRequirements: { category: "subject", count: 10, orientation: "mixed" },
 };
 
 export const galleryCarousel: SectionPreset = {

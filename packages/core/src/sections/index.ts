@@ -44,7 +44,7 @@ export const DEFAULT_PRESETS: Record<SectionType, string> = {
 };
 
 export const GALLERY_IMAGE_MINIMUMS: Record<string, number> = {
-  "gallery-masonry": 9,
+  "gallery-masonry": 10,
   "gallery-grid": 6,
   "gallery-carousel": 5,
 };
