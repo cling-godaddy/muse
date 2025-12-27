@@ -215,6 +215,25 @@ export const terminalTypography: TypographyPreset = {
 };
 
 // ============================================================================
+// BUBBLEGUM
+// ============================================================================
+
+export const bubblegumTypography: TypographyPreset = {
+  id: "bubblegum",
+  name: "Quicksand + Nunito",
+  category: "friendly",
+  mood: "approachable",
+  tags: ["rounded", "soft", "friendly", "bubbly", "geometric"],
+  description: "Rounded bubbly fonts with a soft playful feel",
+  fonts: {
+    heading: "Quicksand, system-ui, sans-serif",
+    body: "Nunito, system-ui, sans-serif",
+  },
+  weights: { heading: 700, body: 400 },
+  googleFonts: ["Quicksand:wght@400;500;600;700", "Nunito:wght@400;500;600"],
+};
+
+// ============================================================================
 // RETRO-FUTURISTIC
 // ============================================================================
 
@@ -258,6 +277,8 @@ export const typographyPresets = {
   "terminal": terminalTypography,
   // retro-futuristic
   "synthwave": synthwaveTypography,
+  // bubblegum
+  "bubblegum": bubblegumTypography,
 } as const;
 
 export type TypographyId = keyof typeof typographyPresets;

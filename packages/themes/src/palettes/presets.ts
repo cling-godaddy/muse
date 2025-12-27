@@ -635,6 +635,35 @@ export const synthwavePalette: ColorPalette = {
 };
 
 // ============================================================================
+// BUBBLEGUM
+// ============================================================================
+
+export const bubblegumPalette: ColorPalette = {
+  id: "bubblegum",
+  name: "Bubblegum",
+  category: "vibrant",
+  mood: "playful",
+  temperature: "warm",
+  contrast: "light",
+  tags: ["candy", "y2k", "cute", "sweet", "retro", "playful", "fun"],
+  industries: ["beauty", "fashion", "kids", "food", "lifestyle", "entertainment"],
+  description: "Sweet Y2K-inspired candy aesthetic with soft pink and cyan",
+  colors: {
+    primary: "#FF6B9D",
+    primaryHover: "#FF5088",
+    accent: "#67E8F9",
+    background: "#FFF5F8",
+    backgroundAlt: "#FFE8F0",
+    text: "#581C4A",
+    textMuted: "#A3627D",
+    heroGradient: "linear-gradient(135deg, #FFE8F0 0%, #E0F7FF 100%)",
+    ctaBackground: "#FF6B9D",
+    ctaText: "#ffffff",
+  },
+  defaultStyle: "cozy",
+};
+
+// ============================================================================
 // ALL PALETTES
 // ============================================================================
 
@@ -666,6 +695,7 @@ export const palettes = {
   aurora,
   candy,
   synthwave: synthwavePalette,
+  bubblegum: bubblegumPalette,
   // luxury
   noir,
   champagne,
