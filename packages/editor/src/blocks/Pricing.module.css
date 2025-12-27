@@ -242,3 +242,45 @@
 :global([data-effects="crt"]) .price input:first-child {
   text-shadow: 0 0 10px rgba(var(--muse-theme-primary-rgb, 0, 255, 0), 0.4);
 }
+
+/* ============================================
+   NEON EFFECTS
+   ============================================ */
+:global([data-effects="neon"]) .headline {
+  text-shadow:
+    0 0 10px rgba(var(--muse-theme-primary-rgb, 255, 42, 109), 0.8),
+    0 0 20px rgba(var(--muse-theme-primary-rgb, 255, 42, 109), 0.6),
+    0 0 40px rgba(var(--muse-theme-primary-rgb, 255, 42, 109), 0.4);
+}
+
+:global([data-effects="neon"]) .subheadline {
+  text-shadow:
+    0 0 8px rgba(var(--muse-theme-primary-rgb, 255, 42, 109), 0.5),
+    0 0 16px rgba(var(--muse-theme-primary-rgb, 255, 42, 109), 0.3);
+}
+
+:global([data-effects="neon"]) .plan {
+  border: 1px solid rgba(var(--muse-theme-primary-rgb, 255, 42, 109), 0.3);
+  box-shadow:
+    0 0 20px rgba(var(--muse-theme-primary-rgb, 255, 42, 109), 0.15),
+    inset 0 0 20px rgba(var(--muse-theme-primary-rgb, 255, 42, 109), 0.05);
+}
+
+:global([data-effects="neon"]) .highlighted {
+  border-color: rgba(var(--muse-theme-primary-rgb, 255, 42, 109), 0.6);
+  box-shadow:
+    0 0 30px rgba(var(--muse-theme-primary-rgb, 255, 42, 109), 0.3),
+    inset 0 0 20px rgba(var(--muse-theme-primary-rgb, 255, 42, 109), 0.1);
+}
+
+:global([data-effects="neon"]) .name {
+  text-shadow:
+    0 0 8px rgba(var(--muse-theme-primary-rgb, 255, 42, 109), 0.6),
+    0 0 16px rgba(var(--muse-theme-primary-rgb, 255, 42, 109), 0.3);
+}
+
+:global([data-effects="neon"]) .price input:first-child {
+  text-shadow:
+    0 0 10px rgba(var(--muse-theme-primary-rgb, 255, 42, 109), 0.7),
+    0 0 20px rgba(var(--muse-theme-primary-rgb, 255, 42, 109), 0.4);
+}

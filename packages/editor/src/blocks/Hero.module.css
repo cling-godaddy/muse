@@ -147,3 +147,31 @@
 :global([data-effects="crt"]) .cta input:last-child {
   box-shadow: 0 0 10px rgba(var(--muse-theme-primary-rgb, 0, 255, 0), 0.2);
 }
+
+/* ============================================
+   NEON EFFECTS
+   Glowing text and elements, synthwave aesthetic
+   ============================================ */
+:global([data-effects="neon"]) .headline {
+  text-shadow:
+    0 0 10px rgba(var(--muse-theme-primary-rgb, 255, 42, 109), 0.8),
+    0 0 20px rgba(var(--muse-theme-primary-rgb, 255, 42, 109), 0.6),
+    0 0 40px rgba(var(--muse-theme-primary-rgb, 255, 42, 109), 0.4);
+}
+
+:global([data-effects="neon"]) .subheadline {
+  text-shadow:
+    0 0 8px rgba(var(--muse-theme-primary-rgb, 255, 42, 109), 0.5),
+    0 0 16px rgba(var(--muse-theme-primary-rgb, 255, 42, 109), 0.3);
+}
+
+:global([data-effects="neon"]) .cta input:first-child {
+  box-shadow:
+    0 0 15px rgba(var(--muse-theme-primary-rgb, 255, 42, 109), 0.5),
+    0 0 30px rgba(var(--muse-theme-primary-rgb, 255, 42, 109), 0.3);
+}
+
+:global([data-effects="neon"]) .cta input:last-child {
+  border: 1px solid rgba(var(--muse-theme-primary-rgb, 255, 42, 109), 0.5);
+  box-shadow: 0 0 10px rgba(var(--muse-theme-primary-rgb, 255, 42, 109), 0.2);
+}

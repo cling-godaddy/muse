@@ -74,3 +74,12 @@
 :global([data-effects="crt"]) .caption {
   text-shadow: 0 0 6px rgba(var(--muse-theme-primary-rgb, 0, 255, 0), 0.3);
 }
+
+/* ============================================
+   NEON EFFECTS
+   ============================================ */
+:global([data-effects="neon"]) .caption {
+  text-shadow:
+    0 0 6px rgba(var(--muse-theme-primary-rgb, 255, 42, 109), 0.6),
+    0 0 12px rgba(var(--muse-theme-primary-rgb, 255, 42, 109), 0.3);
+}
