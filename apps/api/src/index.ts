@@ -8,6 +8,7 @@ import { cors } from "hono/cors";
 import { chatRoute } from "./routes/chat";
 import { generateRoute } from "./routes/generate";
 import { uploadRoute } from "./routes/upload";
+import { searchRoute } from "./routes/search";
 
 const app = new Hono();
 
@@ -15,6 +16,7 @@ app.use("/*", cors());
 app.route("/api/chat", chatRoute);
 app.route("/api/generate", generateRoute);
 app.route("/api/upload", uploadRoute);
+app.route("/api/search", searchRoute);
 
 app.get("/health", c => c.json({ ok: true }));
 

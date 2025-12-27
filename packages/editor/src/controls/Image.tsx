@@ -3,22 +3,44 @@ import * as Popover from "@radix-ui/react-popover";
 import type { ImageSource } from "@muse/core";
 import styles from "./Image.module.css";
 
+interface SearchResult {
+  id: string
+  title: string
+  previewUrl: string
+  displayUrl: string
+  provider: string
+}
+
 interface Props {
   image: ImageSource | undefined
   onUpdate: (image: ImageSource) => void
   onRemove?: () => void
   className?: string
   uploadUrl?: string
+  searchUrl?: string
 }
 
 const DEFAULT_UPLOAD_URL = "/api/upload/image";
+const DEFAULT_SEARCH_URL = "/api/search/images";
 const ALLOWED_TYPES = ["image/jpeg", "image/png", "image/webp", "image/gif"];
 
-export function Image({ image, onUpdate, onRemove, className, uploadUrl = DEFAULT_UPLOAD_URL }: Props) {
+export function Image({
+  image,
+  onUpdate,
+  onRemove,
+  className,
+  uploadUrl = DEFAULT_UPLOAD_URL,
+  searchUrl = DEFAULT_SEARCH_URL,
+}: Props) {
   const [open, setOpen] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // Search state
+  const [query, setQuery] = useState("");
+  const [results, setResults] = useState<SearchResult[]>([]);
+  const [searching, setSearching] = useState(false);
 
   const handleAltChange = (value: string) => {
     if (!image) return;
@@ -73,6 +95,39 @@ export function Image({ image, onUpdate, onRemove, className, uploadUrl = DEFAUL
 
   const triggerUpload = () => {
     fileInputRef.current?.click();
+  };
+
+  const handleSearch = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!query.trim()) return;
+
+    setError(null);
+    setSearching(true);
+
+    try {
+      const res = await fetch(`${searchUrl}?q=${encodeURIComponent(query)}`);
+      if (!res.ok) throw new Error("Search failed");
+      const data: SearchResult[] = await res.json();
+      setResults(data);
+    }
+    catch (err) {
+      setError(err instanceof Error ? err.message : "Search failed");
+    }
+    finally {
+      setSearching(false);
+    }
+  };
+
+  const handleSelectResult = (result: SearchResult) => {
+    onUpdate({
+      url: result.displayUrl,
+      alt: result.title,
+      provider: result.provider,
+      providerId: result.id,
+    });
+    setOpen(false);
+    setQuery("");
+    setResults([]);
   };
 
   const fileInput = (
@@ -140,6 +195,34 @@ export function Image({ image, onUpdate, onRemove, className, uploadUrl = DEFAUL
             />
           </div>
 
+          <form className={styles.searchForm} onSubmit={handleSearch}>
+            <input
+              type="text"
+              className={styles.input}
+              value={query}
+              onChange={e => setQuery(e.target.value)}
+              placeholder="Search images..."
+            />
+            <button type="submit" className={styles.searchButton} disabled={searching}>
+              <SearchIcon />
+            </button>
+          </form>
+
+          {results.length > 0 && (
+            <div className={styles.results}>
+              {results.map(result => (
+                <button
+                  key={result.id}
+                  type="button"
+                  className={styles.resultItem}
+                  onClick={() => handleSelectResult(result)}
+                >
+                  <img src={result.previewUrl} alt={result.title} />
+                </button>
+              ))}
+            </div>
+          )}
+
           {error && <div className={styles.error}>{error}</div>}
 
           <div className={styles.actions}>
@@ -175,6 +258,15 @@ function UploadIcon() {
       <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
       <polyline points="17 8 12 3 7 8" />
       <line x1="12" y1="3" x2="12" y2="15" />
+    </svg>
+  );
+}
+
+function SearchIcon() {
+  return (
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+      <circle cx="11" cy="11" r="8" />
+      <line x1="21" y1="21" x2="16.65" y2="16.65" />
     </svg>
   );
 }
