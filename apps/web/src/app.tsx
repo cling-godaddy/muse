@@ -16,10 +16,13 @@ interface ThemeState {
   effects: string
 }
 
+const IMAGE_BLOCK_TYPES = new Set(["gallery", "features", "testimonials", "image"]);
+
 function MainApp() {
   const { blocks, addBlock, updateBlock, setBlocks } = useBlocks();
   const blocksRef = useRef(blocks);
   const [theme, setTheme] = useState<ThemeState>({ palette: "slate", typography: "inter", effects: "neutral" });
+  const [pendingImageBlocks, setPendingImageBlocks] = useState<Set<string>>(new Set());
 
   useLayoutEffect(() => {
     blocksRef.current = blocks;
@@ -41,6 +44,9 @@ function MainApp() {
 
   const handleBlockParsed = useCallback((block: Block) => {
     addBlock(block);
+    if (IMAGE_BLOCK_TYPES.has(block.type)) {
+      setPendingImageBlocks(prev => new Set(prev).add(block.id));
+    }
   }, [addBlock]);
 
   const handleThemeSelected = useCallback((selection: ThemeSelection) => {
@@ -55,10 +61,14 @@ function MainApp() {
   const handleImages = useCallback((images: ImageSelection[]) => {
     const currentBlocks = blocksRef.current;
     const byBlock = groupBy(images, img => img.blockId);
+    const resolvedBlockIds: string[] = [];
+
     for (const [blockId, blockImages] of Object.entries(byBlock)) {
       const imgSources = blockImages.map(s => s.image);
       const block = currentBlocks.find(b => b.id === blockId);
       if (!block) continue;
+
+      resolvedBlockIds.push(blockId);
 
       if (block.type === "hero") {
         const img = blockImages.find(i => i.category === "ambient" || i.category === "subject");
@@ -88,6 +98,14 @@ function MainApp() {
         }
       }
     }
+
+    if (resolvedBlockIds.length > 0) {
+      setPendingImageBlocks((prev) => {
+        const next = new Set(prev);
+        for (const id of resolvedBlockIds) next.delete(id);
+        return next;
+      });
+    }
   }, [updateBlock]);
 
   return (
@@ -106,7 +124,7 @@ function MainApp() {
         </div>
         <div className="flex-1 min-w-0 overflow-y-auto">
           <div className="h-full overflow-y-auto" style={themeStyle} data-effects={effectsId}>
-            <BlockEditor blocks={blocks} onChange={setBlocks} />
+            <BlockEditor blocks={blocks} onChange={setBlocks} pendingImageBlocks={pendingImageBlocks} />
           </div>
         </div>
       </main>

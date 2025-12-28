@@ -4,6 +4,7 @@ import type { ComponentType } from "react";
 export interface BlockComponentProps<T extends Block = Block> {
   block: T
   onUpdate: (data: Partial<T>) => void
+  isPending?: boolean
 }
 
 export type BlockComponent<T extends Block = Block>

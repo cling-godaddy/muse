@@ -4,9 +4,10 @@ import { BlockWrapper } from "./blocks/BlockWrapper";
 interface BlockEditorProps {
   blocks: Block[]
   onChange: (blocks: Block[]) => void
+  pendingImageBlocks?: Set<string>
 }
 
-export function BlockEditor({ blocks, onChange }: BlockEditorProps) {
+export function BlockEditor({ blocks, onChange, pendingImageBlocks }: BlockEditorProps) {
   const updateBlock = (id: string, data: Partial<Block>) => {
     onChange(blocks.map(b => (b.id === id ? { ...b, ...data } as Block : b)));
   };
@@ -28,6 +29,7 @@ export function BlockEditor({ blocks, onChange }: BlockEditorProps) {
           block={block}
           onUpdate={data => updateBlock(block.id, data)}
           onDelete={() => deleteBlock(block.id)}
+          isPending={pendingImageBlocks?.has(block.id) ?? false}
         />
       ))}
     </div>

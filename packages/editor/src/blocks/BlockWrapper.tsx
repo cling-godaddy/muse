@@ -8,6 +8,7 @@ interface Props {
   block: Block
   onUpdate: (data: Partial<Block>) => void
   onDelete: () => void
+  isPending?: boolean
 }
 
 function UnknownBlock({ block }: { block: Block }) {
@@ -20,7 +21,7 @@ function UnknownBlock({ block }: { block: Block }) {
   );
 }
 
-export function BlockWrapper({ block, onUpdate, onDelete }: Props) {
+export function BlockWrapper({ block, onUpdate, onDelete, isPending }: Props) {
   const Component = useMemo<BlockComponent>(
     () => getBlockComponent(block.type) ?? UnknownBlock,
     [block.type],
@@ -48,7 +49,7 @@ export function BlockWrapper({ block, onUpdate, onDelete }: Props) {
         </button>
       </div>
       {/* eslint-disable-next-line react-hooks/static-components -- registry lookup, not component creation */}
-      <Component block={block} onUpdate={onUpdate} />
+      <Component block={block} onUpdate={onUpdate} isPending={isPending} />
     </div>
   );
 }
