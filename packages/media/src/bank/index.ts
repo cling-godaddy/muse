@@ -2,8 +2,11 @@ import type { ImageSearchResult } from "../types";
 import type { BankConfig, BankSearchOptions } from "./types";
 import { createImageBankStore, type ImageBankStore } from "./store";
 
-export type { BankConfig, BankEntry, BankSearchOptions, EmbedFn, AnalyzeFn } from "./types";
+export type { BankConfig, BankEntry, BankSearchOptions, BankListOptions, EmbedFn, AnalyzeFn } from "./types";
 export type { Attribution, QueryMapping, BankData, ImageMetadata, VectorIndices, ImageAnalysis } from "./types";
+export type { Review, SearchTest, AccuracyRating, ReviewStatus } from "./types";
+export type { BankSearchResult, BankListResult, BankStats, ImageBankStore } from "./store";
+export { createImageBankStore } from "./store";
 
 export interface ImageBankSearchResult {
   results: ImageSearchResult[]

@@ -1,7 +1,7 @@
 import faiss from "faiss-node";
 import type { Logger } from "@muse/logger";
 import type { ImageSearchResult } from "../types";
-import type { BankConfig, BankEntry, BankData, BankSearchOptions, EmbedFn, AnalyzeFn, ImageMetadata } from "./types";
+import type { BankConfig, BankEntry, BankData, BankSearchOptions, BankListOptions, Review, EmbedFn, AnalyzeFn, ImageMetadata } from "./types";
 import { createS3Operations, type S3Operations } from "./s3";
 
 const { IndexFlatIP } = faiss;
@@ -39,12 +39,40 @@ export interface BankSearchResult {
   topScore: number
 }
 
+export interface BankListResult {
+  entries: BankEntry[]
+  total: number
+}
+
+export interface BankStats {
+  total: number
+  reviewed: number
+  pending: number
+  approved: number
+  flagged: number
+  accuracy: {
+    accurate: number
+    partial: number
+    wrong: number
+    unrated: number
+  }
+  searchability: {
+    avgScore: number | null
+    totalTests: number
+  }
+}
+
 export interface ImageBankStore {
   load(): Promise<void>
   search(query: string, opts?: BankSearchOptions): Promise<BankSearchResult>
   store(image: ImageSearchResult, query: string): Promise<BankEntry>
   getImageUrl(entry: BankEntry, size: "preview" | "display"): string
   sync(): Promise<void>
+  // Review operations
+  getEntry(id: string): BankEntry | null
+  listEntries(opts?: BankListOptions): BankListResult
+  updateReview(id: string, review: Review): void
+  getStats(): BankStats
 }
 
 export function createImageBankStore(config: BankConfig): ImageBankStore {
@@ -224,27 +252,13 @@ export function createImageBankStore(config: BankConfig): ImageBankStore {
       const analysis = await analyze(image.displayUrl);
       log.debug("bank_analyze_complete", { entryId, subjects: analysis.subjects });
 
-      // Create embeddings for caption, query, and expansions
+      // Create caption embedding only (simplified strategy)
       const captionVec = await embed(analysis.caption);
-      const queryVec = await embed(query);
-      const expansionVecs = await Promise.all(analysis.expansions.map(t => embed(t)));
 
-      // Add all vectors to FAISS index
+      // Add caption vector to FAISS index
       const captionIndex = state.nextIndex++;
       state.index.add(Array.from(captionVec));
       state.vectorToEntry.set(captionIndex, { entryId, type: "caption" });
-
-      const queryIndex = state.nextIndex++;
-      state.index.add(Array.from(queryVec));
-      state.vectorToEntry.set(queryIndex, { entryId, type: "query" });
-
-      const expansionIndices: number[] = [];
-      for (const vec of expansionVecs) {
-        const idx = state.nextIndex++;
-        state.index.add(Array.from(vec));
-        state.vectorToEntry.set(idx, { entryId, type: "expansion" });
-        expansionIndices.push(idx);
-      }
 
       // Build metadata
       const metadata: ImageMetadata = {
@@ -276,8 +290,8 @@ export function createImageBankStore(config: BankConfig): ImageBankStore {
         metadata,
         vectors: {
           caption: captionIndex,
-          queries: [queryIndex],
-          expansions: expansionIndices,
+          queries: [],
+          expansions: [],
         },
         createdAt: new Date().toISOString(),
       };
@@ -288,8 +302,7 @@ export function createImageBankStore(config: BankConfig): ImageBankStore {
       log.info("bank_store_complete", {
         entryId,
         caption: analysis.caption.slice(0, 50),
-        expansions: analysis.expansions.length,
-        vectors: 2 + expansionIndices.length,
+        vectors: 1,
       });
 
       return entry;
@@ -325,5 +338,129 @@ export function createImageBankStore(config: BankConfig): ImageBankStore {
       state.dirty = false;
       log.info("bank_sync_complete", { entries: state.entries.size });
     },
+
+    getEntry(id: string): BankEntry | null {
+      return state.entries.get(id) ?? null;
+    },
+
+    listEntries(opts: BankListOptions = {}): BankListResult {
+      const { status = "all", accuracy = "all", sort = "oldest", limit = 50, offset = 0 } = opts;
+
+      let entries = Array.from(state.entries.values());
+
+      // Filter by status
+      if (status !== "all") {
+        entries = entries.filter(e => (e.review?.status ?? "pending") === status);
+      }
+
+      // Filter by accuracy
+      if (accuracy !== "all") {
+        if (accuracy === "unrated") {
+          entries = entries.filter(e => e.review?.accuracy == null);
+        }
+        else {
+          entries = entries.filter(e => e.review?.accuracy === accuracy);
+        }
+      }
+
+      // Sort
+      entries.sort((a, b) => {
+        if (sort === "newest") {
+          return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+        }
+        if (sort === "worst-searchability") {
+          const scoreA = computeSearchability(a.review?.searchTests ?? []);
+          const scoreB = computeSearchability(b.review?.searchTests ?? []);
+          return (scoreA ?? 1) - (scoreB ?? 1); // nulls go last
+        }
+        // Default: oldest first, prioritize pending
+        const statusOrder = { pending: 0, flagged: 1, approved: 2 };
+        const statusA = statusOrder[a.review?.status ?? "pending"];
+        const statusB = statusOrder[b.review?.status ?? "pending"];
+        if (statusA !== statusB) return statusA - statusB;
+        return new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
+      });
+
+      const total = entries.length;
+      const paginated = entries.slice(offset, offset + limit);
+
+      return { entries: paginated, total };
+    },
+
+    updateReview(id: string, review: Review): void {
+      const entry = state.entries.get(id);
+      if (!entry) {
+        log.warn("bank_review_not_found", { id });
+        return;
+      }
+      entry.review = review;
+      state.dirty = true;
+      log.debug("bank_review_updated", { id, status: review.status, accuracy: review.accuracy });
+    },
+
+    getStats(): BankStats {
+      const entries = Array.from(state.entries.values());
+      const total = entries.length;
+
+      let reviewed = 0;
+      let pending = 0;
+      let approved = 0;
+      let flagged = 0;
+      let accurate = 0;
+      let partial = 0;
+      let wrong = 0;
+      let unrated = 0;
+      let totalTests = 0;
+      let searchScoreSum = 0;
+      let entriesWithTests = 0;
+
+      for (const entry of entries) {
+        const review = entry.review;
+        const status = review?.status ?? "pending";
+
+        if (status === "pending") pending++;
+        else if (status === "approved") approved++;
+        else if (status === "flagged") flagged++;
+
+        if (review?.accuracy) {
+          reviewed++;
+          if (review.accuracy === "accurate") accurate++;
+          else if (review.accuracy === "partial") partial++;
+          else if (review.accuracy === "wrong") wrong++;
+        }
+        else {
+          unrated++;
+        }
+
+        const tests = review?.searchTests ?? [];
+        totalTests += tests.length;
+        if (tests.length > 0) {
+          const score = computeSearchability(tests);
+          if (score !== null) {
+            searchScoreSum += score;
+            entriesWithTests++;
+          }
+        }
+      }
+
+      return {
+        total,
+        reviewed,
+        pending,
+        approved,
+        flagged,
+        accuracy: { accurate, partial, wrong, unrated },
+        searchability: {
+          avgScore: entriesWithTests > 0 ? searchScoreSum / entriesWithTests : null,
+          totalTests,
+        },
+      };
+    },
   };
+}
+
+function computeSearchability(tests: { found: boolean, rank: number | null }[]): number | null {
+  if (tests.length === 0) return null;
+  const scores = tests.map(t => (t.found && t.rank ? 1 / t.rank : 0));
+  return scores.reduce((a, b) => a + b, 0) / scores.length;
 }

@@ -6,7 +6,8 @@
   "types": "./src/index.ts",
   "exports": {
     ".": "./src/index.ts",
-    "./s3": "./src/bank/s3.ts"
+    "./s3": "./src/bank/s3.ts",
+    "./bank": "./src/bank/index.ts"
   },
   "scripts": {
     "lint": "eslint src",

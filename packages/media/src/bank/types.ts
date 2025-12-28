@@ -36,6 +36,25 @@ export interface VectorIndices {
   expansions: number[] // LLM-generated related terms
 }
 
+// HITL Review types
+export type AccuracyRating = "accurate" | "partial" | "wrong";
+export type ReviewStatus = "pending" | "approved" | "flagged";
+
+export interface SearchTest {
+  query: string
+  found: boolean
+  rank: number | null // 1-indexed, null if not found
+  testedAt: string
+}
+
+export interface Review {
+  accuracy: AccuracyRating | null
+  accuracyAt: string | null
+  searchTests: SearchTest[]
+  status: ReviewStatus
+  notes: string | null
+}
+
 export interface BankEntry {
   id: string // "unsplash:abc123"
   provider: string
@@ -50,6 +69,7 @@ export interface BankEntry {
   metadata: ImageMetadata
   vectors: VectorIndices
   createdAt: string
+  review?: Review
 }
 
 export interface ImageAnalysis {
@@ -83,6 +103,14 @@ export interface BankConfig {
 export interface BankSearchOptions {
   orientation?: "horizontal" | "vertical" | "square"
   limit?: number
+}
+
+export interface BankListOptions {
+  status?: ReviewStatus | "all"
+  accuracy?: AccuracyRating | "unrated" | "all"
+  sort?: "oldest" | "newest" | "worst-searchability"
+  limit?: number
+  offset?: number
 }
 
 export interface BankData {
