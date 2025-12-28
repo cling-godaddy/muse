@@ -1,7 +1,7 @@
 import type { GalleryBlock as GalleryBlockType } from "@muse/core";
 import { getMinimumImages } from "@muse/core";
 import { useAutoResize } from "../../hooks";
-import { ImageWithSkeleton } from "../../ux";
+import { ImageLoader } from "../../ux";
 import styles from "./Grid.module.css";
 
 interface Props {
@@ -33,12 +33,12 @@ export function Grid({ block, onUpdate, isPending }: Props) {
         {isPending && block.images.length === 0
           ? Array.from({ length: getMinimumImages(block.preset ?? "gallery-grid") }).map((_, i) => (
             <div key={i} className={styles.item}>
-              <ImageWithSkeleton isPending />
+              <ImageLoader isPending />
             </div>
           ))
           : block.images.map((image, i) => (
             <div key={i} className={styles.item}>
-              <ImageWithSkeleton image={image} isPending={false} />
+              <ImageLoader image={image} isPending={false} />
             </div>
           ))}
       </div>

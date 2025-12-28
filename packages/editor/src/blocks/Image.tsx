@@ -1,6 +1,6 @@
 import type { ImageBlock as ImageBlockType } from "@muse/core";
 import { Image as ImageControl } from "../controls/Image";
-import { ImageWithSkeleton } from "../ux";
+import { ImageLoader } from "../ux";
 import styles from "./Image.module.css";
 
 interface Props {
@@ -16,7 +16,7 @@ export function Image({ block, onUpdate, isPending }: Props) {
     <div className={`${styles.section} ${styles[size]}`}>
       <div className={styles.container}>
         {isPending && !block.image
-          ? <ImageWithSkeleton isPending aspectRatio="16/9" className={styles.img} />
+          ? <ImageLoader isPending aspectRatio="16/9" className={styles.img} />
           : (
             <>
               <ImageControl

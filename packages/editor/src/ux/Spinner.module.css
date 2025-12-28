@@ -1,6 +1,6 @@
 .spinner {
   display: inline-block;
-  border: 2px solid #e5e7eb;
+  border: 2px solid var(--muse-theme-border, #e5e7eb);
   border-top-color: var(--muse-theme-primary, #6366f1);
   border-radius: 50%;
   animation: spin 0.8s linear infinite;

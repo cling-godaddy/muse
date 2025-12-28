@@ -1,6 +1,6 @@
 import type { FeaturesBlock as FeaturesBlockType, FeatureItem } from "@muse/core";
 import { useAutoResize } from "../hooks";
-import { ImageWithSkeleton } from "../ux";
+import { ImageLoader } from "../ux";
 import styles from "./Features.module.css";
 
 interface Props {
@@ -23,9 +23,9 @@ function FeatureCard({ item, onUpdate, onRemove, isPending }: FeatureCardProps) 
   return (
     <div className={styles.item}>
       {isPending && !item.image
-        ? <ImageWithSkeleton isPending className={styles.itemImage} />
+        ? <ImageLoader isPending className={styles.itemImage} />
         : item.image
-          ? <ImageWithSkeleton image={item.image} isPending={false} className={styles.itemImage} />
+          ? <ImageLoader image={item.image} isPending={false} className={styles.itemImage} />
           : (
             <input
               type="text"

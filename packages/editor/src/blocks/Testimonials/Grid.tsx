@@ -1,6 +1,6 @@
 import type { TestimonialsBlock as TestimonialsBlockType, Quote } from "@muse/core";
 import { useAutoResize } from "../../hooks";
-import { ImageWithSkeleton } from "../../ux";
+import { ImageLoader } from "../../ux";
 import styles from "./Grid.module.css";
 
 interface Props {
@@ -51,7 +51,7 @@ export function Grid({ block, onUpdate, isPending }: Props) {
             <figcaption className={styles.author}>
               <div className={styles.avatar}>
                 {isPending || quote.avatar
-                  ? <ImageWithSkeleton image={quote.avatar} isPending={!!isPending && !quote.avatar} variant="circle" />
+                  ? <ImageLoader image={quote.avatar} isPending={!!isPending && !quote.avatar} variant="circle" />
                   : quote.author.charAt(0)}
               </div>
               <div>

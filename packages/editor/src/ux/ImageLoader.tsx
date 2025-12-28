@@ -1,7 +1,7 @@
 import { useState } from "react";
 import type { ImageSource } from "@muse/core";
-import { Skeleton } from "./Skeleton";
-import styles from "./ImageWithSkeleton.module.css";
+import { Spinner } from "./Spinner";
+import styles from "./ImageLoader.module.css";
 
 interface Props {
   image?: ImageSource
@@ -11,7 +11,7 @@ interface Props {
   className?: string
 }
 
-export function ImageWithSkeleton({
+export function ImageLoader({
   image,
   isPending,
   aspectRatio,
@@ -21,16 +21,19 @@ export function ImageWithSkeleton({
   const [loaded, setLoaded] = useState(false);
 
   const containerStyle = aspectRatio ? { aspectRatio } : undefined;
-  const showSkeleton = isPending && !image;
+  const showSpinner = isPending && !image;
   const showImage = !!image;
+  const isCircle = variant === "circle";
 
   return (
     <div
-      className={`${styles.container}${className ? ` ${className}` : ""}`}
+      className={`${styles.container}${showSpinner ? ` ${styles.pending}` : ""}${isCircle ? ` ${styles.circle}` : ""}${className ? ` ${className}` : ""}`}
       style={containerStyle}
     >
-      {showSkeleton && (
-        <Skeleton variant={variant} className={styles.skeleton} />
+      {showSpinner && (
+        <div className={styles.spinnerWrapper}>
+          <Spinner size="lg" />
+        </div>
       )}
       {showImage && (
         <img

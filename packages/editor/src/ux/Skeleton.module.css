@@ -1,5 +1,8 @@
 .skeleton {
-  background: linear-gradient(90deg, #e5e7eb 25%, #f3f4f6 50%, #e5e7eb 75%);
+  background: linear-gradient(90deg,
+    var(--muse-theme-surface, #e5e7eb) 25%,
+    var(--muse-theme-bg-muted, #f3f4f6) 50%,
+    var(--muse-theme-surface, #e5e7eb) 75%);
   background-size: 200% 100%;
   animation: shimmer 1.5s ease-in-out infinite;
 }
