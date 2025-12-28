@@ -1,6 +1,6 @@
-import type { JsonSchema } from "./types";
+import type { ResponseSchema } from "./types";
 
-export const briefSchema: JsonSchema = {
+export const briefSchema: ResponseSchema = {
   name: "brand_brief",
   schema: {
     type: "object",
@@ -16,7 +16,7 @@ export const briefSchema: JsonSchema = {
   },
 };
 
-export const structureSchema: JsonSchema = {
+export const structureSchema: ResponseSchema = {
   name: "page_structure",
   schema: {
     type: "object",
@@ -41,7 +41,7 @@ export const structureSchema: JsonSchema = {
   },
 };
 
-export const themeSchema: JsonSchema = {
+export const themeSchema: ResponseSchema = {
   name: "theme_selection",
   schema: {
     type: "object",
@@ -68,7 +68,7 @@ const ctaObject = {
   additionalProperties: false,
 };
 
-export const copyBlocksSchema: JsonSchema = {
+export const copyBlocksSchema: ResponseSchema = {
   name: "copy_blocks",
   schema: {
     type: "object",

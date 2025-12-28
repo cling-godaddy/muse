@@ -1,11 +1,11 @@
 import { createLogger } from "@muse/logger";
 import { getMaxImageRequirements, type SectionType } from "@muse/core";
-import type { JsonSchema, Provider } from "../types";
+import type { Provider, ResponseSchema } from "../types";
 import type { AgentInput, SyncAgent, PageStructure, BrandBrief, ImagePlan, CopyBlockContent } from "./types";
 
 const log = createLogger().child({ agent: "image" });
 
-const imagePlanSchema: JsonSchema = {
+const imagePlanSchema: ResponseSchema = {
   name: "image_plan",
   description: "Array of image search plans for landing page blocks",
   schema: {
