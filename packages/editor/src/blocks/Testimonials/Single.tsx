@@ -1,6 +1,6 @@
 import type { TestimonialsBlock as TestimonialsBlockType, Quote } from "@muse/core";
 import { useAutoResize } from "../../hooks";
-import { ImageLoader } from "../../ux";
+import { Avatar } from "../../ux";
 import styles from "./Single.module.css";
 
 interface Props {
@@ -50,11 +50,7 @@ export function Single({ block, onUpdate, isPending }: Props) {
           />
         </blockquote>
         <figcaption className={styles.author}>
-          <div className={styles.avatar}>
-            {isPending || quote.avatar
-              ? <ImageLoader image={quote.avatar} isPending={!!isPending && !quote.avatar} variant="circle" />
-              : quote.author.charAt(0)}
-          </div>
+          <Avatar image={quote.avatar} name={quote.author} isPending={isPending} className={styles.avatar} />
           <div>
             <input
               type="text"

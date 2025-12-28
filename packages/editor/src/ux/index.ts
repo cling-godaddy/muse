@@ -1,3 +1,4 @@
+export { Avatar } from "./Avatar";
 export { Dialog } from "./Dialog";
 export { Ellipsis } from "./Ellipsis";
 export { ImageLoader } from "./ImageLoader";
