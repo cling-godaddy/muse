@@ -102,31 +102,32 @@ interface MessageBubbleProps {
   agents: AgentState[]
 }
 
-function getAgentSummary(agent: AgentState): { label: string, value: string } | null {
+function getAgentSummary(agent: AgentState): string | null {
   if (agent.status !== "complete") return null;
+  const persona = agentPersonas[agent.name];
+  if (!persona) return null;
 
   switch (agent.name) {
     case "brief":
-      return agent.summary ? { label: "Audience", value: agent.summary } : null;
+      return agent.summary ? `Targeting ${agent.summary}` : null;
     case "structure":
       if (agent.data?.blockCount) {
-        const types = agent.data.blockTypes?.join(", ") ?? "";
-        return { label: "Layout", value: `${agent.data.blockCount} sections: ${types}` };
+        const types = agent.data.blockTypes?.join(" → ") ?? "";
+        return `Designed ${agent.data.blockCount} sections: ${types}`;
       }
       return null;
     case "theme":
       if (agent.data?.palette) {
-        const value = `${agent.data.palette}${agent.data.typography ? ` + ${agent.data.typography}` : ""}`;
-        return { label: "Theme", value };
+        return `Selected ${agent.data.palette} colors${agent.data.typography ? ` with ${agent.data.typography} typography` : ""}`;
       }
       return null;
     case "copy":
       return agent.data?.blockCount
-        ? { label: "Content", value: `${agent.data.blockCount} blocks written` }
+        ? `Wrote content for ${agent.data.blockCount} sections`
         : null;
     case "image":
       if (agent.data?.resolved !== undefined) {
-        return { label: "Images", value: `${agent.data.resolved} found` };
+        return `Curated ${agent.data.resolved} images`;
       }
       return null;
     default:
@@ -160,17 +161,18 @@ function MessageBubble({ message, isLast, isLoading, agents }: MessageBubbleProp
             <div className="p-3 text-sm text-text-muted space-y-1">
               {completedAgents.map((agent) => {
                 const summary = getAgentSummary(agent);
-                if (!summary) return null;
+                const persona = agentPersonas[agent.name];
+                if (!summary || !persona) return null;
                 return (
                   <div key={agent.name} className="muse-agent-summary flex items-start gap-2">
                     <span className="text-success">✓</span>
                     <span>
                       <span className="font-medium text-text">
-                        {summary.label}
+                        {persona.title}
                         :
                       </span>
                       {" "}
-                      {summary.value}
+                      {summary}
                     </span>
                   </div>
                 );
@@ -192,12 +194,17 @@ interface AgentTimelineProps {
   isLoading: boolean
 }
 
-const agentDescriptions: Record<string, string> = {
-  brief: "Understanding your request...",
-  structure: "Planning page layout...",
-  theme: "Selecting colors and fonts...",
-  copy: "Writing content...",
-  image: "Finding images...",
+interface AgentPersona {
+  title: string
+  running: string
+}
+
+const agentPersonas: Record<string, AgentPersona> = {
+  brief: { title: "Brand Strategist", running: "Researching your target audience..." },
+  structure: { title: "Page Architect", running: "Designing your page layout..." },
+  theme: { title: "Visual Designer", running: "Selecting your color palette..." },
+  copy: { title: "Copywriter", running: "Crafting your headlines and content..." },
+  image: { title: "Art Curator", running: "Curating images for your page..." },
 };
 
 function AgentTimeline({ agents, isLoading }: AgentTimelineProps) {
@@ -239,9 +246,18 @@ function AgentTimeline({ agents, isLoading }: AgentTimelineProps) {
         : (
           <>
             <Spinner size="sm" />
-            <span>
-              {runningAgent ? agentDescriptions[runningAgent.name] ?? runningAgent.name : "Starting..."}
-            </span>
+            {runningAgent
+              ? (
+                <span>
+                  <span className="font-medium">
+                    {agentPersonas[runningAgent.name]?.title}
+                    :
+                  </span>
+                  {" "}
+                  {agentPersonas[runningAgent.name]?.running ?? "Working..."}
+                </span>
+              )
+              : <span>Starting...</span>}
           </>
         )}
       <TimelineModal agents={agents} isLoading={isLoading} trigger={trigger} />
