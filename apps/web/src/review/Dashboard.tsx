@@ -43,6 +43,7 @@ export function Dashboard({ onStartReview, onSelectEntry, onBackToMain }: Props)
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [refreshKey, setRefreshKey] = useState(0);
+  const [loadedImages, setLoadedImages] = useState<Set<string>>(new Set());
 
   const handleRefresh = async () => {
     setRefreshing(true);
@@ -81,6 +82,7 @@ export function Dashboard({ onStartReview, onSelectEntry, onBackToMain }: Props)
         if (!cancelled) {
           setEntries(data.entries);
           setTotal(data.total);
+          setLoadedImages(new Set());
         }
       })
       .catch(console.error)
@@ -215,41 +217,48 @@ export function Dashboard({ onStartReview, onSelectEntry, onBackToMain }: Props)
                 entries
               </div>
               <div className="grid grid-cols-6 gap-4">
-                {entries.map(entry => (
-                  <button
-                    key={entry.id}
-                    onClick={() => onSelectEntry(entry.id)}
-                    className="group relative aspect-square bg-neutral-900 rounded-lg overflow-hidden hover:ring-2 ring-blue-500"
-                  >
-                    <img
-                      src={entry.previewUrl}
-                      alt={entry.caption}
-                      className="w-full h-full object-cover"
-                      loading="lazy"
-                    />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
-                    <div className="absolute bottom-2 left-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                      <div className="text-xs text-white truncate">
-                        {entry.caption.slice(0, 50)}
-                        ...
+                {entries.map((entry) => {
+                  const isLoaded = loadedImages.has(entry.id);
+                  return (
+                    <button
+                      key={entry.id}
+                      onClick={() => onSelectEntry(entry.id)}
+                      className="group relative aspect-square bg-neutral-900 rounded-lg overflow-hidden hover:ring-2 ring-blue-500"
+                    >
+                      {!isLoaded && (
+                        <div className="absolute inset-0 bg-neutral-800 animate-pulse" />
+                      )}
+                      <img
+                        src={entry.previewUrl}
+                        alt={entry.caption}
+                        className={`w-full h-full object-cover transition-opacity duration-300 ${isLoaded ? "opacity-100" : "opacity-0"}`}
+                        loading="lazy"
+                        onLoad={() => setLoadedImages(prev => new Set(prev).add(entry.id))}
+                      />
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+                      <div className="absolute bottom-2 left-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                        <div className="text-xs text-white truncate">
+                          {entry.caption.slice(0, 50)}
+                          ...
+                        </div>
                       </div>
-                    </div>
-                    <div className="absolute top-2 right-2">
-                      {entry.accuracy === "accurate" && (
-                        <span className="w-3 h-3 rounded-full bg-green-500 block" />
-                      )}
-                      {entry.accuracy === "partial" && (
-                        <span className="w-3 h-3 rounded-full bg-yellow-500 block" />
-                      )}
-                      {entry.accuracy === "wrong" && (
-                        <span className="w-3 h-3 rounded-full bg-red-500 block" />
-                      )}
-                      {entry.status === "flagged" && !entry.accuracy && (
-                        <span className="w-3 h-3 rounded-full bg-orange-500 block" />
-                      )}
-                    </div>
-                  </button>
-                ))}
+                      <div className="absolute top-2 right-2">
+                        {entry.accuracy === "accurate" && (
+                          <span className="w-3 h-3 rounded-full bg-green-500 block" />
+                        )}
+                        {entry.accuracy === "partial" && (
+                          <span className="w-3 h-3 rounded-full bg-yellow-500 block" />
+                        )}
+                        {entry.accuracy === "wrong" && (
+                          <span className="w-3 h-3 rounded-full bg-red-500 block" />
+                        )}
+                        {entry.status === "flagged" && !entry.accuracy && (
+                          <span className="w-3 h-3 rounded-full bg-orange-500 block" />
+                        )}
+                      </div>
+                    </button>
+                  );
+                })}
               </div>
             </>
           )}
