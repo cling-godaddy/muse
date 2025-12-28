@@ -1,0 +1,267 @@
+import type { JsonSchema } from "./types";
+
+export const briefSchema: JsonSchema = {
+  name: "brand_brief",
+  schema: {
+    type: "object",
+    properties: {
+      targetAudience: { type: "string", description: "Who the site is for" },
+      brandVoice: { type: "array", items: { type: "string" }, description: "3 adjectives describing the brand voice" },
+      colorDirection: { type: "string", description: "Color palette guidance" },
+      imageryStyle: { type: "string", description: "Visual style guidance" },
+      constraints: { type: "array", items: { type: "string" }, description: "Specific requirements mentioned" },
+    },
+    required: ["targetAudience", "brandVoice", "colorDirection", "imageryStyle", "constraints"],
+    additionalProperties: false,
+  },
+};
+
+export const structureSchema: JsonSchema = {
+  name: "page_structure",
+  schema: {
+    type: "object",
+    properties: {
+      blocks: {
+        type: "array",
+        items: {
+          type: "object",
+          properties: {
+            id: { type: "string", description: "Unique block ID like block-1, block-2" },
+            type: { type: "string", description: "Block type: hero, features, cta, testimonials, pricing, faq, gallery, contact, text" },
+            preset: { type: "string", description: "Preset ID for the block style" },
+            purpose: { type: "string", description: "What this block should accomplish" },
+          },
+          required: ["id", "type", "preset", "purpose"],
+          additionalProperties: false,
+        },
+      },
+    },
+    required: ["blocks"],
+    additionalProperties: false,
+  },
+};
+
+export const themeSchema: JsonSchema = {
+  name: "theme_selection",
+  schema: {
+    type: "object",
+    properties: {
+      palette: { type: "string", description: "Color palette ID" },
+      typography: { type: "string", description: "Typography preset ID" },
+    },
+    required: ["palette", "typography"],
+    additionalProperties: false,
+  },
+};
+
+// Helper for nullable string
+const nullableString = { type: ["string", "null"] };
+
+// CTA object - all fields required
+const ctaObject = {
+  type: ["object", "null"],
+  properties: {
+    text: { type: "string" },
+    href: { type: "string" },
+  },
+  required: ["text", "href"],
+  additionalProperties: false,
+};
+
+export const copyBlocksSchema: JsonSchema = {
+  name: "copy_blocks",
+  schema: {
+    type: "object",
+    properties: {
+      blocks: {
+        type: "array",
+        items: {
+          anyOf: [
+            // Hero
+            {
+              type: "object",
+              properties: {
+                id: { type: "string" },
+                preset: { type: "string" },
+                type: { type: "string", const: "hero" },
+                headline: { type: "string" },
+                subheadline: nullableString,
+                cta: ctaObject,
+                secondaryCta: ctaObject,
+                alignment: { type: ["string", "null"], enum: ["left", "center", "right", null] },
+              },
+              required: ["id", "preset", "type", "headline", "subheadline", "cta", "secondaryCta", "alignment"],
+              additionalProperties: false,
+            },
+            // Features
+            {
+              type: "object",
+              properties: {
+                id: { type: "string" },
+                preset: { type: "string" },
+                type: { type: "string", const: "features" },
+                headline: nullableString,
+                items: {
+                  type: "array",
+                  items: {
+                    type: "object",
+                    properties: {
+                      icon: nullableString,
+                      title: { type: "string" },
+                      description: { type: "string" },
+                    },
+                    required: ["icon", "title", "description"],
+                    additionalProperties: false,
+                  },
+                },
+                columns: { type: ["number", "null"], enum: [2, 3, 4, null] },
+              },
+              required: ["id", "preset", "type", "headline", "items", "columns"],
+              additionalProperties: false,
+            },
+            // CTA
+            {
+              type: "object",
+              properties: {
+                id: { type: "string" },
+                preset: { type: "string" },
+                type: { type: "string", const: "cta" },
+                headline: { type: "string" },
+                description: nullableString,
+                buttonText: { type: "string" },
+                buttonHref: { type: "string" },
+                variant: { type: ["string", "null"], enum: ["primary", "secondary", null] },
+              },
+              required: ["id", "preset", "type", "headline", "description", "buttonText", "buttonHref", "variant"],
+              additionalProperties: false,
+            },
+            // Testimonials
+            {
+              type: "object",
+              properties: {
+                id: { type: "string" },
+                preset: { type: "string" },
+                type: { type: "string", const: "testimonials" },
+                headline: nullableString,
+                quotes: {
+                  type: "array",
+                  items: {
+                    type: "object",
+                    properties: {
+                      text: { type: "string" },
+                      author: { type: "string" },
+                      role: nullableString,
+                      company: nullableString,
+                    },
+                    required: ["text", "author", "role", "company"],
+                    additionalProperties: false,
+                  },
+                },
+              },
+              required: ["id", "preset", "type", "headline", "quotes"],
+              additionalProperties: false,
+            },
+            // Gallery
+            {
+              type: "object",
+              properties: {
+                id: { type: "string" },
+                preset: { type: "string" },
+                type: { type: "string", const: "gallery" },
+                headline: nullableString,
+                columns: { type: ["number", "null"], enum: [2, 3, 4, null] },
+              },
+              required: ["id", "preset", "type", "headline", "columns"],
+              additionalProperties: false,
+            },
+            // Pricing
+            {
+              type: "object",
+              properties: {
+                id: { type: "string" },
+                preset: { type: "string" },
+                type: { type: "string", const: "pricing" },
+                headline: nullableString,
+                subheadline: nullableString,
+                plans: {
+                  type: "array",
+                  items: {
+                    type: "object",
+                    properties: {
+                      name: { type: "string" },
+                      price: { type: "string" },
+                      period: nullableString,
+                      description: nullableString,
+                      features: { type: "array", items: { type: "string" } },
+                      cta: ctaObject,
+                      highlighted: { type: ["boolean", "null"] },
+                    },
+                    required: ["name", "price", "period", "description", "features", "cta", "highlighted"],
+                    additionalProperties: false,
+                  },
+                },
+              },
+              required: ["id", "preset", "type", "headline", "subheadline", "plans"],
+              additionalProperties: false,
+            },
+            // FAQ
+            {
+              type: "object",
+              properties: {
+                id: { type: "string" },
+                preset: { type: "string" },
+                type: { type: "string", const: "faq" },
+                headline: nullableString,
+                subheadline: nullableString,
+                items: {
+                  type: "array",
+                  items: {
+                    type: "object",
+                    properties: {
+                      question: { type: "string" },
+                      answer: { type: "string" },
+                    },
+                    required: ["question", "answer"],
+                    additionalProperties: false,
+                  },
+                },
+              },
+              required: ["id", "preset", "type", "headline", "subheadline", "items"],
+              additionalProperties: false,
+            },
+            // Contact
+            {
+              type: "object",
+              properties: {
+                id: { type: "string" },
+                preset: { type: "string" },
+                type: { type: "string", const: "contact" },
+                headline: nullableString,
+                subheadline: nullableString,
+                email: nullableString,
+                phone: nullableString,
+                address: nullableString,
+              },
+              required: ["id", "preset", "type", "headline", "subheadline", "email", "phone", "address"],
+              additionalProperties: false,
+            },
+            // Text
+            {
+              type: "object",
+              properties: {
+                id: { type: "string" },
+                preset: { type: "string" },
+                type: { type: "string", const: "text" },
+                content: { type: "string" },
+              },
+              required: ["id", "preset", "type", "content"],
+              additionalProperties: false,
+            },
+          ],
+        },
+      },
+    },
+    required: ["blocks"],
+    additionalProperties: false,
+  },
+};
