@@ -1,4 +1,5 @@
 import { useState, useMemo, useCallback, useEffect, useRef, useLayoutEffect } from "react";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { groupBy } from "lodash-es";
 import { BlockEditor } from "@muse/editor";
 import type { Block } from "@muse/core";
@@ -6,6 +7,7 @@ import type { ImageSelection } from "@muse/media";
 import { resolveThemeWithEffects, themeToCssVars, getTypography, loadFonts } from "@muse/themes";
 import { Chat } from "./components/chat";
 import { useBlocks } from "./hooks/useBlocks";
+import { ReviewApp } from "./review";
 import type { ThemeSelection } from "./utils/streamParser";
 
 interface ThemeState {
@@ -14,7 +16,7 @@ interface ThemeState {
   effects: string
 }
 
-export function App() {
+function MainApp() {
   const { blocks, addBlock, updateBlock, setBlocks } = useBlocks();
   const blocksRef = useRef(blocks);
   const [theme, setTheme] = useState<ThemeState>({ palette: "slate", typography: "inter", effects: "neutral" });
@@ -109,5 +111,16 @@ export function App() {
         </div>
       </main>
     </div>
+  );
+}
+
+export function App() {
+  return (
+    <BrowserRouter>
+      <Routes>
+        <Route path="/" element={<MainApp />} />
+        <Route path="/review" element={<ReviewApp />} />
+      </Routes>
+    </BrowserRouter>
   );
 }

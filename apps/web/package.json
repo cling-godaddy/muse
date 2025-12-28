@@ -18,7 +18,8 @@
     "@muse/themes": "workspace:*",
     "lodash-es": "^4.17.21",
     "react": "^19",
-    "react-dom": "^19"
+    "react-dom": "^19",
+    "react-router-dom": "^7.11.0"
   },
   "devDependencies": {
     "@tailwindcss/vite": "^4.1.18",

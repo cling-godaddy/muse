@@ -9,6 +9,7 @@ import { chatRoute } from "./routes/chat";
 import { generateRoute } from "./routes/generate";
 import { uploadRoute } from "./routes/upload";
 import { searchRoute } from "./routes/search";
+import { reviewRoute } from "./routes/review";
 
 const app = new Hono();
 
@@ -17,6 +18,7 @@ app.route("/api/chat", chatRoute);
 app.route("/api/generate", generateRoute);
 app.route("/api/upload", uploadRoute);
 app.route("/api/search", searchRoute);
+app.route("/api/review", reviewRoute);
 
 app.get("/health", c => c.json({ ok: true }));
 
