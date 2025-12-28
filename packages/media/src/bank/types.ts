@@ -76,7 +76,6 @@ export interface ImageAnalysis {
   subjects: string[]
   colors: {
     dominant: string[]
-    mood: "warm" | "cool" | "neutral"
   }
   style: string[]
   composition: "centered" | "rule-of-thirds" | "symmetrical" | "asymmetrical" | "other"

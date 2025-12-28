@@ -15,9 +15,15 @@ const logger = createLogger();
 let store: ImageBankStore | null = null;
 let storePromise: Promise<ImageBankStore | null> | null = null;
 
-async function getStore(): Promise<ImageBankStore | null> {
-  if (store) return store;
-  if (storePromise) return storePromise;
+async function getStore(forceReload = false): Promise<ImageBankStore | null> {
+  if (!forceReload && store) return store;
+  if (!forceReload && storePromise) return storePromise;
+
+  // Clear cache on force reload
+  if (forceReload) {
+    store = null;
+    storePromise = null;
+  }
 
   const bucket = process.env.S3_BUCKET;
   const region = process.env.AWS_REGION;
@@ -223,6 +229,15 @@ reviewRoute.get("/stats", async (c) => {
 
   const stats = s.getStats();
   return c.json(stats);
+});
+
+// POST /refresh - reload store from S3
+reviewRoute.post("/refresh", async (c) => {
+  const s = await getStore(true);
+  if (!s) return c.json({ error: "Store not available" }, 503);
+
+  const stats = s.getStats();
+  return c.json({ success: true, total: stats.total });
 });
 
 // GET /next - get next entry to review

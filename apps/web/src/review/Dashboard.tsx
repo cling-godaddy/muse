@@ -41,13 +41,29 @@ export function Dashboard({ onStartReview, onSelectEntry, onBackToMain }: Props)
   const [total, setTotal] = useState(0);
   const [filter, setFilter] = useState<"all" | "pending" | "approved" | "flagged">("all");
   const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
+  const [refreshKey, setRefreshKey] = useState(0);
+
+  const handleRefresh = async () => {
+    setRefreshing(true);
+    try {
+      await fetch(`${API_BASE}/refresh`, { method: "POST" });
+      setRefreshKey(k => k + 1);
+    }
+    catch (err) {
+      console.error("Failed to refresh:", err);
+    }
+    finally {
+      setRefreshing(false);
+    }
+  };
 
   useEffect(() => {
     fetch(`${API_BASE}/stats`)
       .then(r => r.json())
       .then(setStats)
       .catch(console.error);
-  }, []);
+  }, [refreshKey]);
 
   useEffect(() => {
     let cancelled = false;
@@ -75,7 +91,7 @@ export function Dashboard({ onStartReview, onSelectEntry, onBackToMain }: Props)
     return () => {
       cancelled = true;
     };
-  }, [filter]);
+  }, [filter, refreshKey]);
 
   const pct = stats ? Math.round((stats.reviewed / stats.total) * 100) : 0;
 
@@ -89,12 +105,21 @@ export function Dashboard({ onStartReview, onSelectEntry, onBackToMain }: Props)
             </button>
             <h1 className="text-2xl font-semibold">KB Review</h1>
           </div>
-          <button
-            onClick={onStartReview}
-            className="px-4 py-2 bg-blue-600 hover:bg-blue-500 rounded font-medium"
-          >
-            Start Review
-          </button>
+          <div className="flex items-center gap-3">
+            <button
+              onClick={handleRefresh}
+              disabled={refreshing}
+              className="px-3 py-2 bg-neutral-800 hover:bg-neutral-700 rounded text-sm text-neutral-300 disabled:opacity-50"
+            >
+              {refreshing ? <Spinner size="sm" /> : "Refresh"}
+            </button>
+            <button
+              onClick={onStartReview}
+              className="px-4 py-2 bg-blue-600 hover:bg-blue-500 rounded font-medium"
+            >
+              Start Review
+            </button>
+          </div>
         </header>
 
         {stats && (
