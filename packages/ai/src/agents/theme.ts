@@ -2,6 +2,7 @@ import { generatePaletteTypographyPrompt } from "@muse/themes";
 import { createLogger } from "@muse/logger";
 import type { Provider } from "../types";
 import type { AgentInput, SyncAgent } from "./types";
+import { themeSchema } from "../schemas";
 
 const log = createLogger().child({ agent: "theme" });
 
@@ -13,9 +14,7 @@ export interface ThemeSelection {
 export function themeSystemPrompt(): string {
   return `You are a brand designer. Select the best color palette and typography for a landing page.
 
-${generatePaletteTypographyPrompt()}
-
-Output ONLY valid JSON, nothing else.`;
+${generatePaletteTypographyPrompt()}`;
 }
 
 export const themeAgent: SyncAgent = {
@@ -44,7 +43,7 @@ export const themeAgent: SyncAgent = {
 
     const response = await provider.chat({
       messages,
-      jsonMode: true,
+      responseSchema: themeSchema,
     });
 
     return response.content.trim();

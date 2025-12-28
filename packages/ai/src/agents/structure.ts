@@ -3,6 +3,7 @@ import { createLogger } from "@muse/logger";
 import type { Provider } from "../types";
 import type { AgentInput, PageStructure, SyncAgent } from "./types";
 import { retrieve, formatStructureContext, type StructureKBEntry } from "../rag";
+import { structureSchema } from "../schemas";
 
 const log = createLogger().child({ agent: "structure-rag" });
 
@@ -15,7 +16,7 @@ ${context}
 
 Your task: Copy the template structure above EXACTLY. Add a "purpose" field to each block describing what it should accomplish for the user's request.
 
-Output ONLY valid JSON. Do not change, add, or remove any blocks. Do not change any type or preset values.`;
+Do not change, add, or remove any blocks. Do not change any type or preset values.`;
   }
 
   // Non-template mode: full prompt with all options
@@ -24,13 +25,6 @@ Output ONLY valid JSON. Do not change, add, or remove any blocks. Do not change 
 SECTION TYPES AND PRESETS:
 ${generateSectionPrompt()}
 ${context ? `\n${context}\n` : ""}
-Output ONLY valid JSON matching this schema:
-{
-  "blocks": [
-    { "id": "unique-id", "type": "section-type", "preset": "preset-id", "purpose": "what this block should accomplish" }
-  ]
-}
-
 Guidelines:
 - When similar examples are provided, use them as guidance for block selection.
 - Generate 3-6 blocks for a typical landing page
@@ -110,7 +104,7 @@ export const structureAgent: SyncAgent = {
 
     const response = await provider.chat({
       messages,
-      jsonMode: true,
+      responseSchema: structureSchema,
     });
 
     log.debug("llm_response", { content: response.content });
@@ -128,12 +122,7 @@ interface RawBlock {
 
 export function parseStructure(json: string): PageStructure {
   try {
-    // Strip markdown code fences if present
-    const cleaned = json.replace(/^```(?:json)?\s*\n?/gm, "").replace(/\n?```\s*$/gm, "").trim();
-    const parsed = JSON.parse(cleaned);
-    if (!Array.isArray(parsed.blocks)) {
-      throw new Error("Invalid structure: blocks must be an array");
-    }
+    const parsed = JSON.parse(json);
     return {
       blocks: parsed.blocks.map((b: RawBlock, i: number) => ({
         id: b.id ?? `block-${i + 1}`,

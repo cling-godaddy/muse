@@ -1,19 +1,11 @@
 import { createLogger } from "@muse/logger";
 import type { Provider } from "../types";
 import type { AgentInput, BrandBrief, SyncAgent } from "./types";
+import { briefSchema } from "../schemas";
 
 const log = createLogger().child({ agent: "brief" });
 
 export const briefSystemPrompt = `You are a brand analyst. Extract a concise brand brief from the user's request.
-
-Output ONLY valid JSON matching this schema:
-{
-  "targetAudience": "who the site is for",
-  "brandVoice": ["adjective1", "adjective2", "adjective3"],
-  "colorDirection": "color palette guidance",
-  "imageryStyle": "visual style guidance",
-  "constraints": ["any specific requirements mentioned"]
-}
 
 Examples:
 - "a landing page for my saas startup" → targetAudience: "startup founders and tech professionals"
@@ -40,7 +32,7 @@ export const briefAgent: SyncAgent = {
 
     const response = await provider.chat({
       messages,
-      jsonMode: true,
+      responseSchema: briefSchema,
     });
 
     return response.content;
