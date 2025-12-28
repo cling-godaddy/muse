@@ -102,9 +102,45 @@ interface MessageBubbleProps {
   agents: AgentState[]
 }
 
+function getAgentSummary(agent: AgentState): { label: string, value: string } | null {
+  if (agent.status !== "complete") return null;
+
+  switch (agent.name) {
+    case "brief":
+      return agent.summary ? { label: "Audience", value: agent.summary } : null;
+    case "structure":
+      if (agent.data?.blockCount) {
+        const types = agent.data.blockTypes?.join(", ") ?? "";
+        return { label: "Layout", value: `${agent.data.blockCount} sections: ${types}` };
+      }
+      return null;
+    case "theme":
+      if (agent.data?.palette) {
+        const value = `${agent.data.palette}${agent.data.typography ? ` + ${agent.data.typography}` : ""}`;
+        return { label: "Theme", value };
+      }
+      return null;
+    case "copy":
+      return agent.data?.blockCount
+        ? { label: "Content", value: `${agent.data.blockCount} blocks written` }
+        : null;
+    case "image":
+      if (agent.data?.resolved !== undefined) {
+        return { label: "Images", value: `${agent.data.resolved} found` };
+      }
+      return null;
+    default:
+      return null;
+  }
+}
+
 function MessageBubble({ message, isLast, isLoading, agents }: MessageBubbleProps) {
   const isAssistant = message.role === "assistant";
   const showTimeline = isAssistant && isLast && (agents.length > 0 || isLoading);
+  const completedAgents = agents.filter(a => a.status === "complete");
+
+  // Show agent summaries when loading, or message content when available
+  const showAgentSummaries = showTimeline && !message.content && completedAgents.length > 0;
 
   return (
     <div className="mb-4">
@@ -119,9 +155,33 @@ function MessageBubble({ message, isLast, isLoading, agents }: MessageBubbleProp
         }`}
       >
         {showTimeline && <AgentTimeline agents={agents} isLoading={isLoading} />}
-        <div className={`p-3 whitespace-pre-wrap break-words ${showTimeline && message.content ? "border-t border-border-light" : ""}`}>
-          {message.content || (isLast && isLoading && agents.length === 0 ? "Generating..." : "")}
-        </div>
+        {showAgentSummaries
+          ? (
+            <div className="p-3 text-sm text-text-muted space-y-1">
+              {completedAgents.map((agent) => {
+                const summary = getAgentSummary(agent);
+                if (!summary) return null;
+                return (
+                  <div key={agent.name} className="muse-agent-summary flex items-start gap-2">
+                    <span className="text-success">✓</span>
+                    <span>
+                      <span className="font-medium text-text">
+                        {summary.label}
+                        :
+                      </span>
+                      {" "}
+                      {summary.value}
+                    </span>
+                  </div>
+                );
+              })}
+            </div>
+          )
+          : (
+            <div className={`p-3 whitespace-pre-wrap break-words ${showTimeline && message.content ? "border-t border-border-light" : ""}`}>
+              {message.content || (isLast && isLoading && agents.length === 0 ? "Generating..." : "")}
+            </div>
+          )}
       </div>
     </div>
   );
