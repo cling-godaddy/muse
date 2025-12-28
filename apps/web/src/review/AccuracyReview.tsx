@@ -139,11 +139,6 @@ export function AccuracyReview({ entry, onComplete }: Props) {
                         </span>
                       );
                   })}
-                  <span className="px-2 py-0.5 bg-neutral-800 rounded text-neutral-500">
-                    (
-                    {entry.colors.mood}
-                    )
-                  </span>
                 </div>
               </div>
             )}
