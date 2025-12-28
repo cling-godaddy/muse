@@ -1,6 +1,7 @@
 import { generateBlockSchemaPrompt } from "@muse/core";
 import type { Provider } from "../types";
-import type { Agent, AgentInput } from "./types";
+import type { AgentInput, SyncAgent } from "./types";
+import { copyBlocksSchema } from "../schemas";
 
 function buildSystemPrompt(input: AgentInput): string {
   const briefSection = input.brief
@@ -25,46 +26,30 @@ ${briefSection}
 ${structureSection}
 ${generateBlockSchemaPrompt()}
 
-RESPONSE FORMAT:
-Describe what you're creating in natural, conversational language.
-Embed each block's JSON in [BLOCK] markers (these are parsed separately, not displayed to users).
-
-Example flow:
-Let me create a compelling hero section to capture attention right away...
-[BLOCK]
-{"id": "block-1", "type": "hero", "preset": "hero-overlay", "headline": "...", ...}
-[/BLOCK]
-
-Now I'll add some features to showcase your key offerings...
-[BLOCK]
-{"id": "block-2", "type": "features", "preset": "features-grid-icons", "items": [...], ...}
-[/BLOCK]
-
 Guidelines:
-- Write naturally, as if explaining your creative choices
-- Use the EXACT block IDs from the structure above (e.g., block-1, block-2)
-- Include the "preset" field in each block JSON
+- Use the EXACT block IDs from the structure above
+- Include the "preset" field in each block
 - Match the brand voice in your copy
-- Each block JSON must be valid and complete
 - Do NOT include images/backgroundImage - they are added automatically`;
 }
 
-export const copyAgent: Agent = {
+export const copyAgent: SyncAgent = {
   config: {
     name: "copy",
     description: "Generates copy and content for blocks",
   },
 
-  async* run(input: AgentInput, provider: Provider): AsyncGenerator<string> {
+  async run(input: AgentInput, provider: Provider): Promise<string> {
     const systemPrompt = buildSystemPrompt(input);
 
-    for await (const chunk of provider.chatStream({
+    const response = await provider.chat({
       messages: [
         { role: "system", content: systemPrompt },
         ...(input.messages ?? [{ role: "user" as const, content: input.prompt }]),
       ],
-    })) {
-      yield chunk;
-    }
+      responseSchema: copyBlocksSchema,
+    });
+
+    return response.content;
   },
 };
