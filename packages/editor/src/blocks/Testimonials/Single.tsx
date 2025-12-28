@@ -1,13 +1,15 @@
 import type { TestimonialsBlock as TestimonialsBlockType, Quote } from "@muse/core";
 import { useAutoResize } from "../../hooks";
+import { ImageWithSkeleton } from "../../ux";
 import styles from "./Single.module.css";
 
 interface Props {
   block: TestimonialsBlockType
   onUpdate: (data: Partial<TestimonialsBlockType>) => void
+  isPending?: boolean
 }
 
-export function Single({ block, onUpdate }: Props) {
+export function Single({ block, onUpdate, isPending }: Props) {
   const quote = block.quotes[0];
   const headlineRef = useAutoResize(block.headline ?? "");
 
@@ -49,7 +51,9 @@ export function Single({ block, onUpdate }: Props) {
         </blockquote>
         <figcaption className={styles.author}>
           <div className={styles.avatar}>
-            {quote.author.charAt(0)}
+            {isPending || quote.avatar
+              ? <ImageWithSkeleton image={quote.avatar} isPending={!!isPending && !quote.avatar} variant="circle" />
+              : quote.author.charAt(0)}
           </div>
           <div>
             <input

@@ -1,13 +1,15 @@
 import type { TestimonialsBlock as TestimonialsBlockType, Quote } from "@muse/core";
 import { useAutoResize } from "../../hooks";
+import { ImageWithSkeleton } from "../../ux";
 import styles from "./Grid.module.css";
 
 interface Props {
   block: TestimonialsBlockType
   onUpdate: (data: Partial<TestimonialsBlockType>) => void
+  isPending?: boolean
 }
 
-export function Grid({ block, onUpdate }: Props) {
+export function Grid({ block, onUpdate, isPending }: Props) {
   const headlineRef = useAutoResize(block.headline ?? "");
 
   const updateQuote = (index: number, data: Partial<Quote>) => {
@@ -48,7 +50,9 @@ export function Grid({ block, onUpdate }: Props) {
             </blockquote>
             <figcaption className={styles.author}>
               <div className={styles.avatar}>
-                {quote.author.charAt(0)}
+                {isPending || quote.avatar
+                  ? <ImageWithSkeleton image={quote.avatar} isPending={!!isPending && !quote.avatar} variant="circle" />
+                  : quote.author.charAt(0)}
               </div>
               <div>
                 <input

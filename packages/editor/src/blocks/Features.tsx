@@ -1,41 +1,40 @@
 import type { FeaturesBlock as FeaturesBlockType, FeatureItem } from "@muse/core";
 import { useAutoResize } from "../hooks";
+import { ImageWithSkeleton } from "../ux";
 import styles from "./Features.module.css";
 
 interface Props {
   block: FeaturesBlockType
   onUpdate: (data: Partial<FeaturesBlockType>) => void
+  isPending?: boolean
 }
 
 interface FeatureCardProps {
   item: FeatureItem
   onUpdate: (data: Partial<FeatureItem>) => void
   onRemove: () => void
+  isPending?: boolean
 }
 
-function FeatureCard({ item, onUpdate, onRemove }: FeatureCardProps) {
+function FeatureCard({ item, onUpdate, onRemove, isPending }: FeatureCardProps) {
   const titleRef = useAutoResize(item.title);
   const descRef = useAutoResize(item.description);
 
   return (
     <div className={styles.item}>
-      {item.image
-        ? (
-          <img
-            src={item.image.url}
-            alt={item.image.alt}
-            className={styles.itemImage}
-          />
-        )
-        : (
-          <input
-            type="text"
-            className={styles.itemIcon}
-            value={typeof item.icon === "string" ? item.icon : ""}
-            onChange={e => onUpdate({ icon: e.target.value || undefined })}
-            placeholder="Icon..."
-          />
-        )}
+      {isPending && !item.image
+        ? <ImageWithSkeleton isPending className={styles.itemImage} />
+        : item.image
+          ? <ImageWithSkeleton image={item.image} isPending={false} className={styles.itemImage} />
+          : (
+            <input
+              type="text"
+              className={styles.itemIcon}
+              value={typeof item.icon === "string" ? item.icon : ""}
+              onChange={e => onUpdate({ icon: e.target.value || undefined })}
+              placeholder="Icon..."
+            />
+          )}
       <textarea
         ref={titleRef}
         className={styles.itemTitle}
@@ -63,7 +62,7 @@ function FeatureCard({ item, onUpdate, onRemove }: FeatureCardProps) {
   );
 }
 
-export function Features({ block, onUpdate }: Props) {
+export function Features({ block, onUpdate, isPending }: Props) {
   const headlineRef = useAutoResize(block.headline ?? "");
 
   const updateItem = (index: number, data: Partial<FeatureItem>) => {
@@ -102,6 +101,7 @@ export function Features({ block, onUpdate }: Props) {
             item={item}
             onUpdate={data => updateItem(i, data)}
             onRemove={() => removeItem(i)}
+            isPending={isPending}
           />
         ))}
       </div>
