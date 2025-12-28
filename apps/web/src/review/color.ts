@@ -2,9 +2,10 @@ import chroma from "chroma-js";
 
 // Override specific color names that chroma-js doesn't handle well
 const COLOR_OVERRIDES: Record<string, string> = {
-  golden: "#d4a017",
-  brown: "#8b4513",
-  orange: "#e65c00",
+  "golden": "#d4a017",
+  "brown": "#8b4513",
+  "light brown": "#c4a484",
+  "orange": "#e65c00",
 };
 
 export function getColorStyle(colorName: string): { bg: string, text: string } | null {
