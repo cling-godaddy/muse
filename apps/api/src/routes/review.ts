@@ -270,7 +270,7 @@ reviewRoute.get("/next", async (c) => {
   const afterId = c.req.query("after");
 
   // Get pending entries
-  const { entries } = s.listEntries({ status: "pending", accuracy: "unrated", limit: 100 });
+  const { entries, total } = s.listEntries({ status: "pending", accuracy: "unrated", limit: 100 });
 
   if (entries.length === 0) {
     return c.json({ entry: null, remaining: 0 });
@@ -303,6 +303,6 @@ reviewRoute.get("/next", async (c) => {
       blacklisted: nextEntry.blacklisted ?? false,
       review: nextEntry.review,
     },
-    remaining: entries.length - 1,
+    remaining: total - 1,
   });
 });

@@ -7,7 +7,7 @@ import type { ImageSelection } from "@muse/media";
 import { resolveThemeWithEffects, themeToCssVars, getTypography, loadFonts } from "@muse/themes";
 import { Chat } from "./components/chat";
 import { useBlocks } from "./hooks/useBlocks";
-import { ReviewApp } from "./review";
+import { ReviewLayout, ReviewDashboard, ReviewEntry, ReviewSessionPage } from "./review";
 import type { ThemeSelection } from "./utils/streamParser";
 
 interface ThemeState {
@@ -119,7 +119,11 @@ export function App() {
     <BrowserRouter>
       <Routes>
         <Route path="/" element={<MainApp />} />
-        <Route path="/review" element={<ReviewApp />} />
+        <Route path="/review" element={<ReviewLayout />}>
+          <Route index element={<ReviewDashboard />} />
+          <Route path="session" element={<ReviewSessionPage />} />
+          <Route path="entries/:id" element={<ReviewEntry />} />
+        </Route>
       </Routes>
     </BrowserRouter>
   );

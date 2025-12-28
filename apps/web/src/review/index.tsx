@@ -1,49 +1,48 @@
-import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { Outlet, useNavigate, useParams } from "react-router-dom";
 import { Dashboard } from "./Dashboard";
 import { ReviewSession } from "./ReviewSession";
 
-type View = "dashboard" | "session";
-
-interface State {
-  view: View
-  entryId?: string
+export function ReviewLayout() {
+  return <Outlet />;
 }
 
-export function ReviewApp() {
+export function ReviewDashboard() {
   const navigate = useNavigate();
-  const [state, setState] = useState<State>({ view: "dashboard" });
-
-  const handleStartReview = () => {
-    setState({ view: "session" });
-  };
-
-  const handleSelectEntry = (id: string) => {
-    setState({ view: "session", entryId: id });
-  };
-
-  const handleBackToDashboard = () => {
-    setState({ view: "dashboard" });
-  };
-
-  const handleBackToMain = () => {
-    navigate("/");
-  };
-
-  if (state.view === "session") {
-    return (
-      <ReviewSession
-        entryId={state.entryId}
-        onBack={handleBackToDashboard}
-      />
-    );
-  }
 
   return (
     <Dashboard
-      onStartReview={handleStartReview}
-      onSelectEntry={handleSelectEntry}
-      onBackToMain={handleBackToMain}
+      onStartReview={() => navigate("/review/session")}
+      onSelectEntry={id => navigate(`/review/entries/${encodeURIComponent(id)}`)}
+      onBackToMain={() => navigate("/")}
+    />
+  );
+}
+
+export function ReviewSessionPage() {
+  const navigate = useNavigate();
+
+  return (
+    <ReviewSession
+      onBack={() => navigate("/review")}
+      onNavigate={id => navigate(`/review/entries/${encodeURIComponent(id)}`, { replace: true })}
+    />
+  );
+}
+
+export function ReviewEntry() {
+  const navigate = useNavigate();
+  const { id } = useParams<{ id: string }>();
+
+  if (!id) {
+    navigate("/review");
+    return null;
+  }
+
+  return (
+    <ReviewSession
+      entryId={decodeURIComponent(id)}
+      onBack={() => navigate("/review")}
+      onNavigate={newId => navigate(`/review/entries/${encodeURIComponent(newId)}`, { replace: true })}
     />
   );
 }

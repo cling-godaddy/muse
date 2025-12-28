@@ -15,18 +15,35 @@ interface EntryData {
   blacklisted?: boolean
 }
 
+interface Stats {
+  total: number
+  reviewed: number
+}
+
 interface Props {
   entryId?: string
   onBack: () => void
+  onNavigate?: (id: string) => void
 }
 
 const API_BASE = "/api/review";
 
-export function ReviewSession({ entryId, onBack }: Props) {
+export function ReviewSession({ entryId, onBack, onNavigate }: Props) {
   const [entry, setEntry] = useState<EntryData | null>(null);
-  const [remaining, setRemaining] = useState(0);
+  const [stats, setStats] = useState<Stats | null>(null);
   const [loading, setLoading] = useState(true);
   const [sessionCount, setSessionCount] = useState(0);
+
+  const loadStats = useCallback(async () => {
+    try {
+      const res = await fetch(`${API_BASE}/stats`);
+      const data = await res.json();
+      setStats({ total: data.total, reviewed: data.reviewed });
+    }
+    catch (err) {
+      console.error("Failed to load stats:", err);
+    }
+  }, []);
 
   const loadEntry = useCallback(async (id?: string) => {
     setLoading(true);
@@ -42,7 +59,7 @@ export function ReviewSession({ entryId, onBack }: Props) {
         const data = await res.json();
         if (data.entry) {
           setEntry(data.entry);
-          setRemaining(data.remaining);
+          onNavigate?.(data.entry.id);
         }
         else {
           setEntry(null);
@@ -55,14 +72,16 @@ export function ReviewSession({ entryId, onBack }: Props) {
     finally {
       setLoading(false);
     }
-  }, [entry?.id]);
+  }, [entry?.id, onNavigate]);
 
   useEffect(() => {
+    loadStats();
     loadEntry(entryId);
   }, [entryId]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const handleComplete = () => {
     setSessionCount(c => c + 1);
+    loadStats();
     loadEntry();
   };
 
@@ -97,10 +116,21 @@ export function ReviewSession({ entryId, onBack }: Props) {
         <button onClick={onBack} className="text-neutral-400 hover:text-white">
           ← Dashboard
         </button>
-        <div className="text-sm text-neutral-500">
-          {remaining > 0 && `${remaining} remaining`}
-          {sessionCount > 0 && ` · ${sessionCount} reviewed`}
-        </div>
+        {stats && (
+          <div className="flex items-center gap-3">
+            <div className="w-32 bg-neutral-800 rounded-full h-2">
+              <div
+                className="bg-blue-500 h-2 rounded-full transition-all"
+                style={{ width: `${Math.round((stats.reviewed / stats.total) * 100)}%` }}
+              />
+            </div>
+            <span className="text-sm text-neutral-500">
+              {stats.reviewed}
+              /
+              {stats.total}
+            </span>
+          </div>
+        )}
         <div className="text-sm text-neutral-500">
           Press 1/2/3 to rate
         </div>
