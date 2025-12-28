@@ -1,6 +1,6 @@
 import type { MediaClient, ImageSelection } from "@muse/media";
 import { createLogger, type Logger } from "@muse/logger";
-import { getMinimumImages, getImageRequirements } from "@muse/core";
+import { getMinimumImages, getImageRequirements, type Block } from "@muse/core";
 import type { Message, Provider } from "../types";
 import { runWithRetry } from "../retry";
 import { briefAgent, briefSystemPrompt, parseBrief } from "./brief";
@@ -10,66 +10,21 @@ import { imageAgent, parseImagePlan } from "./image";
 import { copyAgent } from "./copy";
 import type { BrandBrief, PageStructure, CopyBlockContent } from "./types";
 
-// Strict parsers that throw on failure (for retry logic)
-function parseBriefStrict(json: string): BrandBrief {
-  const cleaned = json.replace(/^```(?:json)?\s*\n?/gm, "").replace(/\n?```\s*$/gm, "").trim();
-  const parsed = JSON.parse(cleaned);
-  if (!parsed.targetAudience || !Array.isArray(parsed.brandVoice)) {
-    throw new Error("Missing required fields: targetAudience or brandVoice");
-  }
-  return {
-    targetAudience: parsed.targetAudience,
-    brandVoice: parsed.brandVoice,
-    colorDirection: parsed.colorDirection ?? "modern, neutral palette",
-    imageryStyle: parsed.imageryStyle ?? "clean, professional imagery",
-    constraints: parsed.constraints ?? [],
-  };
+// Simple JSON parser for schema-validated responses
+function parseJson<T>(json: string): T {
+  return JSON.parse(json);
 }
 
-function parseStructureStrict(json: string): PageStructure {
-  const cleaned = json.replace(/^```(?:json)?\s*\n?/gm, "").replace(/\n?```\s*$/gm, "").trim();
-  const parsed = JSON.parse(cleaned);
-  if (!Array.isArray(parsed.blocks) || parsed.blocks.length === 0) {
-    throw new Error("Invalid structure: blocks must be a non-empty array");
-  }
-  return {
-    blocks: parsed.blocks.map((b: { id?: string, type?: string, preset?: string, purpose?: string }, i: number) => ({
-      id: b.id ?? `block-${i + 1}`,
-      type: b.type ?? "text",
-      preset: b.preset,
-      purpose: b.purpose ?? "",
-    })),
-  };
-}
-
-function parseThemeStrict(json: string): ThemeSelection {
-  const cleaned = json.replace(/^```(?:json)?\s*\n?/gm, "").replace(/\n?```\s*$/gm, "").trim();
-  const parsed = JSON.parse(cleaned);
-  if (!parsed.palette || !parsed.typography) {
-    throw new Error("Missing required fields: palette or typography");
-  }
-  return { palette: parsed.palette, typography: parsed.typography };
-}
-
-const BLOCK_REGEX = /\[BLOCK\]([\s\S]*?)\[\/BLOCK\]/g;
-
-function extractCopyBlocks(copyOutput: string): CopyBlockContent[] {
-  const results: CopyBlockContent[] = [];
-  for (const match of copyOutput.matchAll(BLOCK_REGEX)) {
-    const json = match[1];
-    if (!json) continue;
-    try {
-      const block = JSON.parse(json.trim());
-      results.push({
-        id: block.id,
-        headline: block.headline,
-        subheadline: block.subheadline,
-        itemTitles: block.items?.map((i: { title?: string }) => i.title).filter(Boolean),
-      });
-    }
-    catch { /* skip malformed */ }
-  }
-  return results;
+// Extract copy block summaries for image agent context
+function extractCopyBlockSummaries(blocks: Block[]): CopyBlockContent[] {
+  return blocks.map(block => ({
+    id: block.id,
+    headline: (block as { headline?: string }).headline,
+    subheadline: (block as { subheadline?: string }).subheadline,
+    itemTitles: (block as { items?: { title?: string }[] }).items
+      ?.map(i => i.title)
+      .filter((t): t is string => !!t),
+  }));
 }
 
 export interface OrchestratorInput {
@@ -85,6 +40,7 @@ export interface OrchestratorEvents {
   onBrief?: (brief: BrandBrief) => void
   onStructure?: (structure: PageStructure) => void
   onTheme?: (theme: ThemeSelection) => void
+  onBlocks?: (blocks: Block[]) => void
   onImages?: (images: ImageSelection[]) => void
 }
 
@@ -108,7 +64,7 @@ export async function* orchestrate(
   briefLog.debug("system_prompt", { prompt: briefSystemPrompt });
   briefLog.debug("user_input", { prompt });
 
-  const briefResult = await runWithRetry(briefAgent, { prompt }, provider, parseBriefStrict);
+  const briefResult = await runWithRetry(briefAgent, { prompt }, provider, parseJson<BrandBrief>);
   const brief = briefResult.data ?? parseBrief(briefResult.raw);
   briefLog.debug("raw_response", { response: briefResult.raw, attempts: briefResult.attempts });
 
@@ -133,14 +89,14 @@ export async function* orchestrate(
   const [structureResult, themeResult] = await Promise.all([
     (async () => {
       const start = Date.now();
-      const result = await runWithRetry(structureAgent, { prompt, brief }, provider, parseStructureStrict);
+      const result = await runWithRetry(structureAgent, { prompt, brief }, provider, parseJson<PageStructure>);
       const structure = result.data ?? parseStructure(result.raw);
       structureLog.debug("raw_response", { response: result.raw, attempts: result.attempts });
       return { structure, duration: Date.now() - start, retried: result.attempts > 1 };
     })(),
     (async () => {
       const start = Date.now();
-      const result = await runWithRetry(themeAgent, { prompt, brief }, provider, parseThemeStrict);
+      const result = await runWithRetry(themeAgent, { prompt, brief }, provider, parseJson<ThemeSelection>);
       const selection = result.data ?? parseThemeSelection(result.raw);
       themeLog.debug("raw_response", { response: result.raw, attempts: result.attempts });
       return { selection, duration: Date.now() - start, retried: result.attempts > 1 };
@@ -166,32 +122,45 @@ export async function* orchestrate(
     duration: themeResult.duration,
   })}\n`;
 
-  // emit theme marker for existing parser compatibility (uses palette as theme)
+  // emit theme marker for existing parser compatibility
   yield `[THEME:${themeResult.selection.palette}]\n`;
 
-  // step 3: generate copy (streaming)
+  // step 3: generate copy (non-streaming, structured output)
   yield "[AGENT:copy:start]\n";
   const copyStart = Date.now();
   const copyLog = log.child({ agent: "copy" });
   copyLog.debug("context", { brief, structure });
 
-  let copyOutput = "";
-  for await (const chunk of copyAgent.run(
+  const copyResult = await copyAgent.run(
     { prompt, messages: input.messages, brief, structure },
     provider,
-  )) {
-    copyOutput += chunk;
-    yield chunk;
-  }
+  );
 
   const copyDuration = Date.now() - copyStart;
   copyLog.info("complete", { duration: copyDuration });
 
+  // Parse copy result as { blocks: Block[] }
+  let blocks: Block[] = [];
+  try {
+    const parsed = JSON.parse(copyResult) as { blocks: Block[] };
+    blocks = parsed.blocks ?? [];
+  }
+  catch (err) {
+    copyLog.warn("parse_failed", { error: String(err), input: copyResult.slice(0, 200) });
+  }
+
+  events?.onBlocks?.(blocks);
+
   yield `[AGENT:copy:complete]${JSON.stringify({
+    blockCount: blocks.length,
     duration: copyDuration,
   })}\n`;
 
-  const copyBlocks = extractCopyBlocks(copyOutput);
+  // Emit all blocks at once
+  yield `[BLOCKS:${JSON.stringify(blocks)}]\n`;
+
+  // Extract summaries for image agent
+  const copyBlocks = extractCopyBlockSummaries(blocks);
 
   // step 4: plan and resolve images (using copy context)
   let images: ImageSelection[] = [];
