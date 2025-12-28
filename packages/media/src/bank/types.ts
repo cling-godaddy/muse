@@ -17,7 +17,6 @@ export interface ImageMetadata {
   // Visual properties
   colors: {
     dominant: string[]
-    mood: "warm" | "cool" | "neutral"
   }
 
   // Composition

@@ -5,7 +5,6 @@ export interface ImageAnalysis {
   subjects: string[]
   colors: {
     dominant: string[]
-    mood: "warm" | "cool" | "neutral"
   }
   style: string[]
   composition: "centered" | "rule-of-thirds" | "symmetrical" | "asymmetrical" | "other"
@@ -38,13 +37,8 @@ const analysisSchema = {
             items: { type: "string" },
             description: "2-4 dominant colors in the image",
           },
-          mood: {
-            type: "string",
-            enum: ["warm", "cool", "neutral"],
-            description: "Overall color temperature",
-          },
         },
-        required: ["dominant", "mood"],
+        required: ["dominant"],
         additionalProperties: false,
       },
       style: {
