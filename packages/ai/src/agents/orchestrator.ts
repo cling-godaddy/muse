@@ -156,6 +156,7 @@ export async function* orchestrate(
 
   yield `[AGENT:structure:complete]${JSON.stringify({
     blockCount: structure.blocks.length,
+    blockTypes: structure.blocks.map(b => b.type),
     duration: structureResult.duration,
   })}\n`;
 

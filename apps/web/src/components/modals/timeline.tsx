@@ -179,8 +179,13 @@ function GanttChart({ timeline, totalDuration, isLoading }: GanttChartProps) {
 function getMetaText(agent: AgentState): string | null {
   const { data, summary } = agent;
 
-  if (agent.name === "structure" && data?.blockCount !== undefined) {
-    return `(${data.blockCount} blocks)`;
+  if (agent.name === "structure") {
+    if (data?.blockTypes?.length) {
+      return data.blockTypes.join(" · ");
+    }
+    if (data?.blockCount !== undefined) {
+      return `${data.blockCount} blocks`;
+    }
   }
 
   if (agent.name === "theme" && data?.palette) {
@@ -188,7 +193,7 @@ function getMetaText(agent: AgentState): string | null {
   }
 
   if (agent.name === "image" && data?.planned !== undefined) {
-    return `${data.planned}→${data.resolved ?? 0}`;
+    return `${data.planned} queries → ${data.resolved ?? 0} images`;
   }
 
   if (summary) {

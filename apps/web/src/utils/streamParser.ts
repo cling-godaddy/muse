@@ -13,6 +13,7 @@ export interface AgentState {
   duration?: number
   data?: {
     blockCount?: number
+    blockTypes?: string[]
     palette?: string
     typography?: string
     planned?: number
@@ -81,6 +82,7 @@ export function parseStream(
           summary?: string
           duration?: number
           blockCount?: number
+          blockTypes?: string[]
           palette?: string
           typography?: string
           planned?: number
@@ -91,6 +93,7 @@ export function parseStream(
         if (data.blockCount !== undefined || data.palette || data.typography || data.planned !== undefined) {
           agent.data = {
             blockCount: data.blockCount,
+            blockTypes: data.blockTypes,
             palette: data.palette,
             typography: data.typography,
             planned: data.planned,
