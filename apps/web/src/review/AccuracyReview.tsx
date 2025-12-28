@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
+import { getColorStyle } from "./color";
 
 type AccuracyRating = "accurate" | "partial" | "wrong";
 
@@ -120,11 +121,24 @@ export function AccuracyReview({ entry, onComplete }: Props) {
               <div>
                 <div className="text-neutral-500 mb-1">Colors</div>
                 <div className="flex flex-wrap gap-1">
-                  {entry.colors.dominant.map(c => (
-                    <span key={c} className="px-2 py-0.5 bg-neutral-800 rounded text-neutral-300">
-                      {c}
-                    </span>
-                  ))}
+                  {entry.colors.dominant.map((c) => {
+                    const style = getColorStyle(c);
+                    return style
+                      ? (
+                        <span
+                          key={c}
+                          className="px-2 py-0.5 rounded"
+                          style={{ backgroundColor: style.bg, color: style.text }}
+                        >
+                          {c}
+                        </span>
+                      )
+                      : (
+                        <span key={c} className="px-2 py-0.5 bg-neutral-800 rounded text-neutral-300">
+                          {c}
+                        </span>
+                      );
+                  })}
                   <span className="px-2 py-0.5 bg-neutral-800 rounded text-neutral-500">
                     (
                     {entry.colors.mood}
