@@ -29,7 +29,7 @@ export interface ThemeSelection {
 
 export interface ParseState {
   theme?: ThemeSelection
-  blockCount: number
+  blocks: Block[]
   agents: Map<AgentName, AgentState>
   images: ImageSelection[]
 }
@@ -45,7 +45,7 @@ export interface ParseResult {
 }
 
 const THEME_REGEX = /\[THEME:([^\]]+)\]/;
-const BLOCK_REGEX = /\[BLOCK\]([\s\S]*?)\[\/BLOCK\]/g;
+const BLOCKS_REGEX = /\[BLOCKS:(\[[\s\S]*?\])\]/;
 const USAGE_REGEX = /\[USAGE:(\{[^}]+\})\]/;
 const IMAGES_REGEX = /\[IMAGES:(\[[\s\S]*?\])\]/;
 const AGENT_START_REGEX = /\[AGENT:(\w+):start\]/g;
@@ -58,7 +58,7 @@ export function parseStream(
   let displayText = accumulated;
   let theme = previousState.theme;
   let usage: Usage | undefined;
-  const newBlocks: Block[] = [];
+  let newBlocks: Block[] = [];
   const agents = new Map<AgentName, AgentState>(previousState.agents);
 
   // extract agent start events
@@ -140,65 +140,63 @@ export function parseStream(
   // group images by blockId for injection
   const imagesByBlock = groupBy(images, img => img.blockId);
 
-  // find all complete blocks
-  const blockMatches = [...accumulated.matchAll(BLOCK_REGEX)];
-  const newBlockCount = blockMatches.length;
+  // extract blocks (all at once now, not streaming)
+  let blocks = previousState.blocks;
+  if (blocks.length === 0) {
+    const blocksMatch = accumulated.match(BLOCKS_REGEX);
+    if (blocksMatch?.[1]) {
+      try {
+        const parsedBlocks = JSON.parse(blocksMatch[1]) as Block[];
 
-  // parse only new blocks (ones we haven't seen before)
-  for (let i = previousState.blockCount; i < newBlockCount; i++) {
-    const match = blockMatches[i];
-    if (!match) continue;
+        // inject images into blocks
+        blocks = parsedBlocks.map((block) => {
+          const blockImages = imagesByBlock[block.id];
+          if (!blockImages || blockImages.length === 0) return block;
 
-    try {
-      const json = match[1]?.trim();
-      if (!json) continue;
-      const block = JSON.parse(json) as Partial<Block>;
-      const blockId = block.id ?? crypto.randomUUID();
+          const imgSources = blockImages.map(s => s.image);
 
-      // inject images for this block
-      const blockImages = imagesByBlock[blockId];
-      if (blockImages && blockImages.length > 0) {
-        const imgSources = blockImages.map(s => s.image);
-        if (block.type === "gallery") {
-          // gallery uses images array
-          block.images = imgSources;
-        }
-        else if (block.type === "hero") {
-          // hero uses backgroundImage (ambient for overlay, subject for split)
-          const img = blockImages.find(s => s.category === "ambient" || s.category === "subject");
-          if (img) {
-            (block as { backgroundImage?: unknown }).backgroundImage = img.image;
+          if (block.type === "gallery") {
+            return { ...block, images: imgSources };
           }
-        }
-        else if (block.type === "testimonials") {
-          // testimonials: assign images to quotes
-          const quotes = (block as { quotes?: { image?: unknown }[] }).quotes;
-          if (quotes) {
-            quotes.forEach((q, idx) => {
-              if (imgSources[idx]) q.image = imgSources[idx];
-            });
+          if (block.type === "hero") {
+            const img = blockImages.find(s => s.category === "ambient" || s.category === "subject");
+            if (img) {
+              return { ...block, backgroundImage: img.image };
+            }
           }
-        }
-        else if (block.type === "features") {
-          // features-alternating: assign images to items
-          const items = (block as { items?: { image?: unknown }[] }).items;
-          if (items) {
-            items.forEach((item, idx) => {
-              if (imgSources[idx]) item.image = imgSources[idx];
-            });
+          if (block.type === "testimonials") {
+            const testimonials = block as Block & { quotes?: Record<string, unknown>[] };
+            if (testimonials.quotes) {
+              return {
+                ...block,
+                quotes: testimonials.quotes.map((q, idx) => ({
+                  ...q,
+                  image: imgSources[idx] ?? q.image,
+                })),
+              } as unknown as Block;
+            }
           }
-        }
-      }
+          if (block.type === "features") {
+            const features = block as Block & { items?: Record<string, unknown>[] };
+            if (features.items) {
+              return {
+                ...block,
+                items: features.items.map((item, idx) => ({
+                  ...item,
+                  image: imgSources[idx] ?? item.image,
+                })),
+              } as unknown as Block;
+            }
+          }
 
-      if (block.type && block.id) {
-        newBlocks.push(block as Block);
+          return block;
+        });
+
+        newBlocks = blocks;
       }
-      else if (block.type) {
-        newBlocks.push({ ...block, id: blockId } as Block);
+      catch {
+        console.warn("failed to parse blocks:", blocksMatch[1]?.slice(0, 200));
       }
-    }
-    catch {
-      console.warn("Failed to parse block JSON:", match[1]);
     }
   }
 
@@ -207,10 +205,9 @@ export function parseStream(
     .replace(THEME_REGEX, "")
     .replace(AGENT_START_REGEX, "")
     .replace(AGENT_COMPLETE_REGEX, "")
-    .replace(BLOCK_REGEX, "")
+    .replace(BLOCKS_REGEX, "")
     .replace(USAGE_REGEX, "")
     .replace(IMAGES_REGEX, "")
-    .replace(/\[BLOCK\][\s\S]*$/, "")
     .replace(/\n{3,}/g, "\n\n")
     .trim();
 
@@ -232,6 +229,6 @@ export function parseStream(
     newImages,
     usage,
     agents: agentsArray,
-    state: { theme, blockCount: newBlockCount, agents, images },
+    state: { theme, blocks, agents, images },
   };
 }
