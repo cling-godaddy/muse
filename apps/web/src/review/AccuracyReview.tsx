@@ -9,9 +9,10 @@ interface Entry {
   caption: string
   subjects: string[]
   style: string[]
-  colors?: { dominant: string[], mood: string }
+  colors?: { dominant: string[] }
   mood?: string[]
   context?: string[]
+  blacklisted?: boolean
 }
 
 interface Props {
@@ -24,6 +25,23 @@ const API_BASE = "/api/review";
 export function AccuracyReview({ entry, onComplete }: Props) {
   const [notes, setNotes] = useState("");
   const [saving, setSaving] = useState(false);
+  const [blacklisted, setBlacklisted] = useState(entry.blacklisted ?? false);
+
+  const handleToggleBlacklist = useCallback(async () => {
+    const newValue = !blacklisted;
+    setBlacklisted(newValue);
+    try {
+      await fetch(`${API_BASE}/entries/${encodeURIComponent(entry.id)}/blacklist`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ blacklisted: newValue }),
+      });
+    }
+    catch (err) {
+      console.error("Failed to update blacklist:", err);
+      setBlacklisted(!newValue); // revert on error
+    }
+  }, [entry.id, blacklisted]);
 
   const handleRate = useCallback(async (accuracy: AccuracyRating) => {
     setSaving(true);
@@ -63,12 +81,29 @@ export function AccuracyReview({ entry, onComplete }: Props) {
   return (
     <div className="max-w-5xl mx-auto p-8">
       <div className="grid grid-cols-2 gap-8 mb-8">
-        <div className="flex justify-center">
-          <img
-            src={entry.displayUrl}
-            alt="Image being reviewed"
-            className="max-h-[500px] rounded-lg shadow-2xl object-contain"
-          />
+        <div className="flex flex-col items-center gap-3">
+          <div className="relative">
+            <img
+              src={entry.displayUrl}
+              alt="Image being reviewed"
+              className={`max-h-[500px] rounded-lg shadow-2xl object-contain ${blacklisted ? "opacity-50" : ""}`}
+            />
+            {blacklisted && (
+              <div className="absolute inset-0 flex items-center justify-center">
+                <span className="text-red-500 text-6xl font-bold opacity-50">BLOCKED</span>
+              </div>
+            )}
+          </div>
+          <button
+            onClick={handleToggleBlacklist}
+            className={`text-sm px-3 py-1 rounded ${
+              blacklisted
+                ? "bg-red-600/20 text-red-400 border border-red-600/50"
+                : "bg-neutral-800 text-neutral-400 hover:bg-neutral-700"
+            }`}
+          >
+            {blacklisted ? "Blocked" : "Block image"}
+          </button>
         </div>
 
         <div className="space-y-6">

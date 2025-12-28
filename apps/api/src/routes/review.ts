@@ -120,6 +120,7 @@ reviewRoute.get("/entries/:id", async (c) => {
       status: "pending",
       notes: null,
     },
+    blacklisted: entry.blacklisted ?? false,
     createdAt: entry.createdAt,
   });
 });
@@ -220,6 +221,27 @@ reviewRoute.post("/entries/:id/accuracy", async (c) => {
   s.sync().catch(err => logger.error("sync_failed", { error: String(err) }));
 
   return c.json({ success: true, review });
+});
+
+// POST /entries/:id/blacklist - toggle blacklist status
+reviewRoute.post("/entries/:id/blacklist", async (c) => {
+  const s = await getStore();
+  if (!s) return c.json({ error: "Store not available" }, 503);
+
+  const id = decodeURIComponent(c.req.param("id"));
+  const entry = s.getEntry(id);
+  if (!entry) {
+    return c.json({ error: "Entry not found" }, 404);
+  }
+
+  const { blacklisted } = await c.req.json<{ blacklisted: boolean }>();
+
+  s.setBlacklisted(id, blacklisted);
+
+  // Sync in background
+  s.sync().catch(err => logger.error("sync_failed", { error: String(err) }));
+
+  return c.json({ success: true, blacklisted });
 });
 
 // GET /stats - dashboard stats

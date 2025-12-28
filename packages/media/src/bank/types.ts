@@ -69,6 +69,7 @@ export interface BankEntry {
   vectors: VectorIndices
   createdAt: string
   review?: Review
+  blacklisted?: boolean
 }
 
 export interface ImageAnalysis {

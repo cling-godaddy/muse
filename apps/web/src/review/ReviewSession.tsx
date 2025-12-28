@@ -9,9 +9,10 @@ interface EntryData {
   caption: string
   subjects: string[]
   style: string[]
-  colors?: { dominant: string[], mood: string }
+  colors?: { dominant: string[] }
   mood?: string[]
   context?: string[]
+  blacklisted?: boolean
 }
 
 interface Props {

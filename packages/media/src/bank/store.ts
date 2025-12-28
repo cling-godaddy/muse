@@ -72,6 +72,7 @@ export interface ImageBankStore {
   getEntry(id: string): BankEntry | null
   listEntries(opts?: BankListOptions): BankListResult
   updateReview(id: string, review: Review): void
+  setBlacklisted(id: string, blacklisted: boolean): void
   getStats(): BankStats
 }
 
@@ -182,6 +183,9 @@ export function createImageBankStore(config: BankConfig): ImageBankStore {
 
         const entry = state.entries.get(mapping.entryId);
         if (!entry) continue;
+
+        // Skip blacklisted entries
+        if (entry.blacklisted) continue;
 
         // Apply weight based on vector type
         const weightedScore = rawScore * VECTOR_WEIGHTS[mapping.type];
@@ -396,6 +400,17 @@ export function createImageBankStore(config: BankConfig): ImageBankStore {
       entry.review = review;
       state.dirty = true;
       log.debug("bank_review_updated", { id, status: review.status, accuracy: review.accuracy });
+    },
+
+    setBlacklisted(id: string, blacklisted: boolean): void {
+      const entry = state.entries.get(id);
+      if (!entry) {
+        log.warn("bank_blacklist_not_found", { id });
+        return;
+      }
+      entry.blacklisted = blacklisted;
+      state.dirty = true;
+      log.debug("bank_blacklist_updated", { id, blacklisted });
     },
 
     getStats(): BankStats {
