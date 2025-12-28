@@ -12,14 +12,16 @@ export function Masonry({ block, onUpdate }: Props) {
   const columns = block.columns ?? 3;
   const headlineRef = useAutoResize(block.headline ?? "");
 
+  const images = block.images ?? [];
+
   const updateImage = (index: number, image: ImageSource) => {
-    const images = [...block.images];
-    images[index] = image;
-    onUpdate({ images });
+    const updated = [...images];
+    updated[index] = image;
+    onUpdate({ images: updated });
   };
 
   const removeImage = (index: number) => {
-    onUpdate({ images: block.images.filter((_, i) => i !== index) });
+    onUpdate({ images: images.filter((_, i) => i !== index) });
   };
 
   return (
@@ -38,7 +40,7 @@ export function Masonry({ block, onUpdate }: Props) {
         className={styles.masonry}
         style={{ columnCount: columns }}
       >
-        {block.images.map((image, i) => (
+        {images.map((image, i) => (
           <div key={i} className={styles.item}>
             <Image
               image={image}

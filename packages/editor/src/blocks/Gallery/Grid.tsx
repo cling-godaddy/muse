@@ -13,6 +13,7 @@ interface Props {
 export function Grid({ block, onUpdate, isPending }: Props) {
   const columns = block.columns ?? 3;
   const headlineRef = useAutoResize(block.headline ?? "");
+  const images = block.images ?? [];
 
   return (
     <div className={styles.section}>
@@ -30,13 +31,13 @@ export function Grid({ block, onUpdate, isPending }: Props) {
         className={styles.grid}
         style={{ gridTemplateColumns: `repeat(${columns}, 1fr)` }}
       >
-        {isPending && block.images.length === 0
+        {isPending && images.length === 0
           ? Array.from({ length: getMinimumImages(block.preset ?? "gallery-grid") }).map((_, i) => (
             <div key={i} className={styles.item}>
               <ImageLoader isPending />
             </div>
           ))
-          : block.images.map((image, i) => (
+          : images.map((image, i) => (
             <div key={i} className={styles.item}>
               <ImageLoader image={image} isPending={false} />
             </div>
