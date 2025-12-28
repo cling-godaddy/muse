@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
+import { Spinner } from "@muse/editor";
 import { AccuracyReview } from "./AccuracyReview";
 
 interface EntryData {
@@ -67,7 +68,7 @@ export function ReviewSession({ entryId, onBack }: Props) {
   if (loading) {
     return (
       <div className="min-h-screen bg-neutral-950 text-neutral-100 flex items-center justify-center">
-        <div className="text-neutral-500">Loading...</div>
+        <Spinner size="lg" />
       </div>
     );
   }

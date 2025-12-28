@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { Spinner } from "@muse/editor";
 
 interface Stats {
   total: number
@@ -177,7 +178,9 @@ export function Dashboard({ onStartReview, onSelectEntry, onBackToMain }: Props)
 
         {loading
           ? (
-            <div className="text-neutral-500">Loading...</div>
+            <div className="flex items-center justify-center py-12">
+              <Spinner size="lg" />
+            </div>
           )
           : (
             <>
