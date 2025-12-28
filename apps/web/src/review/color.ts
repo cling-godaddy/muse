@@ -4,6 +4,7 @@ import chroma from "chroma-js";
 const COLOR_OVERRIDES: Record<string, string> = {
   golden: "#d4a017",
   brown: "#8b4513",
+  orange: "#e65c00",
 };
 
 export function getColorStyle(colorName: string): { bg: string, text: string } | null {
