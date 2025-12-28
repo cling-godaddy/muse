@@ -132,6 +132,14 @@ interface AgentTimelineProps {
   isLoading: boolean
 }
 
+const agentDescriptions: Record<string, string> = {
+  brief: "Understanding your request...",
+  structure: "Planning page layout...",
+  theme: "Selecting colors and fonts...",
+  copy: "Writing content...",
+  image: "Finding images...",
+};
+
 function AgentTimeline({ agents, isLoading }: AgentTimelineProps) {
   if (agents.length === 0 && !isLoading) return null;
 
@@ -139,7 +147,6 @@ function AgentTimeline({ agents, isLoading }: AgentTimelineProps) {
 
   const allComplete = agents.length > 0 && agents.every(a => a.status === "complete");
   const runningAgent = agents.find(a => a.status === "running");
-  const completedCount = agents.filter(a => a.status === "complete").length;
   const totalDuration = agents.reduce((sum, a) => sum + (a.duration ?? 0), 0);
   const themeAgent = agents.find(a => a.name === "theme");
 
@@ -172,15 +179,8 @@ function AgentTimeline({ agents, isLoading }: AgentTimelineProps) {
         : (
           <>
             <Spinner size="sm" />
-            <span className="capitalize">
-              {runningAgent?.name ?? "Starting"}
-            </span>
-            <span className="text-text-subtle">
-              (
-              {completedCount}
-              /
-              {agents.length || "?"}
-              )
+            <span>
+              {runningAgent ? agentDescriptions[runningAgent.name] ?? runningAgent.name : "Starting..."}
             </span>
           </>
         )}
