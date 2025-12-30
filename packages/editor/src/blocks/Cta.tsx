@@ -36,12 +36,6 @@ export function Cta({ block, onUpdate }: Props) {
           onChange={e => onUpdate({ buttonText: e.target.value })}
           placeholder="Button text..."
         />
-        <input
-          type="text"
-          value={block.buttonHref}
-          onChange={e => onUpdate({ buttonHref: e.target.value })}
-          placeholder="Button link..."
-        />
       </div>
       <select
         value={variant}

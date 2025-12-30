@@ -58,17 +58,21 @@ export function Hero({ block, onUpdate }: Props) {
             onChange={e => onUpdate({
               cta: { text: e.target.value, href: block.cta?.href ?? "#" },
             })}
-            placeholder="CTA text..."
-          />
-          <input
-            type="text"
-            value={block.cta?.href ?? ""}
-            onChange={e => onUpdate({
-              cta: { text: block.cta?.text ?? "", href: e.target.value },
-            })}
-            placeholder="CTA link..."
+            placeholder="Primary CTA..."
           />
         </div>
+        {block.secondaryCta && (
+          <div className={styles.ctaSecondary}>
+            <input
+              type="text"
+              value={block.secondaryCta.text}
+              onChange={e => onUpdate({
+                secondaryCta: { text: e.target.value, href: block.secondaryCta?.href ?? "#" },
+              })}
+              placeholder="Secondary CTA..."
+            />
+          </div>
+        )}
       </div>
     </div>
   );
