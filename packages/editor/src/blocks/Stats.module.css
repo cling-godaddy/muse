@@ -1,0 +1,122 @@
+.section {
+  padding: 4rem 2rem;
+  background: var(--muse-theme-bg, white);
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+  align-items: center;
+}
+
+.headline {
+  font-family: var(--muse-theme-heading-font, inherit);
+  font-weight: var(--muse-theme-heading-weight, 700);
+  font-size: clamp(1.25rem, 4vw, 1.75rem);
+  color: var(--muse-theme-text, #0f172a);
+  background: transparent;
+  border: 1px dashed transparent;
+  padding: 0.5rem;
+  text-align: center;
+  width: 100%;
+  resize: none;
+}
+
+.headline:focus {
+  border-color: var(--muse-theme-primary, #6366f1);
+  outline: none;
+}
+
+.grid {
+  display: flex;
+  gap: 2rem;
+  flex-wrap: wrap;
+  justify-content: center;
+  width: 100%;
+}
+
+.stat {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  min-width: 120px;
+}
+
+.valueRow {
+  display: flex;
+  align-items: baseline;
+  gap: 0;
+}
+
+.prefix,
+.suffix {
+  width: 2rem;
+  font-size: clamp(1.5rem, 5vw, 2.5rem);
+  font-weight: 700;
+  color: var(--muse-theme-text, #0f172a);
+  background: transparent;
+  border: 1px dashed transparent;
+  text-align: center;
+  padding: 0;
+}
+
+.prefix {
+  text-align: right;
+}
+
+.suffix {
+  text-align: left;
+}
+
+.value {
+  font-size: clamp(2rem, 6vw, 3rem);
+  font-weight: 700;
+  color: var(--muse-theme-primary, #6366f1);
+  background: transparent;
+  border: 1px dashed transparent;
+  text-align: center;
+  width: 6rem;
+  padding: 0;
+}
+
+.prefix:focus,
+.suffix:focus,
+.value:focus {
+  border-color: var(--muse-theme-primary, #6366f1);
+  outline: none;
+}
+
+.label {
+  font-size: 0.875rem;
+  color: var(--muse-theme-text-muted, #64748b);
+  background: transparent;
+  border: 1px dashed transparent;
+  text-align: center;
+  padding: 0.25rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.label:focus {
+  border-color: var(--muse-theme-primary, #6366f1);
+  outline: none;
+}
+
+.removeButton {
+  font-size: 0.625rem;
+  color: var(--muse-theme-text-muted, #94a3b8);
+  background: transparent;
+  border: 1px solid currentColor;
+  padding: 0.125rem 0.375rem;
+  border-radius: 0.25rem;
+  cursor: pointer;
+}
+
+.addButton {
+  padding: 0.5rem 1rem;
+  background: var(--muse-theme-primary, #6366f1);
+  color: white;
+  border: none;
+  border-radius: var(--muse-theme-radius, 0.5rem);
+  cursor: pointer;
+  font-size: 0.875rem;
+}
