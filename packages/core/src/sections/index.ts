@@ -108,4 +108,4 @@ export function isPresetId(id: string): boolean {
   return id in allPresets;
 }
 
-export { generateSectionPrompt } from "./ai";
+export { generateSectionPrompt, SECTION_TYPES } from "./ai";

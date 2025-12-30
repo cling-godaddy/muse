@@ -1,7 +1,7 @@
 import type { SectionType } from "./types";
 import { getPresetsForType } from "./index";
 
-const SECTION_TYPES: SectionType[] = [
+export const SECTION_TYPES: SectionType[] = [
   "hero",
   "features",
   "testimonials",
