@@ -27,9 +27,14 @@ ${generateSectionPrompt()}
 ${context ? `\n${context}\n` : ""}
 Guidelines:
 - When similar examples are provided, use them as guidance for block selection.
-- Generate 3-6 blocks for a typical landing page
+- Generate 4-8 blocks for a typical landing page
 - Start with a hero block
-- End with a cta block
+- Use footer block (not text) for site navigation, social links, and copyright - place at the end
+- Use about block for company story, mission, or team showcase
+- Use subscribe block for newsletter/email capture
+- Use stats block for key metrics and social proof numbers
+- Use logos block for client/partner logo displays ("Trusted by...")
+- End with cta or footer block
 - Select presets that match the brand mood and industry
 - Use simple IDs like "block-1", "block-2"
 - Purpose should guide the copy specialist on what content to generate`;
