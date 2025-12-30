@@ -1,7 +1,7 @@
 import { generatePaletteTypographyPrompt } from "@muse/themes";
 import { createLogger } from "@muse/logger";
 import type { Provider } from "../types";
-import type { AgentInput, SyncAgent } from "./types";
+import type { AgentInput, SyncAgent, SyncAgentResult } from "./types";
 import { themeSchema } from "../schemas";
 
 const log = createLogger().child({ agent: "theme" });
@@ -24,7 +24,7 @@ export const themeAgent: SyncAgent = {
     model: "gpt-4o-mini",
   },
 
-  async run(input: AgentInput, provider: Provider): Promise<string> {
+  async run(input: AgentInput, provider: Provider): Promise<SyncAgentResult> {
     const briefContext = input.brief
       ? `Brand Brief:
 - Target Audience: ${input.brief.targetAudience}
@@ -46,7 +46,7 @@ export const themeAgent: SyncAgent = {
       responseSchema: themeSchema,
     });
 
-    return response.content.trim();
+    return { content: response.content.trim(), usage: response.usage };
   },
 };
 

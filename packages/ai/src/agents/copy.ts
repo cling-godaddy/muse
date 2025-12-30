@@ -1,6 +1,6 @@
 import { generateBlockSchemaPrompt } from "@muse/core";
 import type { Provider } from "../types";
-import type { AgentInput, SyncAgent } from "./types";
+import type { AgentInput, SyncAgent, SyncAgentResult } from "./types";
 import { copyBlocksSchema } from "../schemas";
 
 function buildSystemPrompt(input: AgentInput): string {
@@ -39,7 +39,7 @@ export const copyAgent: SyncAgent = {
     description: "Generates copy and content for blocks",
   },
 
-  async run(input: AgentInput, provider: Provider): Promise<string> {
+  async run(input: AgentInput, provider: Provider): Promise<SyncAgentResult> {
     const systemPrompt = buildSystemPrompt(input);
 
     const response = await provider.chat({
@@ -50,6 +50,6 @@ export const copyAgent: SyncAgent = {
       responseSchema: copyBlocksSchema,
     });
 
-    return response.content;
+    return { content: response.content, usage: response.usage };
   },
 };

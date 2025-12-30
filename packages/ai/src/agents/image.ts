@@ -1,7 +1,7 @@
 import { createLogger } from "@muse/logger";
 import { getMaxImageRequirements, type SectionType } from "@muse/core";
 import type { Provider, ResponseSchema } from "../types";
-import type { AgentInput, SyncAgent, PageStructure, BrandBrief, ImagePlan, CopyBlockContent } from "./types";
+import type { AgentInput, SyncAgent, SyncAgentResult, PageStructure, BrandBrief, ImagePlan, CopyBlockContent } from "./types";
 
 const log = createLogger().child({ agent: "image" });
 
@@ -84,9 +84,9 @@ export const imageAgent: SyncAgent = {
     description: "Plans image searches for blocks",
   },
 
-  async run(input: AgentInput, provider: Provider): Promise<string> {
+  async run(input: AgentInput, provider: Provider): Promise<SyncAgentResult> {
     if (!input.brief || !input.structure) {
-      return "[]";
+      return { content: "[]" };
     }
 
     const messages = [
@@ -102,7 +102,7 @@ export const imageAgent: SyncAgent = {
       responseSchema: imagePlanSchema,
     });
 
-    return response.content;
+    return { content: response.content, usage: response.usage };
   },
 };
 

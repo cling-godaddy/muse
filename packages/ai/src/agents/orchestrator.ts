@@ -3,12 +3,18 @@ import { createLogger, type Logger } from "@muse/logger";
 import { getMinimumImages, getImageRequirements, type Block } from "@muse/core";
 import type { Message, Provider } from "../types";
 import { runWithRetry } from "../retry";
+import { calculateCost } from "../pricing";
 import { briefAgent, briefSystemPrompt, parseBrief } from "./brief";
 import { structureAgent, parseStructure } from "./structure";
 import { themeAgent, themeSystemPrompt, parseThemeSelection, type ThemeSelection } from "./theme";
 import { imageAgent, parseImagePlan } from "./image";
 import { copyAgent } from "./copy";
 import type { BrandBrief, PageStructure, CopyBlockContent } from "./types";
+
+interface UsageAccumulator {
+  input: number
+  output: number
+}
 
 // Simple JSON parser for schema-validated responses
 function parseJson<T>(json: string): T {
@@ -57,6 +63,15 @@ export async function* orchestrate(
   const userMessage = input.messages.find(m => m.role === "user");
   const prompt = userMessage?.content ?? "";
 
+  // Track total usage across all agents
+  const totalUsage: UsageAccumulator = { input: 0, output: 0 };
+  const addUsage = (usage?: { input: number, output: number }) => {
+    if (usage) {
+      totalUsage.input += usage.input;
+      totalUsage.output += usage.output;
+    }
+  };
+
   // step 1: extract brief
   yield "[AGENT:brief:start]\n";
   const briefStart = Date.now();
@@ -66,6 +81,7 @@ export async function* orchestrate(
 
   const briefResult = await runWithRetry(briefAgent, { prompt }, provider, parseJson<BrandBrief>);
   const brief = briefResult.data ?? parseBrief(briefResult.raw);
+  addUsage(briefResult.usage);
   briefLog.debug("raw_response", { response: briefResult.raw, attempts: briefResult.attempts });
 
   events?.onBrief?.(brief);
@@ -92,18 +108,20 @@ export async function* orchestrate(
       const result = await runWithRetry(structureAgent, { prompt, brief }, provider, parseJson<PageStructure>);
       const structure = result.data ?? parseStructure(result.raw);
       structureLog.debug("raw_response", { response: result.raw, attempts: result.attempts });
-      return { structure, duration: Date.now() - start, retried: result.attempts > 1 };
+      return { structure, duration: Date.now() - start, retried: result.attempts > 1, usage: result.usage };
     })(),
     (async () => {
       const start = Date.now();
       const result = await runWithRetry(themeAgent, { prompt, brief }, provider, parseJson<ThemeSelection>);
       const selection = result.data ?? parseThemeSelection(result.raw);
       themeLog.debug("raw_response", { response: result.raw, attempts: result.attempts });
-      return { selection, duration: Date.now() - start, retried: result.attempts > 1 };
+      return { selection, duration: Date.now() - start, retried: result.attempts > 1, usage: result.usage };
     })(),
   ]);
 
   const structure = structureResult.structure;
+  addUsage(structureResult.usage);
+  addUsage(themeResult.usage);
   events?.onStructure?.(structure);
   events?.onTheme?.(themeResult.selection);
 
@@ -135,6 +153,7 @@ export async function* orchestrate(
     { prompt, messages: input.messages, brief, structure },
     provider,
   );
+  addUsage(copyResult.usage);
 
   const copyDuration = Date.now() - copyStart;
   copyLog.info("complete", { duration: copyDuration });
@@ -142,11 +161,11 @@ export async function* orchestrate(
   // Parse copy result as { blocks: Block[] }
   let blocks: Block[] = [];
   try {
-    const parsed = JSON.parse(copyResult) as { blocks: Block[] };
+    const parsed = JSON.parse(copyResult.content) as { blocks: Block[] };
     blocks = parsed.blocks ?? [];
   }
   catch (err) {
-    copyLog.warn("parse_failed", { error: String(err), input: copyResult.slice(0, 200) });
+    copyLog.warn("parse_failed", { error: String(err), input: copyResult.content.slice(0, 200) });
   }
 
   events?.onBlocks?.(blocks);
@@ -169,8 +188,9 @@ export async function* orchestrate(
     const imageStart = Date.now();
     const imageLog = log.child({ agent: "image" });
 
-    const imagePlanJson = await imageAgent.run({ prompt, brief, structure, copyBlocks }, provider);
-    imageLog.debug("raw_response", { response: imagePlanJson });
+    const imageResult = await imageAgent.run({ prompt, brief, structure, copyBlocks }, provider);
+    addUsage(imageResult.usage);
+    imageLog.debug("raw_response", { response: imageResult.content });
 
     // Identify blocks that need mixed orientations for masonry-style layouts
     const mixedOrientationBlocks = new Set(
@@ -179,7 +199,7 @@ export async function* orchestrate(
         .map(b => b.id),
     );
 
-    const imagePlan = parseImagePlan(imagePlanJson, mixedOrientationBlocks);
+    const imagePlan = parseImagePlan(imageResult.content, mixedOrientationBlocks);
     imageLog.debug("parsed_plan", { plan: imagePlan, mixedBlocks: Array.from(mixedOrientationBlocks) });
 
     if (imagePlan.length > 0) {
@@ -209,4 +229,13 @@ export async function* orchestrate(
       yield `[IMAGES:${JSON.stringify(images)}]\n`;
     }
   }
+
+  // Emit total usage for cost tracking
+  const model = provider.name === "anthropic" ? "claude-3-5-sonnet-20241022" : "gpt-4o-mini";
+  yield `[USAGE:${JSON.stringify({
+    input: totalUsage.input,
+    output: totalUsage.output,
+    cost: calculateCost(model, totalUsage.input, totalUsage.output),
+    model,
+  })}]\n`;
 }

@@ -14,6 +14,7 @@ export interface RetryResult<T> {
   data: T | null
   raw: string
   attempts: number
+  usage?: { input: number, output: number }
 }
 
 /**
@@ -31,6 +32,8 @@ export async function runWithRetry<T>(
   let lastRaw = "";
   let lastError: string | null = null;
 
+  let lastUsage: { input: number, output: number } | undefined;
+
   for (let attempt = 1; attempt <= maxRetries + 1; attempt++) {
     const currentInput = lastError
       ? {
@@ -39,14 +42,21 @@ export async function runWithRetry<T>(
       }
       : input;
 
-    lastRaw = await agent.run(currentInput, provider);
+    const result = await agent.run(currentInput, provider);
+    lastRaw = result.content;
+    // Accumulate usage across retries
+    if (result.usage) {
+      lastUsage = lastUsage
+        ? { input: lastUsage.input + result.usage.input, output: lastUsage.output + result.usage.output }
+        : result.usage;
+    }
 
     try {
       const data = parse(lastRaw);
       if (attempt > 1) {
         log.info("retry_succeeded", { agent: agent.config.name, attempt });
       }
-      return { success: true, data, raw: lastRaw, attempts: attempt };
+      return { success: true, data, raw: lastRaw, attempts: attempt, usage: lastUsage };
     }
     catch (err) {
       lastError = String(err);
@@ -59,10 +69,10 @@ export async function runWithRetry<T>(
       });
 
       if (attempt === maxRetries + 1) {
-        return { success: false, data: null, raw: lastRaw, attempts: attempt };
+        return { success: false, data: null, raw: lastRaw, attempts: attempt, usage: lastUsage };
       }
     }
   }
 
-  return { success: false, data: null, raw: lastRaw, attempts: maxRetries + 1 };
+  return { success: false, data: null, raw: lastRaw, attempts: maxRetries + 1, usage: lastUsage };
 }

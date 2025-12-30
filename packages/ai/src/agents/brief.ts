@@ -1,6 +1,6 @@
 import { createLogger } from "@muse/logger";
 import type { Provider } from "../types";
-import type { AgentInput, BrandBrief, SyncAgent } from "./types";
+import type { AgentInput, BrandBrief, SyncAgent, SyncAgentResult } from "./types";
 import { briefSchema } from "../schemas";
 
 const log = createLogger().child({ agent: "brief" });
@@ -21,7 +21,7 @@ export const briefAgent: SyncAgent = {
     model: "gpt-4o-mini",
   },
 
-  async run(input: AgentInput, provider: Provider): Promise<string> {
+  async run(input: AgentInput, provider: Provider): Promise<SyncAgentResult> {
     const messages = [
       { role: "system" as const, content: briefSystemPrompt },
       { role: "user" as const, content: input.prompt },
@@ -35,7 +35,7 @@ export const briefAgent: SyncAgent = {
       responseSchema: briefSchema,
     });
 
-    return response.content;
+    return { content: response.content, usage: response.usage };
   },
 };
 

@@ -1,7 +1,7 @@
 import { generateSectionPrompt } from "@muse/core";
 import { createLogger } from "@muse/logger";
 import type { Provider } from "../types";
-import type { AgentInput, PageStructure, SyncAgent } from "./types";
+import type { AgentInput, PageStructure, SyncAgent, SyncAgentResult } from "./types";
 import { retrieve, formatStructureContext, type StructureKBEntry } from "../rag";
 import { structureSchema } from "../schemas";
 
@@ -80,7 +80,7 @@ export const structureAgent: SyncAgent = {
     model: "gpt-4o-mini",
   },
 
-  async run(input: AgentInput, provider: Provider): Promise<string> {
+  async run(input: AgentInput, provider: Provider): Promise<SyncAgentResult> {
     const { text: context, isTemplate } = await getRAGContext(input.prompt);
     const systemPrompt = buildStructurePrompt(context, isTemplate);
 
@@ -114,7 +114,7 @@ export const structureAgent: SyncAgent = {
 
     log.debug("llm_response", { content: response.content });
 
-    return response.content;
+    return { content: response.content, usage: response.usage };
   },
 };
 

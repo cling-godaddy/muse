@@ -49,7 +49,12 @@ export interface Agent {
   run(input: AgentInput, provider: Provider): AsyncGenerator<string>
 }
 
+export interface SyncAgentResult {
+  content: string
+  usage?: { input: number, output: number }
+}
+
 export interface SyncAgent {
   config: AgentConfig
-  run(input: AgentInput, provider: Provider): Promise<string>
+  run(input: AgentInput, provider: Provider): Promise<SyncAgentResult>
 }
