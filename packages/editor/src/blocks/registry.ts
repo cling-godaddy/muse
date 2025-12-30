@@ -5,6 +5,10 @@ export interface BlockComponentProps<T extends Block = Block> {
   block: T
   onUpdate: (data: Partial<T>) => void
   isPending?: boolean
+  /** Select an item within the block (for list-based blocks) */
+  selectItem?: (itemIndex?: number) => void
+  /** Check if an item is currently selected */
+  isItemSelected?: (itemIndex?: number) => boolean
 }
 
 export type BlockComponent<T extends Block = Block>

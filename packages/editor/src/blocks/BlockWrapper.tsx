@@ -1,8 +1,9 @@
-import { useMemo } from "react";
+import { useMemo, useCallback } from "react";
 import type { Block } from "@muse/core";
 import { getBlockComponent, type BlockComponent } from "./registry";
 import { PresetPicker } from "../controls/PresetPicker";
 import { supportsPresets } from "../controls/presets";
+import { useSelection } from "../context/SelectionContext";
 
 interface Props {
   block: Block
@@ -27,7 +28,16 @@ export function BlockWrapper({ block, onUpdate, onDelete, isPending }: Props) {
     [block.type],
   );
 
+  const { select, isSelected } = useSelection();
   const showPresetPicker = supportsPresets(block.type);
+
+  const selectItem = useCallback((itemIndex?: number) => {
+    select(block.id, itemIndex);
+  }, [select, block.id]);
+
+  const isItemSelected = useCallback((itemIndex?: number) => {
+    return isSelected(block.id, itemIndex);
+  }, [isSelected, block.id]);
 
   return (
     <div className="muse-block" data-block-type={block.type}>
@@ -49,7 +59,13 @@ export function BlockWrapper({ block, onUpdate, onDelete, isPending }: Props) {
         </button>
       </div>
       {/* eslint-disable-next-line react-hooks/static-components -- registry lookup, not component creation */}
-      <Component block={block} onUpdate={onUpdate} isPending={isPending} />
+      <Component
+        block={block}
+        onUpdate={onUpdate}
+        isPending={isPending}
+        selectItem={selectItem}
+        isItemSelected={isItemSelected}
+      />
     </div>
   );
 }
