@@ -18,6 +18,11 @@ export {
   faqPresets,
   contactPresets,
   ctaPresets,
+  footerPresets,
+  aboutPresets,
+  subscribePresets,
+  statsPresets,
+  logosPresets,
   allPresets,
   type HeroPresetId,
   type FeaturesPresetId,
@@ -27,6 +32,11 @@ export {
   type FaqPresetId,
   type ContactPresetId,
   type CtaPresetId,
+  type FooterPresetId,
+  type AboutPresetId,
+  type SubscribePresetId,
+  type StatsPresetId,
+  type LogosPresetId,
 } from "./presets";
 
 import type { SectionPreset, SectionType, ImageRequirements } from "./types";
@@ -41,6 +51,11 @@ export const DEFAULT_PRESETS: Record<SectionType, string> = {
   faq: "faq-accordion",
   contact: "contact-form",
   cta: "cta-centered",
+  footer: "footer-simple",
+  about: "about-story",
+  subscribe: "subscribe-card",
+  stats: "stats-row",
+  logos: "logos-row",
 };
 
 export const GALLERY_IMAGE_MINIMUMS: Record<string, number> = {

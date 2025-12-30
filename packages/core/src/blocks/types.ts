@@ -108,6 +108,14 @@ export interface FaqBlock extends BlockBase {
   items: FaqItem[]
 }
 
+export interface FormField {
+  name: string
+  type: "text" | "email" | "textarea"
+  label: string
+  placeholder?: string
+  required?: boolean
+}
+
 export interface ContactBlock extends BlockBase {
   type: "contact"
   headline?: string
@@ -115,6 +123,77 @@ export interface ContactBlock extends BlockBase {
   email?: string
   phone?: string
   address?: string
+  formHeadline?: string
+  formFields?: FormField[]
+  submitText?: string
+}
+
+export interface FooterLink {
+  label: string
+  href: string
+}
+
+export type SocialPlatform = "twitter" | "facebook" | "instagram" | "linkedin" | "youtube" | "github" | "tiktok";
+
+export interface SocialLink {
+  platform: SocialPlatform
+  href: string
+}
+
+export interface FooterBlock extends BlockBase {
+  type: "footer"
+  companyName?: string
+  copyright?: string
+  links?: FooterLink[]
+  socialLinks?: SocialLink[]
+}
+
+export interface TeamMember {
+  name: string
+  role: string
+  image?: ImageSource
+  bio?: string
+}
+
+export interface AboutBlock extends BlockBase {
+  type: "about"
+  headline?: string
+  body?: string
+  image?: ImageSource
+  teamMembers?: TeamMember[]
+}
+
+export interface SubscribeBlock extends BlockBase {
+  type: "subscribe"
+  headline?: string
+  subheadline?: string
+  buttonText: string
+  placeholderText?: string
+  disclaimer?: string
+}
+
+export interface StatItem {
+  value: string
+  label: string
+  prefix?: string
+  suffix?: string
+}
+
+export interface StatsBlock extends BlockBase {
+  type: "stats"
+  headline?: string
+  stats: StatItem[]
+}
+
+export interface LogoItem {
+  image: ImageSource
+  href?: string
+}
+
+export interface LogosBlock extends BlockBase {
+  type: "logos"
+  headline?: string
+  logos: LogoItem[]
 }
 
 export type Block
@@ -127,7 +206,12 @@ export type Block
     | GalleryBlock
     | PricingBlock
     | FaqBlock
-    | ContactBlock;
+    | ContactBlock
+    | FooterBlock
+    | AboutBlock
+    | SubscribeBlock
+    | StatsBlock
+    | LogosBlock;
 
 export type BlockType = Block["type"];
 
@@ -147,3 +231,8 @@ export const isGalleryBlock = isBlockType<GalleryBlock>("gallery");
 export const isPricingBlock = isBlockType<PricingBlock>("pricing");
 export const isFaqBlock = isBlockType<FaqBlock>("faq");
 export const isContactBlock = isBlockType<ContactBlock>("contact");
+export const isFooterBlock = isBlockType<FooterBlock>("footer");
+export const isAboutBlock = isBlockType<AboutBlock>("about");
+export const isSubscribeBlock = isBlockType<SubscribeBlock>("subscribe");
+export const isStatsBlock = isBlockType<StatsBlock>("stats");
+export const isLogosBlock = isBlockType<LogosBlock>("logos");

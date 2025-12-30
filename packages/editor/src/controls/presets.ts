@@ -9,6 +9,11 @@ const PRESET_BLOCK_TYPES: SectionType[] = [
   "faq",
   "contact",
   "cta",
+  "footer",
+  "about",
+  "subscribe",
+  "stats",
+  "logos",
 ];
 
 export function supportsPresets(blockType: string): boolean {

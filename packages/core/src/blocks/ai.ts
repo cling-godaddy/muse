@@ -147,6 +147,66 @@ registerAISchema({
     email: { type: "string", description: "Contact email address" },
     phone: { type: "string", description: "Contact phone number" },
     address: { type: "string", description: "Physical address" },
+    formHeadline: { type: "string", description: "Form section headline, e.g. 'Send us a message'" },
+    formFields: { type: "array", description: "Array of form fields: { name, type (text/email/textarea), label, placeholder, required }" },
+    submitText: { type: "string", description: "Submit button text, e.g. 'Send Message'" },
   },
   required: [],
+});
+
+registerAISchema({
+  type: "footer",
+  description: "Site footer with navigation links, social links, and copyright",
+  properties: {
+    companyName: { type: "string", description: "Company or brand name" },
+    copyright: { type: "string", description: "Copyright text, e.g. '2024 Company. All rights reserved.'" },
+    links: { type: "array", description: "Array of links: { label, href }" },
+    socialLinks: { type: "array", description: "Array of social links: { platform (twitter/facebook/instagram/linkedin/youtube/github/tiktok), href }" },
+  },
+  required: [],
+});
+
+registerAISchema({
+  type: "about",
+  description: "About section with company story, mission, or team showcase",
+  properties: {
+    headline: { type: "string", description: "Section headline" },
+    body: { type: "string", description: "Company story or mission text (can be multiple paragraphs)" },
+    image: { type: "object", description: "Featured image with url, alt" },
+    teamMembers: { type: "array", description: "Array of team members: { name, role, image, bio }" },
+  },
+  required: [],
+});
+
+registerAISchema({
+  type: "subscribe",
+  description: "Newsletter subscription form for email capture",
+  properties: {
+    headline: { type: "string", description: "Main headline, e.g. 'Stay in the loop'" },
+    subheadline: { type: "string", description: "Supporting text, e.g. 'Join 10,000+ subscribers'" },
+    buttonText: { type: "string", description: "Submit button text", required: true },
+    placeholderText: { type: "string", description: "Input placeholder, e.g. 'Enter your email'" },
+    disclaimer: { type: "string", description: "Privacy disclaimer, e.g. 'No spam. Unsubscribe anytime.'" },
+  },
+  required: ["buttonText"],
+});
+
+registerAISchema({
+  type: "stats",
+  description: "Key metrics and numbers showcase",
+  properties: {
+    headline: { type: "string", description: "Optional section headline" },
+    stats: { type: "array", description: "Array of stat items: { value, label, prefix (e.g. '$'), suffix (e.g. '+') }", required: true },
+  },
+  required: ["stats"],
+});
+
+registerAISchema({
+  type: "logos",
+  description: "Client, partner, or press logo cloud",
+  properties: {
+    headline: { type: "string", description: "Optional headline, e.g. 'Trusted by'" },
+    logos: { type: "array", description: "Array of logos: { image: { url, alt }, href (optional) }", required: true },
+  },
+  required: ["logos"],
 });

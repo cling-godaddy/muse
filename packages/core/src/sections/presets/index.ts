@@ -6,6 +6,11 @@ export { pricingPresets, type PricingPresetId } from "./pricing";
 export { faqPresets, type FaqPresetId } from "./faq";
 export { contactPresets, type ContactPresetId } from "./contact";
 export { ctaPresets, type CtaPresetId } from "./cta";
+export { footerPresets, type FooterPresetId } from "./footer";
+export { aboutPresets, type AboutPresetId } from "./about";
+export { subscribePresets, type SubscribePresetId } from "./subscribe";
+export { statsPresets, type StatsPresetId } from "./stats";
+export { logosPresets, type LogosPresetId } from "./logos";
 
 import { heroPresets } from "./hero";
 import { featuresPresets } from "./features";
@@ -15,6 +20,11 @@ import { pricingPresets } from "./pricing";
 import { faqPresets } from "./faq";
 import { contactPresets } from "./contact";
 import { ctaPresets } from "./cta";
+import { footerPresets } from "./footer";
+import { aboutPresets } from "./about";
+import { subscribePresets } from "./subscribe";
+import { statsPresets } from "./stats";
+import { logosPresets } from "./logos";
 import type { SectionPreset } from "../types";
 
 export const allPresets: Record<string, SectionPreset> = {
@@ -26,4 +36,9 @@ export const allPresets: Record<string, SectionPreset> = {
   ...faqPresets,
   ...contactPresets,
   ...ctaPresets,
+  ...footerPresets,
+  ...aboutPresets,
+  ...subscribePresets,
+  ...statsPresets,
+  ...logosPresets,
 };

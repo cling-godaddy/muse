@@ -10,6 +10,11 @@ const SECTION_TYPES: SectionType[] = [
   "faq",
   "contact",
   "cta",
+  "footer",
+  "about",
+  "subscribe",
+  "stats",
+  "logos",
 ];
 
 export function generateSectionPrompt(): string {

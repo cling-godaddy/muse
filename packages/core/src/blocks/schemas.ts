@@ -114,6 +114,14 @@ export const faqBlockSchema = blockBase.extend({
   items: z.array(faqItemSchema).min(1),
 });
 
+const formFieldSchema = z.object({
+  name: z.string(),
+  type: z.enum(["text", "email", "textarea"]),
+  label: z.string(),
+  placeholder: z.string().optional(),
+  required: z.boolean().optional(),
+});
+
 export const contactBlockSchema = blockBase.extend({
   type: z.literal("contact"),
   headline: z.string().optional(),
@@ -121,6 +129,75 @@ export const contactBlockSchema = blockBase.extend({
   email: z.string().optional(),
   phone: z.string().optional(),
   address: z.string().optional(),
+  formHeadline: z.string().optional(),
+  formFields: z.array(formFieldSchema).optional(),
+  submitText: z.string().optional(),
+});
+
+const footerLinkSchema = z.object({
+  label: z.string(),
+  href: z.string(),
+});
+
+const socialLinkSchema = z.object({
+  platform: z.enum(["twitter", "facebook", "instagram", "linkedin", "youtube", "github", "tiktok"]),
+  href: z.string(),
+});
+
+export const footerBlockSchema = blockBase.extend({
+  type: z.literal("footer"),
+  companyName: z.string().optional(),
+  copyright: z.string().optional(),
+  links: z.array(footerLinkSchema).optional(),
+  socialLinks: z.array(socialLinkSchema).optional(),
+});
+
+const teamMemberSchema = z.object({
+  name: z.string(),
+  role: z.string(),
+  image: imageSourceSchema.optional(),
+  bio: z.string().optional(),
+});
+
+export const aboutBlockSchema = blockBase.extend({
+  type: z.literal("about"),
+  headline: z.string().optional(),
+  body: z.string().optional(),
+  image: imageSourceSchema.optional(),
+  teamMembers: z.array(teamMemberSchema).optional(),
+});
+
+export const subscribeBlockSchema = blockBase.extend({
+  type: z.literal("subscribe"),
+  headline: z.string().optional(),
+  subheadline: z.string().optional(),
+  buttonText: z.string(),
+  placeholderText: z.string().optional(),
+  disclaimer: z.string().optional(),
+});
+
+const statItemSchema = z.object({
+  value: z.string(),
+  label: z.string(),
+  prefix: z.string().optional(),
+  suffix: z.string().optional(),
+});
+
+export const statsBlockSchema = blockBase.extend({
+  type: z.literal("stats"),
+  headline: z.string().optional(),
+  stats: z.array(statItemSchema).min(1),
+});
+
+const logoItemSchema = z.object({
+  image: imageSourceSchema,
+  href: z.string().optional(),
+});
+
+export const logosBlockSchema = blockBase.extend({
+  type: z.literal("logos"),
+  headline: z.string().optional(),
+  logos: z.array(logoItemSchema).min(1),
 });
 
 export const blockSchema = z.discriminatedUnion("type", [
@@ -134,6 +211,11 @@ export const blockSchema = z.discriminatedUnion("type", [
   pricingBlockSchema,
   faqBlockSchema,
   contactBlockSchema,
+  footerBlockSchema,
+  aboutBlockSchema,
+  subscribeBlockSchema,
+  statsBlockSchema,
+  logosBlockSchema,
 ]);
 
 export function validateBlock(data: unknown) {

@@ -101,3 +101,43 @@ registerBlockMeta({
   category: "cta",
   description: "Contact form and info",
 });
+
+registerBlockMeta({
+  type: "footer",
+  label: "Footer",
+  icon: "layout-bottom",
+  category: "layout",
+  description: "Site footer with links and social",
+});
+
+registerBlockMeta({
+  type: "about",
+  label: "About",
+  icon: "users",
+  category: "content",
+  description: "Company story and team",
+});
+
+registerBlockMeta({
+  type: "subscribe",
+  label: "Subscribe",
+  icon: "mail-plus",
+  category: "cta",
+  description: "Newsletter signup form",
+});
+
+registerBlockMeta({
+  type: "stats",
+  label: "Stats",
+  icon: "trending-up",
+  category: "content",
+  description: "Key numbers and metrics",
+});
+
+registerBlockMeta({
+  type: "logos",
+  label: "Logos",
+  icon: "building",
+  category: "content",
+  description: "Client or partner logos",
+});

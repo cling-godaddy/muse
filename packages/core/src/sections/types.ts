@@ -6,7 +6,12 @@ export type SectionType
     | "pricing"
     | "faq"
     | "contact"
-    | "cta";
+    | "cta"
+    | "footer"
+    | "about"
+    | "subscribe"
+    | "stats"
+    | "logos";
 
 export type LayoutPattern
   = | "centered"
