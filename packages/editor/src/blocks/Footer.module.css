@@ -1,0 +1,114 @@
+.section {
+  padding: 2rem;
+  background: var(--muse-theme-bg-alt, #1e293b);
+  color: var(--muse-theme-text, #f8fafc);
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.row {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.field {
+  flex: 1;
+  min-width: 200px;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.field label {
+  font-size: 0.75rem;
+  color: var(--muse-theme-text-muted, #94a3b8);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.field input {
+  background: transparent;
+  border: 1px dashed var(--muse-theme-text-muted, #475569);
+  padding: 0.5rem;
+  color: inherit;
+  font-family: inherit;
+  border-radius: 0.25rem;
+}
+
+.field input:focus {
+  border-color: var(--muse-theme-primary, #6366f1);
+  outline: none;
+}
+
+.linksSection,
+.socialSection {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.linksSection > label,
+.socialSection > label {
+  font-size: 0.75rem;
+  color: var(--muse-theme-text-muted, #94a3b8);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.linksList {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.linkRow {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.linkRow input,
+.linkRow select {
+  flex: 1;
+  background: transparent;
+  border: 1px dashed var(--muse-theme-text-muted, #475569);
+  padding: 0.5rem;
+  color: inherit;
+  font-family: inherit;
+  border-radius: 0.25rem;
+}
+
+.linkRow input:focus,
+.linkRow select:focus {
+  border-color: var(--muse-theme-primary, #6366f1);
+  outline: none;
+}
+
+.linkRow select {
+  min-width: 120px;
+  flex: 0;
+}
+
+.removeButton {
+  font-size: 0.75rem;
+  color: var(--muse-theme-text-muted, #94a3b8);
+  background: transparent;
+  border: 1px solid currentColor;
+  padding: 0.25rem 0.5rem;
+  border-radius: 0.25rem;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.addButton {
+  align-self: flex-start;
+  padding: 0.5rem 1rem;
+  background: var(--muse-theme-primary, #6366f1);
+  color: white;
+  border: none;
+  border-radius: 0.25rem;
+  cursor: pointer;
+  font-size: 0.875rem;
+}
