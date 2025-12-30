@@ -27,7 +27,7 @@ export const structureSchema: ResponseSchema = {
           type: "object",
           properties: {
             id: { type: "string", description: "Unique block ID like block-1, block-2" },
-            type: { type: "string", description: "Block type: hero, features, cta, testimonials, pricing, faq, gallery, contact, text" },
+            type: { type: "string", description: "Block type: hero, features, cta, testimonials, pricing, faq, gallery, contact, footer, about, subscribe, stats, logos, text" },
             preset: { type: "string", description: "Preset ID for the block style" },
             purpose: { type: "string", description: "What this block should accomplish" },
           },
@@ -243,6 +243,135 @@ export const copyBlocksSchema: ResponseSchema = {
                 address: nullableString,
               },
               required: ["id", "preset", "type", "headline", "subheadline", "email", "phone", "address"],
+              additionalProperties: false,
+            },
+            // Footer
+            {
+              type: "object",
+              properties: {
+                id: { type: "string" },
+                preset: { type: "string" },
+                type: { type: "string", const: "footer" },
+                companyName: nullableString,
+                copyright: nullableString,
+                links: {
+                  type: ["array", "null"],
+                  items: {
+                    type: "object",
+                    properties: {
+                      label: { type: "string" },
+                      href: { type: "string" },
+                    },
+                    required: ["label", "href"],
+                    additionalProperties: false,
+                  },
+                },
+                socialLinks: {
+                  type: ["array", "null"],
+                  items: {
+                    type: "object",
+                    properties: {
+                      platform: { type: "string" },
+                      href: { type: "string" },
+                    },
+                    required: ["platform", "href"],
+                    additionalProperties: false,
+                  },
+                },
+              },
+              required: ["id", "preset", "type", "companyName", "copyright", "links", "socialLinks"],
+              additionalProperties: false,
+            },
+            // About
+            {
+              type: "object",
+              properties: {
+                id: { type: "string" },
+                preset: { type: "string" },
+                type: { type: "string", const: "about" },
+                headline: nullableString,
+                body: nullableString,
+                teamMembers: {
+                  type: ["array", "null"],
+                  items: {
+                    type: "object",
+                    properties: {
+                      name: { type: "string" },
+                      role: { type: "string" },
+                      bio: nullableString,
+                    },
+                    required: ["name", "role", "bio"],
+                    additionalProperties: false,
+                  },
+                },
+              },
+              required: ["id", "preset", "type", "headline", "body", "teamMembers"],
+              additionalProperties: false,
+            },
+            // Subscribe
+            {
+              type: "object",
+              properties: {
+                id: { type: "string" },
+                preset: { type: "string" },
+                type: { type: "string", const: "subscribe" },
+                headline: nullableString,
+                subheadline: nullableString,
+                buttonText: { type: "string" },
+                placeholderText: nullableString,
+                disclaimer: nullableString,
+              },
+              required: ["id", "preset", "type", "headline", "subheadline", "buttonText", "placeholderText", "disclaimer"],
+              additionalProperties: false,
+            },
+            // Stats
+            {
+              type: "object",
+              properties: {
+                id: { type: "string" },
+                preset: { type: "string" },
+                type: { type: "string", const: "stats" },
+                headline: nullableString,
+                stats: {
+                  type: "array",
+                  items: {
+                    type: "object",
+                    properties: {
+                      value: { type: "string" },
+                      label: { type: "string" },
+                      prefix: nullableString,
+                      suffix: nullableString,
+                    },
+                    required: ["value", "label", "prefix", "suffix"],
+                    additionalProperties: false,
+                  },
+                },
+              },
+              required: ["id", "preset", "type", "headline", "stats"],
+              additionalProperties: false,
+            },
+            // Logos
+            {
+              type: "object",
+              properties: {
+                id: { type: "string" },
+                preset: { type: "string" },
+                type: { type: "string", const: "logos" },
+                headline: nullableString,
+                logos: {
+                  type: "array",
+                  items: {
+                    type: "object",
+                    properties: {
+                      alt: { type: "string" },
+                      href: nullableString,
+                    },
+                    required: ["alt", "href"],
+                    additionalProperties: false,
+                  },
+                },
+              },
+              required: ["id", "preset", "type", "headline", "logos"],
               additionalProperties: false,
             },
             // Text
