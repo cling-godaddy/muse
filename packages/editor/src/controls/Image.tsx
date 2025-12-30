@@ -1,5 +1,6 @@
 import { useState, useRef } from "react";
 import * as Popover from "@radix-ui/react-popover";
+import { Upload, Search } from "lucide-react";
 import type { ImageSource } from "@muse/core";
 import styles from "./Image.module.css";
 
@@ -156,7 +157,7 @@ export function Image({
             )
             : (
               <>
-                <UploadIcon />
+                <Upload size={24} />
                 <span>Upload image</span>
               </>
             )}
@@ -204,7 +205,7 @@ export function Image({
               placeholder="Search images..."
             />
             <button type="submit" className={styles.searchButton} disabled={searching}>
-              <SearchIcon />
+              <Search size={16} />
             </button>
           </form>
 
@@ -249,24 +250,5 @@ export function Image({
         </Popover.Content>
       </Popover.Portal>
     </Popover.Root>
-  );
-}
-
-function UploadIcon() {
-  return (
-    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-      <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
-      <polyline points="17 8 12 3 7 8" />
-      <line x1="12" y1="3" x2="12" y2="15" />
-    </svg>
-  );
-}
-
-function SearchIcon() {
-  return (
-    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-      <circle cx="11" cy="11" r="8" />
-      <line x1="21" y1="21" x2="16.65" y2="16.65" />
-    </svg>
   );
 }

@@ -8,6 +8,7 @@ import {
   PopoverActions,
   PopoverButton,
 } from "../controls/ItemPopover";
+import { Social } from "../icons/Social";
 import styles from "./Footer.module.css";
 
 interface Props {
@@ -16,16 +17,6 @@ interface Props {
 }
 
 const PLATFORMS: SocialPlatform[] = ["twitter", "facebook", "instagram", "linkedin", "youtube", "github", "tiktok"];
-
-const PLATFORM_ICONS: Record<SocialPlatform, string> = {
-  twitter: "X",
-  facebook: "f",
-  instagram: "ig",
-  linkedin: "in",
-  youtube: "yt",
-  github: "gh",
-  tiktok: "tt",
-};
 
 export function Footer({ block, onUpdate }: Props) {
   const copyrightRef = useAutoResize(block.copyright ?? "");
@@ -118,7 +109,7 @@ export function Footer({ block, onUpdate }: Props) {
             key={i}
             trigger={(
               <span className={styles.socialIcon} title={social.platform}>
-                {PLATFORM_ICONS[social.platform]}
+                <Social platform={social.platform} size={16} />
               </span>
             )}
           >
