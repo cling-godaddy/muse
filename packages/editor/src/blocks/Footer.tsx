@@ -1,4 +1,13 @@
 import type { FooterBlock as FooterBlockType, FooterLink, SocialLink, SocialPlatform } from "@muse/core";
+import { useAutoResize } from "../hooks";
+import {
+  ItemPopover,
+  PopoverField,
+  PopoverInput,
+  PopoverSelect,
+  PopoverActions,
+  PopoverButton,
+} from "../controls/ItemPopover";
 import styles from "./Footer.module.css";
 
 interface Props {
@@ -8,7 +17,19 @@ interface Props {
 
 const PLATFORMS: SocialPlatform[] = ["twitter", "facebook", "instagram", "linkedin", "youtube", "github", "tiktok"];
 
+const PLATFORM_ICONS: Record<SocialPlatform, string> = {
+  twitter: "X",
+  facebook: "f",
+  instagram: "ig",
+  linkedin: "in",
+  youtube: "yt",
+  github: "gh",
+  tiktok: "tt",
+};
+
 export function Footer({ block, onUpdate }: Props) {
+  const copyrightRef = useAutoResize(block.copyright ?? "");
+
   const updateLink = (index: number, data: Partial<FooterLink>) => {
     const links = (block.links ?? []).map((link, i) =>
       i === index ? { ...link, ...data } : link,
@@ -17,7 +38,7 @@ export function Footer({ block, onUpdate }: Props) {
   };
 
   const addLink = () => {
-    onUpdate({ links: [...(block.links ?? []), { label: "", href: "#" }] });
+    onUpdate({ links: [...(block.links ?? []), { label: "Link", href: "#" }] });
   };
 
   const removeLink = (index: number) => {
@@ -33,7 +54,7 @@ export function Footer({ block, onUpdate }: Props) {
 
   const addSocialLink = () => {
     onUpdate({
-      socialLinks: [...(block.socialLinks ?? []), { platform: "twitter", href: "" }],
+      socialLinks: [...(block.socialLinks ?? []), { platform: "twitter", href: "https://" }],
     });
   };
 
@@ -44,85 +65,101 @@ export function Footer({ block, onUpdate }: Props) {
   };
 
   return (
-    <div className={styles.section}>
-      <div className={styles.row}>
-        <div className={styles.field}>
-          <label>Company Name</label>
-          <input
-            type="text"
-            value={block.companyName ?? ""}
-            onChange={e => onUpdate({ companyName: e.target.value || undefined })}
-            placeholder="Company Name"
-          />
-        </div>
-        <div className={styles.field}>
-          <label>Copyright</label>
-          <input
-            type="text"
-            value={block.copyright ?? ""}
-            onChange={e => onUpdate({ copyright: e.target.value || undefined })}
-            placeholder="2024 Company. All rights reserved."
-          />
-        </div>
-      </div>
+    <footer className={styles.footer}>
+      {/* Company name - inline editable */}
+      {block.companyName !== undefined && (
+        <input
+          type="text"
+          className={styles.companyName}
+          value={block.companyName}
+          onChange={e => onUpdate({ companyName: e.target.value || undefined })}
+          placeholder="Company Name"
+        />
+      )}
 
-      <div className={styles.linksSection}>
-        <label>Links</label>
-        <div className={styles.linksList}>
-          {(block.links ?? []).map((link, i) => (
-            <div key={i} className={styles.linkRow}>
-              <input
-                type="text"
+      {/* Navigation links row */}
+      <nav className={styles.nav}>
+        {(block.links ?? []).map((link, i) => (
+          <ItemPopover
+            key={i}
+            trigger={<span className={styles.navLink}>{link.label || "Link"}</span>}
+          >
+            <PopoverField label="Label">
+              <PopoverInput
                 value={link.label}
-                onChange={e => updateLink(i, { label: e.target.value })}
-                placeholder="Label"
+                onChange={value => updateLink(i, { label: value })}
+                placeholder="Link text"
               />
-              <input
-                type="text"
+            </PopoverField>
+            <PopoverField label="URL">
+              <PopoverInput
                 value={link.href}
-                onChange={e => updateLink(i, { href: e.target.value })}
-                placeholder="/page"
+                onChange={value => updateLink(i, { href: value })}
+                placeholder="/page or https://..."
+                type="url"
               />
-              <button type="button" onClick={() => removeLink(i)} className={styles.removeButton}>
+            </PopoverField>
+            <PopoverActions>
+              <PopoverButton variant="danger" onClick={() => removeLink(i)}>
                 Remove
-              </button>
-            </div>
-          ))}
-        </div>
-        <button type="button" onClick={addLink} className={styles.addButton}>
-          Add Link
+              </PopoverButton>
+            </PopoverActions>
+          </ItemPopover>
+        ))}
+        <button type="button" className={styles.addIcon} onClick={addLink} title="Add link">
+          +
+        </button>
+      </nav>
+
+      {/* Social icons row */}
+      <div className={styles.socials}>
+        {(block.socialLinks ?? []).map((social, i) => (
+          <ItemPopover
+            key={i}
+            trigger={(
+              <span className={styles.socialIcon} title={social.platform}>
+                {PLATFORM_ICONS[social.platform]}
+              </span>
+            )}
+          >
+            <PopoverField label="Platform">
+              <PopoverSelect
+                value={social.platform}
+                onChange={value => updateSocialLink(i, { platform: value })}
+                options={PLATFORMS}
+              />
+            </PopoverField>
+            <PopoverField label="URL">
+              <PopoverInput
+                value={social.href}
+                onChange={value => updateSocialLink(i, { href: value })}
+                placeholder="https://twitter.com/..."
+                type="url"
+              />
+            </PopoverField>
+            <PopoverActions>
+              <PopoverButton variant="danger" onClick={() => removeSocialLink(i)}>
+                Remove
+              </PopoverButton>
+            </PopoverActions>
+          </ItemPopover>
+        ))}
+        <button type="button" className={styles.addIcon} onClick={addSocialLink} title="Add social">
+          +
         </button>
       </div>
 
-      <div className={styles.socialSection}>
-        <label>Social Links</label>
-        <div className={styles.linksList}>
-          {(block.socialLinks ?? []).map((social, i) => (
-            <div key={i} className={styles.linkRow}>
-              <select
-                value={social.platform}
-                onChange={e => updateSocialLink(i, { platform: e.target.value as SocialPlatform })}
-              >
-                {PLATFORMS.map(p => (
-                  <option key={p} value={p}>{p}</option>
-                ))}
-              </select>
-              <input
-                type="url"
-                value={social.href}
-                onChange={e => updateSocialLink(i, { href: e.target.value })}
-                placeholder="https://..."
-              />
-              <button type="button" onClick={() => removeSocialLink(i)} className={styles.removeButton}>
-                Remove
-              </button>
-            </div>
-          ))}
-        </div>
-        <button type="button" onClick={addSocialLink} className={styles.addButton}>
-          Add Social
-        </button>
-      </div>
-    </div>
+      {/* Copyright - inline editable */}
+      {block.copyright !== undefined && (
+        <textarea
+          ref={copyrightRef}
+          className={styles.copyright}
+          rows={1}
+          value={block.copyright}
+          onChange={e => onUpdate({ copyright: e.target.value || undefined })}
+          placeholder="© 2024 Company. All rights reserved."
+        />
+      )}
+    </footer>
   );
 }

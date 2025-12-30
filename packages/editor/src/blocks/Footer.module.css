@@ -1,114 +1,181 @@
-.section {
-  padding: 2rem;
+.footer {
+  padding: 2.5rem 2rem;
   background: var(--muse-theme-bg-alt, #1e293b);
   color: var(--muse-theme-text, #f8fafc);
   display: flex;
   flex-direction: column;
-  gap: 1.5rem;
+  align-items: center;
+  gap: 1.25rem;
+  text-align: center;
 }
 
-.row {
-  display: flex;
-  gap: 1rem;
-  flex-wrap: wrap;
-}
-
-.field {
-  flex: 1;
-  min-width: 200px;
-  display: flex;
-  flex-direction: column;
-  gap: 0.25rem;
-}
-
-.field label {
-  font-size: 0.75rem;
-  color: var(--muse-theme-text-muted, #94a3b8);
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-}
-
-.field input {
-  background: transparent;
-  border: 1px dashed var(--muse-theme-text-muted, #475569);
-  padding: 0.5rem;
+/* Company name - large, centered */
+.companyName {
+  font-family: var(--muse-theme-heading-font, inherit);
+  font-weight: var(--muse-theme-heading-weight, 700);
+  font-size: 1.25rem;
   color: inherit;
-  font-family: inherit;
-  border-radius: 0.25rem;
+  background: transparent;
+  border: 1px dashed transparent;
+  padding: 0.25rem 0.5rem;
+  text-align: center;
+  width: auto;
+  min-width: 120px;
 }
 
-.field input:focus {
+.companyName:hover {
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+.companyName:focus {
   border-color: var(--muse-theme-primary, #6366f1);
   outline: none;
 }
 
-.linksSection,
-.socialSection {
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
+.companyName::placeholder {
+  color: var(--muse-theme-text-muted, #64748b);
 }
 
-.linksSection > label,
-.socialSection > label {
-  font-size: 0.75rem;
+/* Navigation links row */
+.nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  align-items: center;
+  justify-content: center;
+}
+
+.navLink {
+  font-size: 0.875rem;
   color: var(--muse-theme-text-muted, #94a3b8);
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
+  padding: 0.375rem 0.75rem;
+  border-radius: 0.25rem;
+  cursor: pointer;
+  transition: color 0.15s, background 0.15s;
 }
 
-.linksList {
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
+.navLink:hover {
+  color: var(--muse-theme-text, #f8fafc);
+  background: rgba(255, 255, 255, 0.1);
 }
 
-.linkRow {
+/* Social icons row */
+.socials {
   display: flex;
   gap: 0.5rem;
   align-items: center;
+  justify-content: center;
 }
 
-.linkRow input,
-.linkRow select {
-  flex: 1;
+.socialIcon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2rem;
+  height: 2rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--muse-theme-text-muted, #94a3b8);
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 50%;
+  cursor: pointer;
+  transition: color 0.15s, background 0.15s;
+  text-transform: lowercase;
+}
+
+.socialIcon:hover {
+  color: var(--muse-theme-text, #f8fafc);
+  background: rgba(255, 255, 255, 0.2);
+}
+
+/* Add button (subtle +) */
+.addIcon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.75rem;
+  height: 1.75rem;
+  font-size: 1rem;
+  color: var(--muse-theme-text-muted, #64748b);
   background: transparent;
   border: 1px dashed var(--muse-theme-text-muted, #475569);
-  padding: 0.5rem;
-  color: inherit;
-  font-family: inherit;
-  border-radius: 0.25rem;
+  border-radius: 50%;
+  cursor: pointer;
+  opacity: 0;
+  transition: opacity 0.15s, color 0.15s, border-color 0.15s;
 }
 
-.linkRow input:focus,
-.linkRow select:focus {
+.nav:hover .addIcon,
+.socials:hover .addIcon {
+  opacity: 1;
+}
+
+.addIcon:hover {
+  color: var(--muse-theme-primary, #6366f1);
+  border-color: var(--muse-theme-primary, #6366f1);
+}
+
+/* Copyright text */
+.copyright {
+  font-size: 0.8125rem;
+  color: var(--muse-theme-text-muted, #64748b);
+  background: transparent;
+  border: 1px dashed transparent;
+  padding: 0.25rem 0.5rem;
+  text-align: center;
+  resize: none;
+  width: 100%;
+  max-width: 400px;
+}
+
+.copyright:hover {
+  border-color: rgba(255, 255, 255, 0.15);
+}
+
+.copyright:focus {
   border-color: var(--muse-theme-primary, #6366f1);
   outline: none;
 }
 
-.linkRow select {
-  min-width: 120px;
-  flex: 0;
+.copyright::placeholder {
+  color: var(--muse-theme-text-muted, #475569);
 }
 
-.removeButton {
-  font-size: 0.75rem;
-  color: var(--muse-theme-text-muted, #94a3b8);
-  background: transparent;
-  border: 1px solid currentColor;
-  padding: 0.25rem 0.5rem;
-  border-radius: 0.25rem;
-  cursor: pointer;
-  white-space: nowrap;
+/* ============================================
+   CRT EFFECTS
+   ============================================ */
+:global([data-effects="crt"]) .footer {
+  position: relative;
 }
 
-.addButton {
-  align-self: flex-start;
-  padding: 0.5rem 1rem;
-  background: var(--muse-theme-primary, #6366f1);
-  color: white;
-  border: none;
-  border-radius: 0.25rem;
-  cursor: pointer;
-  font-size: 0.875rem;
+:global([data-effects="crt"]) .footer::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(
+    0deg,
+    rgba(var(--muse-theme-primary-rgb, 0, 255, 0), 0.03) 0px,
+    rgba(var(--muse-theme-primary-rgb, 0, 255, 0), 0.03) 1px,
+    transparent 1px,
+    transparent 2px
+  );
+  pointer-events: none;
+  z-index: 10;
+}
+
+:global([data-effects="crt"]) .companyName {
+  text-shadow: 0 0 10px rgba(var(--muse-theme-primary-rgb, 0, 255, 0), 0.5);
+}
+
+/* ============================================
+   NEON EFFECTS
+   ============================================ */
+:global([data-effects="neon"]) .companyName {
+  text-shadow:
+    0 0 10px rgba(var(--muse-theme-primary-rgb, 255, 42, 109), 0.8),
+    0 0 20px rgba(var(--muse-theme-primary-rgb, 255, 42, 109), 0.6);
+}
+
+:global([data-effects="neon"]) .socialIcon {
+  box-shadow: 0 0 10px rgba(var(--muse-theme-primary-rgb, 255, 42, 109), 0.3);
 }
