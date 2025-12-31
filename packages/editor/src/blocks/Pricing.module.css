@@ -98,13 +98,17 @@
   display: flex;
   align-items: baseline;
   gap: 0.25rem;
-}
-
-.price input:first-child {
   font-family: var(--muse-theme-heading-font, inherit);
   font-weight: 700;
   font-size: 2.5rem;
   color: var(--muse-theme-text, #111827);
+}
+
+.price input:first-child {
+  font-family: inherit;
+  font-weight: inherit;
+  font-size: inherit;
+  color: inherit;
   background: transparent;
   border: 1px dashed transparent;
   padding: 0.25rem;
@@ -112,7 +116,9 @@
 }
 
 .price input:last-child {
+  font-family: inherit;
   font-size: 1rem;
+  font-weight: 400;
   color: var(--muse-theme-text-muted, #6b7280);
   background: transparent;
   border: 1px dashed transparent;
@@ -157,6 +163,9 @@
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
+  font-family: var(--muse-theme-body-font, inherit);
+  font-size: 0.9375rem;
+  color: var(--muse-theme-text, #374151);
 }
 
 .features li {
@@ -176,9 +185,9 @@
 
 .features input {
   flex: 1;
-  font-family: var(--muse-theme-body-font, inherit);
-  font-size: 0.9375rem;
-  color: var(--muse-theme-text, #374151);
+  font-family: inherit;
+  font-size: inherit;
+  color: inherit;
   background: transparent;
   border: 1px dashed transparent;
   padding: 0.25rem;
