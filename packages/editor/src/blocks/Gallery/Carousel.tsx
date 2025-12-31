@@ -14,7 +14,11 @@ export function Carousel({ block, onUpdate, isPending }: Props) {
   const trackRef = useRef<HTMLDivElement>(null);
   const [canScrollPrev, setCanScrollPrev] = useState(false);
   const [canScrollNext, setCanScrollNext] = useState(true);
+  const [currentIndex, setCurrentIndex] = useState(0);
   const images = block.images ?? [];
+  const slideCount = isPending && images.length === 0
+    ? getMinimumImages(block.preset ?? "gallery-carousel")
+    : images.length;
 
   const updateScrollState = useCallback(() => {
     const track = trackRef.current;
@@ -23,18 +27,40 @@ export function Carousel({ block, onUpdate, isPending }: Props) {
     const { scrollLeft, scrollWidth, clientWidth } = track;
     setCanScrollPrev(scrollLeft > 10);
     setCanScrollNext(scrollLeft < scrollWidth - clientWidth - 10);
-  }, []);
+
+    // Calculate current slide index
+    const slide = track.querySelector(`.${styles.slide}`) as HTMLElement;
+    if (slide) {
+      const slideWidth = slide.offsetWidth;
+      const gap = 16;
+      const index = Math.round(scrollLeft / (slideWidth + gap));
+      setCurrentIndex(Math.max(0, Math.min(index, slideCount - 1)));
+    }
+  }, [slideCount]);
 
   const scroll = (direction: "prev" | "next") => {
     const track = trackRef.current;
     if (!track) return;
 
     const slideWidth = track.querySelector(`.${styles.slide}`)?.clientWidth ?? 0;
-    const gap = 16; // 1rem gap
+    const gap = 16;
     const scrollAmount = slideWidth + gap;
 
     track.scrollBy({
       left: direction === "next" ? scrollAmount : -scrollAmount,
+      behavior: "smooth",
+    });
+  };
+
+  const scrollToIndex = (index: number) => {
+    const track = trackRef.current;
+    if (!track) return;
+
+    const slideWidth = track.querySelector(`.${styles.slide}`)?.clientWidth ?? 0;
+    const gap = 16;
+
+    track.scrollTo({
+      left: index * (slideWidth + gap),
       behavior: "smooth",
     });
   };
@@ -89,6 +115,19 @@ export function Carousel({ block, onUpdate, isPending }: Props) {
           →
         </button>
       </div>
+      {slideCount > 1 && (
+        <div className={styles.dots}>
+          {Array.from({ length: slideCount }).map((_, i) => (
+            <button
+              key={i}
+              type="button"
+              className={`${styles.dot} ${i === currentIndex ? styles.dotActive : ""}`}
+              onClick={() => scrollToIndex(i)}
+              aria-label={`Go to slide ${i + 1}`}
+            />
+          ))}
+        </div>
+      )}
     </div>
   );
 }

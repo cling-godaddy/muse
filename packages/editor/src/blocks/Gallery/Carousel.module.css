@@ -105,6 +105,31 @@
   cursor: not-allowed;
 }
 
+.dots {
+  display: flex;
+  gap: 0.5rem;
+  justify-content: center;
+}
+
+.dot {
+  width: 0.5rem;
+  height: 0.5rem;
+  border-radius: 50%;
+  border: none;
+  background: var(--muse-theme-border, #e5e7eb);
+  cursor: pointer;
+  padding: 0;
+  transition: all 0.15s;
+}
+
+.dot:hover {
+  background: var(--muse-theme-muted, #9ca3af);
+}
+
+.dotActive {
+  background: var(--muse-theme-primary, #6366f1);
+}
+
 /* ============================================
    CRT EFFECTS
    ============================================ */
@@ -142,6 +167,14 @@
   box-shadow: 0 0 10px rgba(var(--muse-theme-primary-rgb, 0, 255, 0), 0.2);
 }
 
+:global([data-effects="crt"]) .dot {
+  box-shadow: 0 0 5px rgba(var(--muse-theme-primary-rgb, 0, 255, 0), 0.3);
+}
+
+:global([data-effects="crt"]) .dotActive {
+  box-shadow: 0 0 10px rgba(var(--muse-theme-primary-rgb, 0, 255, 0), 0.6);
+}
+
 /* ============================================
    NEON EFFECTS
    ============================================ */
@@ -162,4 +195,14 @@
 :global([data-effects="neon"]) .navButton {
   border-color: rgba(var(--muse-theme-primary-rgb, 255, 42, 109), 0.4);
   box-shadow: 0 0 10px rgba(var(--muse-theme-primary-rgb, 255, 42, 109), 0.3);
+}
+
+:global([data-effects="neon"]) .dot {
+  box-shadow: 0 0 5px rgba(var(--muse-theme-primary-rgb, 255, 42, 109), 0.3);
+}
+
+:global([data-effects="neon"]) .dotActive {
+  box-shadow:
+    0 0 10px rgba(var(--muse-theme-primary-rgb, 255, 42, 109), 0.6),
+    0 0 20px rgba(var(--muse-theme-primary-rgb, 255, 42, 109), 0.4);
 }
