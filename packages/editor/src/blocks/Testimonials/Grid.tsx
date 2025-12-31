@@ -33,15 +33,12 @@ export function Grid({ block, onUpdate, isPending }: Props) {
         {block.quotes.map((quote, i) => (
           <figure key={i} className={styles.card}>
             <blockquote>
-              <textarea
+              <EditableText
+                value={quote.text}
+                onChange={v => updateQuote(i, { text: v })}
+                as="p"
                 className={styles.quote}
-                value={`"${quote.text}"`}
-                onChange={(e) => {
-                  const text = e.target.value.replace(/^"|"$/g, "");
-                  updateQuote(i, { text });
-                }}
                 placeholder="Quote text..."
-                rows={4}
               />
             </blockquote>
             <figcaption className={styles.author}>
