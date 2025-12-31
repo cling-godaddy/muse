@@ -12,7 +12,7 @@ type CtaArgs = {
 };
 
 const meta: Meta<CtaArgs> = {
-  title: "Blocks/Cta",
+  title: "Blocks/CTA",
   argTypes: {
     headline: { control: "text" },
     description: { control: "text" },
@@ -23,7 +23,7 @@ const meta: Meta<CtaArgs> = {
     },
     preset: {
       control: "select",
-      options: ["cta-centered", "cta-banner"],
+      options: ["cta-centered"],
     },
   },
   args: {
@@ -53,7 +53,3 @@ export default meta;
 type Story = StoryObj<CtaArgs>;
 
 export const Centered: Story = {};
-
-export const Banner: Story = {
-  args: { preset: "cta-banner" },
-};
