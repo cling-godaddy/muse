@@ -1,0 +1,59 @@
+import React from "react";
+import type { Meta, StoryObj } from "@storybook/react";
+import { Cta } from "@muse/editor";
+import type { CtaBlock } from "@muse/core";
+
+type CtaArgs = {
+  headline: string
+  description: string
+  buttonText: string
+  variant: "primary" | "secondary"
+  preset: string
+};
+
+const meta: Meta<CtaArgs> = {
+  title: "Blocks/Cta",
+  argTypes: {
+    headline: { control: "text" },
+    description: { control: "text" },
+    buttonText: { control: "text" },
+    variant: {
+      control: "inline-radio",
+      options: ["primary", "secondary"],
+    },
+    preset: {
+      control: "select",
+      options: ["cta-centered", "cta-banner"],
+    },
+  },
+  args: {
+    headline: "Ready to Get Started?",
+    description: "Join thousands of satisfied customers today.",
+    buttonText: "Start Now",
+    variant: "primary",
+    preset: "cta-centered",
+  },
+  render: (args) => {
+    const block: CtaBlock = {
+      id: "story-cta",
+      type: "cta",
+      version: 1,
+      headline: args.headline,
+      description: args.description || undefined,
+      buttonText: args.buttonText,
+      buttonHref: "#",
+      variant: args.variant,
+      preset: args.preset,
+    };
+    return <Cta block={block} onUpdate={console.log} />;
+  },
+};
+
+export default meta;
+type Story = StoryObj<CtaArgs>;
+
+export const Centered: Story = {};
+
+export const Banner: Story = {
+  args: { preset: "cta-banner" },
+};
