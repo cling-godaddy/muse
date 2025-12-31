@@ -1,13 +1,13 @@
 import type { FaqBlock as FaqBlockType, FaqItem } from "@muse/core";
-import { EditableText } from "../ux";
-import styles from "./Faq.module.css";
+import { EditableText } from "../../ux";
+import styles from "./TwoColumn.module.css";
 
 interface Props {
   block: FaqBlockType
   onUpdate: (data: Partial<FaqBlockType>) => void
 }
 
-export function Faq({ block, onUpdate }: Props) {
+export function TwoColumn({ block, onUpdate }: Props) {
   const updateItem = (index: number, data: Partial<FaqItem>) => {
     const items = block.items.map((item, i) =>
       i === index ? { ...item, ...data } : item,
@@ -35,7 +35,7 @@ export function Faq({ block, onUpdate }: Props) {
           placeholder="Subheadline..."
         />
       )}
-      <div className={styles.items}>
+      <div className={styles.grid}>
         {block.items.map((item, i) => (
           <div key={i} className={styles.item}>
             <EditableText
