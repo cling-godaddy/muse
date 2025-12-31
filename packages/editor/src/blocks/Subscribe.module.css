@@ -95,6 +95,9 @@
   padding: 0.25rem;
   text-align: center;
   margin-top: 0.5rem;
+  width: 100%;
+  max-width: 400px;
+  resize: none;
 }
 
 .disclaimer:focus {

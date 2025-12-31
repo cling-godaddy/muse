@@ -9,6 +9,7 @@ interface Props {
 
 export function Subscribe({ block, onUpdate }: Props) {
   const headlineRef = useAutoResize(block.headline ?? "");
+  const disclaimerRef = useAutoResize(block.disclaimer ?? "");
 
   return (
     <div className={styles.section}>
@@ -46,9 +47,10 @@ export function Subscribe({ block, onUpdate }: Props) {
         </div>
       </div>
 
-      <input
-        type="text"
+      <textarea
+        ref={disclaimerRef}
         className={styles.disclaimer}
+        rows={1}
         value={block.disclaimer ?? ""}
         onChange={e => onUpdate({ disclaimer: e.target.value || undefined })}
         placeholder="No spam. Unsubscribe anytime."
