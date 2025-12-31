@@ -1,0 +1,165 @@
+.section {
+  padding: 3rem 0;
+  background: var(--muse-theme-bg, white);
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+  align-items: center;
+}
+
+.headline {
+  font-family: var(--muse-theme-heading-font, inherit);
+  font-weight: var(--muse-theme-heading-weight, 700);
+  font-size: clamp(1.25rem, 4vw, 2rem);
+  color: var(--muse-theme-text, #111827);
+  background: transparent;
+  border: 1px dashed transparent;
+  padding: 0.5rem;
+  width: 100%;
+  max-width: 600px;
+  text-align: center;
+}
+
+.headline:focus {
+  border-color: var(--muse-theme-primary, #6366f1);
+  outline: none;
+}
+
+.headline::placeholder {
+  color: var(--muse-theme-muted, #9ca3af);
+}
+
+.wrapper {
+  position: relative;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.track {
+  display: flex;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  scroll-behavior: smooth;
+  gap: 1rem;
+  padding: 0.5rem 2rem;
+  flex: 1;
+
+  /* Hide scrollbar but keep functionality */
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.track::-webkit-scrollbar {
+  display: none;
+}
+
+.slide {
+  flex: 0 0 auto;
+  width: calc(80% - 0.5rem);
+  scroll-snap-align: center;
+  position: relative;
+  aspect-ratio: 16 / 9;
+  border-radius: var(--muse-theme-radius, 0.5rem);
+  overflow: hidden;
+  background: var(--muse-theme-surface, #f3f4f6);
+}
+
+@media (max-width: 640px) {
+  .slide {
+    width: calc(100% - 6rem);
+    aspect-ratio: 4 / 3;
+  }
+}
+
+.slide img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.navButton {
+  flex: 0 0 auto;
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: 50%;
+  border: 1px solid var(--muse-theme-border, #e5e7eb);
+  background: var(--muse-theme-bg, white);
+  color: var(--muse-theme-text, #111827);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.15s;
+  font-size: 1rem;
+}
+
+.navButton:hover {
+  background: var(--muse-theme-surface, #f3f4f6);
+  border-color: var(--muse-theme-primary, #6366f1);
+}
+
+.navButton:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
+
+/* ============================================
+   CRT EFFECTS
+   ============================================ */
+:global([data-effects="crt"]) .section {
+  position: relative;
+}
+
+:global([data-effects="crt"]) .section::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(
+    0deg,
+    rgba(var(--muse-theme-primary-rgb, 0, 255, 0), 0.03) 0px,
+    rgba(var(--muse-theme-primary-rgb, 0, 255, 0), 0.03) 1px,
+    transparent 1px,
+    transparent 2px
+  );
+  pointer-events: none;
+  z-index: 10;
+  border-radius: inherit;
+}
+
+:global([data-effects="crt"]) .headline {
+  text-shadow: 0 0 10px rgba(var(--muse-theme-primary-rgb, 0, 255, 0), 0.5);
+}
+
+:global([data-effects="crt"]) .slide {
+  border: 1px solid rgba(var(--muse-theme-primary-rgb, 0, 255, 0), 0.2);
+  box-shadow: 0 0 15px rgba(var(--muse-theme-primary-rgb, 0, 255, 0), 0.1);
+}
+
+:global([data-effects="crt"]) .navButton {
+  border-color: rgba(var(--muse-theme-primary-rgb, 0, 255, 0), 0.3);
+  box-shadow: 0 0 10px rgba(var(--muse-theme-primary-rgb, 0, 255, 0), 0.2);
+}
+
+/* ============================================
+   NEON EFFECTS
+   ============================================ */
+:global([data-effects="neon"]) .headline {
+  text-shadow:
+    0 0 10px rgba(var(--muse-theme-primary-rgb, 255, 42, 109), 0.8),
+    0 0 20px rgba(var(--muse-theme-primary-rgb, 255, 42, 109), 0.6),
+    0 0 40px rgba(var(--muse-theme-primary-rgb, 255, 42, 109), 0.4);
+}
+
+:global([data-effects="neon"]) .slide {
+  border: 1px solid rgba(var(--muse-theme-primary-rgb, 255, 42, 109), 0.3);
+  box-shadow:
+    0 0 15px rgba(var(--muse-theme-primary-rgb, 255, 42, 109), 0.15),
+    inset 0 0 15px rgba(var(--muse-theme-primary-rgb, 255, 42, 109), 0.05);
+}
+
+:global([data-effects="neon"]) .navButton {
+  border-color: rgba(var(--muse-theme-primary-rgb, 255, 42, 109), 0.4);
+  box-shadow: 0 0 10px rgba(var(--muse-theme-primary-rgb, 255, 42, 109), 0.3);
+}

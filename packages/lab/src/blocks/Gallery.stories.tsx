@@ -76,4 +76,7 @@ export const Masonry: Story = {
 
 export const Carousel: Story = {
   args: { preset: "gallery-carousel", imageCount: 5 },
+  argTypes: {
+    columns: { table: { disable: true } },
+  },
 };
