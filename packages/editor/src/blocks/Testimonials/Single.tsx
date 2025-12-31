@@ -1,6 +1,5 @@
 import type { TestimonialsBlock as TestimonialsBlockType, Quote } from "@muse/core";
-import { useAutoResize } from "../../hooks";
-import { Avatar } from "../../ux";
+import { Avatar, EditableText } from "../../ux";
 import styles from "./Single.module.css";
 
 interface Props {
@@ -11,7 +10,6 @@ interface Props {
 
 export function Single({ block, onUpdate, isPending }: Props) {
   const quote = block.quotes[0];
-  const headlineRef = useAutoResize(block.headline ?? "");
 
   const updateQuote = (data: Partial<Quote>) => {
     const quotes = block.quotes.map((q, i) =>
@@ -26,12 +24,11 @@ export function Single({ block, onUpdate, isPending }: Props) {
     <section className={styles.section}>
       {block.headline !== undefined && (
         <div className={styles.header}>
-          <textarea
-            ref={headlineRef}
-            className={styles.headline}
-            rows={1}
+          <EditableText
             value={block.headline}
-            onChange={e => onUpdate({ headline: e.target.value || undefined })}
+            onChange={v => onUpdate({ headline: v || undefined })}
+            as="h2"
+            className={styles.headline}
             placeholder="Section headline..."
           />
         </div>

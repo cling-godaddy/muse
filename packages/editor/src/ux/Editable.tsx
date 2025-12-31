@@ -39,6 +39,7 @@ export function EditableText({
       value={value}
       onChange={e => onChange(e.target.value)}
       placeholder={placeholder}
+      style={{ resize: "none" }}
     />
   );
 }
