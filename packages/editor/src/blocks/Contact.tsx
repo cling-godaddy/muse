@@ -11,6 +11,7 @@ const FIELD_TYPES: FormField["type"][] = ["text", "email", "textarea"];
 
 export function Contact({ block, onUpdate }: Props) {
   const headlineRef = useAutoResize(block.headline ?? "");
+  const subheadlineRef = useAutoResize(block.subheadline ?? "");
   const formHeadlineRef = useAutoResize(block.formHeadline ?? "");
 
   const updateField = (index: number, data: Partial<FormField>) => {
@@ -48,9 +49,10 @@ export function Contact({ block, onUpdate }: Props) {
         />
       )}
       {block.subheadline !== undefined && (
-        <input
-          type="text"
+        <textarea
+          ref={subheadlineRef}
           className={styles.subheadline}
+          rows={1}
           value={block.subheadline}
           onChange={e => onUpdate({ subheadline: e.target.value || undefined })}
           placeholder="Subheadline..."

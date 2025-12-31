@@ -9,6 +9,7 @@ interface Props {
 
 export function Subscribe({ block, onUpdate }: Props) {
   const headlineRef = useAutoResize(block.headline ?? "");
+  const subheadlineRef = useAutoResize(block.subheadline ?? "");
   const disclaimerRef = useAutoResize(block.disclaimer ?? "");
 
   return (
@@ -21,9 +22,10 @@ export function Subscribe({ block, onUpdate }: Props) {
         onChange={e => onUpdate({ headline: e.target.value || undefined })}
         placeholder="Stay in the loop"
       />
-      <input
-        type="text"
+      <textarea
+        ref={subheadlineRef}
         className={styles.subheadline}
+        rows={1}
         value={block.subheadline ?? ""}
         onChange={e => onUpdate({ subheadline: e.target.value || undefined })}
         placeholder="Join 10,000+ subscribers"

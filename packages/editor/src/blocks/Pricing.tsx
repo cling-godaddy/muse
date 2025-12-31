@@ -9,6 +9,7 @@ interface Props {
 
 export function Pricing({ block, onUpdate }: Props) {
   const headlineRef = useAutoResize(block.headline ?? "");
+  const subheadlineRef = useAutoResize(block.subheadline ?? "");
 
   const updatePlan = (index: number, data: Partial<PricingPlan>) => {
     const plans = block.plans.map((p, i) =>
@@ -30,9 +31,10 @@ export function Pricing({ block, onUpdate }: Props) {
         />
       )}
       {block.subheadline !== undefined && (
-        <input
-          type="text"
+        <textarea
+          ref={subheadlineRef}
           className={styles.subheadline}
+          rows={1}
           value={block.subheadline}
           onChange={e => onUpdate({ subheadline: e.target.value || undefined })}
           placeholder="Subheadline..."
