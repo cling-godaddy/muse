@@ -33,7 +33,7 @@ const meta: Meta<FooterArgs> = {
     copyright: { control: "text" },
     preset: {
       control: "select",
-      options: ["footer-simple", "footer-minimal", "footer-columns"],
+      options: ["footer-simple"],
     },
     showLinks: { control: "boolean" },
     showSocials: { control: "boolean" },
@@ -64,11 +64,3 @@ export default meta;
 type Story = StoryObj<FooterArgs>;
 
 export const Simple: Story = {};
-
-export const Minimal: Story = {
-  args: { preset: "footer-minimal", showLinks: false },
-};
-
-export const Columns: Story = {
-  args: { preset: "footer-columns" },
-};
