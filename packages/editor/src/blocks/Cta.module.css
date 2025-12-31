@@ -95,8 +95,8 @@
 }
 
 .primary .button {
-  background: white;
-  color: var(--muse-theme-primary, #6366f1);
+  background: var(--muse-theme-bg, white);
+  color: var(--muse-theme-text, #111827);
 }
 
 .secondary .button {
