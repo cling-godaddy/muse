@@ -7,9 +7,14 @@ type HeroArgs = {
   headline: string
   subheadline: string
   ctaText: string
-  alignment: "left" | "center" | "right"
+  secondaryCtaText: string
   preset: string
-  showBackgroundImage: boolean
+  overlayOpacity: number
+};
+
+const SAMPLE_IMAGE = {
+  url: "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=1600",
+  alt: "Mountain landscape",
 };
 
 const meta: Meta<HeroArgs> = {
@@ -18,25 +23,26 @@ const meta: Meta<HeroArgs> = {
     headline: { control: "text" },
     subheadline: { control: "text" },
     ctaText: { control: "text" },
-    alignment: {
-      control: "inline-radio",
-      options: ["left", "center", "right"],
-    },
+    secondaryCtaText: { control: "text" },
     preset: {
       control: "select",
       options: ["hero-centered", "hero-overlay", "hero-split-left", "hero-split-right"],
     },
-    showBackgroundImage: { control: "boolean" },
+    overlayOpacity: {
+      control: { type: "range", min: 0, max: 100, step: 10 },
+      if: { arg: "preset", eq: "hero-overlay" },
+    },
   },
   args: {
     headline: "Build Something Amazing",
     subheadline: "Create beautiful landing pages in minutes with our intuitive builder.",
     ctaText: "Get Started",
-    alignment: "center",
+    secondaryCtaText: "Learn More",
     preset: "hero-centered",
-    showBackgroundImage: false,
+    overlayOpacity: 50,
   },
   render: (args) => {
+    const needsImage = args.preset !== "hero-centered";
     const block: HeroBlock = {
       id: "story-hero",
       type: "hero",
@@ -44,12 +50,10 @@ const meta: Meta<HeroArgs> = {
       headline: args.headline,
       subheadline: args.subheadline || undefined,
       cta: args.ctaText ? { text: args.ctaText, href: "#" } : undefined,
-      alignment: args.alignment,
+      secondaryCta: args.secondaryCtaText ? { text: args.secondaryCtaText, href: "#" } : undefined,
       preset: args.preset,
-      backgroundImage: args.showBackgroundImage
-        ? { url: "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=1600", alt: "Background" }
-        : undefined,
-      backgroundOverlay: args.showBackgroundImage ? 0.5 : undefined,
+      backgroundImage: needsImage ? SAMPLE_IMAGE : undefined,
+      backgroundOverlay: args.preset === "hero-overlay" ? args.overlayOpacity : undefined,
     };
     return <Hero block={block} onUpdate={console.log} />;
   },
@@ -61,13 +65,13 @@ type Story = StoryObj<HeroArgs>;
 export const Centered: Story = {};
 
 export const Overlay: Story = {
-  args: { preset: "hero-overlay", showBackgroundImage: true },
+  args: { preset: "hero-overlay" },
 };
 
 export const SplitLeft: Story = {
-  args: { preset: "hero-split-left", alignment: "left", showBackgroundImage: true },
+  args: { preset: "hero-split-left" },
 };
 
 export const SplitRight: Story = {
-  args: { preset: "hero-split-right", alignment: "left", showBackgroundImage: true },
+  args: { preset: "hero-split-right" },
 };

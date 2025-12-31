@@ -1,37 +1,16 @@
 import type { HeroBlock as HeroBlockType } from "@muse/core";
-import { EditableText, EditableLink } from "../ux";
+import { EditableText, EditableLink, ImageLoader } from "../ux";
 import styles from "./Hero.module.css";
 
 interface Props {
   block: HeroBlockType
   onUpdate: (data: Partial<HeroBlockType>) => void
+  isPending?: boolean
 }
 
-export function Hero({ block, onUpdate }: Props) {
-  const alignment = block.alignment ?? "center";
-
-  const hasBackground = !!block.backgroundImage;
-  const overlayOpacity = (block.backgroundOverlay ?? 50) / 100;
-
-  const containerStyle = block.backgroundImage
-    ? {
-      backgroundImage: `url(${block.backgroundImage.url})`,
-      backgroundSize: "cover",
-      backgroundPosition: "center",
-    }
-    : undefined;
-
-  const alignmentClass = alignment === "left" ? styles.left : alignment === "right" ? styles.right : "";
-  const sectionClasses = [styles.section, alignmentClass, hasBackground ? styles.withBg : ""].filter(Boolean).join(" ");
-
+function HeroContent({ block, onUpdate }: Omit<Props, "isPending">) {
   return (
-    <div className={sectionClasses} style={containerStyle}>
-      {hasBackground && (
-        <div
-          className={styles.overlay}
-          style={{ backgroundColor: `rgba(0, 0, 0, ${overlayOpacity})` }}
-        />
-      )}
+    <>
       <EditableText
         value={block.headline}
         onChange={v => onUpdate({ headline: v })}
@@ -66,6 +45,59 @@ export function Hero({ block, onUpdate }: Props) {
           />
         )}
       </div>
+    </>
+  );
+}
+
+export function Hero({ block, onUpdate, isPending }: Props) {
+  const preset = block.preset ?? "hero-centered";
+  const isSplit = preset === "hero-split-left" || preset === "hero-split-right";
+  const isOverlay = preset === "hero-overlay";
+
+  // Split layout: side-by-side text and image
+  if (isSplit) {
+    const imageFirst = preset === "hero-split-right";
+    return (
+      <div className={`${styles.section} ${styles.split} ${imageFirst ? styles.splitRight : ""}`}>
+        <div className={styles.splitContent}>
+          <HeroContent block={block} onUpdate={onUpdate} />
+        </div>
+        <div className={styles.splitImage}>
+          <ImageLoader
+            image={block.backgroundImage}
+            isPending={!!isPending}
+            className={styles.splitImg}
+          />
+        </div>
+      </div>
+    );
+  }
+
+  // Overlay layout: full-bleed background with text on top
+  if (isOverlay && block.backgroundImage) {
+    const overlayOpacity = (block.backgroundOverlay ?? 50) / 100;
+    return (
+      <div
+        className={`${styles.section} ${styles.overlay}`}
+        style={{
+          backgroundImage: `url(${block.backgroundImage.url})`,
+          backgroundSize: "cover",
+          backgroundPosition: "center",
+        }}
+      >
+        <div
+          className={styles.overlayBg}
+          style={{ backgroundColor: `rgba(0, 0, 0, ${overlayOpacity})` }}
+        />
+        <HeroContent block={block} onUpdate={onUpdate} />
+      </div>
+    );
+  }
+
+  // Centered layout: default
+  return (
+    <div className={styles.section}>
+      <HeroContent block={block} onUpdate={onUpdate} />
     </div>
   );
 }
