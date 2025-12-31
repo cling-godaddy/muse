@@ -60,6 +60,7 @@
 }
 
 .teamHeadline {
+  font-family: var(--muse-theme-heading-font, inherit);
   font-size: 1.25rem;
   font-weight: 600;
   text-align: center;
@@ -108,16 +109,20 @@
 }
 
 .memberName {
+  font-family: var(--muse-theme-heading-font, inherit);
   font-weight: 600;
   font-size: 1rem;
+  color: var(--muse-theme-text, #0f172a);
 }
 
 .memberRole {
+  font-family: var(--muse-theme-body-font, inherit);
   font-size: 0.875rem;
-  color: var(--muse-theme-text-muted, #64748b);
+  color: var(--muse-theme-primary, #6366f1);
 }
 
 .memberBio {
+  font-family: var(--muse-theme-body-font, inherit);
   font-size: 0.75rem;
   color: var(--muse-theme-text-muted, #64748b);
 }
