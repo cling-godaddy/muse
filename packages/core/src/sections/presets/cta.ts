@@ -15,24 +15,8 @@ export const ctaCentered: SectionPreset = {
   className: "muse-cta--centered",
 };
 
-export const ctaBanner: SectionPreset = {
-  id: "cta-banner",
-  name: "Banner",
-  sectionType: "cta",
-  layoutPattern: "banner",
-  category: "conversion",
-  mood: "bold",
-  tags: ["prominent", "full-width", "impactful", "strong"],
-  industries: ["startup", "ecommerce", "product", "technology"],
-  description: "Full-width colored band. Strong finish.",
-  requiredFields: ["headline", "buttonText"],
-  optionalFields: ["description", "buttonHref"],
-  className: "muse-cta--banner",
-};
-
 export const ctaPresets = {
   "cta-centered": ctaCentered,
-  "cta-banner": ctaBanner,
 } as const;
 
 export type CtaPresetId = keyof typeof ctaPresets;
