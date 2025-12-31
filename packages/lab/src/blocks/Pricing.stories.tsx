@@ -45,7 +45,7 @@ const meta: Meta<PricingArgs> = {
     subheadline: { control: "text" },
     preset: {
       control: "select",
-      options: ["pricing-cards", "pricing-simple", "pricing-table"],
+      options: ["pricing-cards"],
     },
     planCount: {
       control: { type: "range", min: 2, max: 3, step: 1 },
@@ -75,11 +75,3 @@ export default meta;
 type Story = StoryObj<PricingArgs>;
 
 export const Cards: Story = {};
-
-export const Simple: Story = {
-  args: { preset: "pricing-simple" },
-};
-
-export const Table: Story = {
-  args: { preset: "pricing-table" },
-};
