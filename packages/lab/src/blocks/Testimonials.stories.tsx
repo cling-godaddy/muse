@@ -1,5 +1,5 @@
 import React from "react";
-import type { Meta, StoryObj } from "@storybook/react";
+import type { Meta, StoryObj } from "@storybook/react-vite";
 import { Testimonials } from "@muse/editor";
 import type { TestimonialsBlock, Quote } from "@muse/core";
 

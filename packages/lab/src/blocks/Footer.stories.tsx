@@ -1,5 +1,5 @@
 import React from "react";
-import type { Meta, StoryObj } from "@storybook/react";
+import type { Meta, StoryObj } from "@storybook/react-vite";
 import { Footer } from "@muse/editor";
 import type { FooterBlock, FooterLink, SocialLink } from "@muse/core";
 

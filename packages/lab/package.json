@@ -15,11 +15,11 @@
     "react-dom": "^19"
   },
   "devDependencies": {
-    "@storybook/addon-essentials": "^8.5.0",
-    "@storybook/react": "^8.5.0",
-    "@storybook/react-vite": "^8.5.0",
+    "@storybook/react-vite": "^10.1.11",
     "@types/react": "^19",
     "@types/react-dom": "^19",
-    "storybook": "^8.5.0"
+    "storybook": "^10.1.11",
+    "eslint-plugin-storybook": "10.1.11",
+    "@storybook/addon-docs": "^10.1.11"
   }
 }

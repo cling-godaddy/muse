@@ -1,5 +1,5 @@
 import React from "react";
-import type { Meta, StoryObj } from "@storybook/react";
+import type { Meta, StoryObj } from "@storybook/react-vite";
 import { Logos } from "@muse/editor";
 import type { LogosBlock, LogoItem } from "@muse/core";
 

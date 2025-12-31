@@ -1,5 +1,5 @@
 import React from "react";
-import type { Meta, StoryObj } from "@storybook/react";
+import type { Meta, StoryObj } from "@storybook/react-vite";
 import { Gallery } from "@muse/editor";
 import type { GalleryBlock, ImageSource } from "@muse/core";
 

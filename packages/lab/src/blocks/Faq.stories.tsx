@@ -1,5 +1,5 @@
 import React from "react";
-import type { Meta, StoryObj } from "@storybook/react";
+import type { Meta, StoryObj } from "@storybook/react-vite";
 import { Faq } from "@muse/editor";
 import type { FaqBlock, FaqItem } from "@muse/core";
 

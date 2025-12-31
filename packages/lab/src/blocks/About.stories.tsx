@@ -1,5 +1,5 @@
 import React from "react";
-import type { Meta, StoryObj } from "@storybook/react";
+import type { Meta, StoryObj } from "@storybook/react-vite";
 import { About } from "@muse/editor";
 import type { AboutBlock, TeamMember } from "@muse/core";
 
@@ -73,9 +73,7 @@ const meta: Meta<AboutArgs> = {
 export default meta;
 type Story = StoryObj<AboutArgs>;
 
-export const Story_: Story = {
-  name: "Story",
-};
+export const Default: Story = {};
 
 export const Split: Story = {
   args: { preset: "about-split" },

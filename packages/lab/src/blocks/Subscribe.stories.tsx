@@ -1,5 +1,5 @@
 import React from "react";
-import type { Meta, StoryObj } from "@storybook/react";
+import type { Meta, StoryObj } from "@storybook/react-vite";
 import { Subscribe } from "@muse/editor";
 import type { SubscribeBlock } from "@muse/core";
 
