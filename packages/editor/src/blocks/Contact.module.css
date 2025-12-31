@@ -1,6 +1,6 @@
 .section {
   padding: 3rem 2rem;
-  background: var(--muse-theme-surface, #f9fafb);
+  background: var(--muse-theme-bg, white);
   display: flex;
   flex-direction: column;
   gap: 2rem;
