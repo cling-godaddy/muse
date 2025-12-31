@@ -1,4 +1,5 @@
 import type { TestimonialsBlock as TestimonialsBlockType, Quote } from "@muse/core";
+import { useIsEditable } from "../../context/EditorModeContext";
 import { Avatar, EditableText } from "../../ux";
 import styles from "./Grid.module.css";
 
@@ -9,6 +10,8 @@ interface Props {
 }
 
 export function Grid({ block, onUpdate, isPending }: Props) {
+  const isEditable = useIsEditable();
+
   const updateQuote = (index: number, data: Partial<Quote>) => {
     const quotes = block.quotes.map((q, i) =>
       i === index ? { ...q, ...data } : q,
@@ -44,26 +47,39 @@ export function Grid({ block, onUpdate, isPending }: Props) {
             <figcaption className={styles.author}>
               <Avatar image={quote.avatar} name={quote.author} isPending={isPending} className={styles.avatar} />
               <div>
-                <input
-                  type="text"
-                  className={styles.name}
-                  value={quote.author}
-                  onChange={e => updateQuote(i, { author: e.target.value })}
-                  placeholder="Author name"
-                />
-                <input
-                  type="text"
-                  className={styles.role}
-                  value={[quote.role, quote.company].filter(Boolean).join(", ")}
-                  onChange={(e) => {
-                    const parts = e.target.value.split(", ");
-                    updateQuote(i, {
-                      role: parts[0] || undefined,
-                      company: parts[1] || undefined,
-                    });
-                  }}
-                  placeholder="Role, Company"
-                />
+                {isEditable
+                  ? (
+                    <>
+                      <input
+                        type="text"
+                        className={styles.name}
+                        value={quote.author}
+                        onChange={e => updateQuote(i, { author: e.target.value })}
+                        placeholder="Author name"
+                      />
+                      <input
+                        type="text"
+                        className={styles.role}
+                        value={[quote.role, quote.company].filter(Boolean).join(", ")}
+                        onChange={(e) => {
+                          const parts = e.target.value.split(", ");
+                          updateQuote(i, {
+                            role: parts[0] || undefined,
+                            company: parts[1] || undefined,
+                          });
+                        }}
+                        placeholder="Role, Company"
+                      />
+                    </>
+                  )
+                  : (
+                    <>
+                      <span className={styles.name}>{quote.author}</span>
+                      <span className={styles.role}>
+                        {[quote.role, quote.company].filter(Boolean).join(", ")}
+                      </span>
+                    </>
+                  )}
               </div>
             </figcaption>
           </figure>
