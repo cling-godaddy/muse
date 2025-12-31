@@ -82,28 +82,26 @@
 }
 
 .button {
-  display: flex;
-  gap: 0.5rem;
   margin-top: 0.5rem;
-}
-
-.button input {
-  padding: 0.75rem 1rem;
+  padding: 0.75rem 1.5rem;
   border-radius: var(--muse-theme-radius, 0.5rem);
   border: none;
+  font-family: var(--muse-theme-body-font, sans-serif);
   font-size: 0.875rem;
+  font-weight: 600;
+  text-decoration: none;
+  display: inline-block;
+  cursor: pointer;
 }
 
-.primary .button input {
+.primary .button {
   background: white;
   color: var(--muse-theme-primary, #6366f1);
-  font-weight: 600;
 }
 
-.secondary .button input {
+.secondary .button {
   background: var(--muse-theme-primary, #6366f1);
   color: white;
-  font-weight: 600;
 }
 
 .variantSelect {
@@ -155,7 +153,7 @@
   text-shadow: 0 0 8px rgba(var(--muse-theme-primary-rgb, 0, 255, 0), 0.3);
 }
 
-:global([data-effects="crt"]) .button input {
+:global([data-effects="crt"]) .button {
   box-shadow: 0 0 15px rgba(var(--muse-theme-primary-rgb, 0, 255, 0), 0.3);
 }
 
@@ -175,7 +173,7 @@
     0 0 16px rgba(var(--muse-theme-primary-rgb, 255, 42, 109), 0.3);
 }
 
-:global([data-effects="neon"]) .button input {
+:global([data-effects="neon"]) .button {
   box-shadow:
     0 0 15px rgba(var(--muse-theme-primary-rgb, 255, 42, 109), 0.5),
     0 0 30px rgba(var(--muse-theme-primary-rgb, 255, 42, 109), 0.3);
