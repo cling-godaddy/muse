@@ -1,5 +1,6 @@
 import type { ContactBlock as ContactBlockType, FormField } from "@muse/core";
-import { useAutoResize } from "../hooks";
+import { EditableText } from "../ux";
+import { useIsEditable } from "../context/EditorModeContext";
 import styles from "./Contact.module.css";
 
 interface Props {
@@ -10,9 +11,7 @@ interface Props {
 const FIELD_TYPES: FormField["type"][] = ["text", "email", "textarea"];
 
 export function Contact({ block, onUpdate }: Props) {
-  const headlineRef = useAutoResize(block.headline ?? "");
-  const subheadlineRef = useAutoResize(block.subheadline ?? "");
-  const formHeadlineRef = useAutoResize(block.formHeadline ?? "");
+  const isEditable = useIsEditable();
 
   const updateField = (index: number, data: Partial<FormField>) => {
     const formFields = (block.formFields ?? []).map((field, i) =>
@@ -39,22 +38,20 @@ export function Contact({ block, onUpdate }: Props) {
   return (
     <div className={styles.section}>
       {block.headline !== undefined && (
-        <textarea
-          ref={headlineRef}
-          className={styles.headline}
-          rows={1}
+        <EditableText
           value={block.headline}
-          onChange={e => onUpdate({ headline: e.target.value || undefined })}
+          onChange={v => onUpdate({ headline: v || undefined })}
+          as="h2"
+          className={styles.headline}
           placeholder="Section headline..."
         />
       )}
       {block.subheadline !== undefined && (
-        <textarea
-          ref={subheadlineRef}
-          className={styles.subheadline}
-          rows={1}
+        <EditableText
           value={block.subheadline}
-          onChange={e => onUpdate({ subheadline: e.target.value || undefined })}
+          onChange={v => onUpdate({ subheadline: v || undefined })}
+          as="p"
+          className={styles.subheadline}
           placeholder="Subheadline..."
         />
       )}
@@ -62,92 +59,140 @@ export function Contact({ block, onUpdate }: Props) {
       <div className={styles.info}>
         <div className={styles.field}>
           <label>Email</label>
-          <input
-            type="email"
-            value={block.email ?? ""}
-            onChange={e => onUpdate({ email: e.target.value || undefined })}
-            placeholder="contact@example.com"
-          />
+          {isEditable
+            ? (
+              <input
+                type="email"
+                value={block.email ?? ""}
+                onChange={e => onUpdate({ email: e.target.value || undefined })}
+                placeholder="contact@example.com"
+              />
+            )
+            : block.email
+              ? (
+                <a href={`mailto:${block.email}`}>{block.email}</a>
+              )
+              : null}
         </div>
         <div className={styles.field}>
           <label>Phone</label>
-          <input
-            type="tel"
-            value={block.phone ?? ""}
-            onChange={e => onUpdate({ phone: e.target.value || undefined })}
-            placeholder="+1 (555) 123-4567"
-          />
+          {isEditable
+            ? (
+              <input
+                type="tel"
+                value={block.phone ?? ""}
+                onChange={e => onUpdate({ phone: e.target.value || undefined })}
+                placeholder="+1 (555) 123-4567"
+              />
+            )
+            : block.phone
+              ? (
+                <a href={`tel:${block.phone}`}>{block.phone}</a>
+              )
+              : null}
         </div>
         <div className={styles.field}>
           <label>Address</label>
-          <textarea
-            value={block.address ?? ""}
-            onChange={e => onUpdate({ address: e.target.value || undefined })}
-            placeholder="123 Main St, City, State 12345"
-            rows={2}
-          />
+          {isEditable
+            ? (
+              <textarea
+                value={block.address ?? ""}
+                onChange={e => onUpdate({ address: e.target.value || undefined })}
+                placeholder="123 Main St, City, State 12345"
+                rows={2}
+              />
+            )
+            : block.address
+              ? (
+                <p>{block.address}</p>
+              )
+              : null}
         </div>
       </div>
 
       {block.formFields !== undefined && (
         <div className={styles.formSection}>
-          <textarea
-            ref={formHeadlineRef}
-            className={styles.formHeadline}
-            rows={1}
+          <EditableText
             value={block.formHeadline ?? ""}
-            onChange={e => onUpdate({ formHeadline: e.target.value || undefined })}
+            onChange={v => onUpdate({ formHeadline: v || undefined })}
+            as="h3"
+            className={styles.formHeadline}
             placeholder="Send us a message"
           />
 
-          <div className={styles.formFields}>
-            {block.formFields.map((field, i) => (
-              <div key={i} className={styles.formFieldRow}>
+          {isEditable && (
+            <>
+              <div className={styles.formFields}>
+                {block.formFields.map((field, i) => (
+                  <div key={i} className={styles.formFieldRow}>
+                    <input
+                      type="text"
+                      value={field.label}
+                      onChange={e => updateField(i, { label: e.target.value })}
+                      placeholder="Field label"
+                      className={styles.fieldLabel}
+                    />
+                    <select
+                      value={field.type}
+                      onChange={e => updateField(i, { type: e.target.value as FormField["type"] })}
+                      className={styles.fieldType}
+                    >
+                      {FIELD_TYPES.map(t => (
+                        <option key={t} value={t}>{t}</option>
+                      ))}
+                    </select>
+                    <label className={styles.requiredCheckbox}>
+                      <input
+                        type="checkbox"
+                        checked={field.required ?? false}
+                        onChange={e => updateField(i, { required: e.target.checked })}
+                      />
+                      Required
+                    </label>
+                    <button type="button" onClick={() => removeField(i)} className={styles.removeButton}>
+                      Remove
+                    </button>
+                  </div>
+                ))}
+              </div>
+
+              <button type="button" onClick={addField} className={styles.addButton}>
+                Add Field
+              </button>
+
+              <div className={styles.submitSection}>
+                <label>Submit Button</label>
                 <input
                   type="text"
-                  value={field.label}
-                  onChange={e => updateField(i, { label: e.target.value })}
-                  placeholder="Field label"
-                  className={styles.fieldLabel}
+                  value={block.submitText ?? ""}
+                  onChange={e => onUpdate({ submitText: e.target.value || undefined })}
+                  placeholder="Send Message"
+                  className={styles.submitText}
                 />
-                <select
-                  value={field.type}
-                  onChange={e => updateField(i, { type: e.target.value as FormField["type"] })}
-                  className={styles.fieldType}
-                >
-                  {FIELD_TYPES.map(t => (
-                    <option key={t} value={t}>{t}</option>
-                  ))}
-                </select>
-                <label className={styles.requiredCheckbox}>
-                  <input
-                    type="checkbox"
-                    checked={field.required ?? false}
-                    onChange={e => updateField(i, { required: e.target.checked })}
-                  />
-                  Required
-                </label>
-                <button type="button" onClick={() => removeField(i)} className={styles.removeButton}>
-                  Remove
-                </button>
               </div>
-            ))}
-          </div>
+            </>
+          )}
 
-          <button type="button" onClick={addField} className={styles.addButton}>
-            Add Field
-          </button>
-
-          <div className={styles.submitSection}>
-            <label>Submit Button</label>
-            <input
-              type="text"
-              value={block.submitText ?? ""}
-              onChange={e => onUpdate({ submitText: e.target.value || undefined })}
-              placeholder="Send Message"
-              className={styles.submitText}
-            />
-          </div>
+          {!isEditable && (
+            <form className={styles.form}>
+              {block.formFields.map((field, i) => (
+                <div key={i} className={styles.formField}>
+                  <label>
+                    {field.label}
+                    {field.required && " *"}
+                  </label>
+                  {field.type === "textarea"
+                    ? (
+                      <textarea placeholder={field.label} rows={4} />
+                    )
+                    : (
+                      <input type={field.type} placeholder={field.label} />
+                    )}
+                </div>
+              ))}
+              <button type="submit">{block.submitText ?? "Send"}</button>
+            </form>
+          )}
         </div>
       )}
     </div>

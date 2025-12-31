@@ -1,7 +1,6 @@
 import type { GalleryBlock as GalleryBlockType } from "@muse/core";
 import { getMinimumImages } from "@muse/core";
-import { useAutoResize } from "../../hooks";
-import { ImageLoader } from "../../ux";
+import { EditableText, ImageLoader } from "../../ux";
 import styles from "./Grid.module.css";
 
 interface Props {
@@ -12,18 +11,16 @@ interface Props {
 
 export function Grid({ block, onUpdate, isPending }: Props) {
   const columns = block.columns ?? 3;
-  const headlineRef = useAutoResize(block.headline ?? "");
   const images = block.images ?? [];
 
   return (
     <div className={styles.section}>
       {block.headline !== undefined && (
-        <textarea
-          ref={headlineRef}
-          className={styles.headline}
-          rows={1}
+        <EditableText
           value={block.headline}
-          onChange={e => onUpdate({ headline: e.target.value || undefined })}
+          onChange={v => onUpdate({ headline: v || undefined })}
+          as="h2"
+          className={styles.headline}
           placeholder="Section headline..."
         />
       )}

@@ -1,6 +1,6 @@
 import type { LogosBlock as LogosBlockType, LogoItem } from "@muse/core";
-import { useAutoResize } from "../hooks";
-import { ImageLoader } from "../ux";
+import { EditableText, ImageLoader } from "../ux";
+import { useIsEditable } from "../context/EditorModeContext";
 import styles from "./Logos.module.css";
 
 interface Props {
@@ -10,7 +10,7 @@ interface Props {
 }
 
 export function Logos({ block, onUpdate, isPending }: Props) {
-  const headlineRef = useAutoResize(block.headline ?? "");
+  const isEditable = useIsEditable();
 
   const updateLogo = (index: number, data: Partial<LogoItem>) => {
     const logos = block.logos.map((logo, i) =>
@@ -25,37 +25,52 @@ export function Logos({ block, onUpdate, isPending }: Props) {
 
   return (
     <div className={styles.section}>
-      <textarea
-        ref={headlineRef}
-        className={styles.headline}
-        rows={1}
+      <EditableText
         value={block.headline ?? ""}
-        onChange={e => onUpdate({ headline: e.target.value || undefined })}
+        onChange={v => onUpdate({ headline: v || undefined })}
+        as="h2"
+        className={styles.headline}
         placeholder="Trusted by"
       />
 
       <div className={styles.grid}>
         {block.logos.map((logo, i) => (
           <div key={i} className={styles.logo}>
-            <ImageLoader
-              image={logo.image}
-              isPending={!!isPending}
-              className={styles.logoImage}
-            />
-            <input
-              type="text"
-              value={logo.href ?? ""}
-              onChange={e => updateLogo(i, { href: e.target.value || undefined })}
-              placeholder="Link (optional)"
-              className={styles.logoLink}
-            />
-            <button
-              type="button"
-              onClick={() => removeLogo(i)}
-              className={styles.removeButton}
-            >
-              Remove
-            </button>
+            {logo.href && !isEditable
+              ? (
+                <a href={logo.href}>
+                  <ImageLoader
+                    image={logo.image}
+                    isPending={!!isPending}
+                    className={styles.logoImage}
+                  />
+                </a>
+              )
+              : (
+                <ImageLoader
+                  image={logo.image}
+                  isPending={!!isPending}
+                  className={styles.logoImage}
+                />
+              )}
+            {isEditable && (
+              <>
+                <input
+                  type="text"
+                  value={logo.href ?? ""}
+                  onChange={e => updateLogo(i, { href: e.target.value || undefined })}
+                  placeholder="Link (optional)"
+                  className={styles.logoLink}
+                />
+                <button
+                  type="button"
+                  onClick={() => removeLogo(i)}
+                  className={styles.removeButton}
+                >
+                  Remove
+                </button>
+              </>
+            )}
           </div>
         ))}
       </div>

@@ -1,6 +1,6 @@
 import type { GalleryBlock as GalleryBlockType, ImageSource } from "@muse/core";
-import { useAutoResize } from "../../hooks";
 import { Image } from "../../controls/Image";
+import { EditableText } from "../../ux";
 import styles from "./Masonry.module.css";
 
 interface Props {
@@ -10,8 +10,6 @@ interface Props {
 
 export function Masonry({ block, onUpdate }: Props) {
   const columns = block.columns ?? 3;
-  const headlineRef = useAutoResize(block.headline ?? "");
-
   const images = block.images ?? [];
 
   const updateImage = (index: number, image: ImageSource) => {
@@ -27,12 +25,11 @@ export function Masonry({ block, onUpdate }: Props) {
   return (
     <div className={styles.section}>
       {block.headline !== undefined && (
-        <textarea
-          ref={headlineRef}
-          className={styles.headline}
-          rows={1}
+        <EditableText
           value={block.headline}
-          onChange={e => onUpdate({ headline: e.target.value || undefined })}
+          onChange={v => onUpdate({ headline: v || undefined })}
+          as="h2"
+          className={styles.headline}
           placeholder="Section headline..."
         />
       )}

@@ -1,6 +1,7 @@
 import type { ImageBlock as ImageBlockType } from "@muse/core";
 import { Image as ImageControl } from "../controls/Image";
-import { ImageLoader } from "../ux";
+import { EditableText, ImageLoader } from "../ux";
+import { useIsEditable } from "../context/EditorModeContext";
 import styles from "./Image.module.css";
 
 interface Props {
@@ -10,6 +11,7 @@ interface Props {
 }
 
 export function Image({ block, onUpdate, isPending }: Props) {
+  const isEditable = useIsEditable();
   const size = block.size ?? "medium";
 
   return (
@@ -17,28 +19,43 @@ export function Image({ block, onUpdate, isPending }: Props) {
       <div className={styles.container}>
         {isPending && !block.image
           ? <ImageLoader isPending aspectRatio="16/9" className={styles.img} />
-          : (
-            <>
-              <ImageControl
-                image={block.image}
-                onUpdate={image => onUpdate({ image })}
-                className={styles.img}
-              />
-              {block.image?.provider && (
-                <span className={styles.attribution}>
-                  via
-                  {" "}
-                  {block.image.provider}
-                </span>
-              )}
-            </>
-          )}
+          : isEditable
+            ? (
+              <>
+                <ImageControl
+                  image={block.image}
+                  onUpdate={image => onUpdate({ image })}
+                  className={styles.img}
+                />
+                {block.image?.provider && (
+                  <span className={styles.attribution}>
+                    via
+                    {" "}
+                    {block.image.provider}
+                  </span>
+                )}
+              </>
+            )
+            : block.image
+              ? (
+                <>
+                  <ImageLoader image={block.image} isPending={false} className={styles.img} />
+                  {block.image.provider && (
+                    <span className={styles.attribution}>
+                      via
+                      {" "}
+                      {block.image.provider}
+                    </span>
+                  )}
+                </>
+              )
+              : null}
       </div>
-      <input
-        type="text"
-        className={styles.caption}
+      <EditableText
         value={block.caption ?? ""}
-        onChange={e => onUpdate({ caption: e.target.value || undefined })}
+        onChange={v => onUpdate({ caption: v || undefined })}
+        as="figcaption"
+        className={styles.caption}
         placeholder="Add caption..."
       />
     </div>

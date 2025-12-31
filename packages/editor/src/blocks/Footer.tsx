@@ -1,5 +1,6 @@
 import type { FooterBlock as FooterBlockType, FooterLink, SocialLink, SocialPlatform } from "@muse/core";
-import { useAutoResize } from "../hooks";
+import { EditableText } from "../ux";
+import { useIsEditable } from "../context/EditorModeContext";
 import {
   ItemPopover,
   PopoverField,
@@ -19,7 +20,7 @@ interface Props {
 const PLATFORMS: SocialPlatform[] = ["twitter", "facebook", "instagram", "linkedin", "youtube", "github", "tiktok"];
 
 export function Footer({ block, onUpdate }: Props) {
-  const copyrightRef = useAutoResize(block.copyright ?? "");
+  const isEditable = useIsEditable();
 
   const updateLink = (index: number, data: Partial<FooterLink>) => {
     const links = (block.links ?? []).map((link, i) =>
@@ -57,97 +58,110 @@ export function Footer({ block, onUpdate }: Props) {
 
   return (
     <footer className={styles.footer}>
-      {/* Company name - inline editable */}
       {block.companyName !== undefined && (
-        <input
-          type="text"
-          className={styles.companyName}
+        <EditableText
           value={block.companyName}
-          onChange={e => onUpdate({ companyName: e.target.value || undefined })}
+          onChange={v => onUpdate({ companyName: v || undefined })}
+          as="span"
+          className={styles.companyName}
           placeholder="Company Name"
         />
       )}
 
-      {/* Navigation links row */}
       <nav className={styles.nav}>
         {(block.links ?? []).map((link, i) => (
-          <ItemPopover
-            key={i}
-            trigger={<span className={styles.navLink}>{link.label || "Link"}</span>}
-          >
-            <PopoverField label="Label">
-              <PopoverInput
-                value={link.label}
-                onChange={value => updateLink(i, { label: value })}
-                placeholder="Link text"
-              />
-            </PopoverField>
-            <PopoverField label="URL">
-              <PopoverInput
-                value={link.href}
-                onChange={value => updateLink(i, { href: value })}
-                placeholder="/page or https://..."
-                type="url"
-              />
-            </PopoverField>
-            <PopoverActions>
-              <PopoverButton variant="danger" onClick={() => removeLink(i)}>
-                Remove
-              </PopoverButton>
-            </PopoverActions>
-          </ItemPopover>
+          isEditable
+            ? (
+              <ItemPopover
+                key={i}
+                trigger={<span className={styles.navLink}>{link.label || "Link"}</span>}
+              >
+                <PopoverField label="Label">
+                  <PopoverInput
+                    value={link.label}
+                    onChange={value => updateLink(i, { label: value })}
+                    placeholder="Link text"
+                  />
+                </PopoverField>
+                <PopoverField label="URL">
+                  <PopoverInput
+                    value={link.href}
+                    onChange={value => updateLink(i, { href: value })}
+                    placeholder="/page or https://..."
+                    type="url"
+                  />
+                </PopoverField>
+                <PopoverActions>
+                  <PopoverButton variant="danger" onClick={() => removeLink(i)}>
+                    Remove
+                  </PopoverButton>
+                </PopoverActions>
+              </ItemPopover>
+            )
+            : (
+              <a key={i} href={link.href} className={styles.navLink}>{link.label}</a>
+            )
         ))}
-        <button type="button" className={styles.addIcon} onClick={addLink} title="Add link">
-          +
-        </button>
+        {isEditable && (
+          <button type="button" className={styles.addIcon} onClick={addLink} title="Add link">
+            +
+          </button>
+        )}
       </nav>
 
-      {/* Social icons row */}
       <div className={styles.socials}>
         {(block.socialLinks ?? []).map((social, i) => (
-          <ItemPopover
-            key={i}
-            trigger={(
-              <span className={styles.socialIcon} title={social.platform}>
+          isEditable
+            ? (
+              <ItemPopover
+                key={i}
+                trigger={(
+                  <span className={styles.socialIcon} title={social.platform}>
+                    <Social platform={social.platform} size={16} />
+                  </span>
+                )}
+              >
+                <PopoverField label="Platform">
+                  <PopoverSelect
+                    value={social.platform}
+                    onChange={value => updateSocialLink(i, { platform: value })}
+                    options={PLATFORMS}
+                  />
+                </PopoverField>
+                <PopoverField label="URL">
+                  <PopoverInput
+                    value={social.href}
+                    onChange={value => updateSocialLink(i, { href: value })}
+                    placeholder="https://twitter.com/..."
+                    type="url"
+                  />
+                </PopoverField>
+                <PopoverActions>
+                  <PopoverButton variant="danger" onClick={() => removeSocialLink(i)}>
+                    Remove
+                  </PopoverButton>
+                </PopoverActions>
+              </ItemPopover>
+            )
+            : (
+              <a key={i} href={social.href} className={styles.socialIcon} title={social.platform}>
                 <Social platform={social.platform} size={16} />
-              </span>
-            )}
-          >
-            <PopoverField label="Platform">
-              <PopoverSelect
-                value={social.platform}
-                onChange={value => updateSocialLink(i, { platform: value })}
-                options={PLATFORMS}
-              />
-            </PopoverField>
-            <PopoverField label="URL">
-              <PopoverInput
-                value={social.href}
-                onChange={value => updateSocialLink(i, { href: value })}
-                placeholder="https://twitter.com/..."
-                type="url"
-              />
-            </PopoverField>
-            <PopoverActions>
-              <PopoverButton variant="danger" onClick={() => removeSocialLink(i)}>
-                Remove
-              </PopoverButton>
-            </PopoverActions>
-          </ItemPopover>
+              </a>
+            )
         ))}
-        <button type="button" className={styles.addIcon} onClick={addSocialLink} title="Add social">
-          +
-        </button>
+        {isEditable && (
+          <button type="button" className={styles.addIcon} onClick={addSocialLink} title="Add social">
+            +
+          </button>
+        )}
       </div>
 
-      {/* Copyright - inline editable */}
       {block.copyright !== undefined && (
-        <textarea
-          ref={copyrightRef}
-          className={styles.copyright}
-          rows={1}
+        <EditableText
           value={block.copyright}
-          onChange={e => onUpdate({ copyright: e.target.value || undefined })}
+          onChange={v => onUpdate({ copyright: v || undefined })}
+          as="p"
+          className={styles.copyright}
           placeholder="© 2024 Company. All rights reserved."
         />
       )}

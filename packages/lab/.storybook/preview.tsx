@@ -8,6 +8,7 @@ import {
   getBundle,
   getBundleIds,
 } from "@muse/themes";
+import { EditorModeProvider } from "@muse/editor";
 
 function ThemeWrapper({ bundleId, children }: { bundleId: string, children: React.ReactNode }) {
   const bundle = getBundle(bundleId);
@@ -21,7 +22,11 @@ function ThemeWrapper({ bundleId, children }: { bundleId: string, children: Reac
     }
   }, [bundle]);
 
-  return <div style={cssVars as React.CSSProperties}>{children}</div>;
+  return (
+    <EditorModeProvider mode="preview">
+      <div style={cssVars as React.CSSProperties}>{children}</div>
+    </EditorModeProvider>
+  );
 }
 
 const withTheme: Decorator = (Story, context) => {

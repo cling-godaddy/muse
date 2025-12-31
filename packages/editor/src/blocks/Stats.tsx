@@ -1,5 +1,6 @@
 import type { StatsBlock as StatsBlockType, StatItem } from "@muse/core";
-import { useAutoResize } from "../hooks";
+import { EditableText } from "../ux";
+import { useIsEditable } from "../context/EditorModeContext";
 import styles from "./Stats.module.css";
 
 interface Props {
@@ -8,7 +9,7 @@ interface Props {
 }
 
 export function Stats({ block, onUpdate }: Props) {
-  const headlineRef = useAutoResize(block.headline ?? "");
+  const isEditable = useIsEditable();
 
   const updateStat = (index: number, data: Partial<StatItem>) => {
     const stats = block.stats.map((stat, i) =>
@@ -29,62 +30,78 @@ export function Stats({ block, onUpdate }: Props) {
 
   return (
     <div className={styles.section}>
-      <textarea
-        ref={headlineRef}
-        className={styles.headline}
-        rows={1}
+      <EditableText
         value={block.headline ?? ""}
-        onChange={e => onUpdate({ headline: e.target.value || undefined })}
+        onChange={v => onUpdate({ headline: v || undefined })}
+        as="h2"
+        className={styles.headline}
         placeholder="By the numbers"
       />
 
       <div className={styles.grid}>
         {block.stats.map((stat, i) => (
           <div key={i} className={styles.stat}>
-            <div className={styles.valueRow}>
-              <input
-                type="text"
-                className={styles.prefix}
-                value={stat.prefix ?? ""}
-                onChange={e => updateStat(i, { prefix: e.target.value || undefined })}
-                placeholder="$"
-              />
-              <input
-                type="text"
-                className={styles.value}
-                value={stat.value}
-                onChange={e => updateStat(i, { value: e.target.value })}
-                placeholder="100"
-              />
-              <input
-                type="text"
-                className={styles.suffix}
-                value={stat.suffix ?? ""}
-                onChange={e => updateStat(i, { suffix: e.target.value || undefined })}
-                placeholder="+"
-              />
-            </div>
-            <input
-              type="text"
-              className={styles.label}
-              value={stat.label}
-              onChange={e => updateStat(i, { label: e.target.value })}
-              placeholder="Customers"
-            />
-            <button
-              type="button"
-              onClick={() => removeStat(i)}
-              className={styles.removeButton}
-            >
-              Remove
-            </button>
+            {isEditable
+              ? (
+                <>
+                  <div className={styles.valueRow}>
+                    <input
+                      type="text"
+                      className={styles.prefix}
+                      value={stat.prefix ?? ""}
+                      onChange={e => updateStat(i, { prefix: e.target.value || undefined })}
+                      placeholder="$"
+                    />
+                    <input
+                      type="text"
+                      className={styles.value}
+                      value={stat.value}
+                      onChange={e => updateStat(i, { value: e.target.value })}
+                      placeholder="100"
+                    />
+                    <input
+                      type="text"
+                      className={styles.suffix}
+                      value={stat.suffix ?? ""}
+                      onChange={e => updateStat(i, { suffix: e.target.value || undefined })}
+                      placeholder="+"
+                    />
+                  </div>
+                  <input
+                    type="text"
+                    className={styles.label}
+                    value={stat.label}
+                    onChange={e => updateStat(i, { label: e.target.value })}
+                    placeholder="Customers"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => removeStat(i)}
+                    className={styles.removeButton}
+                  >
+                    Remove
+                  </button>
+                </>
+              )
+              : (
+                <>
+                  <span className={styles.value}>
+                    {stat.prefix}
+                    {stat.value}
+                    {stat.suffix}
+                  </span>
+                  <span className={styles.label}>{stat.label}</span>
+                </>
+              )}
           </div>
         ))}
       </div>
 
-      <button type="button" onClick={addStat} className={styles.addButton}>
-        Add Stat
-      </button>
+      {isEditable && (
+        <button type="button" onClick={addStat} className={styles.addButton}>
+          Add Stat
+        </button>
+      )}
     </div>
   );
 }

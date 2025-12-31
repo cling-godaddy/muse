@@ -4,3 +4,4 @@ export { BlockEditor } from "./BlockEditor";
 export * from "./blocks";
 export * from "./ux";
 export { SelectionProvider, useSelection, type Selection } from "./context/SelectionContext";
+export { EditorModeProvider, useEditorMode, useIsEditable } from "./context/EditorModeContext";

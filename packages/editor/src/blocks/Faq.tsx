@@ -1,5 +1,5 @@
 import type { FaqBlock as FaqBlockType, FaqItem } from "@muse/core";
-import { useAutoResize } from "../hooks";
+import { EditableText } from "../ux";
 import styles from "./Faq.module.css";
 
 interface Props {
@@ -8,9 +8,6 @@ interface Props {
 }
 
 export function Faq({ block, onUpdate }: Props) {
-  const headlineRef = useAutoResize(block.headline ?? "");
-  const subheadlineRef = useAutoResize(block.subheadline ?? "");
-
   const updateItem = (index: number, data: Partial<FaqItem>) => {
     const items = block.items.map((item, i) =>
       i === index ? { ...item, ...data } : item,
@@ -21,41 +18,39 @@ export function Faq({ block, onUpdate }: Props) {
   return (
     <div className={styles.section}>
       {block.headline !== undefined && (
-        <textarea
-          ref={headlineRef}
-          className={styles.headline}
-          rows={1}
+        <EditableText
           value={block.headline}
-          onChange={e => onUpdate({ headline: e.target.value || undefined })}
+          onChange={v => onUpdate({ headline: v || undefined })}
+          as="h2"
+          className={styles.headline}
           placeholder="Section headline..."
         />
       )}
       {block.subheadline !== undefined && (
-        <textarea
-          ref={subheadlineRef}
-          className={styles.subheadline}
-          rows={1}
+        <EditableText
           value={block.subheadline}
-          onChange={e => onUpdate({ subheadline: e.target.value || undefined })}
+          onChange={v => onUpdate({ subheadline: v || undefined })}
+          as="p"
+          className={styles.subheadline}
           placeholder="Subheadline..."
         />
       )}
       <div className={styles.items}>
         {block.items.map((item, i) => (
           <div key={i} className={styles.item}>
-            <input
-              type="text"
-              className={styles.question}
+            <EditableText
               value={item.question}
-              onChange={e => updateItem(i, { question: e.target.value })}
+              onChange={v => updateItem(i, { question: v })}
+              as="h3"
+              className={styles.question}
               placeholder="Question?"
             />
-            <textarea
-              className={styles.answer}
+            <EditableText
               value={item.answer}
-              onChange={e => updateItem(i, { answer: e.target.value })}
+              onChange={v => updateItem(i, { answer: v })}
+              as="p"
+              className={styles.answer}
               placeholder="Answer..."
-              rows={3}
             />
           </div>
         ))}

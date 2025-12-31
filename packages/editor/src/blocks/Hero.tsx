@@ -1,5 +1,5 @@
 import type { HeroBlock as HeroBlockType } from "@muse/core";
-import { useAutoResize } from "../hooks";
+import { EditableText, EditableLink } from "../ux";
 import styles from "./Hero.module.css";
 
 interface Props {
@@ -9,8 +9,6 @@ interface Props {
 
 export function Hero({ block, onUpdate }: Props) {
   const alignment = block.alignment ?? "center";
-  const headlineRef = useAutoResize(block.headline);
-  const subheadlineRef = useAutoResize(block.subheadline ?? "");
 
   const hasBackground = !!block.backgroundImage;
   const overlayOpacity = (block.backgroundOverlay ?? 50) / 100;
@@ -34,44 +32,38 @@ export function Hero({ block, onUpdate }: Props) {
           style={{ backgroundColor: `rgba(0, 0, 0, ${overlayOpacity})` }}
         />
       )}
-      <textarea
-        ref={headlineRef}
-        className={styles.headline}
-        rows={1}
+      <EditableText
         value={block.headline}
-        onChange={e => onUpdate({ headline: e.target.value })}
+        onChange={v => onUpdate({ headline: v })}
+        as="h1"
+        className={styles.headline}
         placeholder="Headline..."
       />
-      <textarea
-        ref={subheadlineRef}
-        className={styles.subheadline}
-        rows={1}
+      <EditableText
         value={block.subheadline ?? ""}
-        onChange={e => onUpdate({ subheadline: e.target.value || undefined })}
+        onChange={v => onUpdate({ subheadline: v || undefined })}
+        as="p"
+        className={styles.subheadline}
         placeholder="Subheadline..."
       />
       <div className={styles.ctas}>
-        <div className={styles.cta}>
-          <input
-            type="text"
-            value={block.cta?.text ?? ""}
-            onChange={e => onUpdate({
-              cta: { text: e.target.value, href: block.cta?.href ?? "#" },
-            })}
+        {block.cta && (
+          <EditableLink
+            text={block.cta.text}
+            href={block.cta.href}
+            onTextChange={v => onUpdate({ cta: { text: v, href: block.cta?.href ?? "#" } })}
+            className={styles.cta}
             placeholder="Primary CTA..."
           />
-        </div>
+        )}
         {block.secondaryCta && (
-          <div className={styles.ctaSecondary}>
-            <input
-              type="text"
-              value={block.secondaryCta.text}
-              onChange={e => onUpdate({
-                secondaryCta: { text: e.target.value, href: block.secondaryCta?.href ?? "#" },
-              })}
-              placeholder="Secondary CTA..."
-            />
-          </div>
+          <EditableLink
+            text={block.secondaryCta.text}
+            href={block.secondaryCta.href}
+            onTextChange={v => onUpdate({ secondaryCta: { text: v, href: block.secondaryCta?.href ?? "#" } })}
+            className={styles.ctaSecondary}
+            placeholder="Secondary CTA..."
+          />
         )}
       </div>
     </div>

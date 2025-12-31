@@ -1,6 +1,6 @@
 import type { FeaturesBlock as FeaturesBlockType, FeatureItem } from "@muse/core";
-import { useAutoResize } from "../hooks";
-import { ImageLoader } from "../ux";
+import { EditableText, ImageLoader } from "../ux";
+import { useIsEditable } from "../context/EditorModeContext";
 import styles from "./Features.module.css";
 
 interface Props {
@@ -17,8 +17,7 @@ interface FeatureCardProps {
 }
 
 function FeatureCard({ item, onUpdate, onRemove, isPending }: FeatureCardProps) {
-  const titleRef = useAutoResize(item.title);
-  const descRef = useAutoResize(item.description);
+  const isEditable = useIsEditable();
 
   return (
     <div className={styles.item}>
@@ -26,44 +25,50 @@ function FeatureCard({ item, onUpdate, onRemove, isPending }: FeatureCardProps) 
         ? <ImageLoader isPending className={styles.itemImage} />
         : item.image
           ? <ImageLoader image={item.image} isPending={false} className={styles.itemImage} />
-          : (
-            <input
-              type="text"
-              className={styles.itemIcon}
-              value={typeof item.icon === "string" ? item.icon : ""}
-              onChange={e => onUpdate({ icon: e.target.value || undefined })}
-              placeholder="Icon..."
-            />
-          )}
-      <textarea
-        ref={titleRef}
-        className={styles.itemTitle}
-        rows={1}
+          : isEditable
+            ? (
+              <input
+                type="text"
+                className={styles.itemIcon}
+                value={typeof item.icon === "string" ? item.icon : ""}
+                onChange={e => onUpdate({ icon: e.target.value || undefined })}
+                placeholder="Icon..."
+              />
+            )
+            : item.icon
+              ? (
+                <span className={styles.itemIcon}>{item.icon}</span>
+              )
+              : null}
+      <EditableText
         value={item.title}
-        onChange={e => onUpdate({ title: e.target.value })}
+        onChange={v => onUpdate({ title: v })}
+        as="h3"
+        className={styles.itemTitle}
         placeholder="Title..."
       />
-      <textarea
-        ref={descRef}
-        className={styles.itemDescription}
-        rows={2}
+      <EditableText
         value={item.description}
-        onChange={e => onUpdate({ description: e.target.value })}
+        onChange={v => onUpdate({ description: v })}
+        as="p"
+        className={styles.itemDescription}
         placeholder="Description..."
       />
-      <button
-        type="button"
-        onClick={onRemove}
-        className={styles.removeButton}
-      >
-        Remove
-      </button>
+      {isEditable && (
+        <button
+          type="button"
+          onClick={onRemove}
+          className={styles.removeButton}
+        >
+          Remove
+        </button>
+      )}
     </div>
   );
 }
 
 export function Features({ block, onUpdate, isPending }: Props) {
-  const headlineRef = useAutoResize(block.headline ?? "");
+  const isEditable = useIsEditable();
 
   const updateItem = (index: number, data: Partial<FeatureItem>) => {
     const items = block.items.map((item, i) =>
@@ -86,12 +91,11 @@ export function Features({ block, onUpdate, isPending }: Props) {
 
   return (
     <div className={styles.section}>
-      <textarea
-        ref={headlineRef}
-        className={styles.headline}
-        rows={1}
+      <EditableText
         value={block.headline ?? ""}
-        onChange={e => onUpdate({ headline: e.target.value || undefined })}
+        onChange={v => onUpdate({ headline: v || undefined })}
+        as="h2"
+        className={styles.headline}
         placeholder="Section headline..."
       />
       <div className={styles.grid}>
@@ -105,13 +109,15 @@ export function Features({ block, onUpdate, isPending }: Props) {
           />
         ))}
       </div>
-      <button
-        type="button"
-        onClick={addItem}
-        className={styles.addButton}
-      >
-        Add Feature
-      </button>
+      {isEditable && (
+        <button
+          type="button"
+          onClick={addItem}
+          className={styles.addButton}
+        >
+          Add Feature
+        </button>
+      )}
     </div>
   );
 }

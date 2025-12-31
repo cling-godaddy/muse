@@ -1,4 +1,5 @@
 import type { TextBlock as TextBlockType } from "@muse/core";
+import { EditableText } from "../ux";
 
 interface Props {
   block: TextBlockType
@@ -8,12 +9,12 @@ interface Props {
 export function Text({ block, onUpdate }: Props) {
   return (
     <div className="muse-block-text">
-      <textarea
-        className="muse-block-text-input"
+      <EditableText
         value={block.content}
-        onChange={e => onUpdate({ content: e.target.value })}
+        onChange={v => onUpdate({ content: v })}
+        as="p"
+        className="muse-block-text-content"
         placeholder="Type something..."
-        rows={3}
       />
     </div>
   );

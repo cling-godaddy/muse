@@ -1,6 +1,6 @@
 import type { AboutBlock as AboutBlockType, TeamMember } from "@muse/core";
-import { useAutoResize } from "../hooks";
-import { ImageLoader } from "../ux";
+import { EditableText, ImageLoader } from "../ux";
+import { useIsEditable } from "../context/EditorModeContext";
 import styles from "./About.module.css";
 
 interface Props {
@@ -10,8 +10,7 @@ interface Props {
 }
 
 export function About({ block, onUpdate, isPending }: Props) {
-  const headlineRef = useAutoResize(block.headline ?? "");
-  const bodyRef = useAutoResize(block.body ?? "");
+  const isEditable = useIsEditable();
 
   const updateMember = (index: number, data: Partial<TeamMember>) => {
     const teamMembers = (block.teamMembers ?? []).map((member, i) =>
@@ -34,12 +33,11 @@ export function About({ block, onUpdate, isPending }: Props) {
 
   return (
     <div className={styles.section}>
-      <textarea
-        ref={headlineRef}
-        className={styles.headline}
-        rows={1}
+      <EditableText
         value={block.headline ?? ""}
-        onChange={e => onUpdate({ headline: e.target.value || undefined })}
+        onChange={v => onUpdate({ headline: v || undefined })}
+        as="h2"
+        className={styles.headline}
         placeholder="About Us"
       />
 
@@ -47,13 +45,12 @@ export function About({ block, onUpdate, isPending }: Props) {
         <ImageLoader image={block.image} isPending={!!isPending} className={styles.image} />
       )}
 
-      <textarea
-        ref={bodyRef}
-        className={styles.body}
+      <EditableText
         value={block.body ?? ""}
-        onChange={e => onUpdate({ body: e.target.value || undefined })}
+        onChange={v => onUpdate({ body: v || undefined })}
+        as="p"
+        className={styles.body}
         placeholder="Tell your story..."
-        rows={4}
       />
 
       {(block.teamMembers?.length ?? 0) > 0 && (
@@ -69,39 +66,43 @@ export function About({ block, onUpdate, isPending }: Props) {
                     className={styles.avatar}
                   />
                 )}
-                <input
-                  type="text"
+                <EditableText
                   value={member.name}
-                  onChange={e => updateMember(i, { name: e.target.value })}
-                  placeholder="Name"
+                  onChange={v => updateMember(i, { name: v })}
+                  as="h4"
                   className={styles.memberName}
+                  placeholder="Name"
                 />
-                <input
-                  type="text"
+                <EditableText
                   value={member.role}
-                  onChange={e => updateMember(i, { role: e.target.value })}
-                  placeholder="Role"
+                  onChange={v => updateMember(i, { role: v })}
+                  as="span"
                   className={styles.memberRole}
+                  placeholder="Role"
                 />
-                <textarea
+                <EditableText
                   value={member.bio ?? ""}
-                  onChange={e => updateMember(i, { bio: e.target.value || undefined })}
-                  placeholder="Short bio..."
-                  rows={2}
+                  onChange={v => updateMember(i, { bio: v || undefined })}
+                  as="p"
                   className={styles.memberBio}
+                  placeholder="Short bio..."
                 />
-                <button type="button" onClick={() => removeMember(i)} className={styles.removeButton}>
-                  Remove
-                </button>
+                {isEditable && (
+                  <button type="button" onClick={() => removeMember(i)} className={styles.removeButton}>
+                    Remove
+                  </button>
+                )}
               </div>
             ))}
           </div>
         </div>
       )}
 
-      <button type="button" onClick={addMember} className={styles.addButton}>
-        Add Team Member
-      </button>
+      {isEditable && (
+        <button type="button" onClick={addMember} className={styles.addButton}>
+          Add Team Member
+        </button>
+      )}
     </div>
   );
 }
