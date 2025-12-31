@@ -1,0 +1,25 @@
+{
+  "name": "@muse/lab",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "storybook dev -p 6006",
+    "build": "storybook build"
+  },
+  "dependencies": {
+    "@muse/core": "workspace:*",
+    "@muse/editor": "workspace:*",
+    "@muse/themes": "workspace:*",
+    "react": "^19",
+    "react-dom": "^19"
+  },
+  "devDependencies": {
+    "@storybook/addon-essentials": "^8.5.0",
+    "@storybook/react": "^8.5.0",
+    "@storybook/react-vite": "^8.5.0",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "storybook": "^8.5.0"
+  }
+}
