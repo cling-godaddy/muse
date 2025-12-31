@@ -14,6 +14,7 @@ type ContactArgs = {
   subheadline: string
   email: string
   phone: string
+  address: string
   preset: string
   showForm: boolean
 };
@@ -25,6 +26,7 @@ const meta: Meta<ContactArgs> = {
     subheadline: { control: "text" },
     email: { control: "text" },
     phone: { control: "text" },
+    address: { control: "text" },
     preset: {
       control: "select",
       options: ["contact-form", "contact-split-map"],
@@ -36,6 +38,7 @@ const meta: Meta<ContactArgs> = {
     subheadline: "We'd love to hear from you",
     email: "hello@example.com",
     phone: "+1 (555) 123-4567",
+    address: "",
     preset: "contact-form",
     showForm: true,
   },
@@ -48,6 +51,7 @@ const meta: Meta<ContactArgs> = {
       subheadline: args.subheadline || undefined,
       email: args.email || undefined,
       phone: args.phone || undefined,
+      address: args.address || undefined,
       preset: args.preset,
       formFields: args.showForm ? sampleFields : undefined,
       submitText: "Send Message",
@@ -62,5 +66,8 @@ type Story = StoryObj<ContactArgs>;
 export const Form: Story = {};
 
 export const SplitMap: Story = {
-  args: { preset: "contact-split-map" },
+  args: {
+    preset: "contact-split-map",
+    address: "1600 Amphitheatre Parkway, Mountain View, CA",
+  },
 };

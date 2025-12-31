@@ -1,7 +1,7 @@
 import type { ContactBlock as ContactBlockType, FormField } from "@muse/core";
-import { EditableText } from "../ux";
-import { useIsEditable } from "../context/EditorModeContext";
-import styles from "./Contact.module.css";
+import { EditableText } from "../../ux";
+import { useIsEditable } from "../../context/EditorModeContext";
+import styles from "./Form.module.css";
 
 interface Props {
   block: ContactBlockType
@@ -10,7 +10,7 @@ interface Props {
 
 const FIELD_TYPES: FormField["type"][] = ["text", "email", "textarea"];
 
-export function Contact({ block, onUpdate }: Props) {
+export function Form({ block, onUpdate }: Props) {
   const isEditable = useIsEditable();
 
   const updateField = (index: number, data: Partial<FormField>) => {
