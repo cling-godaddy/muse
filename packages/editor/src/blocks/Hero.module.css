@@ -138,21 +138,24 @@
   z-index: 1;
 }
 
-.cta input,
-.ctaSecondary input {
+.cta,
+.ctaSecondary {
+  font-family: var(--muse-theme-body-font, sans-serif);
   padding: 0.75rem 1rem;
   border-radius: var(--muse-theme-radius, 0.5rem);
   border: none;
   font-size: 0.875rem;
+  text-decoration: none;
+  display: inline-block;
 }
 
-.cta input {
+.cta {
   background: white;
   color: var(--muse-theme-primary, #6366f1);
   font-weight: 600;
 }
 
-.ctaSecondary input {
+.ctaSecondary {
   background: rgba(255, 255, 255, 0.2);
   color: white;
 }
@@ -185,11 +188,11 @@
   text-shadow: 0 0 8px rgba(var(--muse-theme-primary-rgb, 0, 255, 0), 0.3);
 }
 
-:global([data-effects="crt"]) .cta input {
+:global([data-effects="crt"]) .cta {
   box-shadow: 0 0 15px rgba(var(--muse-theme-primary-rgb, 0, 255, 0), 0.3);
 }
 
-:global([data-effects="crt"]) .ctaSecondary input {
+:global([data-effects="crt"]) .ctaSecondary {
   box-shadow: 0 0 10px rgba(var(--muse-theme-primary-rgb, 0, 255, 0), 0.2);
 }
 
@@ -215,13 +218,13 @@
     0 0 16px rgba(var(--muse-theme-primary-rgb, 255, 42, 109), 0.3);
 }
 
-:global([data-effects="neon"]) .cta input {
+:global([data-effects="neon"]) .cta {
   box-shadow:
     0 0 15px rgba(var(--muse-theme-primary-rgb, 255, 42, 109), 0.5),
     0 0 30px rgba(var(--muse-theme-primary-rgb, 255, 42, 109), 0.3);
 }
 
-:global([data-effects="neon"]) .ctaSecondary input {
+:global([data-effects="neon"]) .ctaSecondary {
   border: 1px solid rgba(var(--muse-theme-primary-rgb, 255, 42, 109), 0.5);
   box-shadow: 0 0 10px rgba(var(--muse-theme-primary-rgb, 255, 42, 109), 0.2);
 }
