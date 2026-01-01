@@ -1,12 +1,12 @@
-import type { SubscribeBlock as SubscribeBlockType } from "@muse/core";
+import type { SubscribeSection as SubscribeSectionType } from "@muse/core";
 import { getDefaultPreset } from "@muse/core";
 import { Inline } from "./Inline";
 import { Card } from "./Card";
 import { Banner } from "./Banner";
 
 interface Props {
-  block: SubscribeBlockType
-  onUpdate: (data: Partial<SubscribeBlockType>) => void
+  block: SubscribeSectionType
+  onUpdate: (data: Partial<SubscribeSectionType>) => void
   isPending?: boolean
 }
 

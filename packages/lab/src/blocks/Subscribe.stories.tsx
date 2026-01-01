@@ -1,7 +1,7 @@
 import React from "react";
 import type { Meta, StoryObj } from "@storybook/react-vite";
 import { Subscribe } from "@muse/editor";
-import type { SubscribeBlock } from "@muse/core";
+import type { SubscribeSection } from "@muse/core";
 
 type SubscribeArgs = {
   headline: string
@@ -34,7 +34,7 @@ const meta: Meta<SubscribeArgs> = {
     preset: "subscribe-inline",
   },
   render: (args) => {
-    const block: SubscribeBlock = {
+    const block: SubscribeSection = {
       id: "story-subscribe",
       type: "subscribe",
       version: 1,

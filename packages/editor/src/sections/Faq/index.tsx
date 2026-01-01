@@ -1,11 +1,11 @@
-import type { FaqBlock as FaqBlockType } from "@muse/core";
+import type { FaqSection as FaqSectionType } from "@muse/core";
 import { getDefaultPreset } from "@muse/core";
 import { Accordion } from "./Accordion";
 import { TwoColumn } from "./TwoColumn";
 
 interface Props {
-  block: FaqBlockType
-  onUpdate: (data: Partial<FaqBlockType>) => void
+  block: FaqSectionType
+  onUpdate: (data: Partial<FaqSectionType>) => void
 }
 
 export function Faq({ block, onUpdate }: Props) {

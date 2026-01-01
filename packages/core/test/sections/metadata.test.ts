@@ -1,15 +1,15 @@
 import { describe, expect, it } from "vitest";
 import {
-  registerBlockMeta,
-  getBlockMeta,
-  getAllBlockMeta,
-  type BlockMeta,
-} from "../../src/blocks/metadata";
+  registerSectionMeta,
+  getSectionMeta,
+  getAllSectionMeta,
+  type SectionMeta,
+} from "../../src/sections/metadata";
 
-describe("block metadata registry", () => {
+describe("section metadata registry", () => {
   describe("default registrations", () => {
     it("has hero metadata registered", () => {
-      const meta = getBlockMeta("hero");
+      const meta = getSectionMeta("hero");
       expect(meta).toBeDefined();
       expect(meta?.type).toBe("hero");
       expect(meta?.label).toBe("Hero");
@@ -17,7 +17,7 @@ describe("block metadata registry", () => {
     });
 
     it("has features metadata registered", () => {
-      const meta = getBlockMeta("features");
+      const meta = getSectionMeta("features");
       expect(meta).toBeDefined();
       expect(meta?.type).toBe("features");
       expect(meta?.label).toBe("Features");
@@ -25,7 +25,7 @@ describe("block metadata registry", () => {
     });
 
     it("has cta metadata registered", () => {
-      const meta = getBlockMeta("cta");
+      const meta = getSectionMeta("cta");
       expect(meta).toBeDefined();
       expect(meta?.type).toBe("cta");
       expect(meta?.label).toBe("Call to Action");
@@ -33,16 +33,16 @@ describe("block metadata registry", () => {
     });
   });
 
-  describe("getBlockMeta", () => {
+  describe("getSectionMeta", () => {
     it("returns undefined for unknown type", () => {
-      const meta = getBlockMeta("unknown" as "text");
+      const meta = getSectionMeta("unknown" as "hero");
       expect(meta).toBeUndefined();
     });
   });
 
-  describe("getAllBlockMeta", () => {
+  describe("getAllSectionMeta", () => {
     it("returns all registered metadata", () => {
-      const allMeta = getAllBlockMeta();
+      const allMeta = getAllSectionMeta();
       expect(allMeta.length).toBeGreaterThanOrEqual(3);
       const types = allMeta.map(m => m.type);
       expect(types).toContain("hero");
@@ -51,7 +51,7 @@ describe("block metadata registry", () => {
     });
 
     it("all entries have required fields", () => {
-      const allMeta = getAllBlockMeta();
+      const allMeta = getAllSectionMeta();
       for (const meta of allMeta) {
         expect(meta.type).toBeDefined();
         expect(meta.label).toBeDefined();
@@ -62,17 +62,17 @@ describe("block metadata registry", () => {
     });
   });
 
-  describe("registerBlockMeta", () => {
+  describe("registerSectionMeta", () => {
     it("registers and retrieves custom metadata", () => {
-      const customMeta: BlockMeta = {
+      const customMeta: SectionMeta = {
         type: "hero",
         label: "Custom Hero",
         icon: "custom-icon",
         category: "layout",
-        description: "Custom hero block",
+        description: "Custom hero section",
       };
-      registerBlockMeta(customMeta);
-      const retrieved = getBlockMeta("hero");
+      registerSectionMeta(customMeta);
+      const retrieved = getSectionMeta("hero");
       expect(retrieved?.label).toBe("Custom Hero");
     });
   });

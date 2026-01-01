@@ -1,18 +1,18 @@
 import { useMemo, useCallback } from "react";
-import type { Block } from "@muse/core";
-import { getBlockComponent, type BlockComponent } from "./registry";
+import type { Section as SectionType } from "@muse/core";
+import { getSectionComponent, type SectionComponent } from "./registry";
 import { PresetPicker } from "../controls/PresetPicker";
 import { supportsPresets } from "../controls/presets";
 import { useSelection } from "../context/Selection";
 
 interface Props {
-  block: Block
-  onUpdate: (data: Partial<Block>) => void
+  block: SectionType
+  onUpdate: (data: Partial<SectionType>) => void
   onDelete: () => void
   isPending?: boolean
 }
 
-function UnknownSection({ block }: { block: Block }) {
+function UnknownSection({ block }: { block: SectionType }) {
   return (
     <div className="muse-section muse-section--unknown">
       Unknown section type:
@@ -22,9 +22,9 @@ function UnknownSection({ block }: { block: Block }) {
   );
 }
 
-export function SectionWrapper({ block, onUpdate, onDelete, isPending }: Props) {
-  const Component = useMemo<BlockComponent>(
-    () => getBlockComponent(block.type) ?? UnknownSection,
+export function Section({ block, onUpdate, onDelete, isPending }: Props) {
+  const Component = useMemo<SectionComponent>(
+    () => getSectionComponent(block.type) ?? UnknownSection,
     [block.type],
   );
 

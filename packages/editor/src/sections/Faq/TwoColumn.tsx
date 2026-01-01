@@ -1,10 +1,10 @@
-import type { FaqBlock as FaqBlockType, FaqItem } from "@muse/core";
+import type { FaqSection as FaqSectionType, FaqItem } from "@muse/core";
 import { EditableText } from "../../ux";
 import styles from "./TwoColumn.module.css";
 
 interface Props {
-  block: FaqBlockType
-  onUpdate: (data: Partial<FaqBlockType>) => void
+  block: FaqSectionType
+  onUpdate: (data: Partial<FaqSectionType>) => void
 }
 
 export function TwoColumn({ block, onUpdate }: Props) {

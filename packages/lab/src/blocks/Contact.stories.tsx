@@ -1,7 +1,7 @@
 import React from "react";
 import type { Meta, StoryObj } from "@storybook/react-vite";
 import { Contact } from "@muse/editor";
-import type { ContactBlock, FormField } from "@muse/core";
+import type { ContactSection, FormField } from "@muse/core";
 
 const sampleFields: FormField[] = [
   { name: "name", type: "text", label: "Name", placeholder: "Your name", required: true },
@@ -43,7 +43,7 @@ const meta: Meta<ContactArgs> = {
     showForm: true,
   },
   render: (args) => {
-    const block: ContactBlock = {
+    const block: ContactSection = {
       id: "story-contact",
       type: "contact",
       version: 1,

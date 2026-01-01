@@ -1,12 +1,12 @@
 import { useState } from "react";
-import type { FaqBlock as FaqBlockType, FaqItem } from "@muse/core";
+import type { FaqSection as FaqSectionType, FaqItem } from "@muse/core";
 import { useIsEditable } from "../../context/EditorMode";
 import { EditableText } from "../../ux";
 import styles from "./Accordion.module.css";
 
 interface Props {
-  block: FaqBlockType
-  onUpdate: (data: Partial<FaqBlockType>) => void
+  block: FaqSectionType
+  onUpdate: (data: Partial<FaqSectionType>) => void
 }
 
 export function Accordion({ block, onUpdate }: Props) {

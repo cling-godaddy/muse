@@ -1,7 +1,7 @@
 import React from "react";
 import type { Meta, StoryObj } from "@storybook/react-vite";
 import { Testimonials } from "@muse/editor";
-import type { TestimonialsBlock, Quote } from "@muse/core";
+import type { TestimonialsSection, Quote } from "@muse/core";
 
 const sampleQuotes: Quote[] = [
   {
@@ -51,7 +51,7 @@ const meta: Meta<TestimonialsArgs> = {
     quoteCount: 3,
   },
   render: (args) => {
-    const block: TestimonialsBlock = {
+    const block: TestimonialsSection = {
       id: "story-testimonials",
       type: "testimonials",
       version: 1,

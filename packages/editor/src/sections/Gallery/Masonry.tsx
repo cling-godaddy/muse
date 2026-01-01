@@ -1,11 +1,11 @@
-import type { GalleryBlock as GalleryBlockType, ImageSource } from "@muse/core";
+import type { GallerySection as GallerySectionType, ImageSource } from "@muse/core";
 import { Image } from "../../controls/Image";
 import { EditableText } from "../../ux";
 import styles from "./Masonry.module.css";
 
 interface Props {
-  block: GalleryBlockType
-  onUpdate: (data: Partial<GalleryBlockType>) => void
+  block: GallerySectionType
+  onUpdate: (data: Partial<GallerySectionType>) => void
 }
 
 export function Masonry({ block, onUpdate }: Props) {

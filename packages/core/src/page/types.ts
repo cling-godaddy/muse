@@ -1,4 +1,4 @@
-import type { Block } from "../blocks/types";
+import type { Section } from "../sections/types";
 
 export interface PageMeta {
   title: string
@@ -10,7 +10,7 @@ export interface Page {
   id: string
   slug: string
   meta: PageMeta
-  blocks: Block[]
+  sections: Section[]
   createdAt?: string
   updatedAt?: string
 }
@@ -18,12 +18,12 @@ export interface Page {
 export function createPage(
   slug: string,
   meta: PageMeta,
-  blocks: Block[] = [],
+  sections: Section[] = [],
 ): Page {
   return {
     id: crypto.randomUUID(),
     slug,
     meta,
-    blocks,
+    sections,
   };
 }

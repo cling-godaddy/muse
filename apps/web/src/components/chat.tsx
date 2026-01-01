@@ -1,5 +1,5 @@
 import { useRef, useEffect, useMemo } from "react";
-import type { Block } from "@muse/core";
+import type { Section } from "@muse/core";
 import type { ImageSelection } from "@muse/media";
 import { Spinner } from "@muse/editor";
 import { useChat, type Message } from "../hooks/useChat";
@@ -7,13 +7,13 @@ import type { AgentState, ThemeSelection } from "../utils/streamParser";
 import { TimelineModal } from "./modals/timeline";
 
 interface ChatProps {
-  onBlockParsed?: (block: Block) => void
+  onSectionParsed?: (section: Section) => void
   onThemeSelected?: (theme: ThemeSelection) => void
   onImages?: (images: ImageSelection[]) => void
 }
 
-export function Chat({ onBlockParsed, onThemeSelected, onImages }: ChatProps) {
-  const options = useMemo(() => ({ onBlockParsed, onThemeSelected, onImages }), [onBlockParsed, onThemeSelected, onImages]);
+export function Chat({ onSectionParsed, onThemeSelected, onImages }: ChatProps) {
+  const options = useMemo(() => ({ onSectionParsed, onThemeSelected, onImages }), [onSectionParsed, onThemeSelected, onImages]);
   const { messages, input, setInput, isLoading, send, sessionUsage, lastUsage, agents } = useChat(options);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
@@ -59,7 +59,7 @@ export function Chat({ onBlockParsed, onThemeSelected, onImages }: ChatProps) {
       <div className="flex-1 overflow-y-auto p-4">
         {messages.length === 0 && (
           <div className="text-text-subtle text-center py-8">
-            Ask AI to generate blocks...
+            Ask AI to generate sections...
           </div>
         )}
         {messages.map((message, i) => (
@@ -111,9 +111,9 @@ function getAgentSummary(agent: AgentState): string | null {
     case "brief":
       return agent.summary ? `Targeting ${agent.summary}` : null;
     case "structure":
-      if (agent.data?.blockCount) {
-        const types = agent.data.blockTypes?.join(" → ") ?? "";
-        return `Designed ${agent.data.blockCount} sections: ${types}`;
+      if (agent.data?.sectionCount) {
+        const types = agent.data.sectionTypes?.join(" → ") ?? "";
+        return `Designed ${agent.data.sectionCount} sections: ${types}`;
       }
       return null;
     case "theme":
@@ -122,8 +122,8 @@ function getAgentSummary(agent: AgentState): string | null {
       }
       return null;
     case "copy":
-      return agent.data?.blockCount
-        ? `Wrote content for ${agent.data.blockCount} sections`
+      return agent.data?.sectionCount
+        ? `Wrote content for ${agent.data.sectionCount} sections`
         : null;
     case "image":
       if (agent.data?.resolved !== undefined) {

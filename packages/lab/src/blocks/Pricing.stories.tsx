@@ -1,7 +1,7 @@
 import React from "react";
 import type { Meta, StoryObj } from "@storybook/react-vite";
 import { Pricing } from "@muse/editor";
-import type { PricingBlock, PricingPlan } from "@muse/core";
+import type { PricingSection, PricingPlan } from "@muse/core";
 
 const samplePlans: PricingPlan[] = [
   {
@@ -58,7 +58,7 @@ const meta: Meta<PricingArgs> = {
     planCount: 3,
   },
   render: (args) => {
-    const block: PricingBlock = {
+    const block: PricingSection = {
       id: "story-pricing",
       type: "pricing",
       version: 1,

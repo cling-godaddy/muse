@@ -1,12 +1,12 @@
 import { useState, useMemo, useCallback, useEffect, useRef, useLayoutEffect } from "react";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { groupBy } from "lodash-es";
-import { BlockEditor } from "@muse/editor";
-import type { Block } from "@muse/core";
+import { SectionEditor } from "@muse/editor";
+import type { Section } from "@muse/core";
 import type { ImageSelection } from "@muse/media";
 import { resolveThemeWithEffects, themeToCssVars, getTypography, loadFonts } from "@muse/themes";
 import { Chat } from "./components/chat";
-import { useBlocks } from "./hooks/useBlocks";
+import { useSections } from "./hooks/useSections";
 import { ReviewLayout, ReviewDashboard, ReviewEntry, ReviewSessionPage } from "./review";
 import type { ThemeSelection } from "./utils/streamParser";
 
@@ -16,17 +16,17 @@ interface ThemeState {
   effects: string
 }
 
-const IMAGE_BLOCK_TYPES = new Set(["gallery", "features", "testimonials", "image"]);
+const IMAGE_SECTION_TYPES = new Set(["gallery", "features", "testimonials", "image"]);
 
 function MainApp() {
-  const { blocks, addBlock, updateBlock, setBlocks } = useBlocks();
-  const blocksRef = useRef(blocks);
+  const { sections, addSection, updateSection, setSections } = useSections();
+  const sectionsRef = useRef(sections);
   const [theme, setTheme] = useState<ThemeState>({ palette: "slate", typography: "inter", effects: "neutral" });
-  const [pendingImageBlocks, setPendingImageBlocks] = useState<Set<string>>(new Set());
+  const [pendingImageSections, setPendingImageSections] = useState<Set<string>>(new Set());
 
   useLayoutEffect(() => {
-    blocksRef.current = blocks;
-  }, [blocks]);
+    sectionsRef.current = sections;
+  }, [sections]);
 
   const { themeStyle, effectsId } = useMemo(() => {
     const { theme: resolved, effects } = resolveThemeWithEffects({
@@ -42,12 +42,12 @@ function MainApp() {
     if (typography) loadFonts(typography);
   }, [theme.typography]);
 
-  const handleBlockParsed = useCallback((block: Block) => {
-    addBlock(block);
-    if (IMAGE_BLOCK_TYPES.has(block.type)) {
-      setPendingImageBlocks(prev => new Set(prev).add(block.id));
+  const handleSectionParsed = useCallback((section: Section) => {
+    addSection(section);
+    if (IMAGE_SECTION_TYPES.has(section.type)) {
+      setPendingImageSections(prev => new Set(prev).add(section.id));
     }
-  }, [addBlock]);
+  }, [addSection]);
 
   const handleThemeSelected = useCallback((selection: ThemeSelection) => {
     // auto-apply effects based on palette
@@ -59,54 +59,54 @@ function MainApp() {
   }, []);
 
   const handleImages = useCallback((images: ImageSelection[]) => {
-    const currentBlocks = blocksRef.current;
-    const byBlock = groupBy(images, img => img.blockId);
-    const resolvedBlockIds: string[] = [];
+    const currentSections = sectionsRef.current;
+    const bySection = groupBy(images, img => img.blockId);
+    const resolvedSectionIds: string[] = [];
 
-    for (const [blockId, blockImages] of Object.entries(byBlock)) {
-      const imgSources = blockImages.map(s => s.image);
-      const block = currentBlocks.find(b => b.id === blockId);
-      if (!block) continue;
+    for (const [sectionId, sectionImages] of Object.entries(bySection)) {
+      const imgSources = sectionImages.map(s => s.image);
+      const section = currentSections.find(s => s.id === sectionId);
+      if (!section) continue;
 
-      resolvedBlockIds.push(blockId);
+      resolvedSectionIds.push(sectionId);
 
-      if (block.type === "hero") {
-        const img = blockImages.find(i => i.category === "ambient" || i.category === "subject");
-        if (img) updateBlock(blockId, { backgroundImage: img.image });
+      if (section.type === "hero") {
+        const img = sectionImages.find(i => i.category === "ambient" || i.category === "subject");
+        if (img) updateSection(sectionId, { backgroundImage: img.image });
       }
-      else if (block.type === "gallery") {
-        updateBlock(blockId, { images: imgSources });
+      else if (section.type === "gallery") {
+        updateSection(sectionId, { images: imgSources });
       }
-      else if (block.type === "features") {
-        const featuresBlock = block as Block & { items?: unknown[] };
-        if (featuresBlock.items) {
-          const items = featuresBlock.items.map((item, idx) => ({
+      else if (section.type === "features") {
+        const featuresSection = section as Section & { items?: unknown[] };
+        if (featuresSection.items) {
+          const items = featuresSection.items.map((item, idx) => ({
             ...(item as object),
             image: imgSources[idx] ?? (item as { image?: unknown }).image,
           }));
-          updateBlock(blockId, { items } as Partial<Block>);
+          updateSection(sectionId, { items } as Partial<Section>);
         }
       }
-      else if (block.type === "testimonials") {
-        const testimonialsBlock = block as Block & { quotes?: unknown[] };
-        if (testimonialsBlock.quotes) {
-          const quotes = testimonialsBlock.quotes.map((q, idx) => ({
+      else if (section.type === "testimonials") {
+        const testimonialsSection = section as Section & { quotes?: unknown[] };
+        if (testimonialsSection.quotes) {
+          const quotes = testimonialsSection.quotes.map((q, idx) => ({
             ...(q as object),
             avatar: imgSources[idx] ?? (q as { avatar?: unknown }).avatar,
           }));
-          updateBlock(blockId, { quotes } as Partial<Block>);
+          updateSection(sectionId, { quotes } as Partial<Section>);
         }
       }
     }
 
-    if (resolvedBlockIds.length > 0) {
-      setPendingImageBlocks((prev) => {
+    if (resolvedSectionIds.length > 0) {
+      setPendingImageSections((prev) => {
         const next = new Set(prev);
-        for (const id of resolvedBlockIds) next.delete(id);
+        for (const id of resolvedSectionIds) next.delete(id);
         return next;
       });
     }
-  }, [updateBlock]);
+  }, [updateSection]);
 
   return (
     <div className="flex flex-col h-full font-sans text-text bg-bg">
@@ -120,11 +120,11 @@ function MainApp() {
       </header>
       <main className="flex-1 flex gap-6 p-6 overflow-hidden">
         <div className="w-[400px] shrink-0">
-          <Chat onBlockParsed={handleBlockParsed} onThemeSelected={handleThemeSelected} onImages={handleImages} />
+          <Chat onSectionParsed={handleSectionParsed} onThemeSelected={handleThemeSelected} onImages={handleImages} />
         </div>
         <div className="flex-1 min-w-0 overflow-y-auto">
           <div className="h-full overflow-y-auto" style={themeStyle} data-effects={effectsId}>
-            <BlockEditor blocks={blocks} onChange={setBlocks} pendingImageBlocks={pendingImageBlocks} />
+            <SectionEditor sections={sections} onChange={setSections} pendingImageSections={pendingImageSections} />
           </div>
         </div>
       </main>

@@ -1,7 +1,7 @@
 import React from "react";
 import type { Meta, StoryObj } from "@storybook/react-vite";
 import { Faq } from "@muse/editor";
-import type { FaqBlock, FaqItem } from "@muse/core";
+import type { FaqSection, FaqItem } from "@muse/core";
 
 const sampleItems: FaqItem[] = [
   { question: "How do I get started?", answer: "Simply sign up for a free account and follow our quick setup guide." },
@@ -38,7 +38,7 @@ const meta: Meta<FaqArgs> = {
     itemCount: 5,
   },
   render: (args) => {
-    const block: FaqBlock = {
+    const block: FaqSection = {
       id: "story-faq",
       type: "faq",
       version: 1,

@@ -1,10 +1,10 @@
-import type { HeroBlock as HeroBlockType } from "@muse/core";
+import type { HeroSection as HeroSectionType } from "@muse/core";
 import { EditableText, EditableLink, ImageLoader } from "../ux";
 import styles from "./Hero.module.css";
 
 interface Props {
-  block: HeroBlockType
-  onUpdate: (data: Partial<HeroBlockType>) => void
+  block: HeroSectionType
+  onUpdate: (data: Partial<HeroSectionType>) => void
   isPending?: boolean
 }
 

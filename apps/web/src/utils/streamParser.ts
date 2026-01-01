@@ -1,5 +1,5 @@
 import { groupBy } from "lodash-es";
-import type { Block } from "@muse/core";
+import type { Section } from "@muse/core";
 import type { Usage } from "@muse/ai";
 import type { ImageSelection } from "@muse/media";
 
@@ -12,8 +12,8 @@ export interface AgentState {
   summary?: string
   duration?: number
   data?: {
-    blockCount?: number
-    blockTypes?: string[]
+    sectionCount?: number
+    sectionTypes?: string[]
     palette?: string
     typography?: string
     planned?: number
@@ -29,7 +29,7 @@ export interface ThemeSelection {
 
 export interface ParseState {
   theme?: ThemeSelection
-  blocks: Block[]
+  sections: Section[]
   agents: Map<AgentName, AgentState>
   images: ImageSelection[]
 }
@@ -37,7 +37,7 @@ export interface ParseState {
 export interface ParseResult {
   displayText: string
   theme?: ThemeSelection
-  newBlocks: Block[]
+  newSections: Section[]
   newImages: ImageSelection[]
   usage?: Usage
   agents: AgentState[]
@@ -58,7 +58,7 @@ export function parseStream(
   let displayText = accumulated;
   let theme = previousState.theme;
   let usage: Usage | undefined;
-  let newBlocks: Block[] = [];
+  let newSections: Section[] = [];
   const agents = new Map<AgentName, AgentState>(previousState.agents);
 
   // extract agent start events
@@ -92,8 +92,8 @@ export function parseStream(
         agent.summary = data.summary;
         if (data.blockCount !== undefined || data.palette || data.typography || data.planned !== undefined) {
           agent.data = {
-            blockCount: data.blockCount,
-            blockTypes: data.blockTypes,
+            sectionCount: data.blockCount,
+            sectionTypes: data.blockTypes,
             palette: data.palette,
             typography: data.typography,
             planned: data.planned,
@@ -137,65 +137,65 @@ export function parseStream(
     }
   }
 
-  // group images by blockId for injection
-  const imagesByBlock = groupBy(images, img => img.blockId);
+  // group images by sectionId for injection
+  const imagesBySection = groupBy(images, img => img.blockId);
 
-  // extract blocks (all at once now, not streaming)
-  let blocks = previousState.blocks;
-  if (blocks.length === 0) {
+  // extract sections (all at once now, not streaming)
+  let sections = previousState.sections;
+  if (sections.length === 0) {
     const blocksMatch = accumulated.match(BLOCKS_REGEX);
     if (blocksMatch?.[1]) {
       try {
-        const parsedBlocks = JSON.parse(blocksMatch[1]) as Block[];
+        const parsedSections = JSON.parse(blocksMatch[1]) as Section[];
 
-        // inject images into blocks
-        blocks = parsedBlocks.map((block) => {
-          const blockImages = imagesByBlock[block.id];
-          if (!blockImages || blockImages.length === 0) return block;
+        // inject images into sections
+        sections = parsedSections.map((section) => {
+          const sectionImages = imagesBySection[section.id];
+          if (!sectionImages || sectionImages.length === 0) return section;
 
-          const imgSources = blockImages.map(s => s.image);
+          const imgSources = sectionImages.map(s => s.image);
 
-          if (block.type === "gallery") {
-            return { ...block, images: imgSources };
+          if (section.type === "gallery") {
+            return { ...section, images: imgSources };
           }
-          if (block.type === "hero") {
-            const img = blockImages.find(s => s.category === "ambient" || s.category === "subject");
+          if (section.type === "hero") {
+            const img = sectionImages.find(s => s.category === "ambient" || s.category === "subject");
             if (img) {
-              return { ...block, backgroundImage: img.image };
+              return { ...section, backgroundImage: img.image };
             }
           }
-          if (block.type === "testimonials") {
-            const testimonials = block as Block & { quotes?: Record<string, unknown>[] };
+          if (section.type === "testimonials") {
+            const testimonials = section as Section & { quotes?: Record<string, unknown>[] };
             if (testimonials.quotes) {
               return {
-                ...block,
+                ...section,
                 quotes: testimonials.quotes.map((q, idx) => ({
                   ...q,
                   image: imgSources[idx] ?? q.image,
                 })),
-              } as unknown as Block;
+              } as unknown as Section;
             }
           }
-          if (block.type === "features") {
-            const features = block as Block & { items?: Record<string, unknown>[] };
+          if (section.type === "features") {
+            const features = section as Section & { items?: Record<string, unknown>[] };
             if (features.items) {
               return {
-                ...block,
+                ...section,
                 items: features.items.map((item, idx) => ({
                   ...item,
                   image: imgSources[idx] ?? item.image,
                 })),
-              } as unknown as Block;
+              } as unknown as Section;
             }
           }
 
-          return block;
+          return section;
         });
 
-        newBlocks = blocks;
+        newSections = sections;
       }
       catch {
-        console.warn("failed to parse blocks:", blocksMatch[1]?.slice(0, 200));
+        console.warn("failed to parse sections:", blocksMatch[1]?.slice(0, 200));
       }
     }
   }
@@ -217,7 +217,7 @@ export function parseStream(
     .map(name => agents.get(name))
     .filter((agent): agent is AgentState => agent !== undefined);
 
-  // detect newly arrived images (for post-block injection)
+  // detect newly arrived images (for post-section injection)
   const newImages = images.length > 0 && previousState.images.length === 0
     ? images
     : [];
@@ -225,10 +225,10 @@ export function parseStream(
   return {
     displayText,
     theme,
-    newBlocks,
+    newSections,
     newImages,
     usage,
     agents: agentsArray,
-    state: { theme, blocks, agents, images },
+    state: { theme, sections, agents, images },
   };
 }

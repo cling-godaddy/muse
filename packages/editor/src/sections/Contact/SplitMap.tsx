@@ -1,12 +1,12 @@
 import { useState, useEffect } from "react";
-import type { ContactBlock as ContactBlockType, FormField } from "@muse/core";
+import type { ContactSection as ContactSectionType, FormField } from "@muse/core";
 import { EditableText } from "../../ux";
 import { useIsEditable } from "../../context/EditorMode";
 import styles from "./SplitMap.module.css";
 
 interface Props {
-  block: ContactBlockType
-  onUpdate: (data: Partial<ContactBlockType>) => void
+  block: ContactSectionType
+  onUpdate: (data: Partial<ContactSectionType>) => void
 }
 
 const FIELD_TYPES: FormField["type"][] = ["text", "email", "textarea"];

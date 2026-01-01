@@ -1,12 +1,12 @@
-import type { GalleryBlock as GalleryBlockType } from "@muse/core";
+import type { GallerySection as GallerySectionType } from "@muse/core";
 import { getDefaultPreset } from "@muse/core";
 import { Grid } from "./Grid";
 import { Masonry } from "./Masonry";
 import { Carousel } from "./Carousel";
 
 interface Props {
-  block: GalleryBlockType
-  onUpdate: (data: Partial<GalleryBlockType>) => void
+  block: GallerySectionType
+  onUpdate: (data: Partial<GallerySectionType>) => void
 }
 
 export function Gallery({ block, onUpdate }: Props) {

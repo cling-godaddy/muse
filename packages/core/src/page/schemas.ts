@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { blockSchema } from "../blocks/schemas";
+import { sectionSchema } from "../sections/schemas";
 
 export const pageMetaSchema = z.object({
   title: z.string(),
@@ -11,7 +11,7 @@ export const pageSchema = z.object({
   id: z.string().uuid(),
   slug: z.string(),
   meta: pageMetaSchema,
-  blocks: z.array(blockSchema),
+  sections: z.array(sectionSchema),
   createdAt: z.string().optional(),
   updatedAt: z.string().optional(),
 });

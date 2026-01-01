@@ -1,11 +1,11 @@
-import type { AboutBlock as AboutBlockType, TeamMember } from "@muse/core";
+import type { AboutSection as AboutSectionType, TeamMember } from "@muse/core";
 import { EditableText, ImageLoader } from "../../ux";
 import { useIsEditable } from "../../context/EditorMode";
 import styles from "./Team.module.css";
 
 interface Props {
-  block: AboutBlockType
-  onUpdate: (data: Partial<AboutBlockType>) => void
+  block: AboutSectionType
+  onUpdate: (data: Partial<AboutSectionType>) => void
   isPending?: boolean
 }
 

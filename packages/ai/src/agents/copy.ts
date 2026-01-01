@@ -1,4 +1,4 @@
-import { generateBlockSchemaPrompt } from "@muse/core";
+import { generateSectionSchemaPrompt } from "@muse/core";
 import type { Provider } from "../types";
 import type { AgentInput, SyncAgent, SyncAgentResult } from "./types";
 import { copyBlocksSchema } from "../schemas";
@@ -24,7 +24,7 @@ ${input.structure.blocks.map(b => `- ${b.id} (${b.type}, preset: ${b.preset}): $
 
 ${briefSection}
 ${structureSection}
-${generateBlockSchemaPrompt()}
+${generateSectionSchemaPrompt()}
 
 Guidelines:
 - Use the EXACT block IDs from the structure above

@@ -1,7 +1,7 @@
 import React from "react";
 import type { Meta, StoryObj } from "@storybook/react-vite";
 import { Cta } from "@muse/editor";
-import type { CtaBlock } from "@muse/core";
+import type { CtaSection } from "@muse/core";
 
 type CtaArgs = {
   headline: string
@@ -34,7 +34,7 @@ const meta: Meta<CtaArgs> = {
     preset: "cta-centered",
   },
   render: (args) => {
-    const block: CtaBlock = {
+    const block: CtaSection = {
       id: "story-cta",
       type: "cta",
       version: 1,

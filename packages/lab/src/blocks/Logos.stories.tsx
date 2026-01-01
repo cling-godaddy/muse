@@ -1,7 +1,7 @@
 import React from "react";
 import type { Meta, StoryObj } from "@storybook/react-vite";
 import { Logos } from "@muse/editor";
-import type { LogosBlock, LogoItem } from "@muse/core";
+import type { LogosSection, LogoItem } from "@muse/core";
 
 function makeLogo(name: string, color: string): LogoItem {
   const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 40"><rect width="120" height="40" rx="4" fill="${color}"/><text x="60" y="25" text-anchor="middle" fill="white" font-family="system-ui" font-size="14" font-weight="600">${name}</text></svg>`;
@@ -43,7 +43,7 @@ const meta: Meta<LogosArgs> = {
     logoCount: 6,
   },
   render: (args) => {
-    const block: LogosBlock = {
+    const block: LogosSection = {
       id: "story-logos",
       type: "logos",
       version: 1,

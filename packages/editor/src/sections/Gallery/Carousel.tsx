@@ -1,12 +1,12 @@
 import { useRef, useState, useCallback } from "react";
-import type { GalleryBlock as GalleryBlockType } from "@muse/core";
+import type { GallerySection as GallerySectionType } from "@muse/core";
 import { getMinimumImages } from "@muse/core";
 import { EditableText, ImageLoader } from "../../ux";
 import styles from "./Carousel.module.css";
 
 interface Props {
-  block: GalleryBlockType
-  onUpdate: (data: Partial<GalleryBlockType>) => void
+  block: GallerySectionType
+  onUpdate: (data: Partial<GallerySectionType>) => void
   isPending?: boolean
 }
 

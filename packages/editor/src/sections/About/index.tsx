@@ -1,11 +1,11 @@
-import type { AboutBlock as AboutBlockType } from "@muse/core";
+import type { AboutSection as AboutSectionType } from "@muse/core";
 import { getDefaultPreset } from "@muse/core";
 import { Story } from "./Story";
 import { Team } from "./Team";
 
 interface Props {
-  block: AboutBlockType
-  onUpdate: (data: Partial<AboutBlockType>) => void
+  block: AboutSectionType
+  onUpdate: (data: Partial<AboutSectionType>) => void
   isPending?: boolean
 }
 

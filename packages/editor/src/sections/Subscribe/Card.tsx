@@ -1,11 +1,11 @@
-import type { SubscribeBlock as SubscribeBlockType } from "@muse/core";
+import type { SubscribeSection as SubscribeSectionType } from "@muse/core";
 import { EditableText } from "../../ux";
 import { useIsEditable } from "../../context/EditorMode";
 import styles from "./Card.module.css";
 
 interface Props {
-  block: SubscribeBlockType
-  onUpdate: (data: Partial<SubscribeBlockType>) => void
+  block: SubscribeSectionType
+  onUpdate: (data: Partial<SubscribeSectionType>) => void
   isPending?: boolean
 }
 

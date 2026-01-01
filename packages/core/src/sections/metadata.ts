@@ -1,28 +1,28 @@
-import type { BlockType } from "./types";
+import type { SectionType } from "./types";
 
-export interface BlockMeta {
-  type: BlockType
+export interface SectionMeta {
+  type: SectionType
   label: string
   icon: string
   category: "content" | "layout" | "media" | "cta"
   description: string
 }
 
-const registry = new Map<BlockType, BlockMeta>();
+const registry = new Map<SectionType, SectionMeta>();
 
-export function registerBlockMeta(meta: BlockMeta): void {
+export function registerSectionMeta(meta: SectionMeta): void {
   registry.set(meta.type, meta);
 }
 
-export function getBlockMeta(type: BlockType): BlockMeta | undefined {
+export function getSectionMeta(type: SectionType): SectionMeta | undefined {
   return registry.get(type);
 }
 
-export function getAllBlockMeta(): BlockMeta[] {
+export function getAllSectionMeta(): SectionMeta[] {
   return Array.from(registry.values());
 }
 
-registerBlockMeta({
+registerSectionMeta({
   type: "hero",
   label: "Hero",
   icon: "layout",
@@ -30,7 +30,7 @@ registerBlockMeta({
   description: "Hero section with headline and CTA",
 });
 
-registerBlockMeta({
+registerSectionMeta({
   type: "features",
   label: "Features",
   icon: "grid",
@@ -38,7 +38,7 @@ registerBlockMeta({
   description: "Feature grid with icons",
 });
 
-registerBlockMeta({
+registerSectionMeta({
   type: "cta",
   label: "Call to Action",
   icon: "mouse-pointer",
@@ -46,7 +46,7 @@ registerBlockMeta({
   description: "CTA section with button",
 });
 
-registerBlockMeta({
+registerSectionMeta({
   type: "testimonials",
   label: "Testimonials",
   icon: "message-circle",
@@ -54,7 +54,7 @@ registerBlockMeta({
   description: "Customer quotes and reviews",
 });
 
-registerBlockMeta({
+registerSectionMeta({
   type: "gallery",
   label: "Gallery",
   icon: "images",
@@ -62,7 +62,7 @@ registerBlockMeta({
   description: "Image gallery or portfolio",
 });
 
-registerBlockMeta({
+registerSectionMeta({
   type: "pricing",
   label: "Pricing",
   icon: "credit-card",
@@ -70,7 +70,7 @@ registerBlockMeta({
   description: "Pricing plans and tiers",
 });
 
-registerBlockMeta({
+registerSectionMeta({
   type: "faq",
   label: "FAQ",
   icon: "help-circle",
@@ -78,7 +78,7 @@ registerBlockMeta({
   description: "Frequently asked questions",
 });
 
-registerBlockMeta({
+registerSectionMeta({
   type: "contact",
   label: "Contact",
   icon: "mail",
@@ -86,7 +86,7 @@ registerBlockMeta({
   description: "Contact form and info",
 });
 
-registerBlockMeta({
+registerSectionMeta({
   type: "footer",
   label: "Footer",
   icon: "layout-bottom",
@@ -94,7 +94,7 @@ registerBlockMeta({
   description: "Site footer with links and social",
 });
 
-registerBlockMeta({
+registerSectionMeta({
   type: "about",
   label: "About",
   icon: "users",
@@ -102,7 +102,7 @@ registerBlockMeta({
   description: "Company story and team",
 });
 
-registerBlockMeta({
+registerSectionMeta({
   type: "subscribe",
   label: "Subscribe",
   icon: "mail-plus",
@@ -110,7 +110,7 @@ registerBlockMeta({
   description: "Newsletter signup form",
 });
 
-registerBlockMeta({
+registerSectionMeta({
   type: "stats",
   label: "Stats",
   icon: "trending-up",
@@ -118,7 +118,7 @@ registerBlockMeta({
   description: "Key numbers and metrics",
 });
 
-registerBlockMeta({
+registerSectionMeta({
   type: "logos",
   label: "Logos",
   icon: "building",

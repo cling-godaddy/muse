@@ -1,4 +1,4 @@
-import type { FooterBlock as FooterBlockType, FooterLink, SocialLink, SocialPlatform } from "@muse/core";
+import type { FooterSection as FooterSectionType, FooterLink, SocialLink, SocialPlatform } from "@muse/core";
 import { EditableText } from "../ux";
 import { useIsEditable } from "../context/EditorMode";
 import {
@@ -13,8 +13,8 @@ import { Social } from "../icons/Social";
 import styles from "./Footer.module.css";
 
 interface Props {
-  block: FooterBlockType
-  onUpdate: (data: Partial<FooterBlockType>) => void
+  block: FooterSectionType
+  onUpdate: (data: Partial<FooterSectionType>) => void
 }
 
 const PLATFORMS: SocialPlatform[] = ["twitter", "facebook", "instagram", "linkedin", "youtube", "github", "tiktok"];

@@ -1,11 +1,11 @@
-import type { CtaBlock as CtaBlockType } from "@muse/core";
+import type { CtaSection as CtaSectionType } from "@muse/core";
 import { EditableText, EditableLink } from "../ux";
 import { useIsEditable } from "../context/EditorMode";
 import styles from "./Cta.module.css";
 
 interface Props {
-  block: CtaBlockType
-  onUpdate: (data: Partial<CtaBlockType>) => void
+  block: CtaSectionType
+  onUpdate: (data: Partial<CtaSectionType>) => void
 }
 
 export function Cta({ block, onUpdate }: Props) {

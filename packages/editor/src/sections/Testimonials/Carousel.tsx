@@ -1,12 +1,12 @@
 import { useState } from "react";
-import type { TestimonialsBlock as TestimonialsBlockType, Quote } from "@muse/core";
+import type { TestimonialsSection as TestimonialsSectionType, Quote } from "@muse/core";
 import { useIsEditable } from "../../context/EditorMode";
 import { Avatar, EditableText } from "../../ux";
 import styles from "./Carousel.module.css";
 
 interface Props {
-  block: TestimonialsBlockType
-  onUpdate: (data: Partial<TestimonialsBlockType>) => void
+  block: TestimonialsSectionType
+  onUpdate: (data: Partial<TestimonialsSectionType>) => void
   isPending?: boolean
 }
 

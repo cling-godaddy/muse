@@ -180,11 +180,11 @@ function getMetaText(agent: AgentState): string | null {
   const { data, summary } = agent;
 
   if (agent.name === "structure") {
-    if (data?.blockTypes?.length) {
-      return data.blockTypes.join(" · ");
+    if (data?.sectionTypes?.length) {
+      return data.sectionTypes.join(" · ");
     }
-    if (data?.blockCount !== undefined) {
-      return `${data.blockCount} blocks`;
+    if (data?.sectionCount !== undefined) {
+      return `${data.sectionCount} sections`;
     }
   }
 

@@ -1,12 +1,12 @@
-import type { StatsBlock as StatsBlockType } from "@muse/core";
+import type { StatsSection as StatsSectionType } from "@muse/core";
 import { getDefaultPreset } from "@muse/core";
 import { Row } from "./Row";
 import { Grid } from "./Grid";
 import { Counters } from "./Counters";
 
 interface Props {
-  block: StatsBlockType
-  onUpdate: (data: Partial<StatsBlockType>) => void
+  block: StatsSectionType
+  onUpdate: (data: Partial<StatsSectionType>) => void
   isPending?: boolean
 }
 

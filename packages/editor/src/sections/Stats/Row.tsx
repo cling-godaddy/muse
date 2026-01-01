@@ -1,11 +1,11 @@
-import type { StatsBlock as StatsBlockType, StatItem } from "@muse/core";
+import type { StatsSection as StatsSectionType, StatItem } from "@muse/core";
 import { EditableText } from "../../ux";
 import { useIsEditable } from "../../context/EditorMode";
 import styles from "./Row.module.css";
 
 interface Props {
-  block: StatsBlockType
-  onUpdate: (data: Partial<StatsBlockType>) => void
+  block: StatsSectionType
+  onUpdate: (data: Partial<StatsSectionType>) => void
   isPending?: boolean
 }
 

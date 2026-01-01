@@ -1,19 +1,19 @@
 import { describe, expect, it } from "vitest";
 import {
-  heroBlockSchema,
-  featuresBlockSchema,
-  ctaBlockSchema,
-  blockSchema,
-  validateBlock,
-  validateBlocks,
-} from "../../src/blocks/schemas";
+  heroSectionSchema,
+  featuresSectionSchema,
+  ctaSectionSchema,
+  sectionSchema,
+  validateSection,
+  validateSections,
+} from "../../src/sections/schemas";
 
 const uuid = "550e8400-e29b-41d4-a716-446655440000";
 
-describe("block schemas", () => {
-  describe("heroBlockSchema", () => {
-    it("validates minimal hero block", () => {
-      const result = heroBlockSchema.safeParse({
+describe("section schemas", () => {
+  describe("heroSectionSchema", () => {
+    it("validates minimal hero section", () => {
+      const result = heroSectionSchema.safeParse({
         id: uuid,
         type: "hero",
         headline: "Welcome",
@@ -21,8 +21,8 @@ describe("block schemas", () => {
       expect(result.success).toBe(true);
     });
 
-    it("validates full hero block", () => {
-      const result = heroBlockSchema.safeParse({
+    it("validates full hero section", () => {
+      const result = heroSectionSchema.safeParse({
         id: uuid,
         type: "hero",
         headline: "Welcome",
@@ -35,7 +35,7 @@ describe("block schemas", () => {
     });
 
     it("rejects invalid alignment", () => {
-      const result = heroBlockSchema.safeParse({
+      const result = heroSectionSchema.safeParse({
         id: uuid,
         type: "hero",
         headline: "Welcome",
@@ -45,9 +45,9 @@ describe("block schemas", () => {
     });
   });
 
-  describe("featuresBlockSchema", () => {
-    it("validates features block with items", () => {
-      const result = featuresBlockSchema.safeParse({
+  describe("featuresSectionSchema", () => {
+    it("validates features section with items", () => {
+      const result = featuresSectionSchema.safeParse({
         id: uuid,
         type: "features",
         items: [{ title: "Fast", description: "Very fast" }],
@@ -56,7 +56,7 @@ describe("block schemas", () => {
     });
 
     it("rejects empty items array", () => {
-      const result = featuresBlockSchema.safeParse({
+      const result = featuresSectionSchema.safeParse({
         id: uuid,
         type: "features",
         items: [],
@@ -65,7 +65,7 @@ describe("block schemas", () => {
     });
 
     it("validates columns option", () => {
-      const result = featuresBlockSchema.safeParse({
+      const result = featuresSectionSchema.safeParse({
         id: uuid,
         type: "features",
         items: [{ title: "Fast", description: "Very fast" }],
@@ -75,7 +75,7 @@ describe("block schemas", () => {
     });
 
     it("rejects invalid columns", () => {
-      const result = featuresBlockSchema.safeParse({
+      const result = featuresSectionSchema.safeParse({
         id: uuid,
         type: "features",
         items: [{ title: "Fast", description: "Very fast" }],
@@ -85,9 +85,9 @@ describe("block schemas", () => {
     });
   });
 
-  describe("ctaBlockSchema", () => {
-    it("validates minimal cta block", () => {
-      const result = ctaBlockSchema.safeParse({
+  describe("ctaSectionSchema", () => {
+    it("validates minimal cta section", () => {
+      const result = ctaSectionSchema.safeParse({
         id: uuid,
         type: "cta",
         headline: "Get started",
@@ -97,8 +97,8 @@ describe("block schemas", () => {
       expect(result.success).toBe(true);
     });
 
-    it("validates full cta block", () => {
-      const result = ctaBlockSchema.safeParse({
+    it("validates full cta section", () => {
+      const result = ctaSectionSchema.safeParse({
         id: uuid,
         type: "cta",
         headline: "Get started",
@@ -111,7 +111,7 @@ describe("block schemas", () => {
     });
 
     it("rejects missing buttonText", () => {
-      const result = ctaBlockSchema.safeParse({
+      const result = ctaSectionSchema.safeParse({
         id: uuid,
         type: "cta",
         headline: "Get started",
@@ -121,9 +121,9 @@ describe("block schemas", () => {
     });
   });
 
-  describe("blockSchema (discriminated union)", () => {
-    it("parses hero block", () => {
-      const result = blockSchema.safeParse({
+  describe("sectionSchema (discriminated union)", () => {
+    it("parses hero section", () => {
+      const result = sectionSchema.safeParse({
         id: uuid,
         type: "hero",
         headline: "Welcome",
@@ -134,8 +134,8 @@ describe("block schemas", () => {
       }
     });
 
-    it("rejects unknown block type", () => {
-      const result = blockSchema.safeParse({
+    it("rejects unknown section type", () => {
+      const result = sectionSchema.safeParse({
         id: uuid,
         type: "unknown",
         content: "test",
@@ -144,9 +144,9 @@ describe("block schemas", () => {
     });
   });
 
-  describe("validateBlock", () => {
-    it("validates valid block", () => {
-      const result = validateBlock({
+  describe("validateSection", () => {
+    it("validates valid section", () => {
+      const result = validateSection({
         id: uuid,
         type: "hero",
         headline: "Welcome",
@@ -154,8 +154,8 @@ describe("block schemas", () => {
       expect(result.success).toBe(true);
     });
 
-    it("returns error for invalid block", () => {
-      const result = validateBlock({
+    it("returns error for invalid section", () => {
+      const result = validateSection({
         id: uuid,
         type: "hero",
       });
@@ -163,7 +163,7 @@ describe("block schemas", () => {
     });
 
     it("returns error for invalid type", () => {
-      const result = validateBlock({
+      const result = validateSection({
         id: uuid,
         type: "unknown",
       });
@@ -171,9 +171,9 @@ describe("block schemas", () => {
     });
   });
 
-  describe("validateBlocks", () => {
-    it("validates valid block array", () => {
-      const result = validateBlocks([
+  describe("validateSections", () => {
+    it("validates valid section array", () => {
+      const result = validateSections([
         { id: uuid, type: "hero", headline: "Welcome" },
         { id: "550e8400-e29b-41d4-a716-446655440001", type: "cta", headline: "Get Started", buttonText: "Sign Up", buttonHref: "/signup" },
       ]);
@@ -181,12 +181,12 @@ describe("block schemas", () => {
     });
 
     it("validates empty array", () => {
-      const result = validateBlocks([]);
+      const result = validateSections([]);
       expect(result.success).toBe(true);
     });
 
-    it("returns error for invalid block in array", () => {
-      const result = validateBlocks([
+    it("returns error for invalid section in array", () => {
+      const result = validateSections([
         { id: uuid, type: "hero", headline: "Welcome" },
         { id: "550e8400-e29b-41d4-a716-446655440001", type: "hero" },
       ]);
@@ -194,7 +194,7 @@ describe("block schemas", () => {
     });
 
     it("returns error for non-array input", () => {
-      const result = validateBlocks("not an array");
+      const result = validateSections("not an array");
       expect(result.success).toBe(false);
     });
   });

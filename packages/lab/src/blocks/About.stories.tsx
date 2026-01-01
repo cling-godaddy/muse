@@ -1,7 +1,7 @@
 import React from "react";
 import type { Meta, StoryObj } from "@storybook/react-vite";
 import { About } from "@muse/editor";
-import type { AboutBlock, TeamMember } from "@muse/core";
+import type { AboutSection, TeamMember } from "@muse/core";
 
 const sampleTeam: TeamMember[] = [
   {
@@ -54,7 +54,7 @@ const meta: Meta<AboutArgs> = {
     teamCount: 0,
   },
   render: (args) => {
-    const block: AboutBlock = {
+    const block: AboutSection = {
       id: "story-about",
       type: "about",
       version: 1,

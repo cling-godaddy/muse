@@ -1,7 +1,7 @@
 import React from "react";
 import type { Meta, StoryObj } from "@storybook/react-vite";
 import { Stats } from "@muse/editor";
-import type { StatsBlock, StatItem } from "@muse/core";
+import type { StatsSection, StatItem } from "@muse/core";
 
 const sampleStats: StatItem[] = [
   { value: "10", suffix: "K+", label: "Customers" },
@@ -34,7 +34,7 @@ const meta: Meta<StatsArgs> = {
     statCount: 4,
   },
   render: (args) => {
-    const block: StatsBlock = {
+    const block: StatsSection = {
       id: "story-stats",
       type: "stats",
       version: 1,

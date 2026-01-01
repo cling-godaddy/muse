@@ -1,30 +1,30 @@
 import { describe, expect, it } from "vitest";
 import {
-  registerAISchema,
-  getAISchema,
-  getAllAISchemas,
-  generateBlockSchemaPrompt,
-  type AIBlockSchema,
-} from "../../src/blocks/ai";
+  registerAISectionSchema,
+  getAISectionSchema,
+  getAllAISectionSchemas,
+  generateSectionSchemaPrompt,
+  type AISectionSchema,
+} from "../../src/sections/ai";
 
-describe("AI schema registry", () => {
+describe("AI section schema registry", () => {
   describe("default registrations", () => {
     it("has hero schema registered", () => {
-      const schema = getAISchema("hero");
+      const schema = getAISectionSchema("hero");
       expect(schema).toBeDefined();
       expect(schema?.type).toBe("hero");
       expect(schema?.required).toContain("headline");
     });
 
     it("has features schema registered", () => {
-      const schema = getAISchema("features");
+      const schema = getAISectionSchema("features");
       expect(schema).toBeDefined();
       expect(schema?.type).toBe("features");
       expect(schema?.required).toContain("items");
     });
 
     it("has cta schema registered", () => {
-      const schema = getAISchema("cta");
+      const schema = getAISectionSchema("cta");
       expect(schema).toBeDefined();
       expect(schema?.type).toBe("cta");
       expect(schema?.required).toContain("headline");
@@ -33,16 +33,16 @@ describe("AI schema registry", () => {
     });
   });
 
-  describe("getAISchema", () => {
+  describe("getAISectionSchema", () => {
     it("returns undefined for unknown type", () => {
-      const schema = getAISchema("unknown" as "text");
+      const schema = getAISectionSchema("unknown" as "hero");
       expect(schema).toBeUndefined();
     });
   });
 
-  describe("getAllAISchemas", () => {
+  describe("getAllAISectionSchemas", () => {
     it("returns all registered schemas", () => {
-      const schemas = getAllAISchemas();
+      const schemas = getAllAISectionSchemas();
       expect(schemas.length).toBeGreaterThanOrEqual(3);
       const types = schemas.map(s => s.type);
       expect(types).toContain("hero");
@@ -51,44 +51,44 @@ describe("AI schema registry", () => {
     });
   });
 
-  describe("registerAISchema", () => {
+  describe("registerAISectionSchema", () => {
     it("registers and retrieves custom schema", () => {
-      const customSchema: AIBlockSchema = {
+      const customSchema: AISectionSchema = {
         type: "hero",
-        description: "Custom hero block",
+        description: "Custom hero section",
         properties: {
           headline: { type: "string", description: "Headline", required: true },
           subheadline: { type: "string", description: "Subheadline" },
         },
         required: ["headline"],
       };
-      registerAISchema(customSchema);
-      const retrieved = getAISchema("hero");
-      expect(retrieved?.description).toBe("Custom hero block");
+      registerAISectionSchema(customSchema);
+      const retrieved = getAISectionSchema("hero");
+      expect(retrieved?.description).toBe("Custom hero section");
     });
   });
 
-  describe("generateBlockSchemaPrompt", () => {
-    it("generates prompt with all block types", () => {
-      const prompt = generateBlockSchemaPrompt();
-      expect(prompt).toContain("Block: hero");
-      expect(prompt).toContain("Block: features");
-      expect(prompt).toContain("Block: cta");
+  describe("generateSectionSchemaPrompt", () => {
+    it("generates prompt with all section types", () => {
+      const prompt = generateSectionSchemaPrompt();
+      expect(prompt).toContain("Section: hero");
+      expect(prompt).toContain("Section: features");
+      expect(prompt).toContain("Section: cta");
     });
 
     it("includes descriptions", () => {
-      const prompt = generateBlockSchemaPrompt();
+      const prompt = generateSectionSchemaPrompt();
       expect(prompt).toContain("Description:");
     });
 
     it("includes field definitions", () => {
-      const prompt = generateBlockSchemaPrompt();
+      const prompt = generateSectionSchemaPrompt();
       expect(prompt).toContain("Fields:");
       expect(prompt).toContain("headline");
     });
 
     it("marks required fields", () => {
-      const prompt = generateBlockSchemaPrompt();
+      const prompt = generateSectionSchemaPrompt();
       expect(prompt).toContain("required");
     });
   });

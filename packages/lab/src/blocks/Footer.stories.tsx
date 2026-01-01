@@ -1,7 +1,7 @@
 import React from "react";
 import type { Meta, StoryObj } from "@storybook/react-vite";
 import { Footer } from "@muse/editor";
-import type { FooterBlock, FooterLink, SocialLink } from "@muse/core";
+import type { FooterSection, FooterLink, SocialLink } from "@muse/core";
 
 const sampleLinks: FooterLink[] = [
   { label: "About", href: "#" },
@@ -46,7 +46,7 @@ const meta: Meta<FooterArgs> = {
     showSocials: true,
   },
   render: (args) => {
-    const block: FooterBlock = {
+    const block: FooterSection = {
       id: "story-footer",
       type: "footer",
       version: 1,

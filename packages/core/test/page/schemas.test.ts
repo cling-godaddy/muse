@@ -13,17 +13,17 @@ describe("page schemas", () => {
         id: uuid,
         slug: "home",
         meta: { title: "Home" },
-        blocks: [],
+        sections: [],
       });
       expect(result.success).toBe(true);
     });
 
-    it("validates page with blocks", () => {
+    it("validates page with sections", () => {
       const result = pageSchema.safeParse({
         id: uuid,
         slug: "home",
         meta: { title: "Home", description: "Welcome" },
-        blocks: [
+        sections: [
           { id: uuid2, type: "hero", headline: "Welcome" },
           { id: uuid3, type: "cta", headline: "Get Started", buttonText: "Sign Up", buttonHref: "/signup" },
         ],
@@ -31,12 +31,12 @@ describe("page schemas", () => {
       expect(result.success).toBe(true);
     });
 
-    it("rejects invalid block in page", () => {
+    it("rejects invalid section in page", () => {
       const result = pageSchema.safeParse({
         id: "550e8400-e29b-41d4-a716-446655440000",
         slug: "home",
         meta: { title: "Home" },
-        blocks: [{ id: "1", type: "invalid" }],
+        sections: [{ id: "1", type: "invalid" }],
       });
       expect(result.success).toBe(false);
     });
@@ -46,7 +46,7 @@ describe("page schemas", () => {
         id: "550e8400-e29b-41d4-a716-446655440000",
         slug: "home",
         meta: {},
-        blocks: [],
+        sections: [],
       });
       expect(result.success).toBe(false);
     });
@@ -56,7 +56,7 @@ describe("page schemas", () => {
         id: "not-a-uuid",
         slug: "home",
         meta: { title: "Home" },
-        blocks: [],
+        sections: [],
       });
       expect(result.success).toBe(false);
     });
@@ -68,7 +68,7 @@ describe("page schemas", () => {
         id: "550e8400-e29b-41d4-a716-446655440000",
         slug: "about",
         meta: { title: "About Us" },
-        blocks: [],
+        sections: [],
       });
       expect(result.success).toBe(true);
     });
@@ -84,14 +84,14 @@ describe("page schemas", () => {
       const page = createPage("home", { title: "Home" });
       expect(page.slug).toBe("home");
       expect(page.meta.title).toBe("Home");
-      expect(page.blocks).toEqual([]);
+      expect(page.sections).toEqual([]);
       expect(page.id).toBeDefined();
     });
 
-    it("creates page with blocks", () => {
-      const blocks = [{ id: "1", type: "hero" as const, headline: "Welcome" }];
-      const page = createPage("about", { title: "About" }, blocks);
-      expect(page.blocks).toHaveLength(1);
+    it("creates page with sections", () => {
+      const sections = [{ id: "1", type: "hero" as const, headline: "Welcome" }];
+      const page = createPage("about", { title: "About" }, sections);
+      expect(page.sections).toHaveLength(1);
     });
   });
 });

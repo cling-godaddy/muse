@@ -1,6 +1,6 @@
 import { Hono } from "hono";
 import { createClient, type Provider } from "@muse/ai";
-import { generateBlockSchemaPrompt, validateBlocks, type Block } from "@muse/core";
+import { generateSectionSchemaPrompt, validateSections, type Section } from "@muse/core";
 import { generateThemePrompt, getTheme } from "@muse/themes";
 
 let client: Provider | null = null;
@@ -16,9 +16,9 @@ function getClient(): Provider {
   return client;
 }
 
-const systemPrompt = `You are a website content generator. Generate content blocks for landing pages based on user prompts.
+const systemPrompt = `You are a website content generator. Generate content sections for landing pages based on user prompts.
 
-${generateBlockSchemaPrompt()}
+${generateSectionSchemaPrompt()}
 
 ${generateThemePrompt()}
 
@@ -29,19 +29,19 @@ IMPORTANT: Respond with ONLY a valid JSON object in this exact format:
     "title": "Page title",
     "description": "Optional page description"
   },
-  "blocks": [
-    // Array of blocks matching the schemas above
-    // Each block must have: id (UUID), type, and type-specific fields
+  "sections": [
+    // Array of sections matching the schemas above
+    // Each section must have: id (UUID), type, and type-specific fields
   ]
 }
 
 Guidelines:
 - Select an appropriate theme based on the business/context
-- Generate 3-6 blocks for a typical landing page
-- Start with a hero block for the main message
+- Generate 3-6 sections for a typical landing page
+- Start with a hero section for the main message
 - Include features to highlight key benefits
-- End with a CTA block to drive action
-- Use UUIDs for block IDs (e.g., "550e8400-e29b-41d4-a716-446655440000")
+- End with a CTA section to drive action
+- Use UUIDs for section IDs (e.g., "550e8400-e29b-41d4-a716-446655440000")
 - Content should be professional and compelling
 - Respond with ONLY the JSON, no markdown or explanation`;
 
@@ -61,7 +61,7 @@ generateRoute.post("/page", async (c) => {
     ],
   });
 
-  let parsed: { theme?: string, meta: { title: string, description?: string }, blocks: Block[] };
+  let parsed: { theme?: string, meta: { title: string, description?: string }, sections: Section[] };
   try {
     parsed = JSON.parse(response.content);
   }
@@ -69,10 +69,10 @@ generateRoute.post("/page", async (c) => {
     return c.json({ error: "failed to parse AI response as JSON", raw: response.content }, 500);
   }
 
-  const validation = validateBlocks(parsed.blocks);
+  const validation = validateSections(parsed.sections);
   if (!validation.success) {
     return c.json({
-      error: "blocks failed validation",
+      error: "sections failed validation",
       issues: validation.error.issues,
       raw: parsed,
     }, 500);
@@ -83,6 +83,6 @@ generateRoute.post("/page", async (c) => {
   return c.json({
     theme: theme?.id ?? "modern",
     meta: parsed.meta,
-    blocks: validation.data,
+    sections: validation.data,
   });
 });

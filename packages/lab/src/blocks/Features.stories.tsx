@@ -1,7 +1,7 @@
 import React from "react";
 import type { Meta, StoryObj } from "@storybook/react-vite";
 import { Features } from "@muse/editor";
-import type { FeaturesBlock, FeatureItem } from "@muse/core";
+import type { FeaturesSection, FeatureItem } from "@muse/core";
 
 const sampleItems: FeatureItem[] = [
   { icon: "zap", title: "Lightning Fast", description: "Built for speed with optimized performance." },
@@ -36,7 +36,7 @@ const meta: Meta<FeaturesArgs> = {
     itemCount: 6,
   },
   render: (args) => {
-    const block: FeaturesBlock = {
+    const block: FeaturesSection = {
       id: "story-features",
       type: "features",
       version: 1,

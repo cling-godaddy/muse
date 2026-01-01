@@ -1,11 +1,11 @@
-import type { ContactBlock as ContactBlockType } from "@muse/core";
+import type { ContactSection as ContactSectionType } from "@muse/core";
 import { getDefaultPreset } from "@muse/core";
 import { Form } from "./Form";
 import { SplitMap } from "./SplitMap";
 
 interface Props {
-  block: ContactBlockType
-  onUpdate: (data: Partial<ContactBlockType>) => void
+  block: ContactSectionType
+  onUpdate: (data: Partial<ContactSectionType>) => void
 }
 
 export function Contact({ block, onUpdate }: Props) {

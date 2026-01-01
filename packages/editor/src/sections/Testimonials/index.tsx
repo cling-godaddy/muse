@@ -1,12 +1,12 @@
-import type { TestimonialsBlock as TestimonialsBlockType } from "@muse/core";
+import type { TestimonialsSection as TestimonialsSectionType } from "@muse/core";
 import { getDefaultPreset } from "@muse/core";
 import { Single } from "./Single";
 import { Grid } from "./Grid";
 import { Carousel } from "./Carousel";
 
 interface Props {
-  block: TestimonialsBlockType
-  onUpdate: (data: Partial<TestimonialsBlockType>) => void
+  block: TestimonialsSectionType
+  onUpdate: (data: Partial<TestimonialsSectionType>) => void
   isPending?: boolean
 }
 

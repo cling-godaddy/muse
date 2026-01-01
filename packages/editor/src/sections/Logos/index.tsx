@@ -1,10 +1,10 @@
-import type { LogosBlock } from "@muse/core";
+import type { LogosSection } from "@muse/core";
 import { Grid } from "./Grid";
 import { Marquee } from "./Marquee";
 
 export interface LogosProps {
-  block: LogosBlock
-  onUpdate: (data: Partial<LogosBlock>) => void
+  block: LogosSection
+  onUpdate: (data: Partial<LogosSection>) => void
   isPending?: boolean
 }
 

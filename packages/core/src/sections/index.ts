@@ -1,3 +1,52 @@
+// Section data types
+export type {
+  SectionBase,
+  Section,
+  HeroSection,
+  FeaturesSection,
+  CtaSection,
+  TestimonialsSection,
+  GallerySection,
+  PricingSection,
+  FaqSection,
+  ContactSection,
+  FooterSection,
+  AboutSection,
+  SubscribeSection,
+  StatsSection,
+  LogosSection,
+  ImageSource,
+  FeatureItem,
+  Quote,
+  PricingPlan,
+  FaqItem,
+  FormField,
+  FooterLink,
+  SocialPlatform,
+  SocialLink,
+  TeamMember,
+  StatItem,
+  LogoItem,
+} from "./types";
+
+export {
+  isSectionType,
+  isHeroSection,
+  isFeaturesSection,
+  isCtaSection,
+  isTestimonialsSection,
+  isGallerySection,
+  isPricingSection,
+  isFaqSection,
+  isContactSection,
+  isFooterSection,
+  isAboutSection,
+  isSubscribeSection,
+  isStatsSection,
+  isLogosSection,
+} from "./types";
+
+// Preset types
 export type {
   SectionType,
   LayoutPattern,
@@ -55,7 +104,7 @@ export const DEFAULT_PRESETS: Record<SectionType, string> = {
   about: "about-story",
   subscribe: "subscribe-card",
   stats: "stats-row",
-  logos: "logos-row",
+  logos: "logos-grid",
 };
 
 export const GALLERY_IMAGE_MINIMUMS: Record<string, number> = {
@@ -108,4 +157,45 @@ export function isPresetId(id: string): boolean {
   return id in allPresets;
 }
 
-export { generateSectionPrompt, SECTION_TYPES } from "./ai";
+// AI
+export {
+  generateSectionPrompt,
+  generateSectionSchemaPrompt,
+  SECTION_TYPES,
+  type AISectionSchema,
+  registerAISectionSchema,
+  getAISectionSchema,
+  getAllAISectionSchemas,
+} from "./ai";
+
+// Schemas
+export {
+  imageSourceSchema,
+  heroSectionSchema,
+  featuresSectionSchema,
+  ctaSectionSchema,
+  testimonialsSectionSchema,
+  gallerySectionSchema,
+  pricingSectionSchema,
+  faqSectionSchema,
+  contactSectionSchema,
+  footerSectionSchema,
+  aboutSectionSchema,
+  subscribeSectionSchema,
+  statsSectionSchema,
+  logosSectionSchema,
+  sectionSchema,
+  validateSection,
+  validateSections,
+} from "./schemas";
+
+// Metadata
+export {
+  type SectionMeta,
+  registerSectionMeta,
+  getSectionMeta,
+  getAllSectionMeta,
+} from "./metadata";
+
+// Factory
+export { createSection } from "./factory";

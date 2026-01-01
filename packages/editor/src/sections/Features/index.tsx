@@ -1,11 +1,11 @@
-import type { FeaturesBlock as FeaturesBlockType } from "@muse/core";
+import type { FeaturesSection as FeaturesSectionType } from "@muse/core";
 import { getDefaultPreset } from "@muse/core";
 import { Grid } from "./Grid";
 import { Numbered } from "./Numbered";
 
 interface Props {
-  block: FeaturesBlockType
-  onUpdate: (data: Partial<FeaturesBlockType>) => void
+  block: FeaturesSectionType
+  onUpdate: (data: Partial<FeaturesSectionType>) => void
   isPending?: boolean
 }
 

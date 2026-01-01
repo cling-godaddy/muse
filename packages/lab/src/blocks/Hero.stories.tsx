@@ -1,7 +1,7 @@
 import React from "react";
 import type { Meta, StoryObj } from "@storybook/react-vite";
 import { Hero } from "@muse/editor";
-import type { HeroBlock } from "@muse/core";
+import type { HeroSection } from "@muse/core";
 
 type HeroArgs = {
   headline: string
@@ -43,7 +43,7 @@ const meta: Meta<HeroArgs> = {
   },
   render: (args) => {
     const needsImage = args.preset !== "hero-centered";
-    const block: HeroBlock = {
+    const block: HeroSection = {
       id: "story-hero",
       type: "hero",
       version: 1,

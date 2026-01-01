@@ -1,6 +1,6 @@
 import type { MediaClient, ImageSelection } from "@muse/media";
 import { createLogger, type Logger } from "@muse/logger";
-import { getMinimumImages, getImageRequirements, type Block } from "@muse/core";
+import { getMinimumImages, getImageRequirements, type Section } from "@muse/core";
 import type { Message, Provider } from "../types";
 import { runWithRetry } from "../retry";
 import { calculateCost } from "../pricing";
@@ -22,12 +22,12 @@ function parseJson<T>(json: string): T {
 }
 
 // Extract copy block summaries for image agent context
-function extractCopyBlockSummaries(blocks: Block[]): CopyBlockContent[] {
-  return blocks.map(block => ({
-    id: block.id,
-    headline: (block as { headline?: string }).headline,
-    subheadline: (block as { subheadline?: string }).subheadline,
-    itemTitles: (block as { items?: { title?: string }[] }).items
+function extractCopySectionSummaries(sections: Section[]): CopyBlockContent[] {
+  return sections.map(section => ({
+    id: section.id,
+    headline: (section as { headline?: string }).headline,
+    subheadline: (section as { subheadline?: string }).subheadline,
+    itemTitles: (section as { items?: { title?: string }[] }).items
       ?.map(i => i.title)
       .filter((t): t is string => !!t),
   }));
@@ -46,7 +46,7 @@ export interface OrchestratorEvents {
   onBrief?: (brief: BrandBrief) => void
   onStructure?: (structure: PageStructure) => void
   onTheme?: (theme: ThemeSelection) => void
-  onBlocks?: (blocks: Block[]) => void
+  onSections?: (sections: Section[]) => void
   onImages?: (images: ImageSelection[]) => void
 }
 
@@ -158,28 +158,28 @@ export async function* orchestrate(
   const copyDuration = Date.now() - copyStart;
   copyLog.info("complete", { duration: copyDuration });
 
-  // Parse copy result as { blocks: Block[] }
-  let blocks: Block[] = [];
+  // Parse copy result as { blocks: Section[] }
+  let sections: Section[] = [];
   try {
-    const parsed = JSON.parse(copyResult.content) as { blocks: Block[] };
-    blocks = parsed.blocks ?? [];
+    const parsed = JSON.parse(copyResult.content) as { blocks: Section[] };
+    sections = parsed.blocks ?? [];
   }
   catch (err) {
     copyLog.warn("parse_failed", { error: String(err), input: copyResult.content.slice(0, 200) });
   }
 
-  events?.onBlocks?.(blocks);
+  events?.onSections?.(sections);
 
   yield `[AGENT:copy:complete]${JSON.stringify({
-    blockCount: blocks.length,
+    sectionCount: sections.length,
     duration: copyDuration,
   })}\n`;
 
-  // Emit all blocks at once
-  yield `[BLOCKS:${JSON.stringify(blocks)}]\n`;
+  // Emit all sections at once
+  yield `[BLOCKS:${JSON.stringify(sections)}]\n`;
 
   // Extract summaries for image agent
-  const copyBlocks = extractCopyBlockSummaries(blocks);
+  const copyBlocks = extractCopySectionSummaries(sections);
 
   // step 4: plan and resolve images (using copy context)
   let images: ImageSelection[] = [];

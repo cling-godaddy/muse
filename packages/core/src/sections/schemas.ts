@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-const blockBase = z.object({
+const sectionBase = z.object({
   id: z.string().uuid(),
   version: z.number().optional(),
   preset: z.string().optional(),
@@ -18,7 +18,7 @@ const ctaLinkSchema = z.object({
   href: z.string(),
 });
 
-export const heroBlockSchema = blockBase.extend({
+export const heroSectionSchema = sectionBase.extend({
   type: z.literal("hero"),
   headline: z.string(),
   subheadline: z.string().optional(),
@@ -36,14 +36,14 @@ const featureItemSchema = z.object({
   description: z.string(),
 });
 
-export const featuresBlockSchema = blockBase.extend({
+export const featuresSectionSchema = sectionBase.extend({
   type: z.literal("features"),
   headline: z.string().optional(),
   items: z.array(featureItemSchema).min(1),
   columns: z.union([z.literal(2), z.literal(3), z.literal(4)]).optional(),
 });
 
-export const ctaBlockSchema = blockBase.extend({
+export const ctaSectionSchema = sectionBase.extend({
   type: z.literal("cta"),
   headline: z.string(),
   description: z.string().optional(),
@@ -60,13 +60,13 @@ const quoteSchema = z.object({
   avatar: imageSourceSchema.optional(),
 });
 
-export const testimonialsBlockSchema = blockBase.extend({
+export const testimonialsSectionSchema = sectionBase.extend({
   type: z.literal("testimonials"),
   headline: z.string().optional(),
   quotes: z.array(quoteSchema).min(1),
 });
 
-export const galleryBlockSchema = blockBase.extend({
+export const gallerySectionSchema = sectionBase.extend({
   type: z.literal("gallery"),
   headline: z.string().optional(),
   images: z.array(imageSourceSchema).min(1),
@@ -83,7 +83,7 @@ const pricingPlanSchema = z.object({
   highlighted: z.boolean().optional(),
 });
 
-export const pricingBlockSchema = blockBase.extend({
+export const pricingSectionSchema = sectionBase.extend({
   type: z.literal("pricing"),
   headline: z.string().optional(),
   subheadline: z.string().optional(),
@@ -95,7 +95,7 @@ const faqItemSchema = z.object({
   answer: z.string(),
 });
 
-export const faqBlockSchema = blockBase.extend({
+export const faqSectionSchema = sectionBase.extend({
   type: z.literal("faq"),
   headline: z.string().optional(),
   subheadline: z.string().optional(),
@@ -110,7 +110,7 @@ const formFieldSchema = z.object({
   required: z.boolean().optional(),
 });
 
-export const contactBlockSchema = blockBase.extend({
+export const contactSectionSchema = sectionBase.extend({
   type: z.literal("contact"),
   headline: z.string().optional(),
   subheadline: z.string().optional(),
@@ -132,7 +132,7 @@ const socialLinkSchema = z.object({
   href: z.string(),
 });
 
-export const footerBlockSchema = blockBase.extend({
+export const footerSectionSchema = sectionBase.extend({
   type: z.literal("footer"),
   companyName: z.string().optional(),
   copyright: z.string().optional(),
@@ -147,7 +147,7 @@ const teamMemberSchema = z.object({
   bio: z.string().optional(),
 });
 
-export const aboutBlockSchema = blockBase.extend({
+export const aboutSectionSchema = sectionBase.extend({
   type: z.literal("about"),
   headline: z.string().optional(),
   body: z.string().optional(),
@@ -155,7 +155,7 @@ export const aboutBlockSchema = blockBase.extend({
   teamMembers: z.array(teamMemberSchema).optional(),
 });
 
-export const subscribeBlockSchema = blockBase.extend({
+export const subscribeSectionSchema = sectionBase.extend({
   type: z.literal("subscribe"),
   headline: z.string().optional(),
   subheadline: z.string().optional(),
@@ -171,7 +171,7 @@ const statItemSchema = z.object({
   suffix: z.string().optional(),
 });
 
-export const statsBlockSchema = blockBase.extend({
+export const statsSectionSchema = sectionBase.extend({
   type: z.literal("stats"),
   headline: z.string().optional(),
   stats: z.array(statItemSchema).min(1),
@@ -182,32 +182,32 @@ const logoItemSchema = z.object({
   href: z.string().optional(),
 });
 
-export const logosBlockSchema = blockBase.extend({
+export const logosSectionSchema = sectionBase.extend({
   type: z.literal("logos"),
   headline: z.string().optional(),
   logos: z.array(logoItemSchema).min(1),
 });
 
-export const blockSchema = z.discriminatedUnion("type", [
-  heroBlockSchema,
-  featuresBlockSchema,
-  ctaBlockSchema,
-  testimonialsBlockSchema,
-  galleryBlockSchema,
-  pricingBlockSchema,
-  faqBlockSchema,
-  contactBlockSchema,
-  footerBlockSchema,
-  aboutBlockSchema,
-  subscribeBlockSchema,
-  statsBlockSchema,
-  logosBlockSchema,
+export const sectionSchema = z.discriminatedUnion("type", [
+  heroSectionSchema,
+  featuresSectionSchema,
+  ctaSectionSchema,
+  testimonialsSectionSchema,
+  gallerySectionSchema,
+  pricingSectionSchema,
+  faqSectionSchema,
+  contactSectionSchema,
+  footerSectionSchema,
+  aboutSectionSchema,
+  subscribeSectionSchema,
+  statsSectionSchema,
+  logosSectionSchema,
 ]);
 
-export function validateBlock(data: unknown) {
-  return blockSchema.safeParse(data);
+export function validateSection(data: unknown) {
+  return sectionSchema.safeParse(data);
 }
 
-export function validateBlocks(data: unknown) {
-  return z.array(blockSchema).safeParse(data);
+export function validateSections(data: unknown) {
+  return z.array(sectionSchema).safeParse(data);
 }

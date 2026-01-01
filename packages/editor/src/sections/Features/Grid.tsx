@@ -1,12 +1,12 @@
-import type { FeaturesBlock as FeaturesBlockType, FeatureItem } from "@muse/core";
+import type { FeaturesSection as FeaturesSectionType, FeatureItem } from "@muse/core";
 import { EditableText, ImageLoader } from "../../ux";
 import { useIsEditable } from "../../context/EditorMode";
 import { FeatureIcon } from "./icons";
 import styles from "./Grid.module.css";
 
 interface Props {
-  block: FeaturesBlockType
-  onUpdate: (data: Partial<FeaturesBlockType>) => void
+  block: FeaturesSectionType
+  onUpdate: (data: Partial<FeaturesSectionType>) => void
   isPending?: boolean
 }
 

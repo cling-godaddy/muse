@@ -1,7 +1,7 @@
 import React from "react";
 import type { Meta, StoryObj } from "@storybook/react-vite";
 import { Gallery } from "@muse/editor";
-import type { GalleryBlock, ImageSource } from "@muse/core";
+import type { GallerySection, ImageSource } from "@muse/core";
 
 const sampleImages: ImageSource[] = [
   { url: "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=600", alt: "Mountain landscape" },
@@ -52,7 +52,7 @@ const meta: Meta<GalleryArgs> = {
     imageCount: 6,
   },
   render: (args) => {
-    const block: GalleryBlock = {
+    const block: GallerySection = {
       id: "story-gallery",
       type: "gallery",
       version: 1,

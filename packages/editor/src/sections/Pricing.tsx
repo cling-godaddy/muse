@@ -1,11 +1,11 @@
-import type { PricingBlock as PricingBlockType, PricingPlan } from "@muse/core";
+import type { PricingSection as PricingSectionType, PricingPlan } from "@muse/core";
 import { EditableText } from "../ux";
 import { useIsEditable } from "../context/EditorMode";
 import styles from "./Pricing.module.css";
 
 interface Props {
-  block: PricingBlockType
-  onUpdate: (data: Partial<PricingBlockType>) => void
+  block: PricingSectionType
+  onUpdate: (data: Partial<PricingSectionType>) => void
 }
 
 export function Pricing({ block, onUpdate }: Props) {
