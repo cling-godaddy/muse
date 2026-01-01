@@ -12,19 +12,19 @@ interface Props {
   isPending?: boolean
 }
 
-function UnknownBlock({ block }: { block: Block }) {
+function UnknownSection({ block }: { block: Block }) {
   return (
-    <div className="muse-block muse-block--unknown">
-      Unknown block type:
+    <div className="muse-section muse-section--unknown">
+      Unknown section type:
       {" "}
       {block.type}
     </div>
   );
 }
 
-export function BlockWrapper({ block, onUpdate, onDelete, isPending }: Props) {
+export function SectionWrapper({ block, onUpdate, onDelete, isPending }: Props) {
   const Component = useMemo<BlockComponent>(
-    () => getBlockComponent(block.type) ?? UnknownBlock,
+    () => getBlockComponent(block.type) ?? UnknownSection,
     [block.type],
   );
 
@@ -40,8 +40,8 @@ export function BlockWrapper({ block, onUpdate, onDelete, isPending }: Props) {
   }, [isSelected, block.id]);
 
   return (
-    <div className="muse-block" data-block-type={block.type}>
-      <div className="muse-block-controls">
+    <div className="muse-section" data-section-type={block.type}>
+      <div className="muse-section-controls">
         {showPresetPicker && (
           <PresetPicker
             blockType={block.type}
@@ -51,9 +51,9 @@ export function BlockWrapper({ block, onUpdate, onDelete, isPending }: Props) {
         )}
         <button
           type="button"
-          className="muse-block-delete"
+          className="muse-section-delete"
           onClick={onDelete}
-          aria-label="Delete block"
+          aria-label="Delete section"
         >
           ×
         </button>

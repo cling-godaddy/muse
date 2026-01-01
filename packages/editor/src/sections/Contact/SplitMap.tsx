@@ -43,7 +43,7 @@ export function SplitMap({ block, onUpdate }: Props) {
     return () => clearTimeout(timer);
   }, [block.address]);
 
-  const apiKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY;
+  const apiKey = (import.meta as unknown as { env?: { VITE_GOOGLE_MAPS_API_KEY?: string } }).env?.VITE_GOOGLE_MAPS_API_KEY;
   const mapUrl = debouncedAddress
     ? apiKey
       ? `https://www.google.com/maps/embed/v1/place?key=${apiKey}&q=${encodeURIComponent(debouncedAddress)}`

@@ -1,5 +1,5 @@
 import type { Block } from "@muse/core";
-import { BlockWrapper } from "./blocks/BlockWrapper";
+import { SectionWrapper } from "./sections/SectionWrapper";
 import { SelectionProvider } from "./context/Selection";
 
 interface BlockEditorProps {
@@ -19,14 +19,14 @@ export function BlockEditor({ blocks, onChange, pendingImageBlocks }: BlockEdito
 
   return (
     <SelectionProvider>
-      <div className="muse-block-editor">
+      <div className="muse-section-editor">
         {blocks.length === 0 && (
-          <div className="muse-block-editor-empty">
-            No blocks yet. Use AI to generate content.
+          <div className="muse-section-editor-empty">
+            No sections yet. Use AI to generate content.
           </div>
         )}
         {blocks.map(block => (
-          <BlockWrapper
+          <SectionWrapper
             key={block.id}
             block={block}
             onUpdate={data => updateBlock(block.id, data)}

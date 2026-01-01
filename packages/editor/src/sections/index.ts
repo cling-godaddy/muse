@@ -1,6 +1,6 @@
 import "./register";
 export * from "./registry";
-export * from "./BlockWrapper";
+export * from "./SectionWrapper";
 export * from "./Hero";
 export * from "./Features";
 export * from "./Cta";

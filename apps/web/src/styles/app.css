@@ -35,13 +35,13 @@ html, body, #root {
   .muse-underline { @apply underline; }
   .muse-content { @apply min-h-[200px] p-4 outline-none flex-1 overflow-y-auto; }
 
-  /* Base overflow protection for all block inputs */
-  .muse-block input,
-  .muse-block textarea {
+  /* Base overflow protection for all section inputs */
+  .muse-section input,
+  .muse-section textarea {
     overflow-wrap: break-word;
     word-wrap: break-word;
   }
-  .muse-block textarea {
+  .muse-section textarea {
     resize: none;
     overflow: hidden;
   }
@@ -56,11 +56,11 @@ html, body, #root {
     @apply w-px bg-border mx-1;
   }
 
-  .muse-block-editor {
+  .muse-section-editor {
     @apply flex flex-col;
     gap: var(--muse-theme-section-gap, 1rem);
   }
-  .muse-block-editor-empty {
+  .muse-section-editor-empty {
     @apply text-text-subtle text-center py-8;
   }
   @keyframes muse-fade-in {
@@ -68,7 +68,7 @@ html, body, #root {
     to { opacity: 1; }
   }
 
-  .muse-block {
+  .muse-section {
     @apply relative;
     animation: muse-fade-in 0.3s ease-out;
   }
@@ -77,29 +77,23 @@ html, body, #root {
     animation: muse-fade-in 0.3s ease-out;
   }
 
-  .muse-block:hover {
+  .muse-section:hover {
     outline: 1px solid rgb(var(--color-primary) / 0.3);
     outline-offset: -1px;
   }
-  .muse-block-controls {
+  .muse-section-controls {
     @apply absolute top-2 right-2 z-10 flex gap-1 opacity-0 transition-opacity;
   }
-  .muse-block:hover .muse-block-controls {
+  .muse-section:hover .muse-section-controls {
     @apply opacity-100;
   }
-  .muse-block-delete {
+  .muse-section-delete {
     @apply w-6 h-6 flex items-center justify-center bg-white border border-gray-200 rounded-md text-gray-400 cursor-pointer shadow-sm transition-colors;
   }
-  .muse-block-delete:hover {
+  .muse-section-delete:hover {
     @apply border-gray-300 text-gray-600;
   }
-  .muse-block--unknown {
+  .muse-section--unknown {
     @apply p-4 bg-bg-muted text-text-muted;
-  }
-  .muse-block-text {
-    @apply p-2;
-  }
-  .muse-block-text-input {
-    @apply w-full p-3 border border-border rounded bg-bg-subtle resize-none font-sans text-sm focus:outline-none focus:border-primary min-h-[80px];
   }
 }
