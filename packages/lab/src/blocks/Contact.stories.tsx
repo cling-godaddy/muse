@@ -20,7 +20,7 @@ type ContactArgs = {
 };
 
 const meta: Meta<ContactArgs> = {
-  title: "Blocks/Contact",
+  title: "Sections/Contact",
   argTypes: {
     headline: { control: "text" },
     subheadline: { control: "text" },

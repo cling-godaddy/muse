@@ -33,7 +33,7 @@ type AboutArgs = {
 };
 
 const meta: Meta<AboutArgs> = {
-  title: "Blocks/About",
+  title: "Sections/About",
   argTypes: {
     headline: { control: "text" },
     body: { control: "text" },

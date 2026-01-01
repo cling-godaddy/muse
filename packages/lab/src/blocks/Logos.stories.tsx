@@ -19,7 +19,7 @@ type LogosArgs = {
 };
 
 const meta: Meta<LogosArgs> = {
-  title: "Blocks/Logos",
+  title: "Sections/Logos",
   argTypes: {
     headline: { control: "text" },
     preset: {

@@ -34,7 +34,7 @@ type TestimonialsArgs = {
 };
 
 const meta: Meta<TestimonialsArgs> = {
-  title: "Blocks/Testimonials",
+  title: "Sections/Testimonials",
   argTypes: {
     headline: { control: "text" },
     preset: {

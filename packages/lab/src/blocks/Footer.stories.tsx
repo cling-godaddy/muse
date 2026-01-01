@@ -27,7 +27,7 @@ type FooterArgs = {
 };
 
 const meta: Meta<FooterArgs> = {
-  title: "Blocks/Footer",
+  title: "Sections/Footer",
   argTypes: {
     companyName: { control: "text" },
     copyright: { control: "text" },

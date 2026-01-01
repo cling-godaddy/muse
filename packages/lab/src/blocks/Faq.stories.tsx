@@ -19,7 +19,7 @@ type FaqArgs = {
 };
 
 const meta: Meta<FaqArgs> = {
-  title: "Blocks/FAQ",
+  title: "Sections/FAQ",
   argTypes: {
     headline: { control: "text" },
     subheadline: { control: "text" },

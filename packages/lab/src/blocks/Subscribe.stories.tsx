@@ -13,7 +13,7 @@ type SubscribeArgs = {
 };
 
 const meta: Meta<SubscribeArgs> = {
-  title: "Blocks/Subscribe",
+  title: "Sections/Subscribe",
   argTypes: {
     headline: { control: "text" },
     subheadline: { control: "text" },

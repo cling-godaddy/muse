@@ -17,7 +17,7 @@ type StatsArgs = {
 };
 
 const meta: Meta<StatsArgs> = {
-  title: "Blocks/Stats",
+  title: "Sections/Stats",
   argTypes: {
     headline: { control: "text" },
     preset: {

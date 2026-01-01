@@ -19,7 +19,7 @@ type FeaturesArgs = {
 };
 
 const meta: Meta<FeaturesArgs> = {
-  title: "Blocks/Features",
+  title: "Sections/Features",
   argTypes: {
     headline: { control: "text" },
     preset: {

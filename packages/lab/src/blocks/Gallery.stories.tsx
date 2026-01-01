@@ -24,7 +24,7 @@ type GalleryArgs = {
 };
 
 const meta: Meta<GalleryArgs> = {
-  title: "Blocks/Gallery",
+  title: "Sections/Gallery",
   argTypes: {
     headline: {
       control: "text",

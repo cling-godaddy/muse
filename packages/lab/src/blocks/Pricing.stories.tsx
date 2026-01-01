@@ -39,7 +39,7 @@ type PricingArgs = {
 };
 
 const meta: Meta<PricingArgs> = {
-  title: "Blocks/Pricing",
+  title: "Sections/Pricing",
   argTypes: {
     headline: { control: "text" },
     subheadline: { control: "text" },

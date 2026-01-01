@@ -12,7 +12,7 @@ type CtaArgs = {
 };
 
 const meta: Meta<CtaArgs> = {
-  title: "Blocks/CTA",
+  title: "Sections/CTA",
   argTypes: {
     headline: { control: "text" },
     description: { control: "text" },

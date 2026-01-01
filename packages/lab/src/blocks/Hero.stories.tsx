@@ -18,7 +18,7 @@ const SAMPLE_IMAGE = {
 };
 
 const meta: Meta<HeroArgs> = {
-  title: "Blocks/Hero",
+  title: "Sections/Hero",
   argTypes: {
     headline: { control: "text" },
     subheadline: { control: "text" },

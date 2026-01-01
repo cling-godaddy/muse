@@ -9,7 +9,7 @@ type ImageArgs = {
 };
 
 const meta: Meta<ImageArgs> = {
-  title: "Blocks/Image",
+  title: "Sections/Image",
   argTypes: {
     caption: { control: "text" },
     size: {
