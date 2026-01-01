@@ -1,14 +1,65 @@
+import { useEffect, useRef, useState } from "react";
 import type { StatsBlock as StatsBlockType, StatItem } from "@muse/core";
-import { EditableText } from "../ux";
-import { useIsEditable } from "../context/EditorModeContext";
-import styles from "./Stats.module.css";
+import { EditableText } from "../../ux";
+import { useIsEditable } from "../../context/EditorModeContext";
+import styles from "./Counters.module.css";
 
 interface Props {
   block: StatsBlockType
   onUpdate: (data: Partial<StatsBlockType>) => void
 }
 
-export function Stats({ block, onUpdate }: Props) {
+function parseNumericValue(value: string): number {
+  const parsed = parseInt(value.replace(/[^0-9.-]/g, ""), 10);
+  return isNaN(parsed) ? 0 : parsed;
+}
+
+function AnimatedValue({ value, prefix, suffix }: { value: string, prefix?: string, suffix?: string }) {
+  const targetValue = parseNumericValue(value);
+  const [displayValue, setDisplayValue] = useState(targetValue);
+  const frameRef = useRef<number | undefined>(undefined);
+  const hasAnimated = useRef(false);
+
+  useEffect(() => {
+    // Only animate on first mount
+    if (hasAnimated.current) return;
+    hasAnimated.current = true;
+
+    const duration = 1500;
+    const startTime = performance.now();
+
+    const animate = (currentTime: number) => {
+      const elapsed = currentTime - startTime;
+      const progress = Math.min(elapsed / duration, 1);
+      // Ease out cubic
+      const eased = 1 - Math.pow(1 - progress, 3);
+      const current = Math.round(targetValue * eased);
+      setDisplayValue(current);
+
+      if (progress < 1) {
+        frameRef.current = requestAnimationFrame(animate);
+      }
+    };
+
+    frameRef.current = requestAnimationFrame(animate);
+
+    return () => {
+      if (frameRef.current) {
+        cancelAnimationFrame(frameRef.current);
+      }
+    };
+  }, [targetValue]);
+
+  return (
+    <span className={styles.value}>
+      {prefix}
+      {displayValue.toLocaleString()}
+      {suffix}
+    </span>
+  );
+}
+
+export function Counters({ block, onUpdate }: Props) {
   const isEditable = useIsEditable();
 
   const updateStat = (index: number, data: Partial<StatItem>) => {
@@ -29,7 +80,7 @@ export function Stats({ block, onUpdate }: Props) {
   };
 
   return (
-    <div className={styles.section}>
+    <section className={styles.section}>
       <EditableText
         value={block.headline ?? ""}
         onChange={v => onUpdate({ headline: v || undefined })}
@@ -38,9 +89,9 @@ export function Stats({ block, onUpdate }: Props) {
         placeholder="By the numbers"
       />
 
-      <div className={styles.grid}>
+      <div className={styles.counters}>
         {block.stats.map((stat, i) => (
-          <div key={i} className={styles.stat}>
+          <div key={i} className={styles.counter}>
             {isEditable
               ? (
                 <>
@@ -54,7 +105,7 @@ export function Stats({ block, onUpdate }: Props) {
                     />
                     <input
                       type="text"
-                      className={styles.value}
+                      className={styles.valueInput}
                       value={stat.value}
                       onChange={e => updateStat(i, { value: e.target.value })}
                       placeholder="100"
@@ -85,11 +136,11 @@ export function Stats({ block, onUpdate }: Props) {
               )
               : (
                 <>
-                  <span className={styles.value}>
-                    {stat.prefix}
-                    {stat.value}
-                    {stat.suffix}
-                  </span>
+                  <AnimatedValue
+                    value={stat.value}
+                    prefix={stat.prefix}
+                    suffix={stat.suffix}
+                  />
                   <span className={styles.label}>{stat.label}</span>
                 </>
               )}
@@ -102,6 +153,6 @@ export function Stats({ block, onUpdate }: Props) {
           Add Stat
         </button>
       )}
-    </div>
+    </section>
   );
 }

@@ -1,0 +1,185 @@
+.section {
+  padding: 4rem 2rem;
+  background: var(--muse-theme-bg, white);
+  display: flex;
+  flex-direction: column;
+  gap: 2.5rem;
+  align-items: center;
+}
+
+.headline {
+  font-family: var(--muse-theme-heading-font, inherit);
+  font-weight: var(--muse-theme-heading-weight, 700);
+  font-size: clamp(1.25rem, 4vw, 1.75rem);
+  color: var(--muse-theme-text, #0f172a);
+  background: transparent;
+  border: 1px dashed transparent;
+  padding: 0.5rem;
+  text-align: center;
+  width: 100%;
+  resize: none;
+}
+
+.headline:focus {
+  border-color: var(--muse-theme-primary, #6366f1);
+  outline: none;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 2rem;
+  width: 100%;
+  max-width: 800px;
+}
+
+.card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 1.5rem;
+  background: var(--muse-theme-surface, #f8fafc);
+  border-radius: var(--muse-theme-radius, 0.5rem);
+  border: 1px solid var(--muse-theme-border, #e2e8f0);
+}
+
+.valueRow {
+  display: flex;
+  align-items: baseline;
+  gap: 0;
+}
+
+.prefix,
+.suffix {
+  width: 2rem;
+  font-family: var(--muse-theme-heading-font, inherit);
+  font-size: clamp(1.5rem, 5vw, 2.5rem);
+  font-weight: 700;
+  color: var(--muse-theme-text, #0f172a);
+  background: transparent;
+  border: 1px dashed transparent;
+  text-align: center;
+  padding: 0;
+}
+
+.prefix {
+  text-align: right;
+}
+
+.suffix {
+  text-align: left;
+}
+
+.value {
+  font-family: var(--muse-theme-heading-font, inherit);
+  font-size: clamp(2rem, 6vw, 3rem);
+  font-weight: 700;
+  color: var(--muse-theme-primary, #6366f1);
+  background: transparent;
+  border: 1px dashed transparent;
+  text-align: center;
+  width: 6rem;
+  padding: 0;
+}
+
+.prefix:focus,
+.suffix:focus,
+.value:focus {
+  border-color: var(--muse-theme-primary, #6366f1);
+  outline: none;
+}
+
+.label {
+  font-family: var(--muse-theme-body-font, inherit);
+  font-size: 0.875rem;
+  color: var(--muse-theme-text-muted, #64748b);
+  background: transparent;
+  border: 1px dashed transparent;
+  text-align: center;
+  padding: 0.25rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.label:focus {
+  border-color: var(--muse-theme-primary, #6366f1);
+  outline: none;
+}
+
+.removeButton {
+  font-size: 0.625rem;
+  color: var(--muse-theme-text-muted, #94a3b8);
+  background: transparent;
+  border: 1px solid currentColor;
+  padding: 0.125rem 0.375rem;
+  border-radius: 0.25rem;
+  cursor: pointer;
+}
+
+.addButton {
+  padding: 0.5rem 1rem;
+  background: var(--muse-theme-primary, #6366f1);
+  color: white;
+  border: none;
+  border-radius: var(--muse-theme-radius, 0.5rem);
+  cursor: pointer;
+  font-size: 0.875rem;
+}
+
+/* ============================================
+   CRT EFFECTS
+   ============================================ */
+:global([data-effects="crt"]) .section {
+  position: relative;
+}
+
+:global([data-effects="crt"]) .section::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(
+    0deg,
+    rgba(var(--muse-theme-primary-rgb, 0, 255, 0), 0.03) 0px,
+    rgba(var(--muse-theme-primary-rgb, 0, 255, 0), 0.03) 1px,
+    transparent 1px,
+    transparent 2px
+  );
+  pointer-events: none;
+  z-index: 10;
+}
+
+:global([data-effects="crt"]) .card {
+  background: rgba(var(--muse-theme-primary-rgb, 0, 255, 0), 0.05);
+  border-color: rgba(var(--muse-theme-primary-rgb, 0, 255, 0), 0.2);
+}
+
+:global([data-effects="crt"]) .value {
+  text-shadow: 0 0 10px rgba(var(--muse-theme-primary-rgb, 0, 255, 0), 0.5);
+}
+
+:global([data-effects="crt"]) .label {
+  text-shadow: 0 0 5px rgba(var(--muse-theme-primary-rgb, 0, 255, 0), 0.3);
+}
+
+/* ============================================
+   NEON EFFECTS
+   ============================================ */
+:global([data-effects="neon"]) .card {
+  background: rgba(var(--muse-theme-primary-rgb, 255, 42, 109), 0.05);
+  border-color: rgba(var(--muse-theme-primary-rgb, 255, 42, 109), 0.3);
+  box-shadow: 0 0 20px rgba(var(--muse-theme-primary-rgb, 255, 42, 109), 0.15);
+}
+
+:global([data-effects="neon"]) .value {
+  text-shadow:
+    0 0 10px rgba(var(--muse-theme-primary-rgb, 255, 42, 109), 0.8),
+    0 0 20px rgba(var(--muse-theme-primary-rgb, 255, 42, 109), 0.6),
+    0 0 40px rgba(var(--muse-theme-primary-rgb, 255, 42, 109), 0.4);
+}
+
+:global([data-effects="neon"]) .label {
+  text-shadow:
+    0 0 5px rgba(var(--muse-theme-primary-rgb, 255, 42, 109), 0.6),
+    0 0 10px rgba(var(--muse-theme-primary-rgb, 255, 42, 109), 0.3);
+}
