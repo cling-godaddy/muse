@@ -1,3 +1,4 @@
+import { useState, useEffect } from "react";
 import type { ContactBlock as ContactBlockType, FormField } from "@muse/core";
 import { EditableText } from "../../ux";
 import { useIsEditable } from "../../context/EditorModeContext";
@@ -35,11 +36,18 @@ export function SplitMap({ block, onUpdate }: Props) {
     });
   };
 
+  const [debouncedAddress, setDebouncedAddress] = useState(block.address);
+
+  useEffect(() => {
+    const timer = setTimeout(() => setDebouncedAddress(block.address), 500);
+    return () => clearTimeout(timer);
+  }, [block.address]);
+
   const apiKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY;
-  const mapUrl = block.address
+  const mapUrl = debouncedAddress
     ? apiKey
-      ? `https://www.google.com/maps/embed/v1/place?key=${apiKey}&q=${encodeURIComponent(block.address)}`
-      : `https://maps.google.com/maps?q=${encodeURIComponent(block.address)}&output=embed`
+      ? `https://www.google.com/maps/embed/v1/place?key=${apiKey}&q=${encodeURIComponent(debouncedAddress)}`
+      : `https://maps.google.com/maps?q=${encodeURIComponent(debouncedAddress)}&output=embed`
     : null;
 
   return (
