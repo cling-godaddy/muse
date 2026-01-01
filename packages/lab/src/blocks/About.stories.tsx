@@ -39,7 +39,7 @@ const meta: Meta<AboutArgs> = {
     body: { control: "text" },
     preset: {
       control: "select",
-      options: ["about-story", "about-split", "about-team"],
+      options: ["about-story", "about-team"],
     },
     showImage: { control: "boolean" },
     teamCount: {
@@ -73,12 +73,13 @@ const meta: Meta<AboutArgs> = {
 export default meta;
 type Story = StoryObj<AboutArgs>;
 
-export const Default: Story = {};
-
-export const Split: Story = {
-  args: { preset: "about-split" },
-};
+export const Story: Story = {};
 
 export const Team: Story = {
-  args: { preset: "about-team", teamCount: 3, showImage: false },
+  args: {
+    headline: "Meet the Team",
+    preset: "about-team",
+    teamCount: 3,
+    showImage: false,
+  },
 };

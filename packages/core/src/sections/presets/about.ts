@@ -32,26 +32,9 @@ export const aboutTeam: SectionPreset = {
   imageRequirements: { category: "people", count: 6, orientation: "square" },
 };
 
-export const aboutSplit: SectionPreset = {
-  id: "about-split",
-  name: "Split",
-  sectionType: "about",
-  layoutPattern: "split",
-  category: "content",
-  mood: "modern",
-  tags: ["visual", "balanced", "image", "text"],
-  industries: ["product", "technology", "creative", "lifestyle"],
-  description: "Image and text side by side.",
-  requiredFields: ["body", "image"],
-  optionalFields: ["headline"],
-  className: "muse-about--split",
-  imageRequirements: { category: "ambient", count: 1, orientation: "vertical" },
-};
-
 export const aboutPresets = {
   "about-story": aboutStory,
   "about-team": aboutTeam,
-  "about-split": aboutSplit,
 } as const;
 
 export type AboutPresetId = keyof typeof aboutPresets;
