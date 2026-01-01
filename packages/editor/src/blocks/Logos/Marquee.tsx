@@ -1,7 +1,7 @@
 import type { LogoItem } from "@muse/core";
 import type { LogosProps } from "./index";
 import { EditableText, ImageLoader } from "../../ux";
-import { useIsEditable } from "../../context/EditorModeContext";
+import { useIsEditable } from "../../context/EditorMode";
 import styles from "./Marquee.module.css";
 
 export function Marquee({ block, onUpdate, isPending }: LogosProps) {

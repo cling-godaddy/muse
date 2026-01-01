@@ -3,7 +3,7 @@ import type { Block } from "@muse/core";
 import { getBlockComponent, type BlockComponent } from "./registry";
 import { PresetPicker } from "../controls/PresetPicker";
 import { supportsPresets } from "../controls/presets";
-import { useSelection } from "../context/SelectionContext";
+import { useSelection } from "../context/Selection";
 
 interface Props {
   block: Block

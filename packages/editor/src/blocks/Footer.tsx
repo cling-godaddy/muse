@@ -1,6 +1,6 @@
 import type { FooterBlock as FooterBlockType, FooterLink, SocialLink, SocialPlatform } from "@muse/core";
 import { EditableText } from "../ux";
-import { useIsEditable } from "../context/EditorModeContext";
+import { useIsEditable } from "../context/EditorMode";
 import {
   ItemPopover,
   PopoverField,

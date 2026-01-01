@@ -1,6 +1,6 @@
 import type { AboutBlock as AboutBlockType, TeamMember } from "@muse/core";
 import { EditableText, ImageLoader } from "../../ux";
-import { useIsEditable } from "../../context/EditorModeContext";
+import { useIsEditable } from "../../context/EditorMode";
 import styles from "./Team.module.css";
 
 interface Props {

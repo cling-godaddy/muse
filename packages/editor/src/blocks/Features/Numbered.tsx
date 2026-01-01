@@ -1,6 +1,6 @@
 import type { FeaturesBlock as FeaturesBlockType, FeatureItem } from "@muse/core";
 import { EditableText } from "../../ux";
-import { useIsEditable } from "../../context/EditorModeContext";
+import { useIsEditable } from "../../context/EditorMode";
 import { FeatureIcon } from "./icons";
 import styles from "./Numbered.module.css";
 

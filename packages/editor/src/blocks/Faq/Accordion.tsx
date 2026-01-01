@@ -1,6 +1,6 @@
 import { useState } from "react";
 import type { FaqBlock as FaqBlockType, FaqItem } from "@muse/core";
-import { useIsEditable } from "../../context/EditorModeContext";
+import { useIsEditable } from "../../context/EditorMode";
 import { EditableText } from "../../ux";
 import styles from "./Accordion.module.css";
 

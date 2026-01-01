@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import type { ContactBlock as ContactBlockType, FormField } from "@muse/core";
 import { EditableText } from "../../ux";
-import { useIsEditable } from "../../context/EditorModeContext";
+import { useIsEditable } from "../../context/EditorMode";
 import styles from "./SplitMap.module.css";
 
 interface Props {

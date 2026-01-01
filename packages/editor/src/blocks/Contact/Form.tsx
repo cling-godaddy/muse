@@ -1,6 +1,6 @@
 import type { ContactBlock as ContactBlockType, FormField } from "@muse/core";
 import { EditableText } from "../../ux";
-import { useIsEditable } from "../../context/EditorModeContext";
+import { useIsEditable } from "../../context/EditorMode";
 import styles from "./Form.module.css";
 
 interface Props {

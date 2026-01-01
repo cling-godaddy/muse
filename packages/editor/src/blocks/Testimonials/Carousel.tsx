@@ -1,6 +1,6 @@
 import { useState } from "react";
 import type { TestimonialsBlock as TestimonialsBlockType, Quote } from "@muse/core";
-import { useIsEditable } from "../../context/EditorModeContext";
+import { useIsEditable } from "../../context/EditorMode";
 import { Avatar, EditableText } from "../../ux";
 import styles from "./Carousel.module.css";
 

@@ -1,6 +1,6 @@
 import type { CtaBlock as CtaBlockType } from "@muse/core";
 import { EditableText, EditableLink } from "../ux";
-import { useIsEditable } from "../context/EditorModeContext";
+import { useIsEditable } from "../context/EditorMode";
 import styles from "./Cta.module.css";
 
 interface Props {

@@ -1,6 +1,6 @@
 import type { StatsBlock as StatsBlockType, StatItem } from "@muse/core";
 import { EditableText } from "../../ux";
-import { useIsEditable } from "../../context/EditorModeContext";
+import { useIsEditable } from "../../context/EditorMode";
 import styles from "./Grid.module.css";
 
 interface Props {

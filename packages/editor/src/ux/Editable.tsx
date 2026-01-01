@@ -1,5 +1,5 @@
 import { useRef, useEffect, type ElementType } from "react";
-import { useIsEditable } from "../context/EditorModeContext";
+import { useIsEditable } from "../context/EditorMode";
 
 interface EditableTextProps {
   value: string

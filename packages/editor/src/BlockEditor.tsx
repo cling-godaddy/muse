@@ -1,6 +1,6 @@
 import type { Block } from "@muse/core";
 import { BlockWrapper } from "./blocks/BlockWrapper";
-import { SelectionProvider } from "./context/SelectionContext";
+import { SelectionProvider } from "./context/Selection";
 
 interface BlockEditorProps {
   blocks: Block[]
