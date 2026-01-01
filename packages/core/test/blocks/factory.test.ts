@@ -1,38 +1,32 @@
 import { describe, expect, it } from "vitest";
 import { createBlock } from "../../src/blocks/factory";
-import type { TextBlock, HeroBlock, FeaturesBlock, CtaBlock } from "../../src/blocks/types";
+import type { HeroBlock, FeaturesBlock, CtaBlock } from "../../src/blocks/types";
 
 const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 describe("createBlock", () => {
   it("creates block with valid UUID", () => {
-    const block = createBlock<TextBlock>("text", { content: "hello" });
+    const block = createBlock<HeroBlock>("hero", { headline: "Hello" });
     expect(block.id).toMatch(uuidRegex);
   });
 
   it("sets type correctly", () => {
-    const block = createBlock<TextBlock>("text", { content: "hello" });
-    expect(block.type).toBe("text");
+    const block = createBlock<HeroBlock>("hero", { headline: "Hello" });
+    expect(block.type).toBe("hero");
   });
 
   it("spreads data correctly", () => {
-    const block = createBlock<TextBlock>("text", { content: "hello" });
-    expect(block.content).toBe("hello");
+    const block = createBlock<HeroBlock>("hero", { headline: "Hello" });
+    expect(block.headline).toBe("Hello");
   });
 
   it("generates unique IDs for each call", () => {
-    const block1 = createBlock<TextBlock>("text", { content: "a" });
-    const block2 = createBlock<TextBlock>("text", { content: "b" });
+    const block1 = createBlock<HeroBlock>("hero", { headline: "a" });
+    const block2 = createBlock<HeroBlock>("hero", { headline: "b" });
     expect(block1.id).not.toBe(block2.id);
   });
 
   describe("works with all block types", () => {
-    it("creates text block", () => {
-      const block = createBlock<TextBlock>("text", { content: "test" });
-      expect(block.type).toBe("text");
-      expect(block.content).toBe("test");
-    });
-
     it("creates hero block", () => {
       const block = createBlock<HeroBlock>("hero", {
         headline: "Welcome",

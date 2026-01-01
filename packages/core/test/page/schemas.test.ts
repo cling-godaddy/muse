@@ -25,7 +25,7 @@ describe("page schemas", () => {
         meta: { title: "Home", description: "Welcome" },
         blocks: [
           { id: uuid2, type: "hero", headline: "Welcome" },
-          { id: uuid3, type: "text", content: "Hello world" },
+          { id: uuid3, type: "cta", headline: "Get Started", buttonText: "Sign Up", buttonHref: "/signup" },
         ],
       });
       expect(result.success).toBe(true);
@@ -89,7 +89,7 @@ describe("page schemas", () => {
     });
 
     it("creates page with blocks", () => {
-      const blocks = [{ id: "1", type: "text" as const, content: "Hello" }];
+      const blocks = [{ id: "1", type: "hero" as const, headline: "Welcome" }];
       const page = createPage("about", { title: "About" }, blocks);
       expect(page.blocks).toHaveLength(1);
     });

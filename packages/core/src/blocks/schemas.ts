@@ -13,11 +13,6 @@ export const imageSourceSchema = z.object({
   providerId: z.string().optional(),
 });
 
-export const textBlockSchema = blockBase.extend({
-  type: z.literal("text"),
-  content: z.string(),
-});
-
 const ctaLinkSchema = z.object({
   text: z.string(),
   href: z.string(),
@@ -201,7 +196,6 @@ export const logosBlockSchema = blockBase.extend({
 });
 
 export const blockSchema = z.discriminatedUnion("type", [
-  textBlockSchema,
   heroBlockSchema,
   featuresBlockSchema,
   ctaBlockSchema,

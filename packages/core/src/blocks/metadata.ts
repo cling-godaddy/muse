@@ -23,14 +23,6 @@ export function getAllBlockMeta(): BlockMeta[] {
 }
 
 registerBlockMeta({
-  type: "text",
-  label: "Text",
-  icon: "type",
-  category: "content",
-  description: "Text content block",
-});
-
-registerBlockMeta({
   type: "hero",
   label: "Hero",
   icon: "layout",

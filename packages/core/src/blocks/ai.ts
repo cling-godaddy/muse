@@ -37,15 +37,6 @@ ${Object.entries(s.properties).map(([k, v]) =>
 }
 
 registerAISchema({
-  type: "text",
-  description: "Text content block for paragraphs and prose",
-  properties: {
-    content: { type: "string", description: "Text content", required: true },
-  },
-  required: ["content"],
-});
-
-registerAISchema({
   type: "hero",
   description: "Hero section with headline, subheadline, call-to-action buttons, and optional background image",
   properties: {

@@ -1,5 +1,4 @@
 import { componentRegistry } from "./registry";
-import { Text } from "./Text";
 import { Hero } from "./Hero";
 import { Features } from "./Features";
 import { Cta } from "./Cta";
@@ -15,7 +14,6 @@ import { Subscribe } from "./Subscribe";
 import { Stats } from "./Stats";
 import { Logos } from "./Logos";
 
-componentRegistry.register("text", Text);
 componentRegistry.register("hero", Hero);
 componentRegistry.register("features", Features);
 componentRegistry.register("cta", Cta);

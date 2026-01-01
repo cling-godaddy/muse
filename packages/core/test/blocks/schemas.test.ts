@@ -1,6 +1,5 @@
 import { describe, expect, it } from "vitest";
 import {
-  textBlockSchema,
   heroBlockSchema,
   featuresBlockSchema,
   ctaBlockSchema,
@@ -12,34 +11,6 @@ import {
 const uuid = "550e8400-e29b-41d4-a716-446655440000";
 
 describe("block schemas", () => {
-  describe("textBlockSchema", () => {
-    it("validates valid text block", () => {
-      const result = textBlockSchema.safeParse({
-        id: uuid,
-        type: "text",
-        content: "hello",
-      });
-      expect(result.success).toBe(true);
-    });
-
-    it("rejects missing content", () => {
-      const result = textBlockSchema.safeParse({
-        id: uuid,
-        type: "text",
-      });
-      expect(result.success).toBe(false);
-    });
-
-    it("rejects invalid uuid", () => {
-      const result = textBlockSchema.safeParse({
-        id: "not-a-uuid",
-        type: "text",
-        content: "hello",
-      });
-      expect(result.success).toBe(false);
-    });
-  });
-
   describe("heroBlockSchema", () => {
     it("validates minimal hero block", () => {
       const result = heroBlockSchema.safeParse({
@@ -151,18 +122,6 @@ describe("block schemas", () => {
   });
 
   describe("blockSchema (discriminated union)", () => {
-    it("parses text block", () => {
-      const result = blockSchema.safeParse({
-        id: uuid,
-        type: "text",
-        content: "hello",
-      });
-      expect(result.success).toBe(true);
-      if (result.success) {
-        expect(result.data.type).toBe("text");
-      }
-    });
-
     it("parses hero block", () => {
       const result = blockSchema.safeParse({
         id: uuid,
@@ -189,8 +148,8 @@ describe("block schemas", () => {
     it("validates valid block", () => {
       const result = validateBlock({
         id: uuid,
-        type: "text",
-        content: "hello",
+        type: "hero",
+        headline: "Welcome",
       });
       expect(result.success).toBe(true);
     });
@@ -198,7 +157,7 @@ describe("block schemas", () => {
     it("returns error for invalid block", () => {
       const result = validateBlock({
         id: uuid,
-        type: "text",
+        type: "hero",
       });
       expect(result.success).toBe(false);
     });
@@ -215,8 +174,8 @@ describe("block schemas", () => {
   describe("validateBlocks", () => {
     it("validates valid block array", () => {
       const result = validateBlocks([
-        { id: uuid, type: "text", content: "hello" },
-        { id: "550e8400-e29b-41d4-a716-446655440001", type: "hero", headline: "Welcome" },
+        { id: uuid, type: "hero", headline: "Welcome" },
+        { id: "550e8400-e29b-41d4-a716-446655440001", type: "cta", headline: "Get Started", buttonText: "Sign Up", buttonHref: "/signup" },
       ]);
       expect(result.success).toBe(true);
     });
@@ -228,8 +187,8 @@ describe("block schemas", () => {
 
     it("returns error for invalid block in array", () => {
       const result = validateBlocks([
-        { id: uuid, type: "text", content: "hello" },
-        { id: "550e8400-e29b-41d4-a716-446655440001", type: "text" },
+        { id: uuid, type: "hero", headline: "Welcome" },
+        { id: "550e8400-e29b-41d4-a716-446655440001", type: "hero" },
       ]);
       expect(result.success).toBe(false);
     });

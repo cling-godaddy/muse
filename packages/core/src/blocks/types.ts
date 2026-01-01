@@ -12,11 +12,6 @@ export interface ImageSource {
   providerId?: string
 }
 
-export interface TextBlock extends BlockBase {
-  type: "text"
-  content: string
-}
-
 export interface HeroBlock extends BlockBase {
   type: "hero"
   headline: string
@@ -197,8 +192,7 @@ export interface LogosBlock extends BlockBase {
 }
 
 export type Block
-  = | TextBlock
-    | HeroBlock
+  = | HeroBlock
     | FeaturesBlock
     | CtaBlock
     | ImageBlock
@@ -221,7 +215,6 @@ export function isBlockType<T extends Block>(
   return (block): block is T => block.type === type;
 }
 
-export const isTextBlock = isBlockType<TextBlock>("text");
 export const isHeroBlock = isBlockType<HeroBlock>("hero");
 export const isFeaturesBlock = isBlockType<FeaturesBlock>("features");
 export const isCtaBlock = isBlockType<CtaBlock>("cta");

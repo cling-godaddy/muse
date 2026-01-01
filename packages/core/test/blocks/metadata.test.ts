@@ -8,14 +8,6 @@ import {
 
 describe("block metadata registry", () => {
   describe("default registrations", () => {
-    it("has text metadata registered", () => {
-      const meta = getBlockMeta("text");
-      expect(meta).toBeDefined();
-      expect(meta?.type).toBe("text");
-      expect(meta?.label).toBe("Text");
-      expect(meta?.category).toBe("content");
-    });
-
     it("has hero metadata registered", () => {
       const meta = getBlockMeta("hero");
       expect(meta).toBeDefined();
@@ -51,9 +43,8 @@ describe("block metadata registry", () => {
   describe("getAllBlockMeta", () => {
     it("returns all registered metadata", () => {
       const allMeta = getAllBlockMeta();
-      expect(allMeta.length).toBeGreaterThanOrEqual(4);
+      expect(allMeta.length).toBeGreaterThanOrEqual(3);
       const types = allMeta.map(m => m.type);
-      expect(types).toContain("text");
       expect(types).toContain("hero");
       expect(types).toContain("features");
       expect(types).toContain("cta");
@@ -74,15 +65,15 @@ describe("block metadata registry", () => {
   describe("registerBlockMeta", () => {
     it("registers and retrieves custom metadata", () => {
       const customMeta: BlockMeta = {
-        type: "text",
-        label: "Custom Text",
+        type: "hero",
+        label: "Custom Hero",
         icon: "custom-icon",
-        category: "content",
-        description: "Custom text block",
+        category: "layout",
+        description: "Custom hero block",
       };
       registerBlockMeta(customMeta);
-      const retrieved = getBlockMeta("text");
-      expect(retrieved?.label).toBe("Custom Text");
+      const retrieved = getBlockMeta("hero");
+      expect(retrieved?.label).toBe("Custom Hero");
     });
   });
 });

@@ -9,13 +9,6 @@ import {
 
 describe("AI schema registry", () => {
   describe("default registrations", () => {
-    it("has text schema registered", () => {
-      const schema = getAISchema("text");
-      expect(schema).toBeDefined();
-      expect(schema?.type).toBe("text");
-      expect(schema?.required).toContain("content");
-    });
-
     it("has hero schema registered", () => {
       const schema = getAISchema("hero");
       expect(schema).toBeDefined();
@@ -50,9 +43,8 @@ describe("AI schema registry", () => {
   describe("getAllAISchemas", () => {
     it("returns all registered schemas", () => {
       const schemas = getAllAISchemas();
-      expect(schemas.length).toBeGreaterThanOrEqual(4);
+      expect(schemas.length).toBeGreaterThanOrEqual(3);
       const types = schemas.map(s => s.type);
-      expect(types).toContain("text");
       expect(types).toContain("hero");
       expect(types).toContain("features");
       expect(types).toContain("cta");
@@ -62,24 +54,23 @@ describe("AI schema registry", () => {
   describe("registerAISchema", () => {
     it("registers and retrieves custom schema", () => {
       const customSchema: AIBlockSchema = {
-        type: "text",
-        description: "Custom text block",
+        type: "hero",
+        description: "Custom hero block",
         properties: {
-          content: { type: "string", description: "Content", required: true },
-          format: { type: "string", description: "Format type" },
+          headline: { type: "string", description: "Headline", required: true },
+          subheadline: { type: "string", description: "Subheadline" },
         },
-        required: ["content"],
+        required: ["headline"],
       };
       registerAISchema(customSchema);
-      const retrieved = getAISchema("text");
-      expect(retrieved?.description).toBe("Custom text block");
+      const retrieved = getAISchema("hero");
+      expect(retrieved?.description).toBe("Custom hero block");
     });
   });
 
   describe("generateBlockSchemaPrompt", () => {
     it("generates prompt with all block types", () => {
       const prompt = generateBlockSchemaPrompt();
-      expect(prompt).toContain("Block: text");
       expect(prompt).toContain("Block: hero");
       expect(prompt).toContain("Block: features");
       expect(prompt).toContain("Block: cta");
@@ -94,7 +85,6 @@ describe("AI schema registry", () => {
       const prompt = generateBlockSchemaPrompt();
       expect(prompt).toContain("Fields:");
       expect(prompt).toContain("headline");
-      expect(prompt).toContain("content");
     });
 
     it("marks required fields", () => {
