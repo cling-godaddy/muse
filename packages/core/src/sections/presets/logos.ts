@@ -15,21 +15,6 @@ export const logosGrid: SectionPreset = {
   className: "muse-logos--grid",
 };
 
-export const logosRow: SectionPreset = {
-  id: "logos-row",
-  name: "Row",
-  sectionType: "logos",
-  layoutPattern: "list",
-  category: "social-proof",
-  mood: "minimal",
-  tags: ["compact", "inline", "subtle", "horizontal"],
-  industries: ["startup", "saas", "agency", "technology"],
-  description: "Single row of logos. Compact.",
-  requiredFields: ["logos"],
-  optionalFields: ["headline"],
-  className: "muse-logos--row",
-};
-
 export const logosMarquee: SectionPreset = {
   id: "logos-marquee",
   name: "Marquee",
@@ -47,7 +32,6 @@ export const logosMarquee: SectionPreset = {
 
 export const logosPresets = {
   "logos-grid": logosGrid,
-  "logos-row": logosRow,
   "logos-marquee": logosMarquee,
 } as const;
 

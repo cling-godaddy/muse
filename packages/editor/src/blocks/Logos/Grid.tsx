@@ -1,15 +1,10 @@
-import type { LogosBlock as LogosBlockType, LogoItem } from "@muse/core";
-import { EditableText, ImageLoader } from "../ux";
-import { useIsEditable } from "../context/EditorModeContext";
-import styles from "./Logos.module.css";
+import type { LogoItem } from "@muse/core";
+import type { LogosProps } from "./index";
+import { EditableText, ImageLoader } from "../../ux";
+import { useIsEditable } from "../../context/EditorModeContext";
+import styles from "./Grid.module.css";
 
-interface Props {
-  block: LogosBlockType
-  onUpdate: (data: Partial<LogosBlockType>) => void
-  isPending?: boolean
-}
-
-export function Logos({ block, onUpdate, isPending }: Props) {
+export function Grid({ block, onUpdate, isPending }: LogosProps) {
   const isEditable = useIsEditable();
 
   const updateLogo = (index: number, data: Partial<LogoItem>) => {
@@ -24,7 +19,7 @@ export function Logos({ block, onUpdate, isPending }: Props) {
   };
 
   return (
-    <div className={styles.section}>
+    <section className={styles.section}>
       <EditableText
         value={block.headline ?? ""}
         onChange={v => onUpdate({ headline: v || undefined })}
@@ -38,7 +33,7 @@ export function Logos({ block, onUpdate, isPending }: Props) {
           <div key={i} className={styles.logo}>
             {logo.href && !isEditable
               ? (
-                <a href={logo.href}>
+                <a href={logo.href} className={styles.logoLink}>
                   <ImageLoader
                     image={logo.image}
                     isPending={!!isPending}
@@ -60,7 +55,7 @@ export function Logos({ block, onUpdate, isPending }: Props) {
                   value={logo.href ?? ""}
                   onChange={e => updateLogo(i, { href: e.target.value || undefined })}
                   placeholder="Link (optional)"
-                  className={styles.logoLink}
+                  className={styles.linkInput}
                 />
                 <button
                   type="button"
@@ -74,6 +69,6 @@ export function Logos({ block, onUpdate, isPending }: Props) {
           </div>
         ))}
       </div>
-    </div>
+    </section>
   );
 }
