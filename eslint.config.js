@@ -33,6 +33,20 @@ export default tseslint.config(
     },
   },
   {
+    // Context files export both Provider components and hooks - this is idiomatic React
+    files: ["**/context/*.tsx"],
+    rules: {
+      "react-refresh/only-export-components": "off",
+    },
+  },
+  {
+    // Icon components may export utility functions alongside the component
+    files: ["**/icons/*.tsx"],
+    rules: {
+      "react-refresh/only-export-components": "off",
+    },
+  },
+  {
     ignores: ["**/dist/**", "**/node_modules/**"],
   },
   storybook.configs["flat/recommended"]
