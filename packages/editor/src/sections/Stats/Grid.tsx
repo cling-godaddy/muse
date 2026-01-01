@@ -4,15 +4,15 @@ import { useIsEditable } from "../../context/EditorMode";
 import styles from "./Grid.module.css";
 
 interface Props {
-  block: StatsSectionType
+  section: StatsSectionType
   onUpdate: (data: Partial<StatsSectionType>) => void
 }
 
-export function Grid({ block, onUpdate }: Props) {
+export function Grid({ section, onUpdate }: Props) {
   const isEditable = useIsEditable();
 
   const updateStat = (index: number, data: Partial<StatItem>) => {
-    const stats = block.stats.map((stat, i) =>
+    const stats = section.stats.map((stat, i) =>
       i === index ? { ...stat, ...data } : stat,
     );
     onUpdate({ stats });
@@ -20,18 +20,18 @@ export function Grid({ block, onUpdate }: Props) {
 
   const addStat = () => {
     onUpdate({
-      stats: [...block.stats, { value: "0", label: "Label" }],
+      stats: [...section.stats, { value: "0", label: "Label" }],
     });
   };
 
   const removeStat = (index: number) => {
-    onUpdate({ stats: block.stats.filter((_, i) => i !== index) });
+    onUpdate({ stats: section.stats.filter((_, i) => i !== index) });
   };
 
   return (
     <section className={styles.section}>
       <EditableText
-        value={block.headline ?? ""}
+        value={section.headline ?? ""}
         onChange={v => onUpdate({ headline: v || undefined })}
         as="h2"
         className={styles.headline}
@@ -39,7 +39,7 @@ export function Grid({ block, onUpdate }: Props) {
       />
 
       <div className={styles.grid}>
-        {block.stats.map((stat, i) => (
+        {section.stats.map((stat, i) => (
           <div key={i} className={styles.card}>
             {isEditable
               ? (

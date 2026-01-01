@@ -9,7 +9,7 @@ import { structureAgent, parseStructure } from "./structure";
 import { themeAgent, themeSystemPrompt, parseThemeSelection, type ThemeSelection } from "./theme";
 import { imageAgent, parseImagePlan } from "./image";
 import { copyAgent } from "./copy";
-import type { BrandBrief, PageStructure, CopyBlockContent } from "./types";
+import type { BrandBrief, PageStructure, CopySectionContent } from "./types";
 
 interface UsageAccumulator {
   input: number
@@ -21,8 +21,8 @@ function parseJson<T>(json: string): T {
   return JSON.parse(json);
 }
 
-// Extract copy block summaries for image agent context
-function extractCopySectionSummaries(sections: Section[]): CopyBlockContent[] {
+// Extract copy section summaries for image agent context
+function extractCopySectionSummaries(sections: Section[]): CopySectionContent[] {
   return sections.map(section => ({
     id: section.id,
     headline: (section as { headline?: string }).headline,
@@ -125,12 +125,12 @@ export async function* orchestrate(
   events?.onStructure?.(structure);
   events?.onTheme?.(themeResult.selection);
 
-  structureLog.info("complete", { duration: structureResult.duration, blockCount: structure.blocks.length });
+  structureLog.info("complete", { duration: structureResult.duration, sectionCount: structure.sections.length });
   themeLog.info("complete", { duration: themeResult.duration, ...themeResult.selection });
 
   yield `[AGENT:structure:complete]${JSON.stringify({
-    blockCount: structure.blocks.length,
-    blockTypes: structure.blocks.map(b => b.type),
+    sectionCount: structure.sections.length,
+    sectionTypes: structure.sections.map(s => s.type),
     duration: structureResult.duration,
   })}\n`;
 
@@ -158,11 +158,11 @@ export async function* orchestrate(
   const copyDuration = Date.now() - copyStart;
   copyLog.info("complete", { duration: copyDuration });
 
-  // Parse copy result as { blocks: Section[] }
+  // Parse copy result as { sections: Section[] }
   let sections: Section[] = [];
   try {
-    const parsed = JSON.parse(copyResult.content) as { blocks: Section[] };
-    sections = parsed.blocks ?? [];
+    const parsed = JSON.parse(copyResult.content) as { sections: Section[] };
+    sections = parsed.sections ?? [];
   }
   catch (err) {
     copyLog.warn("parse_failed", { error: String(err), input: copyResult.content.slice(0, 200) });
@@ -176,10 +176,10 @@ export async function* orchestrate(
   })}\n`;
 
   // Emit all sections at once
-  yield `[BLOCKS:${JSON.stringify(sections)}]\n`;
+  yield `[SECTIONS:${JSON.stringify(sections)}]\n`;
 
   // Extract summaries for image agent
-  const copyBlocks = extractCopySectionSummaries(sections);
+  const copySections = extractCopySectionSummaries(sections);
 
   // step 4: plan and resolve images (using copy context)
   let images: ImageSelection[] = [];
@@ -188,30 +188,30 @@ export async function* orchestrate(
     const imageStart = Date.now();
     const imageLog = log.child({ agent: "image" });
 
-    const imageResult = await imageAgent.run({ prompt, brief, structure, copyBlocks }, provider);
+    const imageResult = await imageAgent.run({ prompt, brief, structure, copySections }, provider);
     addUsage(imageResult.usage);
     imageLog.debug("raw_response", { response: imageResult.content });
 
-    // Identify blocks that need mixed orientations for masonry-style layouts
-    const mixedOrientationBlocks = new Set(
-      structure.blocks
-        .filter(b => b.preset && getImageRequirements(b.preset)?.orientation === "mixed")
-        .map(b => b.id),
+    // Identify sections that need mixed orientations for masonry-style layouts
+    const mixedOrientationSections = new Set(
+      structure.sections
+        .filter(s => s.preset && getImageRequirements(s.preset)?.orientation === "mixed")
+        .map(s => s.id),
     );
 
-    const imagePlan = parseImagePlan(imageResult.content, mixedOrientationBlocks);
-    imageLog.debug("parsed_plan", { plan: imagePlan, mixedBlocks: Array.from(mixedOrientationBlocks) });
+    const imagePlan = parseImagePlan(imageResult.content, mixedOrientationSections);
+    imageLog.debug("parsed_plan", { plan: imagePlan, mixedSections: Array.from(mixedOrientationSections) });
 
     if (imagePlan.length > 0) {
-      // Compute minimum image counts per gallery block
-      const minPerBlock: Record<string, number> = {};
-      for (const block of structure.blocks) {
-        if (block.type === "gallery" && block.preset) {
-          minPerBlock[block.id] = getMinimumImages(block.preset);
+      // Compute minimum image counts per gallery section
+      const minPerSection: Record<string, number> = {};
+      for (const section of structure.sections) {
+        if (section.type === "gallery" && section.preset) {
+          minPerSection[section.id] = getMinimumImages(section.preset);
         }
       }
 
-      images = await config.mediaClient.executePlan(imagePlan, { minPerBlock });
+      images = await config.mediaClient.executePlan(imagePlan, { minPerSection });
       events?.onImages?.(images);
     }
 
@@ -224,7 +224,7 @@ export async function* orchestrate(
       duration: imageDuration,
     })}\n`;
 
-    // emit images for client-side injection into blocks
+    // emit images for client-side injection into sections
     if (images.length > 0) {
       yield `[IMAGES:${JSON.stringify(images)}]\n`;
     }

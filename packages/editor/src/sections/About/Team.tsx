@@ -4,16 +4,16 @@ import { useIsEditable } from "../../context/EditorMode";
 import styles from "./Team.module.css";
 
 interface Props {
-  block: AboutSectionType
+  section: AboutSectionType
   onUpdate: (data: Partial<AboutSectionType>) => void
   isPending?: boolean
 }
 
-export function Team({ block, onUpdate, isPending }: Props) {
+export function Team({ section, onUpdate, isPending }: Props) {
   const isEditable = useIsEditable();
 
   const updateMember = (index: number, data: Partial<TeamMember>) => {
-    const teamMembers = (block.teamMembers ?? []).map((member, i) =>
+    const teamMembers = (section.teamMembers ?? []).map((member, i) =>
       i === index ? { ...member, ...data } : member,
     );
     onUpdate({ teamMembers });
@@ -21,20 +21,20 @@ export function Team({ block, onUpdate, isPending }: Props) {
 
   const addMember = () => {
     onUpdate({
-      teamMembers: [...(block.teamMembers ?? []), { name: "", role: "" }],
+      teamMembers: [...(section.teamMembers ?? []), { name: "", role: "" }],
     });
   };
 
   const removeMember = (index: number) => {
     onUpdate({
-      teamMembers: (block.teamMembers ?? []).filter((_, i) => i !== index),
+      teamMembers: (section.teamMembers ?? []).filter((_, i) => i !== index),
     });
   };
 
   return (
     <section className={styles.section}>
       <EditableText
-        value={block.headline ?? ""}
+        value={section.headline ?? ""}
         onChange={v => onUpdate({ headline: v || undefined })}
         as="h2"
         className={styles.headline}
@@ -42,7 +42,7 @@ export function Team({ block, onUpdate, isPending }: Props) {
       />
 
       <div className={styles.grid}>
-        {block.teamMembers?.map((member, i) => (
+        {section.teamMembers?.map((member, i) => (
           <div key={i} className={styles.member}>
             {member.image && (
               <ImageLoader

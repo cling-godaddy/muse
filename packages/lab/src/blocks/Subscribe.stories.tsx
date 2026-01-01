@@ -34,7 +34,7 @@ const meta: Meta<SubscribeArgs> = {
     preset: "subscribe-inline",
   },
   render: (args) => {
-    const block: SubscribeSection = {
+    const section: SubscribeSection = {
       id: "story-subscribe",
       type: "subscribe",
       version: 1,
@@ -45,7 +45,7 @@ const meta: Meta<SubscribeArgs> = {
       disclaimer: args.disclaimer || undefined,
       preset: args.preset,
     };
-    return <Subscribe block={block} onUpdate={console.log} />;
+    return <Subscribe section={section} onUpdate={console.log} />;
   },
 };
 

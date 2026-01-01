@@ -4,26 +4,26 @@ import { useIsEditable } from "../../context/EditorMode";
 import styles from "./Card.module.css";
 
 interface Props {
-  block: SubscribeSectionType
+  section: SubscribeSectionType
   onUpdate: (data: Partial<SubscribeSectionType>) => void
   isPending?: boolean
 }
 
-export function Card({ block, onUpdate }: Props) {
+export function Card({ section, onUpdate }: Props) {
   const isEditable = useIsEditable();
 
   return (
     <section className={styles.section}>
       <div className={styles.card}>
         <EditableText
-          value={block.headline ?? ""}
+          value={section.headline ?? ""}
           onChange={v => onUpdate({ headline: v || undefined })}
           as="h2"
           className={styles.headline}
           placeholder="Stay in the loop"
         />
         <EditableText
-          value={block.subheadline ?? ""}
+          value={section.subheadline ?? ""}
           onChange={v => onUpdate({ subheadline: v || undefined })}
           as="p"
           className={styles.subheadline}
@@ -37,14 +37,14 @@ export function Card({ block, onUpdate }: Props) {
                 <input
                   type="text"
                   className={styles.emailInput}
-                  value={block.placeholderText ?? ""}
+                  value={section.placeholderText ?? ""}
                   onChange={e => onUpdate({ placeholderText: e.target.value || undefined })}
                   placeholder="Enter your email"
                 />
                 <div className={styles.button}>
                   <input
                     type="text"
-                    value={block.buttonText}
+                    value={section.buttonText}
                     onChange={e => onUpdate({ buttonText: e.target.value })}
                     placeholder="Subscribe"
                   />
@@ -56,18 +56,18 @@ export function Card({ block, onUpdate }: Props) {
                 <input
                   type="email"
                   className={styles.emailInput}
-                  placeholder={block.placeholderText ?? "Enter your email"}
+                  placeholder={section.placeholderText ?? "Enter your email"}
                   disabled
                 />
                 <button type="button" className={styles.button}>
-                  {block.buttonText || "Subscribe"}
+                  {section.buttonText || "Subscribe"}
                 </button>
               </>
             )}
         </div>
 
         <EditableText
-          value={block.disclaimer ?? ""}
+          value={section.disclaimer ?? ""}
           onChange={v => onUpdate({ disclaimer: v || undefined })}
           as="p"
           className={styles.disclaimer}

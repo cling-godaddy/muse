@@ -4,18 +4,18 @@ import { EditableText, ImageLoader } from "../../ux";
 import { useIsEditable } from "../../context/EditorMode";
 import styles from "./Marquee.module.css";
 
-export function Marquee({ block, onUpdate, isPending }: LogosProps) {
+export function Marquee({ section, onUpdate, isPending }: LogosProps) {
   const isEditable = useIsEditable();
 
   const updateLogo = (index: number, data: Partial<LogoItem>) => {
-    const logos = block.logos.map((logo, i) =>
+    const logos = section.logos.map((logo, i) =>
       i === index ? { ...logo, ...data } : logo,
     );
     onUpdate({ logos });
   };
 
   const removeLogo = (index: number) => {
-    onUpdate({ logos: block.logos.filter((_, i) => i !== index) });
+    onUpdate({ logos: section.logos.filter((_, i) => i !== index) });
   };
 
   const renderLogo = (logo: LogoItem, i: number, isClone = false) => (
@@ -61,7 +61,7 @@ export function Marquee({ block, onUpdate, isPending }: LogosProps) {
   return (
     <section className={styles.section}>
       <EditableText
-        value={block.headline ?? ""}
+        value={section.headline ?? ""}
         onChange={v => onUpdate({ headline: v || undefined })}
         as="h2"
         className={styles.headline}
@@ -70,8 +70,8 @@ export function Marquee({ block, onUpdate, isPending }: LogosProps) {
 
       <div className={styles.marqueeContainer}>
         <div className={`${styles.marquee} ${isEditable ? styles.paused : ""}`}>
-          {block.logos.map((logo, i) => renderLogo(logo, i))}
-          {!isEditable && block.logos.map((logo, i) => renderLogo(logo, i, true))}
+          {section.logos.map((logo, i) => renderLogo(logo, i))}
+          {!isEditable && section.logos.map((logo, i) => renderLogo(logo, i, true))}
         </div>
       </div>
     </section>

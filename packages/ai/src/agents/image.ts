@@ -1,13 +1,13 @@
 import { createLogger } from "@muse/logger";
 import { getMaxImageRequirements, type SectionType } from "@muse/core";
 import type { Provider, ResponseSchema } from "../types";
-import type { AgentInput, SyncAgent, SyncAgentResult, PageStructure, BrandBrief, ImagePlan, CopyBlockContent } from "./types";
+import type { AgentInput, SyncAgent, SyncAgentResult, PageStructure, BrandBrief, ImagePlan, CopySectionContent } from "./types";
 
 const log = createLogger().child({ agent: "image" });
 
 const imagePlanSchema: ResponseSchema = {
   name: "image_plan",
-  description: "Array of image search plans for landing page blocks",
+  description: "Array of image search plans for landing page sections",
   schema: {
     type: "object",
     properties: {
@@ -16,7 +16,7 @@ const imagePlanSchema: ResponseSchema = {
         items: {
           type: "object",
           properties: {
-            blockId: { type: "string", description: "Block ID to attach image to" },
+            blockId: { type: "string", description: "Section ID to attach image to" },
             category: { type: "string", enum: ["ambient", "subject", "people"], description: "Image category: ambient (backgrounds/textures), subject (main content), people (portraits/teams)" },
             provider: { type: "string", enum: ["unsplash", "pexels"], description: "Image provider" },
             searchQuery: { type: "string", description: "Search query for the image" },
@@ -33,22 +33,22 @@ const imagePlanSchema: ResponseSchema = {
   },
 };
 
-function buildPlanningPrompt(brief: BrandBrief, structure: PageStructure, copyBlocks?: CopyBlockContent[]): string {
-  const blocksWithImages = structure.blocks
-    .map((b) => {
+function buildPlanningPrompt(brief: BrandBrief, structure: PageStructure, copySections?: CopySectionContent[]): string {
+  const sectionsWithImages = structure.sections
+    .map((s) => {
       // Use max requirements for section type to support preset switching
-      const req = getMaxImageRequirements(b.type as SectionType);
+      const req = getMaxImageRequirements(s.type as SectionType);
       if (!req) return null;
-      return { block: b, req };
+      return { section: s, req };
     })
     .filter((x): x is NonNullable<typeof x> => x !== null);
 
-  const requirementsSection = blocksWithImages.length > 0
-    ? `IMAGE REQUIREMENTS (one plan item per block):
-${blocksWithImages.map(({ block, req }) =>
-  `- ${block.id}: ${req.count} ${req.category} image(s), orientation: ${req.orientation === "mixed" ? "horizontal OR vertical OR square" : req.orientation}`,
+  const requirementsSection = sectionsWithImages.length > 0
+    ? `IMAGE REQUIREMENTS (one plan item per section):
+${sectionsWithImages.map(({ section, req }) =>
+  `- ${section.id}: ${req.count} ${req.category} image(s), orientation: ${req.orientation === "mixed" ? "horizontal OR vertical OR square" : req.orientation}`,
 ).join("\n")}`
-    : "No blocks require images.";
+    : "No sections require images.";
 
   return `You are an image curator for landing pages. Generate search queries for the required images.
 
@@ -58,20 +58,20 @@ BRAND BRIEF:
 - Brand Voice: ${brief.brandVoice.join(", ")}
 
 PAGE CONTEXT:
-${structure.blocks.map((b) => {
-  const copy = copyBlocks?.find(c => c.id === b.id);
+${structure.sections.map((s) => {
+  const copy = copySections?.find(c => c.id === s.id);
   const copyLine = copy?.headline
     ? `\n  Headline: "${copy.headline}"${copy.subheadline ? ` | Subheadline: "${copy.subheadline}"` : ""}`
     : "";
-  return `- ${b.id} (${b.type}): ${b.purpose}${copyLine}`;
+  return `- ${s.id} (${s.type}): ${s.purpose}${copyLine}`;
 }).join("\n")}
 
 ${requirementsSection}
 
 RULES:
-- Output exactly ONE plan item per block listed above
+- Output exactly ONE plan item per section listed above
 - Use the exact category, count, and orientation specified
-- Do NOT split blocks into multiple plan items
+- Do NOT split sections into multiple plan items
 - Search queries should be specific and evocative, using the headline/copy context when available
 - Provider: "unsplash" for editorial/lifestyle, "pexels" for objects/products
 
@@ -81,7 +81,7 @@ Return empty items array if no images needed.`;
 export const imageAgent: SyncAgent = {
   config: {
     name: "image",
-    description: "Plans image searches for blocks",
+    description: "Plans image searches for sections",
   },
 
   async run(input: AgentInput, provider: Provider): Promise<SyncAgentResult> {
@@ -90,7 +90,7 @@ export const imageAgent: SyncAgent = {
     }
 
     const messages = [
-      { role: "system" as const, content: buildPlanningPrompt(input.brief, input.structure, input.copyBlocks) },
+      { role: "system" as const, content: buildPlanningPrompt(input.brief, input.structure, input.copySections) },
       { role: "user" as const, content: `Plan images for a page about: ${input.prompt}` },
     ];
     if (input.retryFeedback) {
@@ -106,7 +106,7 @@ export const imageAgent: SyncAgent = {
   },
 };
 
-export function parseImagePlan(json: string, mixedOrientationBlocks?: Set<string>): ImagePlan[] {
+export function parseImagePlan(json: string, mixedOrientationSections?: Set<string>): ImagePlan[] {
   try {
     const cleaned = json.trim().replace(/^```json\n?/, "").replace(/\n?```$/, "");
     const parsed = JSON.parse(cleaned);
@@ -132,13 +132,13 @@ export function parseImagePlan(json: string, mixedOrientationBlocks?: Set<string
 
     const plans = items.filter(isImagePlan);
 
-    // Mark mixed orientation blocks - client.ts handles the parallel fetch
-    if (!mixedOrientationBlocks || mixedOrientationBlocks.size === 0) {
+    // Mark mixed orientation sections - client.ts handles the parallel fetch
+    if (!mixedOrientationSections || mixedOrientationSections.size === 0) {
       return plans;
     }
 
     return plans.map((item: ImagePlan) =>
-      mixedOrientationBlocks.has(item.blockId)
+      mixedOrientationSections.has(item.blockId)
         ? { ...item, orientation: "mixed" as const }
         : item,
     );

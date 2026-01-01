@@ -5,21 +5,21 @@ import { Grid } from "./Grid";
 import { Carousel } from "./Carousel";
 
 interface Props {
-  block: TestimonialsSectionType
+  section: TestimonialsSectionType
   onUpdate: (data: Partial<TestimonialsSectionType>) => void
   isPending?: boolean
 }
 
-export function Testimonials({ block, onUpdate, isPending }: Props) {
-  const preset = block.preset ?? getDefaultPreset("testimonials");
+export function Testimonials({ section, onUpdate, isPending }: Props) {
+  const preset = section.preset ?? getDefaultPreset("testimonials");
 
   switch (preset) {
     case "testimonials-single":
-      return <Single block={block} onUpdate={onUpdate} isPending={isPending} />;
+      return <Single section={section} onUpdate={onUpdate} isPending={isPending} />;
     case "testimonials-carousel":
-      return <Carousel block={block} onUpdate={onUpdate} isPending={isPending} />;
+      return <Carousel section={section} onUpdate={onUpdate} isPending={isPending} />;
     case "testimonials-grid":
     default:
-      return <Grid block={block} onUpdate={onUpdate} isPending={isPending} />;
+      return <Grid section={section} onUpdate={onUpdate} isPending={isPending} />;
   }
 }

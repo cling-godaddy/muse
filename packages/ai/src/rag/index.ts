@@ -7,5 +7,5 @@ export type {
   RetrievedExample,
   RetrieveOptions,
   StructureKBEntry,
-  StructureBlock,
+  StructureSection,
 } from "./types";

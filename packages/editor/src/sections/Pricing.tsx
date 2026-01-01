@@ -4,15 +4,15 @@ import { useIsEditable } from "../context/EditorMode";
 import styles from "./Pricing.module.css";
 
 interface Props {
-  block: PricingSectionType
+  section: PricingSectionType
   onUpdate: (data: Partial<PricingSectionType>) => void
 }
 
-export function Pricing({ block, onUpdate }: Props) {
+export function Pricing({ section, onUpdate }: Props) {
   const isEditable = useIsEditable();
 
   const updatePlan = (index: number, data: Partial<PricingPlan>) => {
-    const plans = block.plans.map((p, i) =>
+    const plans = section.plans.map((p, i) =>
       i === index ? { ...p, ...data } : p,
     );
     onUpdate({ plans });
@@ -20,18 +20,18 @@ export function Pricing({ block, onUpdate }: Props) {
 
   return (
     <div className={styles.section}>
-      {block.headline !== undefined && (
+      {section.headline !== undefined && (
         <EditableText
-          value={block.headline}
+          value={section.headline}
           onChange={v => onUpdate({ headline: v || undefined })}
           as="h2"
           className={styles.headline}
           placeholder="Section headline..."
         />
       )}
-      {block.subheadline !== undefined && (
+      {section.subheadline !== undefined && (
         <EditableText
-          value={block.subheadline}
+          value={section.subheadline}
           onChange={v => onUpdate({ subheadline: v || undefined })}
           as="p"
           className={styles.subheadline}
@@ -39,7 +39,7 @@ export function Pricing({ block, onUpdate }: Props) {
         />
       )}
       <div className={styles.plans}>
-        {block.plans.map((plan, i) => (
+        {section.plans.map((plan, i) => (
           <div
             key={i}
             className={`${styles.plan} ${plan.highlighted ? styles.highlighted : ""}`}

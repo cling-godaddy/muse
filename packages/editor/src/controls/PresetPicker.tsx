@@ -2,14 +2,14 @@ import { getPresetsForType, getDefaultPreset, type SectionType } from "@muse/cor
 import { Select } from "./Select";
 
 interface Props {
-  blockType: string
+  sectionType: string
   currentPreset: string | undefined
   onChange: (presetId: string) => void
 }
 
-export function PresetPicker({ blockType, currentPreset, onChange }: Props) {
-  const presets = getPresetsForType(blockType as SectionType);
-  const defaultPreset = getDefaultPreset(blockType as SectionType);
+export function PresetPicker({ sectionType, currentPreset, onChange }: Props) {
+  const presets = getPresetsForType(sectionType as SectionType);
+  const defaultPreset = getDefaultPreset(sectionType as SectionType);
   const selected = currentPreset ?? defaultPreset;
 
   if (presets.length === 0) return null;

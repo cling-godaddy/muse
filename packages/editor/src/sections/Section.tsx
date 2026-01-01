@@ -6,46 +6,46 @@ import { supportsPresets } from "../controls/presets";
 import { useSelection } from "../context/Selection";
 
 interface Props {
-  block: SectionType
+  section: SectionType
   onUpdate: (data: Partial<SectionType>) => void
   onDelete: () => void
   isPending?: boolean
 }
 
-function UnknownSection({ block }: { block: SectionType }) {
+function UnknownSection({ section }: { section: SectionType }) {
   return (
     <div className="muse-section muse-section--unknown">
       Unknown section type:
       {" "}
-      {block.type}
+      {section.type}
     </div>
   );
 }
 
-export function Section({ block, onUpdate, onDelete, isPending }: Props) {
+export function Section({ section, onUpdate, onDelete, isPending }: Props) {
   const Component = useMemo<SectionComponent>(
-    () => getSectionComponent(block.type) ?? UnknownSection,
-    [block.type],
+    () => getSectionComponent(section.type) ?? UnknownSection,
+    [section.type],
   );
 
   const { select, isSelected } = useSelection();
-  const showPresetPicker = supportsPresets(block.type);
+  const showPresetPicker = supportsPresets(section.type);
 
   const selectItem = useCallback((itemIndex?: number) => {
-    select(block.id, itemIndex);
-  }, [select, block.id]);
+    select(section.id, itemIndex);
+  }, [select, section.id]);
 
   const isItemSelected = useCallback((itemIndex?: number) => {
-    return isSelected(block.id, itemIndex);
-  }, [isSelected, block.id]);
+    return isSelected(section.id, itemIndex);
+  }, [isSelected, section.id]);
 
   return (
-    <div className="muse-section" data-section-type={block.type}>
+    <div className="muse-section" data-section-type={section.type}>
       <div className="muse-section-controls">
         {showPresetPicker && (
           <PresetPicker
-            blockType={block.type}
-            currentPreset={block.preset}
+            sectionType={section.type}
+            currentPreset={section.preset}
             onChange={preset => onUpdate({ preset })}
           />
         )}
@@ -60,7 +60,7 @@ export function Section({ block, onUpdate, onDelete, isPending }: Props) {
       </div>
       {/* eslint-disable-next-line react-hooks/static-components -- registry lookup, not component creation */}
       <Component
-        block={block}
+        section={section}
         onUpdate={onUpdate}
         isPending={isPending}
         selectItem={selectItem}

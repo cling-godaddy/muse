@@ -58,7 +58,7 @@ const meta: Meta<PricingArgs> = {
     planCount: 3,
   },
   render: (args) => {
-    const block: PricingSection = {
+    const section: PricingSection = {
       id: "story-pricing",
       type: "pricing",
       version: 1,
@@ -67,7 +67,7 @@ const meta: Meta<PricingArgs> = {
       preset: args.preset,
       plans: samplePlans.slice(0, args.planCount),
     };
-    return <Pricing block={block} onUpdate={console.log} />;
+    return <Pricing section={section} onUpdate={console.log} />;
   },
 };
 

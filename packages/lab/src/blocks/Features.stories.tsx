@@ -36,7 +36,7 @@ const meta: Meta<FeaturesArgs> = {
     itemCount: 6,
   },
   render: (args) => {
-    const block: FeaturesSection = {
+    const section: FeaturesSection = {
       id: "story-features",
       type: "features",
       version: 1,
@@ -44,7 +44,7 @@ const meta: Meta<FeaturesArgs> = {
       preset: args.preset,
       items: sampleItems.slice(0, args.itemCount),
     };
-    return <Features block={block} onUpdate={console.log} />;
+    return <Features section={section} onUpdate={console.log} />;
   },
 };
 

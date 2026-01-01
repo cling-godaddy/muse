@@ -43,7 +43,7 @@ const meta: Meta<ContactArgs> = {
     showForm: true,
   },
   render: (args) => {
-    const block: ContactSection = {
+    const section: ContactSection = {
       id: "story-contact",
       type: "contact",
       version: 1,
@@ -56,7 +56,7 @@ const meta: Meta<ContactArgs> = {
       formFields: args.showForm ? sampleFields : undefined,
       submitText: "Send Message",
     };
-    return <Contact block={block} onUpdate={console.log} />;
+    return <Contact section={section} onUpdate={console.log} />;
   },
 };
 

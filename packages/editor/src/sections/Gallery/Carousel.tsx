@@ -5,19 +5,19 @@ import { EditableText, ImageLoader } from "../../ux";
 import styles from "./Carousel.module.css";
 
 interface Props {
-  block: GallerySectionType
+  section: GallerySectionType
   onUpdate: (data: Partial<GallerySectionType>) => void
   isPending?: boolean
 }
 
-export function Carousel({ block, onUpdate, isPending }: Props) {
+export function Carousel({ section, onUpdate, isPending }: Props) {
   const trackRef = useRef<HTMLDivElement>(null);
   const [canScrollPrev, setCanScrollPrev] = useState(false);
   const [canScrollNext, setCanScrollNext] = useState(true);
   const [currentIndex, setCurrentIndex] = useState(0);
-  const images = block.images ?? [];
+  const images = section.images ?? [];
   const slideCount = isPending && images.length === 0
-    ? getMinimumImages(block.preset ?? "gallery-carousel")
+    ? getMinimumImages(section.preset ?? "gallery-carousel")
     : images.length;
 
   const updateScrollState = useCallback(() => {
@@ -67,9 +67,9 @@ export function Carousel({ block, onUpdate, isPending }: Props) {
 
   return (
     <div className={styles.section}>
-      {block.headline !== undefined && (
+      {section.headline !== undefined && (
         <EditableText
-          value={block.headline}
+          value={section.headline}
           onChange={v => onUpdate({ headline: v || undefined })}
           as="h2"
           className={styles.headline}
@@ -93,7 +93,7 @@ export function Carousel({ block, onUpdate, isPending }: Props) {
         >
           {isPending && images.length === 0
             ? Array.from({
-              length: getMinimumImages(block.preset ?? "gallery-carousel"),
+              length: getMinimumImages(section.preset ?? "gallery-carousel"),
             }).map((_, i) => (
               <div key={i} className={styles.slide}>
                 <ImageLoader isPending />

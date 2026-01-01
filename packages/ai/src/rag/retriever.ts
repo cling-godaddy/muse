@@ -55,10 +55,10 @@ export function formatStructureContext(
 
   // High confidence match - present as template to follow
   if (top.score >= TEMPLATE_THRESHOLD) {
-    const blocks = top.entry.structure.blocks.map((block, i) => ({
-      id: `block-${i + 1}`,
-      type: block.type,
-      preset: block.preset,
+    const sections = top.entry.structure.sections.map((section, i) => ({
+      id: `section-${i + 1}`,
+      type: section.type,
+      preset: section.preset,
     }));
 
     const lines = [
@@ -67,7 +67,7 @@ export function formatStructureContext(
       `Match: "${top.entry.request}" (${(top.score * 100).toFixed(0)}% match)`,
       "",
       "```json",
-      JSON.stringify({ blocks }, null, 2),
+      JSON.stringify({ sections }, null, 2),
       "```",
     ];
 
@@ -80,8 +80,8 @@ export function formatStructureContext(
   for (const { entry } of examples) {
     lines.push(`Request: "${entry.request}"`);
     lines.push("Structure:");
-    for (const block of entry.structure.blocks) {
-      lines.push(`  - ${block.type}/${block.preset}: ${block.rationale}`);
+    for (const section of entry.structure.sections) {
+      lines.push(`  - ${section.type}/${section.preset}: ${section.rationale}`);
     }
     lines.push("");
   }

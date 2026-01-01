@@ -1,12 +1,12 @@
 import { describe, it, expect } from "vitest";
 import { SECTION_TYPES } from "@muse/core";
-import { copyBlocksSchema } from "./schemas";
+import { copySectionsSchema } from "./schemas";
 
-describe("copyBlocksSchema", () => {
+describe("copySectionsSchema", () => {
   it("has a schema for every section type", () => {
-    const schema = copyBlocksSchema.schema as {
+    const schema = copySectionsSchema.schema as {
       properties: {
-        blocks: {
+        sections: {
           items: {
             anyOf: Array<{
               properties: {
@@ -18,7 +18,7 @@ describe("copyBlocksSchema", () => {
       }
     };
 
-    const schemaTypes = schema.properties.blocks.items.anyOf
+    const schemaTypes = schema.properties.sections.items.anyOf
       .map(entry => entry.properties.type.const)
       .filter(Boolean);
 

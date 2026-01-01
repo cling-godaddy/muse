@@ -21,22 +21,22 @@ export const structureSchema: ResponseSchema = {
   schema: {
     type: "object",
     properties: {
-      blocks: {
+      sections: {
         type: "array",
         items: {
           type: "object",
           properties: {
-            id: { type: "string", description: "Unique block ID like block-1, block-2" },
-            type: { type: "string", description: "Block type: hero, features, cta, testimonials, pricing, faq, gallery, contact, footer, about, subscribe, stats, logos, text" },
-            preset: { type: "string", description: "Preset ID for the block style" },
-            purpose: { type: "string", description: "What this block should accomplish" },
+            id: { type: "string", description: "Unique section ID like section-1, section-2" },
+            type: { type: "string", description: "Section type: hero, features, cta, testimonials, pricing, faq, gallery, contact, footer, about, subscribe, stats, logos" },
+            preset: { type: "string", description: "Preset ID for the section style" },
+            purpose: { type: "string", description: "What this section should accomplish" },
           },
           required: ["id", "type", "preset", "purpose"],
           additionalProperties: false,
         },
       },
     },
-    required: ["blocks"],
+    required: ["sections"],
     additionalProperties: false,
   },
 };
@@ -68,12 +68,12 @@ const ctaObject = {
   additionalProperties: false,
 };
 
-export const copyBlocksSchema: ResponseSchema = {
-  name: "copy_blocks",
+export const copySectionsSchema: ResponseSchema = {
+  name: "copy_sections",
   schema: {
     type: "object",
     properties: {
-      blocks: {
+      sections: {
         type: "array",
         items: {
           anyOf: [
@@ -390,7 +390,7 @@ export const copyBlocksSchema: ResponseSchema = {
         },
       },
     },
-    required: ["blocks"],
+    required: ["sections"],
     additionalProperties: false,
   },
 };

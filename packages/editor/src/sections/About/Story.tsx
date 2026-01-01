@@ -3,28 +3,28 @@ import { EditableText, ImageLoader } from "../../ux";
 import styles from "./Story.module.css";
 
 interface Props {
-  block: AboutSectionType
+  section: AboutSectionType
   onUpdate: (data: Partial<AboutSectionType>) => void
   isPending?: boolean
 }
 
-export function Story({ block, onUpdate, isPending }: Props) {
+export function Story({ section, onUpdate, isPending }: Props) {
   return (
     <section className={styles.section}>
       <EditableText
-        value={block.headline ?? ""}
+        value={section.headline ?? ""}
         onChange={v => onUpdate({ headline: v || undefined })}
         as="h2"
         className={styles.headline}
         placeholder="About Us"
       />
 
-      {block.image && (
-        <ImageLoader image={block.image} isPending={!!isPending} className={styles.image} />
+      {section.image && (
+        <ImageLoader image={section.image} isPending={!!isPending} className={styles.image} />
       )}
 
       <EditableText
-        value={block.body ?? ""}
+        value={section.body ?? ""}
         onChange={v => onUpdate({ body: v || undefined })}
         as="p"
         className={styles.body}

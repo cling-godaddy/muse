@@ -5,21 +5,21 @@ import { Card } from "./Card";
 import { Banner } from "./Banner";
 
 interface Props {
-  block: SubscribeSectionType
+  section: SubscribeSectionType
   onUpdate: (data: Partial<SubscribeSectionType>) => void
   isPending?: boolean
 }
 
-export function Subscribe({ block, onUpdate, isPending }: Props) {
-  const preset = block.preset ?? getDefaultPreset("subscribe");
+export function Subscribe({ section, onUpdate, isPending }: Props) {
+  const preset = section.preset ?? getDefaultPreset("subscribe");
 
   switch (preset) {
     case "subscribe-inline":
-      return <Inline block={block} onUpdate={onUpdate} />;
+      return <Inline section={section} onUpdate={onUpdate} />;
     case "subscribe-banner":
-      return <Banner block={block} onUpdate={onUpdate} />;
+      return <Banner section={section} onUpdate={onUpdate} />;
     case "subscribe-card":
     default:
-      return <Card block={block} onUpdate={onUpdate} isPending={isPending} />;
+      return <Card section={section} onUpdate={onUpdate} isPending={isPending} />;
   }
 }

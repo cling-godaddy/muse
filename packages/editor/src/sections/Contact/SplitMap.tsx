@@ -5,17 +5,17 @@ import { useIsEditable } from "../../context/EditorMode";
 import styles from "./SplitMap.module.css";
 
 interface Props {
-  block: ContactSectionType
+  section: ContactSectionType
   onUpdate: (data: Partial<ContactSectionType>) => void
 }
 
 const FIELD_TYPES: FormField["type"][] = ["text", "email", "textarea"];
 
-export function SplitMap({ block, onUpdate }: Props) {
+export function SplitMap({ section, onUpdate }: Props) {
   const isEditable = useIsEditable();
 
   const updateField = (index: number, data: Partial<FormField>) => {
-    const formFields = (block.formFields ?? []).map((field, i) =>
+    const formFields = (section.formFields ?? []).map((field, i) =>
       i === index ? { ...field, ...data } : field,
     );
     onUpdate({ formFields });
@@ -24,7 +24,7 @@ export function SplitMap({ block, onUpdate }: Props) {
   const addField = () => {
     onUpdate({
       formFields: [
-        ...(block.formFields ?? []),
+        ...(section.formFields ?? []),
         { name: `field_${Date.now()}`, type: "text" as const, label: "" },
       ],
     });
@@ -32,16 +32,16 @@ export function SplitMap({ block, onUpdate }: Props) {
 
   const removeField = (index: number) => {
     onUpdate({
-      formFields: (block.formFields ?? []).filter((_, i) => i !== index),
+      formFields: (section.formFields ?? []).filter((_, i) => i !== index),
     });
   };
 
-  const [debouncedAddress, setDebouncedAddress] = useState(block.address);
+  const [debouncedAddress, setDebouncedAddress] = useState(section.address);
 
   useEffect(() => {
-    const timer = setTimeout(() => setDebouncedAddress(block.address), 500);
+    const timer = setTimeout(() => setDebouncedAddress(section.address), 500);
     return () => clearTimeout(timer);
-  }, [block.address]);
+  }, [section.address]);
 
   const apiKey = (import.meta as unknown as { env?: { VITE_GOOGLE_MAPS_API_KEY?: string } }).env?.VITE_GOOGLE_MAPS_API_KEY;
   const mapUrl = debouncedAddress
@@ -52,18 +52,18 @@ export function SplitMap({ block, onUpdate }: Props) {
 
   return (
     <section className={styles.section}>
-      {block.headline !== undefined && (
+      {section.headline !== undefined && (
         <EditableText
-          value={block.headline}
+          value={section.headline}
           onChange={v => onUpdate({ headline: v || undefined })}
           as="h2"
           className={styles.headline}
           placeholder="Section headline..."
         />
       )}
-      {block.subheadline !== undefined && (
+      {section.subheadline !== undefined && (
         <EditableText
-          value={block.subheadline}
+          value={section.subheadline}
           onChange={v => onUpdate({ subheadline: v || undefined })}
           as="p"
           className={styles.subheadline}
@@ -80,13 +80,13 @@ export function SplitMap({ block, onUpdate }: Props) {
                 ? (
                   <input
                     type="email"
-                    value={block.email ?? ""}
+                    value={section.email ?? ""}
                     onChange={e => onUpdate({ email: e.target.value || undefined })}
                     placeholder="contact@example.com"
                   />
                 )
-                : block.email
-                  ? <a href={`mailto:${block.email}`}>{block.email}</a>
+                : section.email
+                  ? <a href={`mailto:${section.email}`}>{section.email}</a>
                   : null}
             </div>
             <div className={styles.field}>
@@ -95,13 +95,13 @@ export function SplitMap({ block, onUpdate }: Props) {
                 ? (
                   <input
                     type="tel"
-                    value={block.phone ?? ""}
+                    value={section.phone ?? ""}
                     onChange={e => onUpdate({ phone: e.target.value || undefined })}
                     placeholder="+1 (555) 123-4567"
                   />
                 )
-                : block.phone
-                  ? <a href={`tel:${block.phone}`}>{block.phone}</a>
+                : section.phone
+                  ? <a href={`tel:${section.phone}`}>{section.phone}</a>
                   : null}
             </div>
             <div className={styles.field}>
@@ -109,22 +109,22 @@ export function SplitMap({ block, onUpdate }: Props) {
               {isEditable
                 ? (
                   <textarea
-                    value={block.address ?? ""}
+                    value={section.address ?? ""}
                     onChange={e => onUpdate({ address: e.target.value || undefined })}
                     placeholder="123 Main St, City, State 12345"
                     rows={2}
                   />
                 )
-                : block.address
-                  ? <p>{block.address}</p>
+                : section.address
+                  ? <p>{section.address}</p>
                   : null}
             </div>
           </div>
 
-          {block.formFields !== undefined && (
+          {section.formFields !== undefined && (
             <div className={styles.formSection}>
               <EditableText
-                value={block.formHeadline ?? ""}
+                value={section.formHeadline ?? ""}
                 onChange={v => onUpdate({ formHeadline: v || undefined })}
                 as="h3"
                 className={styles.formHeadline}
@@ -134,7 +134,7 @@ export function SplitMap({ block, onUpdate }: Props) {
               {isEditable && (
                 <>
                   <div className={styles.formFields}>
-                    {block.formFields.map((field, i) => (
+                    {section.formFields.map((field, i) => (
                       <div key={i} className={styles.formFieldRow}>
                         <input
                           type="text"
@@ -175,7 +175,7 @@ export function SplitMap({ block, onUpdate }: Props) {
                     <label>Submit Button</label>
                     <input
                       type="text"
-                      value={block.submitText ?? ""}
+                      value={section.submitText ?? ""}
                       onChange={e => onUpdate({ submitText: e.target.value || undefined })}
                       placeholder="Send Message"
                       className={styles.submitText}
@@ -186,7 +186,7 @@ export function SplitMap({ block, onUpdate }: Props) {
 
               {!isEditable && (
                 <form className={styles.form}>
-                  {block.formFields.map((field, i) => (
+                  {section.formFields.map((field, i) => (
                     <div key={i} className={styles.formField}>
                       <label>
                         {field.label}
@@ -197,7 +197,7 @@ export function SplitMap({ block, onUpdate }: Props) {
                         : <input type={field.type} placeholder={field.label} />}
                     </div>
                   ))}
-                  <button type="submit">{block.submitText ?? "Send"}</button>
+                  <button type="submit">{section.submitText ?? "Send"}</button>
                 </form>
               )}
             </div>

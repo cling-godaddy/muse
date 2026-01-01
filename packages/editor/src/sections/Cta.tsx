@@ -4,34 +4,34 @@ import { useIsEditable } from "../context/EditorMode";
 import styles from "./Cta.module.css";
 
 interface Props {
-  block: CtaSectionType
+  section: CtaSectionType
   onUpdate: (data: Partial<CtaSectionType>) => void
 }
 
-export function Cta({ block, onUpdate }: Props) {
+export function Cta({ section, onUpdate }: Props) {
   const isEditable = useIsEditable();
-  const variant = block.variant ?? "primary";
+  const variant = section.variant ?? "primary";
   const variantClass = variant === "primary" ? styles.primary : styles.secondary;
 
   return (
     <div className={`${styles.section} ${variantClass}`}>
       <EditableText
-        value={block.headline}
+        value={section.headline}
         onChange={v => onUpdate({ headline: v })}
         as="h2"
         className={styles.headline}
         placeholder="CTA headline..."
       />
       <EditableText
-        value={block.description ?? ""}
+        value={section.description ?? ""}
         onChange={v => onUpdate({ description: v || undefined })}
         as="p"
         className={styles.description}
         placeholder="Description..."
       />
       <EditableLink
-        text={block.buttonText}
-        href={block.buttonHref ?? "#"}
+        text={section.buttonText}
+        href={section.buttonHref ?? "#"}
         onTextChange={v => onUpdate({ buttonText: v })}
         className={styles.button}
         placeholder="Button text..."

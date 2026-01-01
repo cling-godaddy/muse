@@ -4,17 +4,17 @@ import { Avatar, EditableText } from "../../ux";
 import styles from "./Single.module.css";
 
 interface Props {
-  block: TestimonialsSectionType
+  section: TestimonialsSectionType
   onUpdate: (data: Partial<TestimonialsSectionType>) => void
   isPending?: boolean
 }
 
-export function Single({ block, onUpdate, isPending }: Props) {
+export function Single({ section, onUpdate, isPending }: Props) {
   const isEditable = useIsEditable();
-  const quote = block.quotes[0];
+  const quote = section.quotes[0];
 
   const updateQuote = (data: Partial<Quote>) => {
-    const quotes = block.quotes.map((q, i) =>
+    const quotes = section.quotes.map((q, i) =>
       i === 0 ? { ...q, ...data } : q,
     );
     onUpdate({ quotes });
@@ -24,10 +24,10 @@ export function Single({ block, onUpdate, isPending }: Props) {
 
   return (
     <section className={styles.section}>
-      {block.headline !== undefined && (
+      {section.headline !== undefined && (
         <div className={styles.header}>
           <EditableText
-            value={block.headline}
+            value={section.headline}
             onChange={v => onUpdate({ headline: v || undefined })}
             as="h2"
             className={styles.headline}

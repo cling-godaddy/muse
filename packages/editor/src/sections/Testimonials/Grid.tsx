@@ -4,16 +4,16 @@ import { Avatar, EditableText } from "../../ux";
 import styles from "./Grid.module.css";
 
 interface Props {
-  block: TestimonialsSectionType
+  section: TestimonialsSectionType
   onUpdate: (data: Partial<TestimonialsSectionType>) => void
   isPending?: boolean
 }
 
-export function Grid({ block, onUpdate, isPending }: Props) {
+export function Grid({ section, onUpdate, isPending }: Props) {
   const isEditable = useIsEditable();
 
   const updateQuote = (index: number, data: Partial<Quote>) => {
-    const quotes = block.quotes.map((q, i) =>
+    const quotes = section.quotes.map((q, i) =>
       i === index ? { ...q, ...data } : q,
     );
     onUpdate({ quotes });
@@ -21,10 +21,10 @@ export function Grid({ block, onUpdate, isPending }: Props) {
 
   return (
     <section className={styles.section}>
-      {block.headline !== undefined && (
+      {section.headline !== undefined && (
         <div className={styles.header}>
           <EditableText
-            value={block.headline}
+            value={section.headline}
             onChange={v => onUpdate({ headline: v || undefined })}
             as="h2"
             className={styles.headline}
@@ -33,7 +33,7 @@ export function Grid({ block, onUpdate, isPending }: Props) {
         </div>
       )}
       <div className={styles.container}>
-        {block.quotes.map((quote, i) => (
+        {section.quotes.map((quote, i) => (
           <figure key={i} className={styles.card}>
             <blockquote>
               <EditableText

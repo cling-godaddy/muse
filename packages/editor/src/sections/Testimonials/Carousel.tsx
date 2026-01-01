@@ -5,15 +5,15 @@ import { Avatar, EditableText } from "../../ux";
 import styles from "./Carousel.module.css";
 
 interface Props {
-  block: TestimonialsSectionType
+  section: TestimonialsSectionType
   onUpdate: (data: Partial<TestimonialsSectionType>) => void
   isPending?: boolean
 }
 
-export function Carousel({ block, onUpdate, isPending }: Props) {
+export function Carousel({ section, onUpdate, isPending }: Props) {
   const isEditable = useIsEditable();
   const [currentIndex, setCurrentIndex] = useState(0);
-  const quotes = block.quotes;
+  const quotes = section.quotes;
   const total = quotes.length;
   const quote = quotes[currentIndex];
 
@@ -31,10 +31,10 @@ export function Carousel({ block, onUpdate, isPending }: Props) {
 
   return (
     <section className={styles.section}>
-      {block.headline !== undefined && (
+      {section.headline !== undefined && (
         <div className={styles.header}>
           <EditableText
-            value={block.headline}
+            value={section.headline}
             onChange={v => onUpdate({ headline: v || undefined })}
             as="h2"
             className={styles.headline}

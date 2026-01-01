@@ -3,43 +3,43 @@ import { EditableText, EditableLink, ImageLoader } from "../ux";
 import styles from "./Hero.module.css";
 
 interface Props {
-  block: HeroSectionType
+  section: HeroSectionType
   onUpdate: (data: Partial<HeroSectionType>) => void
   isPending?: boolean
 }
 
-function HeroContent({ block, onUpdate }: Omit<Props, "isPending">) {
+function HeroContent({ section, onUpdate }: Omit<Props, "isPending">) {
   return (
     <>
       <EditableText
-        value={block.headline}
+        value={section.headline}
         onChange={v => onUpdate({ headline: v })}
         as="h1"
         className={styles.headline}
         placeholder="Headline..."
       />
       <EditableText
-        value={block.subheadline ?? ""}
+        value={section.subheadline ?? ""}
         onChange={v => onUpdate({ subheadline: v || undefined })}
         as="p"
         className={styles.subheadline}
         placeholder="Subheadline..."
       />
       <div className={styles.ctas}>
-        {block.cta && (
+        {section.cta && (
           <EditableLink
-            text={block.cta.text}
-            href={block.cta.href}
-            onTextChange={v => onUpdate({ cta: { text: v, href: block.cta?.href ?? "#" } })}
+            text={section.cta.text}
+            href={section.cta.href}
+            onTextChange={v => onUpdate({ cta: { text: v, href: section.cta?.href ?? "#" } })}
             className={styles.cta}
             placeholder="Primary CTA..."
           />
         )}
-        {block.secondaryCta && (
+        {section.secondaryCta && (
           <EditableLink
-            text={block.secondaryCta.text}
-            href={block.secondaryCta.href}
-            onTextChange={v => onUpdate({ secondaryCta: { text: v, href: block.secondaryCta?.href ?? "#" } })}
+            text={section.secondaryCta.text}
+            href={section.secondaryCta.href}
+            onTextChange={v => onUpdate({ secondaryCta: { text: v, href: section.secondaryCta?.href ?? "#" } })}
             className={styles.ctaSecondary}
             placeholder="Secondary CTA..."
           />
@@ -49,8 +49,8 @@ function HeroContent({ block, onUpdate }: Omit<Props, "isPending">) {
   );
 }
 
-export function Hero({ block, onUpdate, isPending }: Props) {
-  const preset = block.preset ?? "hero-centered";
+export function Hero({ section, onUpdate, isPending }: Props) {
+  const preset = section.preset ?? "hero-centered";
   const isSplit = preset === "hero-split-left" || preset === "hero-split-right";
   const isOverlay = preset === "hero-overlay";
 
@@ -60,11 +60,11 @@ export function Hero({ block, onUpdate, isPending }: Props) {
     return (
       <div className={`${styles.section} ${styles.split} ${imageFirst ? styles.splitRight : ""}`}>
         <div className={styles.splitContent}>
-          <HeroContent block={block} onUpdate={onUpdate} />
+          <HeroContent section={section} onUpdate={onUpdate} />
         </div>
         <div className={styles.splitImage}>
           <ImageLoader
-            image={block.backgroundImage}
+            image={section.backgroundImage}
             isPending={!!isPending}
             className={styles.splitImg}
           />
@@ -74,13 +74,13 @@ export function Hero({ block, onUpdate, isPending }: Props) {
   }
 
   // Overlay layout: full-bleed background with text on top
-  if (isOverlay && block.backgroundImage) {
-    const overlayOpacity = (block.backgroundOverlay ?? 50) / 100;
+  if (isOverlay && section.backgroundImage) {
+    const overlayOpacity = (section.backgroundOverlay ?? 50) / 100;
     return (
       <div
         className={`${styles.section} ${styles.overlay}`}
         style={{
-          backgroundImage: `url(${block.backgroundImage.url})`,
+          backgroundImage: `url(${section.backgroundImage.url})`,
           backgroundSize: "cover",
           backgroundPosition: "center",
         }}
@@ -89,7 +89,7 @@ export function Hero({ block, onUpdate, isPending }: Props) {
           className={styles.overlayBg}
           style={{ backgroundColor: `rgba(0, 0, 0, ${overlayOpacity})` }}
         />
-        <HeroContent block={block} onUpdate={onUpdate} />
+        <HeroContent section={section} onUpdate={onUpdate} />
       </div>
     );
   }
@@ -97,7 +97,7 @@ export function Hero({ block, onUpdate, isPending }: Props) {
   // Centered layout: default
   return (
     <div className={styles.section}>
-      <HeroContent block={block} onUpdate={onUpdate} />
+      <HeroContent section={section} onUpdate={onUpdate} />
     </div>
   );
 }

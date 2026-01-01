@@ -14,29 +14,29 @@ export function buildStructurePrompt(context: string, isTemplate: boolean): stri
 
 ${context}
 
-Your task: Copy the template structure above EXACTLY. Add a "purpose" field to each block describing what it should accomplish for the user's request.
+Your task: Copy the template structure above EXACTLY. Add a "purpose" field to each section describing what it should accomplish for the user's request.
 
-Do not change, add, or remove any blocks. Do not change any type or preset values.`;
+Do not change, add, or remove any sections. Do not change any type or preset values.`;
   }
 
   // Non-template mode: full prompt with all options
-  return `You are a page structure planner. Given a brand brief and user request, define the block structure for a landing page.
+  return `You are a page structure planner. Given a brand brief and user request, define the section structure for a landing page.
 
 SECTION TYPES AND PRESETS:
 ${generateSectionPrompt()}
 ${context ? `\n${context}\n` : ""}
 Guidelines:
-- When similar examples are provided, use them as guidance for block selection.
-- Generate 4-8 blocks for a typical landing page
-- Start with a hero block
-- Use footer block (not text) for site navigation, social links, and copyright - place at the end
-- Use about block for company story, mission, or team showcase
-- Use subscribe block for newsletter/email capture
-- Use stats block for key metrics and social proof numbers
-- Use logos block for client/partner logo displays ("Trusted by...")
-- End with cta or footer block
+- When similar examples are provided, use them as guidance for section selection.
+- Generate 4-8 sections for a typical landing page
+- Start with a hero section
+- Use footer section (not text) for site navigation, social links, and copyright - place at the end
+- Use about section for company story, mission, or team showcase
+- Use subscribe section for newsletter/email capture
+- Use stats section for key metrics and social proof numbers
+- Use logos section for client/partner logo displays ("Trusted by...")
+- End with cta or footer section
 - Select presets that match the brand mood and industry
-- Use simple IDs like "block-1", "block-2"
+- Use simple IDs like "section-1", "section-2"
 - Purpose should guide the copy specialist on what content to generate`;
 }
 
@@ -76,7 +76,7 @@ async function getRAGContext(prompt: string): Promise<RAGContext> {
 export const structureAgent: SyncAgent = {
   config: {
     name: "structure",
-    description: "Plans page structure and block layout",
+    description: "Plans page structure and section layout",
     model: "gpt-4o-mini",
   },
 
@@ -118,7 +118,7 @@ export const structureAgent: SyncAgent = {
   },
 };
 
-interface RawBlock {
+interface RawSection {
   id?: string
   type?: string
   preset?: string
@@ -129,21 +129,21 @@ export function parseStructure(json: string): PageStructure {
   try {
     const parsed = JSON.parse(json);
     return {
-      blocks: parsed.blocks.map((b: RawBlock, i: number) => ({
-        id: b.id ?? `block-${i + 1}`,
-        type: b.type ?? "text",
-        preset: b.preset,
-        purpose: b.purpose ?? "",
+      sections: parsed.sections.map((s: RawSection, i: number) => ({
+        id: s.id ?? `section-${i + 1}`,
+        type: s.type ?? "text",
+        preset: s.preset,
+        purpose: s.purpose ?? "",
       })),
     };
   }
   catch (err) {
     log.warn("parse_failed", { error: String(err), input: json.slice(0, 200) });
     return {
-      blocks: [
-        { id: "block-1", type: "hero", preset: "hero-centered", purpose: "introduce the product" },
-        { id: "block-2", type: "features", preset: "features-grid-icons", purpose: "highlight key features" },
-        { id: "block-3", type: "cta", preset: "cta-centered", purpose: "drive conversion" },
+      sections: [
+        { id: "section-1", type: "hero", preset: "hero-centered", purpose: "introduce the product" },
+        { id: "section-2", type: "features", preset: "features-grid-icons", purpose: "highlight key features" },
+        { id: "section-3", type: "cta", preset: "cta-centered", purpose: "drive conversion" },
       ],
     };
   }

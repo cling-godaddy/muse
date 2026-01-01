@@ -45,7 +45,7 @@ export interface ParseResult {
 }
 
 const THEME_REGEX = /\[THEME:([^\]]+)\]/;
-const BLOCKS_REGEX = /\[BLOCKS:(\[[\s\S]*?\])\]/;
+const SECTIONS_REGEX = /\[SECTIONS:(\[[\s\S]*?\])\]/;
 const USAGE_REGEX = /\[USAGE:(\{[^}]+\})\]/;
 const IMAGES_REGEX = /\[IMAGES:(\[[\s\S]*?\])\]/;
 const AGENT_START_REGEX = /\[AGENT:(\w+):start\]/g;
@@ -81,8 +81,8 @@ export function parseStream(
         const data = JSON.parse(jsonStr) as {
           summary?: string
           duration?: number
-          blockCount?: number
-          blockTypes?: string[]
+          sectionCount?: number
+          sectionTypes?: string[]
           palette?: string
           typography?: string
           planned?: number
@@ -90,10 +90,10 @@ export function parseStream(
         };
         agent.duration = data.duration;
         agent.summary = data.summary;
-        if (data.blockCount !== undefined || data.palette || data.typography || data.planned !== undefined) {
+        if (data.sectionCount !== undefined || data.palette || data.typography || data.planned !== undefined) {
           agent.data = {
-            sectionCount: data.blockCount,
-            sectionTypes: data.blockTypes,
+            sectionCount: data.sectionCount,
+            sectionTypes: data.sectionTypes,
             palette: data.palette,
             typography: data.typography,
             planned: data.planned,
@@ -143,10 +143,10 @@ export function parseStream(
   // extract sections (all at once now, not streaming)
   let sections = previousState.sections;
   if (sections.length === 0) {
-    const blocksMatch = accumulated.match(BLOCKS_REGEX);
-    if (blocksMatch?.[1]) {
+    const sectionsMatch = accumulated.match(SECTIONS_REGEX);
+    if (sectionsMatch?.[1]) {
       try {
-        const parsedSections = JSON.parse(blocksMatch[1]) as Section[];
+        const parsedSections = JSON.parse(sectionsMatch[1]) as Section[];
 
         // inject images into sections
         sections = parsedSections.map((section) => {
@@ -195,7 +195,7 @@ export function parseStream(
         newSections = sections;
       }
       catch {
-        console.warn("failed to parse sections:", blocksMatch[1]?.slice(0, 200));
+        console.warn("failed to parse sections:", sectionsMatch[1]?.slice(0, 200));
       }
     }
   }
@@ -205,7 +205,7 @@ export function parseStream(
     .replace(THEME_REGEX, "")
     .replace(AGENT_START_REGEX, "")
     .replace(AGENT_COMPLETE_REGEX, "")
-    .replace(BLOCKS_REGEX, "")
+    .replace(SECTIONS_REGEX, "")
     .replace(USAGE_REGEX, "")
     .replace(IMAGES_REGEX, "")
     .replace(/\n{3,}/g, "\n\n")

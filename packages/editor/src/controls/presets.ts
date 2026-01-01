@@ -1,6 +1,6 @@
 import type { SectionType } from "@muse/core";
 
-const PRESET_BLOCK_TYPES: SectionType[] = [
+const PRESET_SECTION_TYPES: SectionType[] = [
   "hero",
   "features",
   "testimonials",
@@ -16,6 +16,6 @@ const PRESET_BLOCK_TYPES: SectionType[] = [
   "logos",
 ];
 
-export function supportsPresets(blockType: string): boolean {
-  return PRESET_BLOCK_TYPES.includes(blockType as SectionType);
+export function supportsPresets(sectionType: string): boolean {
+  return PRESET_SECTION_TYPES.includes(sectionType as SectionType);
 }

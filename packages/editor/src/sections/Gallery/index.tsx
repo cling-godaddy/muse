@@ -5,20 +5,20 @@ import { Masonry } from "./Masonry";
 import { Carousel } from "./Carousel";
 
 interface Props {
-  block: GallerySectionType
+  section: GallerySectionType
   onUpdate: (data: Partial<GallerySectionType>) => void
 }
 
-export function Gallery({ block, onUpdate }: Props) {
-  const preset = block.preset ?? getDefaultPreset("gallery");
+export function Gallery({ section, onUpdate }: Props) {
+  const preset = section.preset ?? getDefaultPreset("gallery");
 
   switch (preset) {
     case "gallery-masonry":
-      return <Masonry block={block} onUpdate={onUpdate} />;
+      return <Masonry section={section} onUpdate={onUpdate} />;
     case "gallery-carousel":
-      return <Carousel block={block} onUpdate={onUpdate} />;
+      return <Carousel section={section} onUpdate={onUpdate} />;
     case "gallery-grid":
     default:
-      return <Grid block={block} onUpdate={onUpdate} />;
+      return <Grid section={section} onUpdate={onUpdate} />;
   }
 }

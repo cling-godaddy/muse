@@ -5,7 +5,7 @@ import { useIsEditable } from "../../context/EditorMode";
 import styles from "./Counters.module.css";
 
 interface Props {
-  block: StatsSectionType
+  section: StatsSectionType
   onUpdate: (data: Partial<StatsSectionType>) => void
 }
 
@@ -59,11 +59,11 @@ function AnimatedValue({ value, prefix, suffix }: { value: string, prefix?: stri
   );
 }
 
-export function Counters({ block, onUpdate }: Props) {
+export function Counters({ section, onUpdate }: Props) {
   const isEditable = useIsEditable();
 
   const updateStat = (index: number, data: Partial<StatItem>) => {
-    const stats = block.stats.map((stat, i) =>
+    const stats = section.stats.map((stat, i) =>
       i === index ? { ...stat, ...data } : stat,
     );
     onUpdate({ stats });
@@ -71,18 +71,18 @@ export function Counters({ block, onUpdate }: Props) {
 
   const addStat = () => {
     onUpdate({
-      stats: [...block.stats, { value: "0", label: "Label" }],
+      stats: [...section.stats, { value: "0", label: "Label" }],
     });
   };
 
   const removeStat = (index: number) => {
-    onUpdate({ stats: block.stats.filter((_, i) => i !== index) });
+    onUpdate({ stats: section.stats.filter((_, i) => i !== index) });
   };
 
   return (
     <section className={styles.section}>
       <EditableText
-        value={block.headline ?? ""}
+        value={section.headline ?? ""}
         onChange={v => onUpdate({ headline: v || undefined })}
         as="h2"
         className={styles.headline}
@@ -90,7 +90,7 @@ export function Counters({ block, onUpdate }: Props) {
       />
 
       <div className={styles.counters}>
-        {block.stats.map((stat, i) => (
+        {section.stats.map((stat, i) => (
           <div key={i} className={styles.counter}>
             {isEditable
               ? (

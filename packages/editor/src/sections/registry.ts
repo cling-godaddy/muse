@@ -2,7 +2,7 @@ import type { Section } from "@muse/core";
 import type { ComponentType } from "react";
 
 export interface SectionComponentProps<T extends Section = Section> {
-  block: T
+  section: T
   onUpdate: (data: Partial<T>) => void
   isPending?: boolean
   /** Select an item within the section (for list-based sections) */

@@ -10,7 +10,7 @@ export interface BrandBrief {
   constraints: string[]
 }
 
-export interface BlockStructure {
+export interface SectionStructure {
   id: string
   type: string
   purpose: string
@@ -18,10 +18,10 @@ export interface BlockStructure {
 }
 
 export interface PageStructure {
-  blocks: BlockStructure[]
+  sections: SectionStructure[]
 }
 
-export interface CopyBlockContent {
+export interface CopySectionContent {
   id: string
   headline?: string
   subheadline?: string
@@ -33,7 +33,7 @@ export interface AgentInput {
   messages?: Message[]
   brief?: BrandBrief
   structure?: PageStructure
-  copyBlocks?: CopyBlockContent[]
+  copySections?: CopySectionContent[]
   context?: Record<string, unknown>
   retryFeedback?: string
 }

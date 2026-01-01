@@ -38,7 +38,7 @@ const meta: Meta<FaqArgs> = {
     itemCount: 5,
   },
   render: (args) => {
-    const block: FaqSection = {
+    const section: FaqSection = {
       id: "story-faq",
       type: "faq",
       version: 1,
@@ -47,7 +47,7 @@ const meta: Meta<FaqArgs> = {
       preset: args.preset,
       items: sampleItems.slice(0, args.itemCount),
     };
-    return <Faq block={block} onUpdate={console.log} />;
+    return <Faq section={section} onUpdate={console.log} />;
   },
 };
 

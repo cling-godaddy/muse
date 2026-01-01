@@ -43,7 +43,7 @@ const meta: Meta<LogosArgs> = {
     logoCount: 6,
   },
   render: (args) => {
-    const block: LogosSection = {
+    const section: LogosSection = {
       id: "story-logos",
       type: "logos",
       version: 1,
@@ -51,7 +51,7 @@ const meta: Meta<LogosArgs> = {
       preset: args.preset,
       logos: sampleLogos.slice(0, args.logoCount),
     };
-    return <Logos block={block} onUpdate={console.log} />;
+    return <Logos section={section} onUpdate={console.log} />;
   },
 };
 

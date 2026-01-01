@@ -4,20 +4,20 @@ import { EditableText, ImageLoader } from "../../ux";
 import styles from "./Grid.module.css";
 
 interface Props {
-  block: GallerySectionType
+  section: GallerySectionType
   onUpdate: (data: Partial<GallerySectionType>) => void
   isPending?: boolean
 }
 
-export function Grid({ block, onUpdate, isPending }: Props) {
-  const columns = block.columns ?? 3;
-  const images = block.images ?? [];
+export function Grid({ section, onUpdate, isPending }: Props) {
+  const columns = section.columns ?? 3;
+  const images = section.images ?? [];
 
   return (
     <div className={styles.section}>
-      {block.headline !== undefined && (
+      {section.headline !== undefined && (
         <EditableText
-          value={block.headline}
+          value={section.headline}
           onChange={v => onUpdate({ headline: v || undefined })}
           as="h2"
           className={styles.headline}
@@ -29,7 +29,7 @@ export function Grid({ block, onUpdate, isPending }: Props) {
         style={{ gridTemplateColumns: `repeat(${columns}, 1fr)` }}
       >
         {isPending && images.length === 0
-          ? Array.from({ length: getMinimumImages(block.preset ?? "gallery-grid") }).map((_, i) => (
+          ? Array.from({ length: getMinimumImages(section.preset ?? "gallery-grid") }).map((_, i) => (
             <div key={i} className={styles.item}>
               <ImageLoader isPending />
             </div>

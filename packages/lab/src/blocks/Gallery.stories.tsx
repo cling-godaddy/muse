@@ -52,7 +52,7 @@ const meta: Meta<GalleryArgs> = {
     imageCount: 6,
   },
   render: (args) => {
-    const block: GallerySection = {
+    const section: GallerySection = {
       id: "story-gallery",
       type: "gallery",
       version: 1,
@@ -61,7 +61,7 @@ const meta: Meta<GalleryArgs> = {
       preset: args.preset,
       images: sampleImages.slice(0, args.imageCount),
     };
-    return <Gallery block={block} onUpdate={data => console.log("Update:", data)} />;
+    return <Gallery section={section} onUpdate={data => console.log("Update:", data)} />;
   },
 };
 

@@ -34,7 +34,7 @@ const meta: Meta<CtaArgs> = {
     preset: "cta-centered",
   },
   render: (args) => {
-    const block: CtaSection = {
+    const section: CtaSection = {
       id: "story-cta",
       type: "cta",
       version: 1,
@@ -45,7 +45,7 @@ const meta: Meta<CtaArgs> = {
       variant: args.variant,
       preset: args.preset,
     };
-    return <Cta block={block} onUpdate={console.log} />;
+    return <Cta section={section} onUpdate={console.log} />;
   },
 };
 

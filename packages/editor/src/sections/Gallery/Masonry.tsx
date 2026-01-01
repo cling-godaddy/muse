@@ -4,13 +4,13 @@ import { EditableText } from "../../ux";
 import styles from "./Masonry.module.css";
 
 interface Props {
-  block: GallerySectionType
+  section: GallerySectionType
   onUpdate: (data: Partial<GallerySectionType>) => void
 }
 
-export function Masonry({ block, onUpdate }: Props) {
-  const columns = block.columns ?? 3;
-  const images = block.images ?? [];
+export function Masonry({ section, onUpdate }: Props) {
+  const columns = section.columns ?? 3;
+  const images = section.images ?? [];
 
   const updateImage = (index: number, image: ImageSource) => {
     const updated = [...images];
@@ -24,9 +24,9 @@ export function Masonry({ block, onUpdate }: Props) {
 
   return (
     <div className={styles.section}>
-      {block.headline !== undefined && (
+      {section.headline !== undefined && (
         <EditableText
-          value={block.headline}
+          value={section.headline}
           onChange={v => onUpdate({ headline: v || undefined })}
           as="h2"
           className={styles.headline}

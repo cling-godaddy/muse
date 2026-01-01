@@ -13,32 +13,32 @@ import { Social } from "../icons/Social";
 import styles from "./Footer.module.css";
 
 interface Props {
-  block: FooterSectionType
+  section: FooterSectionType
   onUpdate: (data: Partial<FooterSectionType>) => void
 }
 
 const PLATFORMS: SocialPlatform[] = ["twitter", "facebook", "instagram", "linkedin", "youtube", "github", "tiktok"];
 
-export function Footer({ block, onUpdate }: Props) {
+export function Footer({ section, onUpdate }: Props) {
   const isEditable = useIsEditable();
 
   const updateLink = (index: number, data: Partial<FooterLink>) => {
-    const links = (block.links ?? []).map((link, i) =>
+    const links = (section.links ?? []).map((link, i) =>
       i === index ? { ...link, ...data } : link,
     );
     onUpdate({ links });
   };
 
   const addLink = () => {
-    onUpdate({ links: [...(block.links ?? []), { label: "Link", href: "#" }] });
+    onUpdate({ links: [...(section.links ?? []), { label: "Link", href: "#" }] });
   };
 
   const removeLink = (index: number) => {
-    onUpdate({ links: (block.links ?? []).filter((_, i) => i !== index) });
+    onUpdate({ links: (section.links ?? []).filter((_, i) => i !== index) });
   };
 
   const updateSocialLink = (index: number, data: Partial<SocialLink>) => {
-    const socialLinks = (block.socialLinks ?? []).map((link, i) =>
+    const socialLinks = (section.socialLinks ?? []).map((link, i) =>
       i === index ? { ...link, ...data } : link,
     );
     onUpdate({ socialLinks });
@@ -46,21 +46,21 @@ export function Footer({ block, onUpdate }: Props) {
 
   const addSocialLink = () => {
     onUpdate({
-      socialLinks: [...(block.socialLinks ?? []), { platform: "twitter", href: "https://" }],
+      socialLinks: [...(section.socialLinks ?? []), { platform: "twitter", href: "https://" }],
     });
   };
 
   const removeSocialLink = (index: number) => {
     onUpdate({
-      socialLinks: (block.socialLinks ?? []).filter((_, i) => i !== index),
+      socialLinks: (section.socialLinks ?? []).filter((_, i) => i !== index),
     });
   };
 
   return (
     <footer className={styles.footer}>
-      {block.companyName !== undefined && (
+      {section.companyName !== undefined && (
         <EditableText
-          value={block.companyName}
+          value={section.companyName}
           onChange={v => onUpdate({ companyName: v || undefined })}
           as="span"
           className={styles.companyName}
@@ -69,7 +69,7 @@ export function Footer({ block, onUpdate }: Props) {
       )}
 
       <nav className={styles.nav}>
-        {(block.links ?? []).map((link, i) => (
+        {(section.links ?? []).map((link, i) => (
           isEditable
             ? (
               <ItemPopover
@@ -110,7 +110,7 @@ export function Footer({ block, onUpdate }: Props) {
       </nav>
 
       <div className={styles.socials}>
-        {(block.socialLinks ?? []).map((social, i) => (
+        {(section.socialLinks ?? []).map((social, i) => (
           isEditable
             ? (
               <ItemPopover
@@ -156,9 +156,9 @@ export function Footer({ block, onUpdate }: Props) {
         )}
       </div>
 
-      {block.copyright !== undefined && (
+      {section.copyright !== undefined && (
         <EditableText
-          value={block.copyright}
+          value={section.copyright}
           onChange={v => onUpdate({ copyright: v || undefined })}
           as="p"
           className={styles.copyright}

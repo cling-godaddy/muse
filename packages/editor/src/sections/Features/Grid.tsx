@@ -5,7 +5,7 @@ import { FeatureIcon } from "./icons";
 import styles from "./Grid.module.css";
 
 interface Props {
-  block: FeaturesSectionType
+  section: FeaturesSectionType
   onUpdate: (data: Partial<FeaturesSectionType>) => void
   isPending?: boolean
 }
@@ -66,11 +66,11 @@ function FeatureCard({ item, onUpdate, onRemove, isPending }: FeatureCardProps) 
   );
 }
 
-export function Grid({ block, onUpdate, isPending }: Props) {
+export function Grid({ section, onUpdate, isPending }: Props) {
   const isEditable = useIsEditable();
 
   const updateItem = (index: number, data: Partial<FeatureItem>) => {
-    const items = block.items.map((item, i) =>
+    const items = section.items.map((item, i) =>
       i === index ? { ...item, ...data } : item,
     );
     onUpdate({ items });
@@ -78,27 +78,27 @@ export function Grid({ block, onUpdate, isPending }: Props) {
 
   const addItem = () => {
     onUpdate({
-      items: [...block.items, { title: "", description: "" }],
+      items: [...section.items, { title: "", description: "" }],
     });
   };
 
   const removeItem = (index: number) => {
     onUpdate({
-      items: block.items.filter((_, i) => i !== index),
+      items: section.items.filter((_, i) => i !== index),
     });
   };
 
   return (
     <div className={styles.section}>
       <EditableText
-        value={block.headline ?? ""}
+        value={section.headline ?? ""}
         onChange={v => onUpdate({ headline: v || undefined })}
         as="h2"
         className={styles.headline}
         placeholder="Section headline..."
       />
       <div className={styles.grid}>
-        {block.items.map((item, i) => (
+        {section.items.map((item, i) => (
           <FeatureCard
             key={i}
             item={item}

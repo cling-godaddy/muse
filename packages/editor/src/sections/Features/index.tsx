@@ -4,19 +4,19 @@ import { Grid } from "./Grid";
 import { Numbered } from "./Numbered";
 
 interface Props {
-  block: FeaturesSectionType
+  section: FeaturesSectionType
   onUpdate: (data: Partial<FeaturesSectionType>) => void
   isPending?: boolean
 }
 
-export function Features({ block, onUpdate, isPending }: Props) {
-  const preset = block.preset ?? getDefaultPreset("features");
+export function Features({ section, onUpdate, isPending }: Props) {
+  const preset = section.preset ?? getDefaultPreset("features");
 
   switch (preset) {
     case "features-numbered":
-      return <Numbered block={block} onUpdate={onUpdate} />;
+      return <Numbered section={section} onUpdate={onUpdate} />;
     case "features-grid":
     default:
-      return <Grid block={block} onUpdate={onUpdate} isPending={isPending} />;
+      return <Grid section={section} onUpdate={onUpdate} isPending={isPending} />;
   }
 }

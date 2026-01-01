@@ -4,17 +4,17 @@ import { useIsEditable } from "../../context/EditorMode";
 import styles from "./Form.module.css";
 
 interface Props {
-  block: ContactSectionType
+  section: ContactSectionType
   onUpdate: (data: Partial<ContactSectionType>) => void
 }
 
 const FIELD_TYPES: FormField["type"][] = ["text", "email", "textarea"];
 
-export function Form({ block, onUpdate }: Props) {
+export function Form({ section, onUpdate }: Props) {
   const isEditable = useIsEditable();
 
   const updateField = (index: number, data: Partial<FormField>) => {
-    const formFields = (block.formFields ?? []).map((field, i) =>
+    const formFields = (section.formFields ?? []).map((field, i) =>
       i === index ? { ...field, ...data } : field,
     );
     onUpdate({ formFields });
@@ -23,7 +23,7 @@ export function Form({ block, onUpdate }: Props) {
   const addField = () => {
     onUpdate({
       formFields: [
-        ...(block.formFields ?? []),
+        ...(section.formFields ?? []),
         { name: `field_${Date.now()}`, type: "text" as const, label: "" },
       ],
     });
@@ -31,24 +31,24 @@ export function Form({ block, onUpdate }: Props) {
 
   const removeField = (index: number) => {
     onUpdate({
-      formFields: (block.formFields ?? []).filter((_, i) => i !== index),
+      formFields: (section.formFields ?? []).filter((_, i) => i !== index),
     });
   };
 
   return (
     <div className={styles.section}>
-      {block.headline !== undefined && (
+      {section.headline !== undefined && (
         <EditableText
-          value={block.headline}
+          value={section.headline}
           onChange={v => onUpdate({ headline: v || undefined })}
           as="h2"
           className={styles.headline}
           placeholder="Section headline..."
         />
       )}
-      {block.subheadline !== undefined && (
+      {section.subheadline !== undefined && (
         <EditableText
-          value={block.subheadline}
+          value={section.subheadline}
           onChange={v => onUpdate({ subheadline: v || undefined })}
           as="p"
           className={styles.subheadline}
@@ -63,14 +63,14 @@ export function Form({ block, onUpdate }: Props) {
             ? (
               <input
                 type="email"
-                value={block.email ?? ""}
+                value={section.email ?? ""}
                 onChange={e => onUpdate({ email: e.target.value || undefined })}
                 placeholder="contact@example.com"
               />
             )
-            : block.email
+            : section.email
               ? (
-                <a href={`mailto:${block.email}`}>{block.email}</a>
+                <a href={`mailto:${section.email}`}>{section.email}</a>
               )
               : null}
         </div>
@@ -80,14 +80,14 @@ export function Form({ block, onUpdate }: Props) {
             ? (
               <input
                 type="tel"
-                value={block.phone ?? ""}
+                value={section.phone ?? ""}
                 onChange={e => onUpdate({ phone: e.target.value || undefined })}
                 placeholder="+1 (555) 123-4567"
               />
             )
-            : block.phone
+            : section.phone
               ? (
-                <a href={`tel:${block.phone}`}>{block.phone}</a>
+                <a href={`tel:${section.phone}`}>{section.phone}</a>
               )
               : null}
         </div>
@@ -96,24 +96,24 @@ export function Form({ block, onUpdate }: Props) {
           {isEditable
             ? (
               <textarea
-                value={block.address ?? ""}
+                value={section.address ?? ""}
                 onChange={e => onUpdate({ address: e.target.value || undefined })}
                 placeholder="123 Main St, City, State 12345"
                 rows={2}
               />
             )
-            : block.address
+            : section.address
               ? (
-                <p>{block.address}</p>
+                <p>{section.address}</p>
               )
               : null}
         </div>
       </div>
 
-      {block.formFields !== undefined && (
+      {section.formFields !== undefined && (
         <div className={styles.formSection}>
           <EditableText
-            value={block.formHeadline ?? ""}
+            value={section.formHeadline ?? ""}
             onChange={v => onUpdate({ formHeadline: v || undefined })}
             as="h3"
             className={styles.formHeadline}
@@ -123,7 +123,7 @@ export function Form({ block, onUpdate }: Props) {
           {isEditable && (
             <>
               <div className={styles.formFields}>
-                {block.formFields.map((field, i) => (
+                {section.formFields.map((field, i) => (
                   <div key={i} className={styles.formFieldRow}>
                     <input
                       type="text"
@@ -164,7 +164,7 @@ export function Form({ block, onUpdate }: Props) {
                 <label>Submit Button</label>
                 <input
                   type="text"
-                  value={block.submitText ?? ""}
+                  value={section.submitText ?? ""}
                   onChange={e => onUpdate({ submitText: e.target.value || undefined })}
                   placeholder="Send Message"
                   className={styles.submitText}
@@ -175,7 +175,7 @@ export function Form({ block, onUpdate }: Props) {
 
           {!isEditable && (
             <form className={styles.form}>
-              {block.formFields.map((field, i) => (
+              {section.formFields.map((field, i) => (
                 <div key={i} className={styles.formField}>
                   <label>
                     {field.label}
@@ -190,7 +190,7 @@ export function Form({ block, onUpdate }: Props) {
                     )}
                 </div>
               ))}
-              <button type="submit">{block.submitText ?? "Send"}</button>
+              <button type="submit">{section.submitText ?? "Send"}</button>
             </form>
           )}
         </div>

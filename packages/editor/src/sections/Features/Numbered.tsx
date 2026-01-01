@@ -5,15 +5,15 @@ import { FeatureIcon } from "./icons";
 import styles from "./Numbered.module.css";
 
 interface Props {
-  block: FeaturesSectionType
+  section: FeaturesSectionType
   onUpdate: (data: Partial<FeaturesSectionType>) => void
 }
 
-export function Numbered({ block, onUpdate }: Props) {
+export function Numbered({ section, onUpdate }: Props) {
   const isEditable = useIsEditable();
 
   const updateItem = (index: number, data: Partial<FeatureItem>) => {
-    const items = block.items.map((item, i) =>
+    const items = section.items.map((item, i) =>
       i === index ? { ...item, ...data } : item,
     );
     onUpdate({ items });
@@ -21,20 +21,20 @@ export function Numbered({ block, onUpdate }: Props) {
 
   const addItem = () => {
     onUpdate({
-      items: [...block.items, { title: "", description: "" }],
+      items: [...section.items, { title: "", description: "" }],
     });
   };
 
   const removeItem = (index: number) => {
     onUpdate({
-      items: block.items.filter((_, i) => i !== index),
+      items: section.items.filter((_, i) => i !== index),
     });
   };
 
   return (
     <section className={styles.section}>
       <EditableText
-        value={block.headline ?? ""}
+        value={section.headline ?? ""}
         onChange={v => onUpdate({ headline: v || undefined })}
         as="h2"
         className={styles.headline}
@@ -42,7 +42,7 @@ export function Numbered({ block, onUpdate }: Props) {
       />
 
       <div className={styles.list}>
-        {block.items.map((item, i) => (
+        {section.items.map((item, i) => (
           <div key={i} className={styles.step}>
             <div className={styles.number}>{i + 1}</div>
             <div className={styles.content}>

@@ -54,7 +54,7 @@ const meta: Meta<AboutArgs> = {
     teamCount: 0,
   },
   render: (args) => {
-    const block: AboutSection = {
+    const section: AboutSection = {
       id: "story-about",
       type: "about",
       version: 1,
@@ -66,7 +66,7 @@ const meta: Meta<AboutArgs> = {
         : undefined,
       teamMembers: args.teamCount > 0 ? sampleTeam.slice(0, args.teamCount) : undefined,
     };
-    return <About block={block} onUpdate={console.log} />;
+    return <About section={section} onUpdate={console.log} />;
   },
 };
 

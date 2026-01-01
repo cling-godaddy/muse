@@ -19,7 +19,7 @@ export interface RetrieveOptions {
   minScore?: number
 }
 
-export interface StructureBlock {
+export interface StructureSection {
   type: string
   preset: string
   rationale: string
@@ -30,6 +30,6 @@ export interface StructureKBEntry extends KBEntry {
   industry?: string
   keywords: string[]
   structure: {
-    blocks: StructureBlock[]
+    sections: StructureSection[]
   }
 }

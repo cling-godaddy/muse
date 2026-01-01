@@ -34,7 +34,7 @@ const meta: Meta<StatsArgs> = {
     statCount: 4,
   },
   render: (args) => {
-    const block: StatsSection = {
+    const section: StatsSection = {
       id: "story-stats",
       type: "stats",
       version: 1,
@@ -42,7 +42,7 @@ const meta: Meta<StatsArgs> = {
       preset: args.preset,
       stats: sampleStats.slice(0, args.statCount),
     };
-    return <Stats block={block} onUpdate={console.log} />;
+    return <Stats section={section} onUpdate={console.log} />;
   },
 };
 

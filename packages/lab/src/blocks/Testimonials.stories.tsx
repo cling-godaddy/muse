@@ -51,7 +51,7 @@ const meta: Meta<TestimonialsArgs> = {
     quoteCount: 3,
   },
   render: (args) => {
-    const block: TestimonialsSection = {
+    const section: TestimonialsSection = {
       id: "story-testimonials",
       type: "testimonials",
       version: 1,
@@ -59,7 +59,7 @@ const meta: Meta<TestimonialsArgs> = {
       preset: args.preset,
       quotes: sampleQuotes.slice(0, args.quoteCount),
     };
-    return <Testimonials block={block} onUpdate={console.log} />;
+    return <Testimonials section={section} onUpdate={console.log} />;
   },
 };
 

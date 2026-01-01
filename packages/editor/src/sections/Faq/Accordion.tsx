@@ -5,16 +5,16 @@ import { EditableText } from "../../ux";
 import styles from "./Accordion.module.css";
 
 interface Props {
-  block: FaqSectionType
+  section: FaqSectionType
   onUpdate: (data: Partial<FaqSectionType>) => void
 }
 
-export function Accordion({ block, onUpdate }: Props) {
+export function Accordion({ section, onUpdate }: Props) {
   const isEditable = useIsEditable();
   const [openIndex, setOpenIndex] = useState<number | null>(isEditable ? 0 : null);
 
   const updateItem = (index: number, data: Partial<FaqItem>) => {
-    const items = block.items.map((item, i) =>
+    const items = section.items.map((item, i) =>
       i === index ? { ...item, ...data } : item,
     );
     onUpdate({ items });
@@ -28,18 +28,18 @@ export function Accordion({ block, onUpdate }: Props) {
 
   return (
     <div className={styles.section}>
-      {block.headline !== undefined && (
+      {section.headline !== undefined && (
         <EditableText
-          value={block.headline}
+          value={section.headline}
           onChange={v => onUpdate({ headline: v || undefined })}
           as="h2"
           className={styles.headline}
           placeholder="Section headline..."
         />
       )}
-      {block.subheadline !== undefined && (
+      {section.subheadline !== undefined && (
         <EditableText
-          value={block.subheadline}
+          value={section.subheadline}
           onChange={v => onUpdate({ subheadline: v || undefined })}
           as="p"
           className={styles.subheadline}
@@ -47,7 +47,7 @@ export function Accordion({ block, onUpdate }: Props) {
         />
       )}
       <div className={styles.items}>
-        {block.items.map((item, i) => {
+        {section.items.map((item, i) => {
           const isOpen = isEditable || openIndex === i;
           return (
             <div key={i} className={`${styles.item} ${isOpen ? styles.open : ""}`}>

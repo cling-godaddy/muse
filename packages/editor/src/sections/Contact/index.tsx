@@ -4,18 +4,18 @@ import { Form } from "./Form";
 import { SplitMap } from "./SplitMap";
 
 interface Props {
-  block: ContactSectionType
+  section: ContactSectionType
   onUpdate: (data: Partial<ContactSectionType>) => void
 }
 
-export function Contact({ block, onUpdate }: Props) {
-  const preset = block.preset ?? getDefaultPreset("contact");
+export function Contact({ section, onUpdate }: Props) {
+  const preset = section.preset ?? getDefaultPreset("contact");
 
   switch (preset) {
     case "contact-split-map":
-      return <SplitMap block={block} onUpdate={onUpdate} />;
+      return <SplitMap section={section} onUpdate={onUpdate} />;
     case "contact-form":
     default:
-      return <Form block={block} onUpdate={onUpdate} />;
+      return <Form section={section} onUpdate={onUpdate} />;
   }
 }

@@ -39,7 +39,7 @@ export type {
   AgentConfig,
   AgentInput,
   BrandBrief,
-  BlockStructure,
+  SectionStructure,
   PageStructure,
   ImagePlan,
   ImageSelection,

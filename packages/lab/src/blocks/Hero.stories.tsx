@@ -43,7 +43,7 @@ const meta: Meta<HeroArgs> = {
   },
   render: (args) => {
     const needsImage = args.preset !== "hero-centered";
-    const block: HeroSection = {
+    const section: HeroSection = {
       id: "story-hero",
       type: "hero",
       version: 1,
@@ -55,7 +55,7 @@ const meta: Meta<HeroArgs> = {
       backgroundImage: needsImage ? SAMPLE_IMAGE : undefined,
       backgroundOverlay: args.preset === "hero-overlay" ? args.overlayOpacity : undefined,
     };
-    return <Hero block={block} onUpdate={console.log} />;
+    return <Hero section={section} onUpdate={console.log} />;
   },
 };
 

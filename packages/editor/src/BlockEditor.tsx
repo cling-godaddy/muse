@@ -28,7 +28,7 @@ export function SectionEditor({ sections, onChange, pendingImageSections }: Sect
         {sections.map(section => (
           <SectionWrapper
             key={section.id}
-            block={section}
+            section={section}
             onUpdate={data => updateSection(section.id, data)}
             onDelete={() => deleteSection(section.id)}
             isPending={pendingImageSections?.has(section.id) ?? false}

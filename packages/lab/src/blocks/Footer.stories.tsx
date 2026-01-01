@@ -46,7 +46,7 @@ const meta: Meta<FooterArgs> = {
     showSocials: true,
   },
   render: (args) => {
-    const block: FooterSection = {
+    const section: FooterSection = {
       id: "story-footer",
       type: "footer",
       version: 1,
@@ -56,7 +56,7 @@ const meta: Meta<FooterArgs> = {
       links: args.showLinks ? sampleLinks : undefined,
       socialLinks: args.showSocials ? sampleSocials : undefined,
     };
-    return <Footer block={block} onUpdate={console.log} />;
+    return <Footer section={section} onUpdate={console.log} />;
   },
 };
 

@@ -51,7 +51,7 @@ export interface MediaProvider {
 }
 
 export interface ExecutePlanOptions {
-  minPerBlock?: Record<string, number>
+  minPerSection?: Record<string, number>
 }
 
 export interface MediaClient {
