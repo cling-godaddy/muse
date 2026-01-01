@@ -9,7 +9,7 @@ describe("runWithRetry", () => {
   it("succeeds on first attempt with valid JSON", async () => {
     const mockAgent: SyncAgent = {
       config: { name: "test", description: "test" },
-      run: vi.fn().mockResolvedValue("{\"value\": 42}"),
+      run: vi.fn().mockResolvedValue({ content: "{\"value\": 42}" }),
     };
 
     const parse = (json: string) => JSON.parse(json);
@@ -28,11 +28,11 @@ describe("runWithRetry", () => {
       run: vi.fn().mockImplementation(async (input) => {
         attempts++;
         if (attempts === 1) {
-          return "not valid json";
+          return { content: "not valid json" };
         }
         // Second attempt should have retryFeedback
         expect(input.retryFeedback).toContain("not valid JSON");
-        return "{\"retried\": true}";
+        return { content: "{\"retried\": true}" };
       }),
     };
 
@@ -48,7 +48,7 @@ describe("runWithRetry", () => {
   it("returns failure after max retries exhausted", async () => {
     const mockAgent: SyncAgent = {
       config: { name: "test", description: "test" },
-      run: vi.fn().mockResolvedValue("always invalid"),
+      run: vi.fn().mockResolvedValue({ content: "always invalid" }),
     };
 
     const parse = (json: string) => JSON.parse(json);
