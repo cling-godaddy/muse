@@ -44,7 +44,7 @@ import { allPresets } from "./presets";
 
 export const DEFAULT_PRESETS: Record<SectionType, string> = {
   hero: "hero-centered",
-  features: "features-grid-icons",
+  features: "features-grid",
   testimonials: "testimonials-carousel",
   gallery: "gallery-grid",
   pricing: "pricing-cards",

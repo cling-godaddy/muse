@@ -14,7 +14,6 @@ const sampleItems: FeatureItem[] = [
 
 type FeaturesArgs = {
   headline: string
-  columns: 2 | 3 | 4
   preset: string
   itemCount: number
 };
@@ -23,13 +22,9 @@ const meta: Meta<FeaturesArgs> = {
   title: "Blocks/Features",
   argTypes: {
     headline: { control: "text" },
-    columns: {
-      control: "inline-radio",
-      options: [2, 3, 4],
-    },
     preset: {
       control: "select",
-      options: ["features-grid-icons", "features-grid-cards", "features-alternating", "features-numbered"],
+      options: ["features-grid", "features-numbered"],
     },
     itemCount: {
       control: { type: "range", min: 2, max: 6, step: 1 },
@@ -37,8 +32,7 @@ const meta: Meta<FeaturesArgs> = {
   },
   args: {
     headline: "Why Choose Us",
-    columns: 3,
-    preset: "features-grid-icons",
+    preset: "features-grid",
     itemCount: 6,
   },
   render: (args) => {
@@ -47,7 +41,6 @@ const meta: Meta<FeaturesArgs> = {
       type: "features",
       version: 1,
       headline: args.headline || undefined,
-      columns: args.columns,
       preset: args.preset,
       items: sampleItems.slice(0, args.itemCount),
     };
@@ -58,16 +51,12 @@ const meta: Meta<FeaturesArgs> = {
 export default meta;
 type Story = StoryObj<FeaturesArgs>;
 
-export const GridIcons: Story = {};
-
-export const GridCards: Story = {
-  args: { preset: "features-grid-cards" },
-};
-
-export const Alternating: Story = {
-  args: { preset: "features-alternating", itemCount: 3 },
-};
+export const Grid: Story = {};
 
 export const Numbered: Story = {
-  args: { preset: "features-numbered", itemCount: 4 },
+  args: {
+    headline: "How It Works",
+    preset: "features-numbered",
+    itemCount: 4,
+  },
 };

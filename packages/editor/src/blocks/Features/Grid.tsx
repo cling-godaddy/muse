@@ -1,7 +1,8 @@
 import type { FeaturesBlock as FeaturesBlockType, FeatureItem } from "@muse/core";
-import { EditableText, ImageLoader } from "../ux";
-import { useIsEditable } from "../context/EditorModeContext";
-import styles from "./Features.module.css";
+import { EditableText, ImageLoader } from "../../ux";
+import { useIsEditable } from "../../context/EditorModeContext";
+import { FeatureIcon } from "./icons";
+import styles from "./Grid.module.css";
 
 interface Props {
   block: FeaturesBlockType
@@ -36,9 +37,7 @@ function FeatureCard({ item, onUpdate, onRemove, isPending }: FeatureCardProps) 
               />
             )
             : item.icon
-              ? (
-                <span className={styles.itemIcon}>{item.icon}</span>
-              )
+              ? <FeatureIcon name={item.icon} size={32} className={styles.itemIcon} />
               : null}
       <EditableText
         value={item.title}
@@ -67,7 +66,7 @@ function FeatureCard({ item, onUpdate, onRemove, isPending }: FeatureCardProps) 
   );
 }
 
-export function Features({ block, onUpdate, isPending }: Props) {
+export function Grid({ block, onUpdate, isPending }: Props) {
   const isEditable = useIsEditable();
 
   const updateItem = (index: number, data: Partial<FeatureItem>) => {

@@ -69,13 +69,17 @@
 }
 
 .itemTitle {
+  font-family: var(--muse-theme-heading-font, inherit);
   font-weight: 600;
   font-size: 1rem;
+  color: var(--muse-theme-text, #0f172a);
 }
 
 .itemDescription {
+  font-family: var(--muse-theme-body-font, inherit);
   color: var(--muse-theme-text-muted, #64748b);
   font-size: 0.875rem;
+  line-height: 1.5;
 }
 
 .removeButton {
