@@ -1,0 +1,204 @@
+.section {
+  padding: 4rem 2rem;
+  background: var(--muse-theme-primary, #6366f1);
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+  align-items: center;
+}
+
+@media (min-width: 768px) {
+  .section {
+    flex-direction: row;
+    justify-content: center;
+    gap: 4rem;
+  }
+}
+
+.content {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  text-align: center;
+}
+
+@media (min-width: 768px) {
+  .content {
+    text-align: left;
+    max-width: 400px;
+  }
+}
+
+.headline {
+  font-family: var(--muse-theme-heading-font, inherit);
+  font-weight: var(--muse-theme-heading-weight, 700);
+  font-size: clamp(1.5rem, 4vw, 2rem);
+  color: white;
+  background: transparent;
+  border: 1px dashed transparent;
+  padding: 0.5rem;
+  resize: none;
+}
+
+.headline:focus {
+  border-color: rgba(255, 255, 255, 0.5);
+  outline: none;
+}
+
+.subheadline {
+  font-family: var(--muse-theme-body-font, inherit);
+  font-size: 1rem;
+  color: rgba(255, 255, 255, 0.85);
+  background: transparent;
+  border: 1px dashed transparent;
+  padding: 0.25rem 0.5rem;
+  resize: none;
+}
+
+.subheadline:focus {
+  border-color: rgba(255, 255, 255, 0.5);
+  outline: none;
+}
+
+.formWrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  align-items: center;
+}
+
+@media (min-width: 768px) {
+  .formWrapper {
+    align-items: flex-start;
+  }
+}
+
+.form {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+@media (min-width: 768px) {
+  .form {
+    justify-content: flex-start;
+  }
+}
+
+.emailInput {
+  padding: 0.75rem 1rem;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: var(--muse-theme-radius, 0.5rem);
+  background: rgba(255, 255, 255, 0.15);
+  color: white;
+  font-family: var(--muse-theme-body-font, inherit);
+  min-width: 220px;
+}
+
+.emailInput::placeholder {
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.emailInput:focus {
+  border-color: white;
+  outline: none;
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.button {
+  background: white;
+  color: var(--muse-theme-primary, #6366f1);
+  border: none;
+  border-radius: var(--muse-theme-radius, 0.5rem);
+  padding: 0.75rem 1.5rem;
+  font-family: var(--muse-theme-body-font, inherit);
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.button input {
+  background: transparent;
+  border: none;
+  color: var(--muse-theme-primary, #6366f1);
+  font-family: inherit;
+  font-weight: 600;
+  text-align: center;
+  width: 100%;
+}
+
+.button input:focus {
+  outline: none;
+}
+
+.disclaimer {
+  font-family: var(--muse-theme-body-font, inherit);
+  font-size: 0.75rem;
+  color: rgba(255, 255, 255, 0.7);
+  background: transparent;
+  border: 1px dashed transparent;
+  padding: 0.25rem;
+  text-align: center;
+  resize: none;
+}
+
+@media (min-width: 768px) {
+  .disclaimer {
+    text-align: left;
+  }
+}
+
+.disclaimer:focus {
+  border-color: rgba(255, 255, 255, 0.5);
+  outline: none;
+}
+
+/* ============================================
+   CRT EFFECTS
+   ============================================ */
+:global([data-effects="crt"]) .section {
+  position: relative;
+}
+
+:global([data-effects="crt"]) .section::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(
+    0deg,
+    rgba(255, 255, 255, 0.03) 0px,
+    rgba(255, 255, 255, 0.03) 1px,
+    transparent 1px,
+    transparent 2px
+  );
+  pointer-events: none;
+  z-index: 10;
+}
+
+:global([data-effects="crt"]) .headline {
+  text-shadow: 0 0 15px rgba(255, 255, 255, 0.6);
+}
+
+:global([data-effects="crt"]) .button {
+  box-shadow: 0 0 15px rgba(255, 255, 255, 0.5);
+}
+
+/* ============================================
+   NEON EFFECTS
+   ============================================ */
+:global([data-effects="neon"]) .headline {
+  text-shadow:
+    0 0 10px rgba(255, 255, 255, 0.9),
+    0 0 30px rgba(255, 255, 255, 0.6),
+    0 0 60px rgba(255, 255, 255, 0.4);
+}
+
+:global([data-effects="neon"]) .button {
+  box-shadow:
+    0 0 15px rgba(255, 255, 255, 0.7),
+    0 0 30px rgba(255, 255, 255, 0.4);
+}
+
+:global([data-effects="neon"]) .emailInput {
+  box-shadow: 0 0 10px rgba(255, 255, 255, 0.3);
+}

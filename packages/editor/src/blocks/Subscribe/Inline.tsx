@@ -1,31 +1,24 @@
 import type { SubscribeBlock as SubscribeBlockType } from "@muse/core";
-import { EditableText } from "../ux";
-import { useIsEditable } from "../context/EditorModeContext";
-import styles from "./Subscribe.module.css";
+import { EditableText } from "../../ux";
+import { useIsEditable } from "../../context/EditorModeContext";
+import styles from "./Inline.module.css";
 
 interface Props {
   block: SubscribeBlockType
   onUpdate: (data: Partial<SubscribeBlockType>) => void
 }
 
-export function Subscribe({ block, onUpdate }: Props) {
+export function Inline({ block, onUpdate }: Props) {
   const isEditable = useIsEditable();
 
   return (
-    <div className={styles.section}>
+    <section className={styles.section}>
       <EditableText
         value={block.headline ?? ""}
         onChange={v => onUpdate({ headline: v || undefined })}
-        as="h2"
+        as="span"
         className={styles.headline}
-        placeholder="Stay in the loop"
-      />
-      <EditableText
-        value={block.subheadline ?? ""}
-        onChange={v => onUpdate({ subheadline: v || undefined })}
-        as="p"
-        className={styles.subheadline}
-        placeholder="Join 10,000+ subscribers"
+        placeholder="Subscribe to our newsletter"
       />
 
       <div className={styles.form}>
@@ -64,13 +57,15 @@ export function Subscribe({ block, onUpdate }: Props) {
           )}
       </div>
 
-      <EditableText
-        value={block.disclaimer ?? ""}
-        onChange={v => onUpdate({ disclaimer: v || undefined })}
-        as="p"
-        className={styles.disclaimer}
-        placeholder="No spam. Unsubscribe anytime."
-      />
-    </div>
+      {(isEditable || block.disclaimer) && (
+        <EditableText
+          value={block.disclaimer ?? ""}
+          onChange={v => onUpdate({ disclaimer: v || undefined })}
+          as="span"
+          className={styles.disclaimer}
+          placeholder="No spam"
+        />
+      )}
+    </section>
   );
 }
