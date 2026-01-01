@@ -76,17 +76,6 @@ registerAISchema({
 });
 
 registerAISchema({
-  type: "image",
-  description: "Standalone image block with optional caption",
-  properties: {
-    image: { type: "object", description: "Image source with url, alt, provider, providerId", required: true },
-    caption: { type: "string", description: "Optional caption below image" },
-    size: { type: "string", description: "Display size: small, medium, large, or full" },
-  },
-  required: ["image"],
-});
-
-registerAISchema({
   type: "testimonials",
   description: "Customer testimonials section with quotes",
   properties: {

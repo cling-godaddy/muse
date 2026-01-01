@@ -4,7 +4,6 @@ export * from "./BlockWrapper";
 export * from "./Hero";
 export * from "./Features";
 export * from "./Cta";
-export * from "./Image";
 export * from "./Testimonials";
 export * from "./Gallery";
 export * from "./Pricing";

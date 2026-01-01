@@ -46,13 +46,6 @@ export interface CtaBlock extends BlockBase {
   variant?: "primary" | "secondary"
 }
 
-export interface ImageBlock extends BlockBase {
-  type: "image"
-  image: ImageSource
-  caption?: string
-  size?: "small" | "medium" | "large" | "full"
-}
-
 export interface Quote {
   text: string
   author: string
@@ -195,7 +188,6 @@ export type Block
   = | HeroBlock
     | FeaturesBlock
     | CtaBlock
-    | ImageBlock
     | TestimonialsBlock
     | GalleryBlock
     | PricingBlock
@@ -218,7 +210,6 @@ export function isBlockType<T extends Block>(
 export const isHeroBlock = isBlockType<HeroBlock>("hero");
 export const isFeaturesBlock = isBlockType<FeaturesBlock>("features");
 export const isCtaBlock = isBlockType<CtaBlock>("cta");
-export const isImageBlock = isBlockType<ImageBlock>("image");
 export const isTestimonialsBlock = isBlockType<TestimonialsBlock>("testimonials");
 export const isGalleryBlock = isBlockType<GalleryBlock>("gallery");
 export const isPricingBlock = isBlockType<PricingBlock>("pricing");

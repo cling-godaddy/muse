@@ -52,13 +52,6 @@ export const ctaBlockSchema = blockBase.extend({
   variant: z.enum(["primary", "secondary"]).optional(),
 });
 
-export const imageBlockSchema = blockBase.extend({
-  type: z.literal("image"),
-  image: imageSourceSchema,
-  caption: z.string().optional(),
-  size: z.enum(["small", "medium", "large", "full"]).optional(),
-});
-
 const quoteSchema = z.object({
   text: z.string(),
   author: z.string(),
@@ -199,7 +192,6 @@ export const blockSchema = z.discriminatedUnion("type", [
   heroBlockSchema,
   featuresBlockSchema,
   ctaBlockSchema,
-  imageBlockSchema,
   testimonialsBlockSchema,
   galleryBlockSchema,
   pricingBlockSchema,

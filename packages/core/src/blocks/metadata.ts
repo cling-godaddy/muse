@@ -47,14 +47,6 @@ registerBlockMeta({
 });
 
 registerBlockMeta({
-  type: "image",
-  label: "Image",
-  icon: "image",
-  category: "media",
-  description: "Image with optional caption",
-});
-
-registerBlockMeta({
   type: "testimonials",
   label: "Testimonials",
   icon: "message-circle",
