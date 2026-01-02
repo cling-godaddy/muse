@@ -339,10 +339,10 @@ export const copySectionsSchema: ResponseSchema = {
                     properties: {
                       value: { type: "string", description: "Numeric value only, no symbols (e.g. '95', '10', '1500', '24')" },
                       label: { type: "string", description: "What the stat measures (e.g. 'Customers', 'Years Experience', 'Countries')" },
-                      prefix: { type: ["string", "null"], description: "ONLY for monetary values: '$', '€', '£'. Omit or null for non-monetary stats." },
-                      suffix: { type: ["string", "null"], description: "Unit: '%' for percentages, '+' for more, 'K'/'M' for thousands/millions. Omit if not needed." },
+                      prefix: { type: ["string", "null"], description: "ONLY for monetary values: '$', '€', '£'. Use null for non-monetary stats (most cases)." },
+                      suffix: { type: ["string", "null"], description: "Unit: '%' for percentages, '+' for more, 'K'/'M' for thousands/millions. Use null if not needed." },
                     },
-                    required: ["value", "label"],
+                    required: ["value", "label", "prefix", "suffix"],
                     additionalProperties: false,
                   },
                 },
