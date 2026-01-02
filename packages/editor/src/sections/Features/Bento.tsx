@@ -69,8 +69,17 @@ function BentoCard({ item, onUpdate, onRemove, isPending, isLarge }: BentoCardPr
   );
 }
 
+const layoutClasses: Record<string, string> = {
+  "features-bento": "bentoHero",
+  "features-bento-spotlight": "bentoSpotlight",
+  "features-bento-split": "bentoSplit",
+  "features-bento-alt": "bentoAlt",
+};
+
 export function Bento({ section, onUpdate, isPending }: Props) {
   const isEditable = useIsEditable();
+  const layoutClassName = layoutClasses[section.preset ?? "features-bento"] ?? "bentoHero";
+  const layoutClass = (styles as Record<string, string>)[layoutClassName] ?? "";
 
   const updateItem = (index: number, data: Partial<FeatureItem>) => {
     const items = section.items.map((item, i) =>
@@ -100,7 +109,7 @@ export function Bento({ section, onUpdate, isPending }: Props) {
         className={styles.headline}
         placeholder="Section headline..."
       />
-      <div className={styles.bento}>
+      <div className={`${styles.bento} ${layoutClass}`}>
         {section.items.map((item, i) => (
           <BentoCard
             key={i}

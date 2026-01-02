@@ -15,6 +15,9 @@ export function Features({ section, onUpdate, isPending }: Props) {
 
   switch (preset) {
     case "features-bento":
+    case "features-bento-spotlight":
+    case "features-bento-split":
+    case "features-bento-alt":
       return <Bento section={section} onUpdate={onUpdate} isPending={isPending} />;
     case "features-numbered":
       return <Numbered section={section} onUpdate={onUpdate} />;

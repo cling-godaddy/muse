@@ -19,6 +19,9 @@ const sampleItemsWithImages: FeatureItem[] = [
   { image: { url: "https://images.unsplash.com/photo-1555949963-aa79dcee981c?w=600", alt: "Code editor" }, title: "Developer Tools", description: "Powerful APIs and SDKs for every platform." },
   { image: { url: "https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?w=600", alt: "Security" }, title: "Enterprise Security", description: "SOC 2 compliant with end-to-end encryption." },
   { image: { url: "https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=600", alt: "Data visualization" }, title: "Smart Insights", description: "AI-powered recommendations and forecasting." },
+  { image: { url: "https://images.unsplash.com/photo-1504868584819-f8e8b4b6d7e3?w=600", alt: "Dashboard" }, title: "Custom Dashboards", description: "Build personalized views of your data." },
+  { image: { url: "https://images.unsplash.com/photo-1558494949-ef010cbdcc31?w=600", alt: "Server room" }, title: "Global Infrastructure", description: "Deploy to any region with one click." },
+  { image: { url: "https://images.unsplash.com/photo-1551434678-e076c223a692?w=600", alt: "Mobile app" }, title: "Mobile Ready", description: "Native apps for iOS and Android." },
 ];
 
 type FeaturesArgs = {
@@ -33,7 +36,7 @@ const meta: Meta<FeaturesArgs> = {
     preset: { table: { disable: true } },
     headline: { control: "text" },
     itemCount: {
-      control: { type: "range", min: 2, max: 6, step: 1 },
+      control: { type: "range", min: 2, max: 9, step: 1 },
     },
   },
   args: {
@@ -78,10 +81,70 @@ export const GridImages: Story = {
   },
 };
 
-export const Bento: Story = {
+export const BentoHero: Story = {
   args: {
     headline: "Platform Highlights",
     preset: "features-bento",
+    itemCount: 6,
+  },
+  render: (args) => {
+    const section: FeaturesSection = {
+      id: "story-features",
+      type: "features",
+      version: 1,
+      headline: args.headline || undefined,
+      preset: args.preset,
+      items: sampleItemsWithImages.slice(0, args.itemCount),
+    };
+    return <Features section={section} onUpdate={console.log} />;
+  },
+};
+
+export const BentoSpotlight: Story = {
+  args: {
+    headline: "Core Features",
+    preset: "features-bento-spotlight",
+    itemCount: 8,
+  },
+  argTypes: {
+    itemCount: { control: { type: "range", min: 7, max: 8, step: 1 } },
+  },
+  render: (args) => {
+    const section: FeaturesSection = {
+      id: "story-features",
+      type: "features",
+      version: 1,
+      headline: args.headline || undefined,
+      preset: args.preset,
+      items: sampleItemsWithImages.slice(0, args.itemCount),
+    };
+    return <Features section={section} onUpdate={console.log} />;
+  },
+};
+
+export const BentoSplit: Story = {
+  args: {
+    headline: "Key Benefits",
+    preset: "features-bento-split",
+    itemCount: 4,
+  },
+  render: (args) => {
+    const section: FeaturesSection = {
+      id: "story-features",
+      type: "features",
+      version: 1,
+      headline: args.headline || undefined,
+      preset: args.preset,
+      items: sampleItemsWithImages.slice(0, args.itemCount),
+    };
+    return <Features section={section} onUpdate={console.log} />;
+  },
+};
+
+export const BentoAlt: Story = {
+  args: {
+    headline: "What We Offer",
+    preset: "features-bento-alt",
     itemCount: 6,
   },
   render: (args) => {

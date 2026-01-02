@@ -42,6 +42,8 @@ export interface ImageRequirements {
   category: ImageCategory
   count: number
   orientation: ImageOrientation
+  min?: number
+  max?: number
 }
 
 export interface SectionPreset {

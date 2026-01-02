@@ -33,17 +33,65 @@ export const featuresGridImages: SectionPreset = {
 
 export const featuresBento: SectionPreset = {
   id: "features-bento",
-  name: "Bento",
+  name: "Bento Hero",
   sectionType: "features",
   layoutPattern: "grid",
   category: "value",
   mood: "modern",
-  tags: ["visual", "dynamic", "showcase", "premium"],
+  tags: ["visual", "dynamic", "showcase", "premium", "hero"],
   industries: ["saas", "fintech", "health", "creative"],
-  description: "Asymmetric grid with varied card sizes. Modern, visual.",
+  description: "Hero card with supporting features. Modern, visual.",
   requiredFields: ["items"],
   optionalFields: ["headline"],
   className: "muse-features--bento",
+  imageRequirements: { category: "subject", count: 6, orientation: "mixed" },
+};
+
+export const featuresBentoSpotlight: SectionPreset = {
+  id: "features-bento-spotlight",
+  name: "Bento Spotlight",
+  sectionType: "features",
+  layoutPattern: "grid",
+  category: "value",
+  mood: "modern",
+  tags: ["visual", "spotlight", "centered", "premium"],
+  industries: ["saas", "creative", "portfolio", "branding"],
+  description: "Center spotlight surrounded by offset outer cards. 7-8 items.",
+  requiredFields: ["items"],
+  optionalFields: ["headline"],
+  className: "muse-features--bento-spotlight",
+  imageRequirements: { category: "subject", count: 8, orientation: "mixed", min: 7, max: 8 },
+};
+
+export const featuresBentoSplit: SectionPreset = {
+  id: "features-bento-split",
+  name: "Bento Split",
+  sectionType: "features",
+  layoutPattern: "grid",
+  category: "value",
+  mood: "modern",
+  tags: ["visual", "comparison", "balanced", "minimal"],
+  industries: ["saas", "ecommerce", "portfolio", "creative"],
+  description: "Alternating wide and narrow cards. Clean pairs.",
+  requiredFields: ["items"],
+  optionalFields: ["headline"],
+  className: "muse-features--bento-split",
+  imageRequirements: { category: "subject", count: 4, orientation: "mixed" },
+};
+
+export const featuresBentoAlt: SectionPreset = {
+  id: "features-bento-alt",
+  name: "Bento Alternating",
+  sectionType: "features",
+  layoutPattern: "grid",
+  category: "value",
+  mood: "modern",
+  tags: ["visual", "rhythm", "dynamic", "scalable"],
+  industries: ["saas", "technology", "creative", "ecommerce"],
+  description: "Repeating wide-narrow pattern. Scales to any count.",
+  requiredFields: ["items"],
+  optionalFields: ["headline"],
+  className: "muse-features--bento-alt",
   imageRequirements: { category: "subject", count: 6, orientation: "mixed" },
 };
 
@@ -66,6 +114,9 @@ export const featuresPresets = {
   "features-grid": featuresGrid,
   "features-grid-images": featuresGridImages,
   "features-bento": featuresBento,
+  "features-bento-spotlight": featuresBentoSpotlight,
+  "features-bento-split": featuresBentoSplit,
+  "features-bento-alt": featuresBentoAlt,
   "features-numbered": featuresNumbered,
 } as const;
 
