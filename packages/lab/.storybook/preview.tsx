@@ -1,5 +1,6 @@
 import React, { useEffect } from "react";
 import type { Preview, Decorator } from "@storybook/react-vite";
+import { action } from "storybook/actions";
 import {
   resolveThemeFromBundle,
   themeToCssVars,
@@ -38,8 +39,34 @@ const withTheme: Decorator = (Story, context) => {
   );
 };
 
+const logLinkClick = action("link-click");
+
+function LinkInterceptor({ children }: { children: React.ReactNode }) {
+  useEffect(() => {
+    const handler = (e: MouseEvent) => {
+      const link = (e.target as HTMLElement).closest("a");
+      if (link) {
+        e.preventDefault();
+        logLinkClick({
+          text: link.textContent?.trim(),
+          href: link.getAttribute("href"),
+        });
+      }
+    };
+    document.addEventListener("click", handler);
+    return () => document.removeEventListener("click", handler);
+  }, []);
+  return <>{children}</>;
+}
+
+const withLinkHandler: Decorator = Story => (
+  <LinkInterceptor>
+    <Story />
+  </LinkInterceptor>
+);
+
 const preview: Preview = {
-  decorators: [withTheme],
+  decorators: [withTheme, withLinkHandler],
   globalTypes: {
     theme: {
       name: "Theme",
