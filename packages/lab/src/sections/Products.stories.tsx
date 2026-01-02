@@ -24,7 +24,7 @@ const sampleProducts: ProductItem[] = [
 
 const sampleMinimalProducts: ProductItem[] = [
   { image: { url: "https://images.unsplash.com/photo-1594938298603-c8148c4dae35?w=400", alt: "Vase" }, name: "Ceramic Vase", price: "$85" },
-  { image: { url: "https://images.unsplash.com/photo-1586023492125-27b2c045efd7?w=400", alt: "Chair" }, name: "Accent Chair", price: "$450" },
+  { image: { url: "https://images.unsplash.com/photo-1586023492125-27b2c045efd7?w=400", alt: "Chair" }, name: "Accent Chair", price: "$450", originalPrice: "$550" },
   { image: { url: "https://images.unsplash.com/photo-1567538096630-e0c55bd6374c?w=400", alt: "Lamp" }, name: "Table Lamp", price: "$120" },
   { image: { url: "https://images.unsplash.com/photo-1555041469-a586c61ea9bc?w=400", alt: "Sofa" }, name: "Velvet Sofa", price: "$1,299" },
   { image: { url: "https://images.unsplash.com/photo-1493663284031-b7e3aefcae8e?w=400", alt: "Coffee Table" }, name: "Oak Coffee Table", price: "$380" },
@@ -33,7 +33,7 @@ const sampleMinimalProducts: ProductItem[] = [
   { image: { url: "https://images.unsplash.com/photo-1540932239986-30128078f3c5?w=400", alt: "Clock" }, name: "Wall Clock", price: "$145" },
   { image: { url: "https://images.unsplash.com/photo-1616486338812-3dadae4b4ace?w=400", alt: "Desk" }, name: "Writing Desk", price: "$680" },
   { image: { url: "https://images.unsplash.com/photo-1556228453-efd6c1ff04f6?w=400", alt: "Bookshelf" }, name: "Floating Shelf", price: "$95" },
-  { image: { url: "https://images.unsplash.com/photo-1513506003901-1e6a229e2d15?w=400", alt: "Rug" }, name: "Woven Rug", price: "$320" },
+  { image: { url: "https://images.unsplash.com/photo-1513506003901-1e6a229e2d15?w=400", alt: "Rug" }, name: "Woven Rug", price: "$320", originalPrice: "$400" },
   { image: { url: "https://images.unsplash.com/photo-1592078615290-033ee584e267?w=400", alt: "Armchair" }, name: "Lounge Chair", price: "$890" },
   { image: { url: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400", alt: "Art" }, name: "Abstract Print", price: "$240" },
   { image: { url: "https://images.unsplash.com/photo-1583847268964-b28dc8f51f92?w=400", alt: "Planter" }, name: "Concrete Planter", price: "$65" },
