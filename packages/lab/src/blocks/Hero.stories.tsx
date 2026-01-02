@@ -20,14 +20,11 @@ const SAMPLE_IMAGE = {
 const meta: Meta<HeroArgs> = {
   title: "Sections/Hero",
   argTypes: {
+    preset: { table: { disable: true } },
     headline: { control: "text" },
     subheadline: { control: "text" },
     ctaText: { control: "text" },
     secondaryCtaText: { control: "text" },
-    preset: {
-      control: "select",
-      options: ["hero-centered", "hero-overlay", "hero-split-left", "hero-split-right"],
-    },
     overlayOpacity: {
       control: { type: "range", min: 0, max: 100, step: 10 },
       if: { arg: "preset", eq: "hero-overlay" },

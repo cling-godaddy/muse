@@ -30,11 +30,8 @@ type FeaturesArgs = {
 const meta: Meta<FeaturesArgs> = {
   title: "Sections/Features",
   argTypes: {
+    preset: { table: { disable: true } },
     headline: { control: "text" },
-    preset: {
-      control: "select",
-      options: ["features-grid", "features-grid-images", "features-numbered"],
-    },
     itemCount: {
       control: { type: "range", min: 2, max: 6, step: 1 },
     },

@@ -21,12 +21,9 @@ type FaqArgs = {
 const meta: Meta<FaqArgs> = {
   title: "Sections/FAQ",
   argTypes: {
+    preset: { table: { disable: true } },
     headline: { control: "text" },
     subheadline: { control: "text" },
-    preset: {
-      control: "select",
-      options: ["faq-accordion", "faq-two-column"],
-    },
     itemCount: {
       control: { type: "range", min: 2, max: 5, step: 1 },
     },

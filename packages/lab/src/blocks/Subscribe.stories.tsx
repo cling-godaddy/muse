@@ -15,15 +15,12 @@ type SubscribeArgs = {
 const meta: Meta<SubscribeArgs> = {
   title: "Sections/Subscribe",
   argTypes: {
+    preset: { table: { disable: true } },
     headline: { control: "text" },
     subheadline: { control: "text" },
     buttonText: { control: "text" },
     placeholderText: { control: "text" },
     disclaimer: { control: "text" },
-    preset: {
-      control: "select",
-      options: ["subscribe-inline", "subscribe-card", "subscribe-banner"],
-    },
   },
   args: {
     headline: "Stay Updated",

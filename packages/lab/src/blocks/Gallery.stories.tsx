@@ -26,6 +26,7 @@ type GalleryArgs = {
 const meta: Meta<GalleryArgs> = {
   title: "Sections/Gallery",
   argTypes: {
+    preset: { table: { disable: true } },
     headline: {
       control: "text",
       description: "Section headline",
@@ -34,11 +35,6 @@ const meta: Meta<GalleryArgs> = {
       control: "inline-radio",
       options: [2, 3, 4],
       description: "Number of columns",
-    },
-    preset: {
-      control: "select",
-      options: ["gallery-grid", "gallery-masonry", "gallery-carousel"],
-      description: "Layout preset",
     },
     imageCount: {
       control: { type: "range", min: 1, max: 10, step: 1 },
@@ -77,6 +73,7 @@ export const Masonry: Story = {
 export const Carousel: Story = {
   args: { preset: "gallery-carousel", imageCount: 5 },
   argTypes: {
+    preset: { table: { disable: true } },
     columns: { table: { disable: true } },
   },
 };

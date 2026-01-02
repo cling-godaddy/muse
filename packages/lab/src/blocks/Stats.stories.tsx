@@ -19,11 +19,8 @@ type StatsArgs = {
 const meta: Meta<StatsArgs> = {
   title: "Sections/Stats",
   argTypes: {
+    preset: { table: { disable: true } },
     headline: { control: "text" },
-    preset: {
-      control: "select",
-      options: ["stats-row", "stats-grid", "stats-counters"],
-    },
     statCount: {
       control: { type: "range", min: 2, max: 4, step: 1 },
     },

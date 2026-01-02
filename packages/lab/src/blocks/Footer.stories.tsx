@@ -29,12 +29,9 @@ type FooterArgs = {
 const meta: Meta<FooterArgs> = {
   title: "Sections/Footer",
   argTypes: {
+    preset: { table: { disable: true } },
     companyName: { control: "text" },
     copyright: { control: "text" },
-    preset: {
-      control: "select",
-      options: ["footer-simple"],
-    },
     showLinks: { control: "boolean" },
     showSocials: { control: "boolean" },
   },

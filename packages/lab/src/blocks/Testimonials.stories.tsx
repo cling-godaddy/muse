@@ -36,11 +36,8 @@ type TestimonialsArgs = {
 const meta: Meta<TestimonialsArgs> = {
   title: "Sections/Testimonials",
   argTypes: {
+    preset: { table: { disable: true } },
     headline: { control: "text" },
-    preset: {
-      control: "select",
-      options: ["testimonials-grid", "testimonials-carousel", "testimonials-single"],
-    },
     quoteCount: {
       control: { type: "range", min: 1, max: 3, step: 1 },
     },

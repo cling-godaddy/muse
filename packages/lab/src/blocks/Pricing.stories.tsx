@@ -41,12 +41,9 @@ type PricingArgs = {
 const meta: Meta<PricingArgs> = {
   title: "Sections/Pricing",
   argTypes: {
+    preset: { table: { disable: true } },
     headline: { control: "text" },
     subheadline: { control: "text" },
-    preset: {
-      control: "select",
-      options: ["pricing-cards"],
-    },
     planCount: {
       control: { type: "range", min: 2, max: 3, step: 1 },
     },

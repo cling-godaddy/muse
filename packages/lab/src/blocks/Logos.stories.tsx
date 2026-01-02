@@ -28,11 +28,8 @@ type LogosArgs = {
 const meta: Meta<LogosArgs> = {
   title: "Sections/Logos",
   argTypes: {
+    preset: { table: { disable: true } },
     headline: { control: "text" },
-    preset: {
-      control: "select",
-      options: ["logos-grid", "logos-marquee"],
-    },
     logoCount: {
       control: { type: "range", min: 3, max: 8, step: 1 },
     },

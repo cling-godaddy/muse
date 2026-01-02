@@ -14,16 +14,13 @@ type CtaArgs = {
 const meta: Meta<CtaArgs> = {
   title: "Sections/CTA",
   argTypes: {
+    preset: { table: { disable: true } },
     headline: { control: "text" },
     description: { control: "text" },
     buttonText: { control: "text" },
     variant: {
       control: "inline-radio",
       options: ["primary", "secondary"],
-    },
-    preset: {
-      control: "select",
-      options: ["cta-centered"],
     },
   },
   args: {

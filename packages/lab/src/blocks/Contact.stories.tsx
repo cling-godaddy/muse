@@ -22,15 +22,12 @@ type ContactArgs = {
 const meta: Meta<ContactArgs> = {
   title: "Sections/Contact",
   argTypes: {
+    preset: { table: { disable: true } },
     headline: { control: "text" },
     subheadline: { control: "text" },
     email: { control: "text" },
     phone: { control: "text" },
     address: { control: "text" },
-    preset: {
-      control: "select",
-      options: ["contact-form", "contact-split-map"],
-    },
     showForm: { control: "boolean" },
   },
   args: {

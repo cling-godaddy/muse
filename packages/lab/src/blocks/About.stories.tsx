@@ -35,12 +35,9 @@ type AboutArgs = {
 const meta: Meta<AboutArgs> = {
   title: "Sections/About",
   argTypes: {
+    preset: { table: { disable: true } },
     headline: { control: "text" },
     body: { control: "text" },
-    preset: {
-      control: "select",
-      options: ["about-story", "about-team"],
-    },
     showImage: { control: "boolean" },
     teamCount: {
       control: { type: "range", min: 0, max: 3, step: 1 },
