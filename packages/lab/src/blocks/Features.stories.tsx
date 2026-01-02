@@ -78,6 +78,25 @@ export const GridImages: Story = {
   },
 };
 
+export const Bento: Story = {
+  args: {
+    headline: "Platform Highlights",
+    preset: "features-bento",
+    itemCount: 6,
+  },
+  render: (args) => {
+    const section: FeaturesSection = {
+      id: "story-features",
+      type: "features",
+      version: 1,
+      headline: args.headline || undefined,
+      preset: args.preset,
+      items: sampleItemsWithImages.slice(0, args.itemCount),
+    };
+    return <Features section={section} onUpdate={console.log} />;
+  },
+};
+
 export const Numbered: Story = {
   args: {
     headline: "How It Works",

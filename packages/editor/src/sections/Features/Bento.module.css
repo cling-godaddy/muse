@@ -1,0 +1,223 @@
+.section {
+  padding: 4rem 2rem;
+  background: var(--muse-theme-bg-alt, #f8fafc);
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+  overflow: hidden;
+}
+
+.headline {
+  font-family: var(--muse-theme-heading-font, inherit);
+  font-weight: var(--muse-theme-heading-weight, 700);
+  font-size: clamp(1.25rem, 4vw, 1.75rem);
+  color: var(--muse-theme-text, #0f172a);
+  background: transparent;
+  border: 1px dashed transparent;
+  padding: 0.5rem;
+  text-align: center;
+  width: 100%;
+  resize: none;
+}
+
+.headline:focus {
+  border-color: var(--muse-theme-primary, #6366f1);
+  outline: none;
+}
+
+/* Bento grid layout */
+.bento {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  grid-auto-rows: minmax(180px, auto);
+  gap: 1rem;
+}
+
+/* Hero card: first item spans 2x2 */
+.bento .item:first-child {
+  grid-column: span 2;
+  grid-row: span 2;
+}
+
+/* Full-width card: 6th item spans full width */
+.bento .item:nth-child(6) {
+  grid-column: span 4;
+}
+
+/* Individual bento card */
+.item {
+  background: var(--muse-theme-bg, white);
+  padding: 1.5rem;
+  border-radius: var(--muse-theme-radius, 0.75rem);
+  box-shadow: var(--muse-theme-shadow-card, 0 1px 3px rgba(0, 0, 0, 0.1));
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Image fills the card as background */
+.itemImage {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: inherit;
+}
+
+/* Content overlay on image */
+.item:has(.itemImage) .itemContent {
+  position: relative;
+  z-index: 1;
+  margin-top: auto;
+  padding: 1rem;
+  background: linear-gradient(to top, rgba(0, 0, 0, 0.7), transparent);
+  margin: -1.5rem;
+  margin-top: auto;
+  padding-top: 3rem;
+  border-radius: 0 0 var(--muse-theme-radius, 0.75rem) var(--muse-theme-radius, 0.75rem);
+}
+
+.item:has(.itemImage) .itemTitle,
+.item:has(.itemImage) .itemDescription {
+  color: white;
+}
+
+.itemContent {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.item input,
+.item textarea {
+  background: transparent;
+  border: 1px dashed transparent;
+  padding: 0.25rem;
+  font-family: var(--muse-theme-body-font, inherit);
+  color: var(--muse-theme-text, #0f172a);
+  resize: none;
+}
+
+.item input:focus,
+.item textarea:focus {
+  border-color: var(--muse-theme-primary, #6366f1);
+  outline: none;
+}
+
+.itemIcon {
+  font-size: 1.5rem;
+  text-align: center;
+  color: var(--muse-theme-primary, #6366f1);
+}
+
+.itemTitle {
+  font-family: var(--muse-theme-heading-font, inherit);
+  font-weight: 600;
+  font-size: 1.125rem;
+  color: var(--muse-theme-text, #0f172a);
+}
+
+/* Larger title for hero card */
+.bento .item:first-child .itemTitle {
+  font-size: 1.5rem;
+}
+
+.itemDescription {
+  font-family: var(--muse-theme-body-font, inherit);
+  color: var(--muse-theme-text-muted, #64748b);
+  font-size: 0.875rem;
+  line-height: 1.5;
+}
+
+.removeButton {
+  position: absolute;
+  top: 0.5rem;
+  right: 0.5rem;
+  font-size: 0.75rem;
+  color: var(--muse-theme-text-muted, #64748b);
+  background: var(--muse-theme-bg, white);
+  border: 1px solid currentColor;
+  padding: 0.25rem 0.5rem;
+  border-radius: 0.25rem;
+  cursor: pointer;
+  z-index: 2;
+}
+
+.addButton {
+  align-self: center;
+  padding: 0.5rem 1rem;
+  background: var(--muse-theme-primary, #6366f1);
+  color: white;
+  border: none;
+  border-radius: var(--muse-theme-radius, 0.5rem);
+  cursor: pointer;
+  font-size: 0.875rem;
+}
+
+/* Responsive: 2 columns on tablet/mobile */
+@media (max-width: 768px) {
+  .bento {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .bento .item:first-child {
+    grid-column: span 2;
+    grid-row: span 1;
+  }
+
+  .bento .item:nth-child(6) {
+    grid-column: span 2;
+  }
+}
+
+/* ============================================
+   CRT EFFECTS
+   ============================================ */
+:global([data-effects="crt"]) .section {
+  position: relative;
+}
+
+:global([data-effects="crt"]) .section::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(
+    0deg,
+    rgba(var(--muse-theme-primary-rgb, 0, 255, 0), 0.03) 0px,
+    rgba(var(--muse-theme-primary-rgb, 0, 255, 0), 0.03) 1px,
+    transparent 1px,
+    transparent 2px
+  );
+  pointer-events: none;
+  z-index: 10;
+  border-radius: inherit;
+}
+
+:global([data-effects="crt"]) .headline {
+  text-shadow: 0 0 10px rgba(var(--muse-theme-primary-rgb, 0, 255, 0), 0.5);
+}
+
+:global([data-effects="crt"]) .item {
+  border: 1px solid rgba(var(--muse-theme-primary-rgb, 0, 255, 0), 0.2);
+  box-shadow: 0 0 20px rgba(var(--muse-theme-primary-rgb, 0, 255, 0), 0.1);
+}
+
+/* ============================================
+   NEON EFFECTS
+   ============================================ */
+:global([data-effects="neon"]) .headline {
+  text-shadow:
+    0 0 10px rgba(var(--muse-theme-primary-rgb, 255, 42, 109), 0.8),
+    0 0 20px rgba(var(--muse-theme-primary-rgb, 255, 42, 109), 0.6),
+    0 0 40px rgba(var(--muse-theme-primary-rgb, 255, 42, 109), 0.4);
+}
+
+:global([data-effects="neon"]) .item {
+  border: 1px solid rgba(var(--muse-theme-primary-rgb, 255, 42, 109), 0.3);
+  box-shadow:
+    0 0 15px rgba(var(--muse-theme-primary-rgb, 255, 42, 109), 0.15),
+    inset 0 0 15px rgba(var(--muse-theme-primary-rgb, 255, 42, 109), 0.05);
+}

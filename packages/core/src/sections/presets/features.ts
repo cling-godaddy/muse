@@ -31,6 +31,22 @@ export const featuresGridImages: SectionPreset = {
   imageRequirements: { category: "subject", count: 6, orientation: "horizontal" },
 };
 
+export const featuresBento: SectionPreset = {
+  id: "features-bento",
+  name: "Bento",
+  sectionType: "features",
+  layoutPattern: "grid",
+  category: "value",
+  mood: "modern",
+  tags: ["visual", "dynamic", "showcase", "premium"],
+  industries: ["saas", "fintech", "health", "creative"],
+  description: "Asymmetric grid with varied card sizes. Modern, visual.",
+  requiredFields: ["items"],
+  optionalFields: ["headline"],
+  className: "muse-features--bento",
+  imageRequirements: { category: "subject", count: 6, orientation: "mixed" },
+};
+
 export const featuresNumbered: SectionPreset = {
   id: "features-numbered",
   name: "Numbered",
@@ -49,6 +65,7 @@ export const featuresNumbered: SectionPreset = {
 export const featuresPresets = {
   "features-grid": featuresGrid,
   "features-grid-images": featuresGridImages,
+  "features-bento": featuresBento,
   "features-numbered": featuresNumbered,
 } as const;
 
