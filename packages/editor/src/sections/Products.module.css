@@ -153,6 +153,7 @@
 }
 
 .ratingValue {
+  font-family: var(--muse-theme-body-font, inherit);
   color: var(--muse-theme-text-muted, #6b7280);
 }
 
