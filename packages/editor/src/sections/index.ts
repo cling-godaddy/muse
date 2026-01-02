@@ -14,3 +14,4 @@ export * from "./About";
 export * from "./Subscribe";
 export * from "./Stats";
 export * from "./Logos";
+export * from "./Menu";

@@ -15,6 +15,7 @@ export type {
   SubscribeSection,
   StatsSection,
   LogosSection,
+  MenuSection,
   ImageSource,
   FeatureItem,
   Quote,
@@ -27,6 +28,8 @@ export type {
   TeamMember,
   StatItem,
   LogoItem,
+  MenuItem,
+  MenuCategory,
 } from "./types";
 
 export {
@@ -44,6 +47,7 @@ export {
   isSubscribeSection,
   isStatsSection,
   isLogosSection,
+  isMenuSection,
 } from "./types";
 
 // Preset types
@@ -72,6 +76,7 @@ export {
   subscribePresets,
   statsPresets,
   logosPresets,
+  menuPresets,
   allPresets,
   type HeroPresetId,
   type FeaturesPresetId,
@@ -86,6 +91,7 @@ export {
   type SubscribePresetId,
   type StatsPresetId,
   type LogosPresetId,
+  type MenuPresetId,
 } from "./presets";
 
 import type { SectionPreset, SectionType, ImageRequirements } from "./types";
@@ -105,6 +111,7 @@ export const DEFAULT_PRESETS: Record<SectionType, string> = {
   subscribe: "subscribe-card",
   stats: "stats-row",
   logos: "logos-grid",
+  menu: "menu-list",
 };
 
 export const GALLERY_IMAGE_MINIMUMS: Record<string, number> = {

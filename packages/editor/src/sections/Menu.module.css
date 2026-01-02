@@ -1,0 +1,403 @@
+.section {
+  padding: 3rem 2rem;
+  background: var(--muse-theme-bg, white);
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+.headline {
+  font-family: var(--muse-theme-heading-font, inherit);
+  font-weight: var(--muse-theme-heading-weight, 700);
+  font-size: clamp(1.5rem, 4vw, 2.5rem);
+  color: var(--muse-theme-text, #111827);
+  background: transparent;
+  border: 1px dashed transparent;
+  padding: 0.5rem;
+  text-align: center;
+  width: 100%;
+}
+
+.headline:focus {
+  border-color: var(--muse-theme-primary, #6366f1);
+  outline: none;
+}
+
+.subheadline {
+  font-family: var(--muse-theme-body-font, inherit);
+  font-size: 1.125rem;
+  color: var(--muse-theme-text-muted, #6b7280);
+  background: transparent;
+  border: 1px dashed transparent;
+  padding: 0.5rem;
+  text-align: center;
+  width: 100%;
+  resize: none;
+}
+
+.subheadline:focus {
+  border-color: var(--muse-theme-primary, #6366f1);
+  outline: none;
+}
+
+/* Categories */
+.categories {
+  display: flex;
+  flex-direction: column;
+  gap: 2.5rem;
+}
+
+.category {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.categoryHeader {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  border-bottom: 2px solid var(--muse-theme-border, #e5e7eb);
+  padding-bottom: 0.5rem;
+}
+
+.categoryName {
+  font-family: var(--muse-theme-heading-font, inherit);
+  font-weight: 600;
+  font-size: 1.25rem;
+  color: var(--muse-theme-text, #111827);
+  background: transparent;
+  border: 1px dashed transparent;
+  padding: 0.25rem;
+  flex: 1;
+}
+
+.categoryName:focus {
+  border-color: var(--muse-theme-primary, #6366f1);
+  outline: none;
+}
+
+.removeCategoryButton {
+  font-size: 0.75rem;
+  color: var(--muse-theme-text-muted, #6b7280);
+  background: transparent;
+  border: 1px solid currentColor;
+  padding: 0.25rem 0.5rem;
+  border-radius: 0.25rem;
+  cursor: pointer;
+}
+
+/* Items container */
+.items {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+/* Individual item */
+.item {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  position: relative;
+  padding: 0.5rem 0;
+}
+
+.itemContent {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.itemHeader {
+  display: flex;
+  align-items: baseline;
+  gap: 0.5rem;
+}
+
+.itemName {
+  font-family: var(--muse-theme-body-font, inherit);
+  font-weight: 500;
+  font-size: 1rem;
+  color: var(--muse-theme-text, #111827);
+  background: transparent;
+  border: 1px dashed transparent;
+  padding: 0.125rem;
+}
+
+.itemName:focus {
+  border-color: var(--muse-theme-primary, #6366f1);
+  outline: none;
+}
+
+.itemDots {
+  flex: 1;
+  border-bottom: 1px dotted var(--muse-theme-border, #d1d5db);
+  margin-bottom: 0.25rem;
+  min-width: 2rem;
+}
+
+.itemPrice {
+  font-family: var(--muse-theme-body-font, inherit);
+  font-weight: 500;
+  font-size: 1rem;
+  color: var(--muse-theme-text, #111827);
+  background: transparent;
+  border: 1px dashed transparent;
+  padding: 0.125rem;
+  text-align: right;
+}
+
+.itemPrice:focus {
+  border-color: var(--muse-theme-primary, #6366f1);
+  outline: none;
+}
+
+.itemDescription {
+  font-family: var(--muse-theme-body-font, inherit);
+  font-size: 0.875rem;
+  color: var(--muse-theme-text-muted, #6b7280);
+  background: transparent;
+  border: 1px dashed transparent;
+  padding: 0.125rem;
+  padding-left: 0;
+  resize: none;
+}
+
+.itemDescription:focus {
+  border-color: var(--muse-theme-primary, #6366f1);
+  outline: none;
+}
+
+.itemTags {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  margin-top: 0.25rem;
+}
+
+.tag {
+  font-size: 0.75rem;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.025em;
+  color: var(--muse-theme-primary, #6366f1);
+  background: var(--muse-theme-bg-alt, #f3f4f6);
+  padding: 0.125rem 0.5rem;
+  border-radius: 0.25rem;
+}
+
+.removeButton {
+  position: absolute;
+  top: 0.5rem;
+  right: 0;
+  font-size: 1rem;
+  color: var(--muse-theme-text-muted, #9ca3af);
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 0.25rem;
+  line-height: 1;
+}
+
+.removeButton:hover {
+  color: var(--muse-theme-text, #111827);
+}
+
+.addItemButton,
+.addCategoryButton {
+  font-size: 0.875rem;
+  color: var(--muse-theme-primary, #6366f1);
+  background: transparent;
+  border: 1px dashed var(--muse-theme-primary, #6366f1);
+  padding: 0.5rem 1rem;
+  border-radius: 0.5rem;
+  cursor: pointer;
+  margin-top: 0.5rem;
+}
+
+.addCategoryButton {
+  align-self: flex-start;
+}
+
+.empty {
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+}
+
+/* ============================================
+   LIST LAYOUT (default)
+   Classic restaurant menu style
+   ============================================ */
+.list .items {
+  max-width: 600px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+.list .categoryName {
+  text-align: center;
+}
+
+.list .categoryHeader {
+  justify-content: center;
+}
+
+/* ============================================
+   CARDS LAYOUT
+   Grid of visual cards with images
+   ============================================ */
+.cards .items {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  gap: 1.5rem;
+}
+
+.cards .item {
+  background: var(--muse-theme-bg-alt, #f8fafc);
+  border-radius: var(--muse-theme-radius, 0.75rem);
+  overflow: hidden;
+  padding: 0;
+}
+
+.cards .itemImage {
+  width: 100%;
+  height: 160px;
+  object-fit: cover;
+}
+
+.cards .itemContent {
+  padding: 1rem;
+}
+
+.cards .itemHeader {
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.25rem;
+}
+
+.cards .itemName {
+  font-size: 1.125rem;
+  font-weight: 600;
+}
+
+.cards .itemPrice {
+  font-size: 1rem;
+  color: var(--muse-theme-primary, #6366f1);
+  font-weight: 600;
+}
+
+.cards .itemDots {
+  display: none;
+}
+
+.cards .removeButton {
+  top: 0.5rem;
+  right: 0.5rem;
+  background: var(--muse-theme-bg, white);
+  border-radius: 50%;
+  width: 1.5rem;
+  height: 1.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.cards .addItemButton {
+  grid-column: 1 / -1;
+}
+
+/* ============================================
+   SIMPLE LAYOUT
+   Dense, minimal, multi-column
+   ============================================ */
+.simple .items {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 0.5rem 2rem;
+}
+
+.simple .item {
+  padding: 0.25rem 0;
+}
+
+.simple .itemHeader {
+  gap: 0.25rem;
+}
+
+.simple .itemName {
+  font-size: 0.9375rem;
+}
+
+.simple .itemPrice {
+  font-size: 0.9375rem;
+}
+
+.simple .itemDots {
+  min-width: 1rem;
+}
+
+.simple .removeButton {
+  top: 0;
+}
+
+/* ============================================
+   CRT EFFECTS
+   ============================================ */
+:global([data-effects="crt"]) .section {
+  position: relative;
+}
+
+:global([data-effects="crt"]) .section::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(
+    0deg,
+    rgba(var(--muse-theme-primary-rgb, 0, 255, 0), 0.03) 0px,
+    rgba(var(--muse-theme-primary-rgb, 0, 255, 0), 0.03) 1px,
+    transparent 1px,
+    transparent 2px
+  );
+  pointer-events: none;
+  z-index: 10;
+}
+
+:global([data-effects="crt"]) .headline {
+  text-shadow: 0 0 10px rgba(var(--muse-theme-primary-rgb, 0, 255, 0), 0.5);
+}
+
+:global([data-effects="crt"]) .categoryName {
+  text-shadow: 0 0 8px rgba(var(--muse-theme-primary-rgb, 0, 255, 0), 0.4);
+}
+
+:global([data-effects="crt"]) .itemName {
+  text-shadow: 0 0 5px rgba(var(--muse-theme-primary-rgb, 0, 255, 0), 0.3);
+}
+
+/* ============================================
+   NEON EFFECTS
+   ============================================ */
+:global([data-effects="neon"]) .headline {
+  text-shadow:
+    0 0 10px rgba(var(--muse-theme-primary-rgb, 255, 42, 109), 0.8),
+    0 0 20px rgba(var(--muse-theme-primary-rgb, 255, 42, 109), 0.6),
+    0 0 40px rgba(var(--muse-theme-primary-rgb, 255, 42, 109), 0.4);
+}
+
+:global([data-effects="neon"]) .categoryName {
+  text-shadow:
+    0 0 8px rgba(var(--muse-theme-primary-rgb, 255, 42, 109), 0.6),
+    0 0 16px rgba(var(--muse-theme-primary-rgb, 255, 42, 109), 0.4);
+}
+
+:global([data-effects="neon"]) .tag {
+  box-shadow: 0 0 10px rgba(var(--muse-theme-primary-rgb, 255, 42, 109), 0.3);
+}
+
+:global([data-effects="neon"]) .cards .item {
+  box-shadow:
+    0 0 15px rgba(var(--muse-theme-primary-rgb, 255, 42, 109), 0.15),
+    inset 0 0 15px rgba(var(--muse-theme-primary-rgb, 255, 42, 109), 0.05);
+}

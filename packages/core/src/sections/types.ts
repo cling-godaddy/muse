@@ -11,7 +11,8 @@ export type SectionType
     | "about"
     | "subscribe"
     | "stats"
-    | "logos";
+    | "logos"
+    | "menu";
 
 export type LayoutPattern
   = | "centered"
@@ -256,6 +257,27 @@ export interface LogosSection extends SectionBase {
   logos: LogoItem[]
 }
 
+export interface MenuItem {
+  name: string
+  description?: string
+  price: string
+  tags?: string[]
+  image?: ImageSource
+}
+
+export interface MenuCategory {
+  name: string
+  items: MenuItem[]
+}
+
+export interface MenuSection extends SectionBase {
+  type: "menu"
+  headline?: string
+  subheadline?: string
+  items?: MenuItem[]
+  categories?: MenuCategory[]
+}
+
 export type Section
   = | HeroSection
     | FeaturesSection
@@ -269,7 +291,8 @@ export type Section
     | AboutSection
     | SubscribeSection
     | StatsSection
-    | LogosSection;
+    | LogosSection
+    | MenuSection;
 
 export function isSectionType<T extends Section>(
   type: T["type"],
@@ -290,3 +313,4 @@ export const isAboutSection = isSectionType<AboutSection>("about");
 export const isSubscribeSection = isSectionType<SubscribeSection>("subscribe");
 export const isStatsSection = isSectionType<StatsSection>("stats");
 export const isLogosSection = isSectionType<LogosSection>("logos");
+export const isMenuSection = isSectionType<MenuSection>("menu");
