@@ -209,7 +209,7 @@ registerAISectionSchema({
   description: "Key metrics and numbers showcase",
   properties: {
     headline: { type: "string", description: "Optional section headline" },
-    stats: { type: "array", description: "Array of stat items: { value, label, prefix (e.g. '$'), suffix (e.g. '+') }", required: true },
+    stats: { type: "array", description: "Array of stat items: { value (number only, no symbols), label, prefix (use '$' or '€' ONLY for money, otherwise null), suffix ('+', '%', 'k', 'M', or null) }", required: true },
   },
   required: ["stats"],
 });

@@ -337,10 +337,10 @@ export const copySectionsSchema: ResponseSchema = {
                   items: {
                     type: "object",
                     properties: {
-                      value: { type: "string" },
+                      value: { type: "string", description: "Numeric value only, no symbols (e.g. '95', '10', '1500')" },
                       label: { type: "string" },
-                      prefix: nullableString,
-                      suffix: nullableString,
+                      prefix: { type: ["string", "null"], description: "Currency symbol ONLY for monetary values ('$', '€'), otherwise null" },
+                      suffix: { type: ["string", "null"], description: "Unit suffix like '+', '%', 'k', 'M', or null" },
                     },
                     required: ["value", "label", "prefix", "suffix"],
                     additionalProperties: false,
