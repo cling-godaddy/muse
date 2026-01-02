@@ -81,7 +81,7 @@
   color: var(--muse-theme-primary, #6366f1);
   background: transparent;
   border: 1px dashed transparent;
-  text-align: center;
+  text-align: right;
   width: 5rem;
   padding: 0;
 }
