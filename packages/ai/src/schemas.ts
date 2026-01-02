@@ -337,12 +337,12 @@ export const copySectionsSchema: ResponseSchema = {
                   items: {
                     type: "object",
                     properties: {
-                      value: { type: "string", description: "Numeric value only, no symbols (e.g. '95', '10', '1500')" },
-                      label: { type: "string" },
-                      prefix: { type: ["string", "null"], description: "Currency symbol ONLY for monetary values ('$', '€'), otherwise null" },
-                      suffix: { type: ["string", "null"], description: "Unit suffix like '+', '%', 'k', 'M', or null" },
+                      value: { type: "string", description: "Numeric value only, no symbols (e.g. '95', '10', '1500', '24')" },
+                      label: { type: "string", description: "What the stat measures (e.g. 'Customers', 'Years Experience', 'Countries')" },
+                      prefix: { type: ["string", "null"], description: "ONLY for monetary values: '$', '€', '£'. Omit or null for non-monetary stats." },
+                      suffix: { type: ["string", "null"], description: "Unit: '%' for percentages, '+' for more, 'K'/'M' for thousands/millions. Omit if not needed." },
                     },
-                    required: ["value", "label", "prefix", "suffix"],
+                    required: ["value", "label"],
                     additionalProperties: false,
                   },
                 },

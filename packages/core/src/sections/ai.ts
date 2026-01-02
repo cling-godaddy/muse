@@ -209,7 +209,17 @@ registerAISectionSchema({
   description: "Key metrics and numbers showcase",
   properties: {
     headline: { type: "string", description: "Optional section headline" },
-    stats: { type: "array", description: "Array of stat items: { value (number only, no symbols), label, prefix (use '$' or '€' ONLY for money, otherwise null), suffix ('+', '%', 'k', 'M', or null) }", required: true },
+    stats: {
+      type: "array",
+      description: `Array of stat items with value, label, optional prefix/suffix.
+Examples:
+- Money: { value: "2", label: "Revenue", prefix: "$", suffix: "M" }
+- Percent: { value: "98", label: "Satisfaction", suffix: "%" }
+- Count: { value: "10", label: "Years in Business", suffix: "+" }
+- Plain: { value: "50", label: "Countries Served" }
+Only use prefix for currency ($, €, £). Most stats need NO prefix.`,
+      required: true,
+    },
   },
   required: ["stats"],
 });

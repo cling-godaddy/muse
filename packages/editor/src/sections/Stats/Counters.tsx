@@ -101,7 +101,7 @@ export function Counters({ section, onUpdate }: Props) {
                       className={styles.prefix}
                       value={stat.prefix ?? ""}
                       onChange={e => updateStat(i, { prefix: e.target.value || undefined })}
-                      placeholder="$"
+                      placeholder=""
                     />
                     <input
                       type="text"
