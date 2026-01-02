@@ -12,7 +12,8 @@ export type SectionType
     | "subscribe"
     | "stats"
     | "logos"
-    | "menu";
+    | "menu"
+    | "products";
 
 export type LayoutPattern
   = | "centered"
@@ -278,6 +279,23 @@ export interface MenuSection extends SectionBase {
   categories?: MenuCategory[]
 }
 
+export interface ProductItem {
+  image: ImageSource
+  name: string
+  price: string
+  originalPrice?: string
+  rating?: number
+  href?: string
+  badge?: string
+}
+
+export interface ProductsSection extends SectionBase {
+  type: "products"
+  headline?: string
+  subheadline?: string
+  items: ProductItem[]
+}
+
 export type Section
   = | HeroSection
     | FeaturesSection
@@ -292,7 +310,8 @@ export type Section
     | SubscribeSection
     | StatsSection
     | LogosSection
-    | MenuSection;
+    | MenuSection
+    | ProductsSection;
 
 export function isSectionType<T extends Section>(
   type: T["type"],
@@ -314,3 +333,4 @@ export const isSubscribeSection = isSectionType<SubscribeSection>("subscribe");
 export const isStatsSection = isSectionType<StatsSection>("stats");
 export const isLogosSection = isSectionType<LogosSection>("logos");
 export const isMenuSection = isSectionType<MenuSection>("menu");
+export const isProductsSection = isSectionType<ProductsSection>("products");

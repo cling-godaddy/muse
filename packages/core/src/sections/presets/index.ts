@@ -12,6 +12,7 @@ export { subscribePresets, type SubscribePresetId } from "./subscribe";
 export { statsPresets, type StatsPresetId } from "./stats";
 export { logosPresets, type LogosPresetId } from "./logos";
 export { menuPresets, type MenuPresetId } from "./menu";
+export { productsPresets, type ProductsPresetId } from "./products";
 
 import { heroPresets } from "./hero";
 import { featuresPresets } from "./features";
@@ -27,6 +28,7 @@ import { subscribePresets } from "./subscribe";
 import { statsPresets } from "./stats";
 import { logosPresets } from "./logos";
 import { menuPresets } from "./menu";
+import { productsPresets } from "./products";
 import type { SectionPreset } from "../types";
 
 export const allPresets: Record<string, SectionPreset> = {
@@ -44,4 +46,5 @@ export const allPresets: Record<string, SectionPreset> = {
   ...statsPresets,
   ...logosPresets,
   ...menuPresets,
+  ...productsPresets,
 };

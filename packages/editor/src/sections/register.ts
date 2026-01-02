@@ -13,6 +13,7 @@ import { Subscribe } from "./Subscribe";
 import { Stats } from "./Stats";
 import { Logos } from "./Logos";
 import { Menu } from "./Menu";
+import { Products } from "./Products";
 
 componentRegistry.register("hero", Hero);
 componentRegistry.register("features", Features);
@@ -28,3 +29,4 @@ componentRegistry.register("subscribe", Subscribe);
 componentRegistry.register("stats", Stats);
 componentRegistry.register("logos", Logos);
 componentRegistry.register("menu", Menu);
+componentRegistry.register("products", Products);

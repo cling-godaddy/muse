@@ -16,6 +16,7 @@ export type {
   StatsSection,
   LogosSection,
   MenuSection,
+  ProductsSection,
   ImageSource,
   FeatureItem,
   Quote,
@@ -30,6 +31,7 @@ export type {
   LogoItem,
   MenuItem,
   MenuCategory,
+  ProductItem,
 } from "./types";
 
 export {
@@ -48,6 +50,7 @@ export {
   isStatsSection,
   isLogosSection,
   isMenuSection,
+  isProductsSection,
 } from "./types";
 
 // Preset types
@@ -77,6 +80,7 @@ export {
   statsPresets,
   logosPresets,
   menuPresets,
+  productsPresets,
   allPresets,
   type HeroPresetId,
   type FeaturesPresetId,
@@ -92,6 +96,7 @@ export {
   type StatsPresetId,
   type LogosPresetId,
   type MenuPresetId,
+  type ProductsPresetId,
 } from "./presets";
 
 import type { SectionPreset, SectionType, ImageRequirements } from "./types";
@@ -112,6 +117,7 @@ export const DEFAULT_PRESETS: Record<SectionType, string> = {
   stats: "stats-row",
   logos: "logos-grid",
   menu: "menu-list",
+  products: "products-grid",
 };
 
 export const GALLERY_IMAGE_MINIMUMS: Record<string, number> = {
