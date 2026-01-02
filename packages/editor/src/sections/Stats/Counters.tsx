@@ -118,12 +118,12 @@ export function Counters({ section, onUpdate }: Props) {
                       placeholder="+"
                     />
                   </div>
-                  <input
-                    type="text"
+                  <textarea
                     className={styles.label}
                     value={stat.label}
                     onChange={e => updateStat(i, { label: e.target.value })}
                     placeholder="Customers"
+                    rows={1}
                   />
                   <button
                     type="button"

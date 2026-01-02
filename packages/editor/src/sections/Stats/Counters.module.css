@@ -108,6 +108,9 @@
   text-transform: uppercase;
   letter-spacing: 0.1em;
   width: 100%;
+  resize: none;
+  overflow: hidden;
+  field-sizing: content;
 }
 
 .label:focus {
