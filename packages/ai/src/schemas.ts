@@ -27,7 +27,7 @@ export const structureSchema: ResponseSchema = {
           type: "object",
           properties: {
             id: { type: "string", description: "Unique section ID like section-1, section-2" },
-            type: { type: "string", description: "Section type: hero, features, cta, testimonials, pricing, faq, gallery, contact, footer, about, subscribe, stats, logos" },
+            type: { type: "string", description: "Section type: hero, features, cta, testimonials, pricing, faq, gallery, contact, footer, about, subscribe, stats, logos, menu, products" },
             preset: { type: "string", description: "Preset ID for the section style" },
             purpose: { type: "string", description: "What this section should accomplish" },
           },
@@ -384,6 +384,71 @@ export const copySectionsSchema: ResponseSchema = {
                 content: { type: "string" },
               },
               required: ["id", "preset", "type", "content"],
+              additionalProperties: false,
+            },
+            // Menu
+            {
+              type: "object",
+              properties: {
+                id: { type: "string" },
+                preset: { type: "string" },
+                type: { type: "string", const: "menu" },
+                headline: nullableString,
+                subheadline: nullableString,
+                categories: {
+                  type: ["array", "null"],
+                  items: {
+                    type: "object",
+                    properties: {
+                      name: { type: "string" },
+                      items: {
+                        type: "array",
+                        items: {
+                          type: "object",
+                          properties: {
+                            name: { type: "string" },
+                            description: nullableString,
+                            price: { type: "string" },
+                            tags: { type: ["array", "null"], items: { type: "string" } },
+                          },
+                          required: ["name", "description", "price", "tags"],
+                          additionalProperties: false,
+                        },
+                      },
+                    },
+                    required: ["name", "items"],
+                    additionalProperties: false,
+                  },
+                },
+              },
+              required: ["id", "preset", "type", "headline", "subheadline", "categories"],
+              additionalProperties: false,
+            },
+            // Products
+            {
+              type: "object",
+              properties: {
+                id: { type: "string" },
+                preset: { type: "string" },
+                type: { type: "string", const: "products" },
+                headline: nullableString,
+                subheadline: nullableString,
+                items: {
+                  type: "array",
+                  items: {
+                    type: "object",
+                    properties: {
+                      name: { type: "string" },
+                      price: { type: "string" },
+                      originalPrice: nullableString,
+                      badge: nullableString,
+                    },
+                    required: ["name", "price", "originalPrice", "badge"],
+                    additionalProperties: false,
+                  },
+                },
+              },
+              required: ["id", "preset", "type", "headline", "subheadline", "items"],
               additionalProperties: false,
             },
           ],

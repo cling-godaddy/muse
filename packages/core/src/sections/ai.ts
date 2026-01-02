@@ -15,6 +15,8 @@ export const SECTION_TYPES: SectionType[] = [
   "subscribe",
   "stats",
   "logos",
+  "menu",
+  "products",
 ];
 
 export function generateSectionPrompt(): string {
@@ -220,4 +222,26 @@ registerAISectionSchema({
     logos: { type: "array", description: "Array of logos: { image: { url, alt }, href (optional) }", required: true },
   },
   required: ["logos"],
+});
+
+registerAISectionSchema({
+  type: "menu",
+  description: "Restaurant or cafe menu with categories and items",
+  properties: {
+    headline: { type: "string", description: "Optional section headline, e.g. 'Our Menu'" },
+    subheadline: { type: "string", description: "Optional supporting text" },
+    categories: { type: "array", description: "Array of menu categories: { name, items: [{ name, description, price, tags (e.g. 'vegan', 'gf', 'spicy') }] }", required: true },
+  },
+  required: ["categories"],
+});
+
+registerAISectionSchema({
+  type: "products",
+  description: "E-commerce product catalog or showcase",
+  properties: {
+    headline: { type: "string", description: "Optional section headline, e.g. 'Shop Our Collection'" },
+    subheadline: { type: "string", description: "Optional supporting text" },
+    items: { type: "array", description: "Array of products: { name, price, originalPrice (for sales), badge (e.g. 'New', 'Sale') }", required: true },
+  },
+  required: ["items"],
 });
