@@ -15,6 +15,22 @@ export const featuresGrid: SectionPreset = {
   className: "muse-features--grid",
 };
 
+export const featuresGridImages: SectionPreset = {
+  id: "features-grid-images",
+  name: "Grid with Images",
+  sectionType: "features",
+  layoutPattern: "grid",
+  category: "value",
+  mood: "visual",
+  tags: ["visual", "cards", "showcase", "modern"],
+  industries: ["saas", "ecommerce", "portfolio", "creative"],
+  description: "Feature cards with images instead of icons.",
+  requiredFields: ["items"],
+  optionalFields: ["headline", "subheadline"],
+  className: "muse-features--grid-images",
+  imageRequirements: { category: "subject", count: 6, orientation: "horizontal" },
+};
+
 export const featuresNumbered: SectionPreset = {
   id: "features-numbered",
   name: "Numbered",
@@ -32,6 +48,7 @@ export const featuresNumbered: SectionPreset = {
 
 export const featuresPresets = {
   "features-grid": featuresGrid,
+  "features-grid-images": featuresGridImages,
   "features-numbered": featuresNumbered,
 } as const;
 
