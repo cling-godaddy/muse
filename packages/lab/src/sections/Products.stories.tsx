@@ -21,6 +21,8 @@ const sampleMinimalProducts: ProductItem[] = [
   { image: { url: "https://images.unsplash.com/photo-1555041469-a586c61ea9bc?w=400", alt: "Sofa" }, name: "Velvet Sofa", price: "$1,299" },
   { image: { url: "https://images.unsplash.com/photo-1493663284031-b7e3aefcae8e?w=400", alt: "Coffee Table" }, name: "Oak Coffee Table", price: "$380" },
   { image: { url: "https://images.unsplash.com/photo-1507473885765-e6ed057f782c?w=400", alt: "Mirror" }, name: "Round Mirror", price: "$165" },
+  { image: { url: "https://images.unsplash.com/photo-1506439773649-6e0eb8cfb237?w=400", alt: "Plant" }, name: "Fiddle Leaf Fig", price: "$95" },
+  { image: { url: "https://images.unsplash.com/photo-1540932239986-30128078f3c5?w=400", alt: "Clock" }, name: "Wall Clock", price: "$145" },
 ];
 
 type ProductsArgs = {
