@@ -188,6 +188,18 @@ export function parseStream(
               } as unknown as Section;
             }
           }
+          if (section.type === "products") {
+            const products = section as Section & { items?: Record<string, unknown>[] };
+            if (products.items) {
+              return {
+                ...section,
+                items: products.items.map((item, idx) => ({
+                  ...item,
+                  image: imgSources[idx] ?? item.image,
+                })),
+              } as unknown as Section;
+            }
+          }
 
           return section;
         });
