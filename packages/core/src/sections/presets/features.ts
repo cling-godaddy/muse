@@ -2,7 +2,7 @@ import type { SectionPreset } from "../types";
 
 export const featuresGrid: SectionPreset = {
   id: "features-grid",
-  name: "Grid",
+  name: "Cards",
   sectionType: "features",
   layoutPattern: "grid",
   category: "value",
@@ -17,7 +17,7 @@ export const featuresGrid: SectionPreset = {
 
 export const featuresGridImages: SectionPreset = {
   id: "features-grid-images",
-  name: "Grid with Images",
+  name: "Cards with Images",
   sectionType: "features",
   layoutPattern: "grid",
   category: "value",

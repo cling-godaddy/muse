@@ -10,6 +10,9 @@ const sampleItems: FeatureItem[] = [
   { icon: "globe", title: "Global Scale", description: "Deploy anywhere in the world." },
   { icon: "heart", title: "User Focused", description: "Designed with users in mind." },
   { icon: "settings", title: "Customizable", description: "Tailor everything to your needs." },
+  { icon: "layers", title: "Modular", description: "Mix and match components as needed." },
+  { icon: "clock", title: "Always On", description: "99.9% uptime guarantee." },
+  { icon: "users", title: "Team Ready", description: "Built for collaboration at scale." },
 ];
 
 const sampleItemsWithImages: FeatureItem[] = [
@@ -60,9 +63,9 @@ const meta: Meta<FeaturesArgs> = {
 export default meta;
 type Story = StoryObj<FeaturesArgs>;
 
-export const Grid: Story = {};
+export const Cards: Story = {};
 
-export const GridImages: Story = {
+export const CardsWithImages: Story = {
   args: {
     headline: "Everything You Need",
     preset: "features-grid-images",
