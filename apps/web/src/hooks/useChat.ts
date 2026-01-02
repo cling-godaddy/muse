@@ -21,6 +21,7 @@ export interface UseChat {
   input: string
   setInput: (input: string) => void
   isLoading: boolean
+  error: string | null
   send: () => Promise<void>
   sessionUsage: Usage
   lastUsage?: Usage
@@ -35,6 +36,7 @@ export function useChat(options: UseChatOptions = {}): UseChat {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const [sessionUsage, setSessionUsage] = useState<Usage>(emptyUsage);
   const [lastUsage, setLastUsage] = useState<Usage | undefined>();
   const [agents, setAgents] = useState<AgentState[]>([]);
@@ -51,6 +53,7 @@ export function useChat(options: UseChatOptions = {}): UseChat {
     setMessages(newMessages);
     setInput("");
     setIsLoading(true);
+    setError(null);
     setAgents([]);
     parseStateRef.current = { sections: [], agents: new Map(), images: [] };
     usageProcessedRef.current = false;
@@ -132,17 +135,16 @@ export function useChat(options: UseChatOptions = {}): UseChat {
         ]);
       }
     }
-    catch (error) {
-      console.error("Chat error:", error);
-      setMessages([
-        ...newMessages,
-        { role: "assistant", content: "Error: Failed to get response" },
-      ]);
+    catch (err) {
+      const message = err instanceof Error ? err.message : "Unknown error";
+      console.error("Chat error:", err);
+      setError(message);
+      setAgents([]);
     }
     finally {
       setIsLoading(false);
     }
   }, [input, messages, isLoading, options]);
 
-  return { messages, input, setInput, isLoading, send, sessionUsage, lastUsage, agents };
+  return { messages, input, setInput, isLoading, error, send, sessionUsage, lastUsage, agents };
 }

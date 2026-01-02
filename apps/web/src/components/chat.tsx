@@ -14,7 +14,7 @@ interface ChatProps {
 
 export function Chat({ onSectionParsed, onThemeSelected, onImages }: ChatProps) {
   const options = useMemo(() => ({ onSectionParsed, onThemeSelected, onImages }), [onSectionParsed, onThemeSelected, onImages]);
-  const { messages, input, setInput, isLoading, send, sessionUsage, lastUsage, agents } = useChat(options);
+  const { messages, input, setInput, isLoading, error, send, sessionUsage, lastUsage, agents } = useChat(options);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -71,6 +71,13 @@ export function Chat({ onSectionParsed, onThemeSelected, onImages }: ChatProps) 
             agents={i === messages.length - 1 && message.role === "assistant" ? agents : []}
           />
         ))}
+        {error && (
+          <div className="mb-4 p-3 rounded-lg border border-red-300 bg-red-50 text-red-700 text-sm">
+            <span className="font-medium">Error:</span>
+            {" "}
+            {error}
+          </div>
+        )}
         <div ref={messagesEndRef} />
       </div>
       <div className="p-3 border-t border-border flex gap-2">
