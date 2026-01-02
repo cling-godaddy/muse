@@ -128,24 +128,8 @@ export const BentoSplit: Story = {
     preset: "features-bento-split",
     itemCount: 4,
   },
-  render: (args) => {
-    const section: FeaturesSection = {
-      id: "story-features",
-      type: "features",
-      version: 1,
-      headline: args.headline || undefined,
-      preset: args.preset,
-      items: sampleItemsWithImages.slice(0, args.itemCount),
-    };
-    return <Features section={section} onUpdate={console.log} />;
-  },
-};
-
-export const BentoAlt: Story = {
-  args: {
-    headline: "What We Offer",
-    preset: "features-bento-alt",
-    itemCount: 6,
+  argTypes: {
+    itemCount: { control: { type: "range", min: 2, max: 8, step: 1 } },
   },
   render: (args) => {
     const section: FeaturesSection = {

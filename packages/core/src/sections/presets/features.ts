@@ -76,23 +76,7 @@ export const featuresBentoSplit: SectionPreset = {
   requiredFields: ["items"],
   optionalFields: ["headline"],
   className: "muse-features--bento-split",
-  imageRequirements: { category: "subject", count: 4, orientation: "mixed" },
-};
-
-export const featuresBentoAlt: SectionPreset = {
-  id: "features-bento-alt",
-  name: "Bento Alternating",
-  sectionType: "features",
-  layoutPattern: "grid",
-  category: "value",
-  mood: "modern",
-  tags: ["visual", "rhythm", "dynamic", "scalable"],
-  industries: ["saas", "technology", "creative", "ecommerce"],
-  description: "Repeating wide-narrow pattern. Scales to any count.",
-  requiredFields: ["items"],
-  optionalFields: ["headline"],
-  className: "muse-features--bento-alt",
-  imageRequirements: { category: "subject", count: 6, orientation: "mixed" },
+  imageRequirements: { category: "subject", count: 4, orientation: "mixed", max: 8 },
 };
 
 export const featuresNumbered: SectionPreset = {
@@ -116,7 +100,6 @@ export const featuresPresets = {
   "features-bento": featuresBento,
   "features-bento-spotlight": featuresBentoSpotlight,
   "features-bento-split": featuresBentoSplit,
-  "features-bento-alt": featuresBentoAlt,
   "features-numbered": featuresNumbered,
 } as const;
 

@@ -73,7 +73,6 @@ const layoutClasses: Record<string, string> = {
   "features-bento": "bentoHero",
   "features-bento-spotlight": "bentoSpotlight",
   "features-bento-split": "bentoSplit",
-  "features-bento-alt": "bentoAlt",
 };
 
 export function Bento({ section, onUpdate, isPending }: Props) {
