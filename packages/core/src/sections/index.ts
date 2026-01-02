@@ -63,6 +63,7 @@ export type {
   ImageCategory,
   ImageOrientation,
   ImageRequirements,
+  ImageInjection,
 } from "./types";
 
 export {
@@ -99,7 +100,7 @@ export {
   type ProductsPresetId,
 } from "./presets";
 
-import type { SectionPreset, SectionType, ImageRequirements } from "./types";
+import type { SectionPreset, SectionType, ImageRequirements, ImageInjection, ImageSource, Section } from "./types";
 import { allPresets } from "./presets";
 
 export const DEFAULT_PRESETS: Record<SectionType, string> = {
@@ -212,3 +213,47 @@ export {
 
 // Factory
 export { createSection } from "./factory";
+
+// Image injection helpers
+
+/** Check if any preset for this section type requires images */
+export function sectionNeedsImages(sectionType: SectionType): boolean {
+  return getPresetsForType(sectionType).some(p => p.imageRequirements !== undefined);
+}
+
+/** Get image injection config for a section type (from default preset) */
+export function getImageInjection(sectionType: SectionType): ImageInjection | undefined {
+  const defaultPresetId = DEFAULT_PRESETS[sectionType];
+  return getPreset(defaultPresetId)?.imageInjection;
+}
+
+/** Get image injection config for a specific preset */
+export function getPresetImageInjection(presetId: string): ImageInjection | undefined {
+  return getPreset(presetId)?.imageInjection;
+}
+
+/** Apply images to a section based on injection config */
+export function applyImageInjection(
+  section: Section,
+  images: ImageSource[],
+  injection: ImageInjection,
+): Partial<Section> {
+  switch (injection.type) {
+    case "array":
+      return { [injection.field]: images } as Partial<Section>;
+    case "single":
+      return { [injection.field]: images[0] } as Partial<Section>;
+    case "nested": {
+      const items = (section as unknown as Record<string, unknown[]>)[injection.array];
+      if (items && Array.isArray(items)) {
+        return {
+          [injection.array]: items.map((item, idx) => ({
+            ...(item as object),
+            [injection.field]: images[idx] ?? (item as Record<string, unknown>)[injection.field],
+          })),
+        } as Partial<Section>;
+      }
+      return {};
+    }
+  }
+}

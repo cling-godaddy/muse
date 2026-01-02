@@ -1,5 +1,6 @@
 import { groupBy } from "lodash-es";
-import type { Section } from "@muse/core";
+import type { Section, SectionType } from "@muse/core";
+import { getPresetImageInjection, getImageInjection, applyImageInjection } from "@muse/core";
 import type { Usage } from "@muse/ai";
 import type { ImageSelection } from "@muse/media";
 
@@ -148,57 +149,19 @@ export function parseStream(
       try {
         const parsedSections = JSON.parse(sectionsMatch[1]) as Section[];
 
-        // inject images into sections
-        sections = parsedSections.map((section) => {
+        // inject images into sections using declarative config
+        sections = parsedSections.map((section): Section => {
           const sectionImages = imagesBySection[section.id];
           if (!sectionImages || sectionImages.length === 0) return section;
 
           const imgSources = sectionImages.map(s => s.image);
+          const injection = section.preset
+            ? getPresetImageInjection(section.preset)
+            : getImageInjection(section.type as SectionType);
 
-          if (section.type === "gallery") {
-            return { ...section, images: imgSources };
-          }
-          if (section.type === "hero") {
-            const img = sectionImages.find(s => s.category === "ambient" || s.category === "subject");
-            if (img) {
-              return { ...section, backgroundImage: img.image };
-            }
-          }
-          if (section.type === "testimonials") {
-            const testimonials = section as Section & { quotes?: Record<string, unknown>[] };
-            if (testimonials.quotes) {
-              return {
-                ...section,
-                quotes: testimonials.quotes.map((q, idx) => ({
-                  ...q,
-                  image: imgSources[idx] ?? q.image,
-                })),
-              } as unknown as Section;
-            }
-          }
-          if (section.type === "features") {
-            const features = section as Section & { items?: Record<string, unknown>[] };
-            if (features.items) {
-              return {
-                ...section,
-                items: features.items.map((item, idx) => ({
-                  ...item,
-                  image: imgSources[idx] ?? item.image,
-                })),
-              } as unknown as Section;
-            }
-          }
-          if (section.type === "products") {
-            const products = section as Section & { items?: Record<string, unknown>[] };
-            if (products.items) {
-              return {
-                ...section,
-                items: products.items.map((item, idx) => ({
-                  ...item,
-                  image: imgSources[idx] ?? item.image,
-                })),
-              } as unknown as Section;
-            }
+          if (injection) {
+            const updates = applyImageInjection(section, imgSources, injection);
+            return { ...section, ...updates } as Section;
           }
 
           return section;

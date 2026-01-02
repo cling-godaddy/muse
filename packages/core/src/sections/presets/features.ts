@@ -29,6 +29,7 @@ export const featuresGridImages: SectionPreset = {
   optionalFields: ["headline", "subheadline"],
   className: "muse-features--grid-images",
   imageRequirements: { category: "subject", count: 6, orientation: "horizontal" },
+  imageInjection: { type: "nested", array: "items", field: "image" },
 };
 
 export const featuresBento: SectionPreset = {
@@ -45,6 +46,7 @@ export const featuresBento: SectionPreset = {
   optionalFields: ["headline"],
   className: "muse-features--bento",
   imageRequirements: { category: "subject", count: 6, orientation: "mixed" },
+  imageInjection: { type: "nested", array: "items", field: "image" },
 };
 
 export const featuresBentoSpotlight: SectionPreset = {
@@ -61,6 +63,7 @@ export const featuresBentoSpotlight: SectionPreset = {
   optionalFields: ["headline"],
   className: "muse-features--bento-spotlight",
   imageRequirements: { category: "subject", count: 8, orientation: "mixed", min: 7, max: 8 },
+  imageInjection: { type: "nested", array: "items", field: "image" },
 };
 
 export const featuresBentoSplit: SectionPreset = {
@@ -77,6 +80,7 @@ export const featuresBentoSplit: SectionPreset = {
   optionalFields: ["headline"],
   className: "muse-features--bento-split",
   imageRequirements: { category: "subject", count: 4, orientation: "mixed", max: 8 },
+  imageInjection: { type: "nested", array: "items", field: "image" },
 };
 
 export const featuresNumbered: SectionPreset = {

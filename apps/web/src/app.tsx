@@ -2,7 +2,8 @@ import { useState, useMemo, useCallback, useEffect, useRef, useLayoutEffect } fr
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { groupBy } from "lodash-es";
 import { SectionEditor } from "@muse/editor";
-import type { Section } from "@muse/core";
+import type { Section, SectionType } from "@muse/core";
+import { sectionNeedsImages, getPresetImageInjection, getImageInjection, applyImageInjection } from "@muse/core";
 import type { ImageSelection } from "@muse/media";
 import { resolveThemeWithEffects, themeToCssVars, getTypography, loadFonts } from "@muse/themes";
 import { Chat } from "./components/chat";
@@ -15,8 +16,6 @@ interface ThemeState {
   typography: string
   effects: string
 }
-
-const IMAGE_SECTION_TYPES = new Set(["gallery", "features", "testimonials", "image", "products"]);
 
 function MainApp() {
   const { sections, addSection, updateSection, setSections } = useSections();
@@ -44,7 +43,7 @@ function MainApp() {
 
   const handleSectionParsed = useCallback((section: Section) => {
     addSection(section);
-    if (IMAGE_SECTION_TYPES.has(section.type)) {
+    if (sectionNeedsImages(section.type as SectionType)) {
       setPendingImageSections(prev => new Set(prev).add(section.id));
     }
   }, [addSection]);
@@ -68,43 +67,16 @@ function MainApp() {
       const section = currentSections.find(s => s.id === sectionId);
       if (!section) continue;
 
-      resolvedSectionIds.push(sectionId);
+      // Get injection config from preset or fallback to section type default
+      const injection = section.preset
+        ? getPresetImageInjection(section.preset)
+        : getImageInjection(section.type as SectionType);
 
-      if (section.type === "hero") {
-        const img = sectionImages.find(i => i.category === "ambient" || i.category === "subject");
-        if (img) updateSection(sectionId, { backgroundImage: img.image });
-      }
-      else if (section.type === "gallery") {
-        updateSection(sectionId, { images: imgSources });
-      }
-      else if (section.type === "features") {
-        const featuresSection = section as Section & { items?: unknown[] };
-        if (featuresSection.items) {
-          const items = featuresSection.items.map((item, idx) => ({
-            ...(item as object),
-            image: imgSources[idx] ?? (item as { image?: unknown }).image,
-          }));
-          updateSection(sectionId, { items } as Partial<Section>);
-        }
-      }
-      else if (section.type === "testimonials") {
-        const testimonialsSection = section as Section & { quotes?: unknown[] };
-        if (testimonialsSection.quotes) {
-          const quotes = testimonialsSection.quotes.map((q, idx) => ({
-            ...(q as object),
-            avatar: imgSources[idx] ?? (q as { avatar?: unknown }).avatar,
-          }));
-          updateSection(sectionId, { quotes } as Partial<Section>);
-        }
-      }
-      else if (section.type === "products") {
-        const productsSection = section as Section & { items?: unknown[] };
-        if (productsSection.items) {
-          const items = productsSection.items.map((item, idx) => ({
-            ...(item as object),
-            image: imgSources[idx] ?? (item as { image?: unknown }).image,
-          }));
-          updateSection(sectionId, { items } as Partial<Section>);
+      if (injection) {
+        const updates = applyImageInjection(section, imgSources, injection);
+        if (Object.keys(updates).length > 0) {
+          updateSection(sectionId, updates);
+          resolvedSectionIds.push(sectionId);
         }
       }
     }

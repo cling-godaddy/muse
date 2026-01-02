@@ -29,6 +29,7 @@ export const menuCards: SectionPreset = {
   optionalFields: ["headline", "subheadline", "categories"],
   className: "muse-menu--cards",
   imageRequirements: { category: "subject", count: 6, orientation: "square" },
+  imageInjection: { type: "nested", array: "items", field: "image" },
 };
 
 export const menuSimple: SectionPreset = {

@@ -48,6 +48,11 @@ export interface ImageRequirements {
   max?: number
 }
 
+export type ImageInjection
+  = | { type: "array", field: string }
+    | { type: "single", field: string }
+    | { type: "nested", array: string, field: string };
+
 export interface SectionPreset {
   id: string
   name: string
@@ -66,6 +71,7 @@ export interface SectionPreset {
   className: string
 
   imageRequirements?: ImageRequirements
+  imageInjection?: ImageInjection
 }
 
 export type PresetId = string;
