@@ -16,7 +16,7 @@ interface ThemeState {
   effects: string
 }
 
-const IMAGE_SECTION_TYPES = new Set(["gallery", "features", "testimonials", "image"]);
+const IMAGE_SECTION_TYPES = new Set(["gallery", "features", "testimonials", "image", "products"]);
 
 function MainApp() {
   const { sections, addSection, updateSection, setSections } = useSections();
@@ -95,6 +95,16 @@ function MainApp() {
             avatar: imgSources[idx] ?? (q as { avatar?: unknown }).avatar,
           }));
           updateSection(sectionId, { quotes } as Partial<Section>);
+        }
+      }
+      else if (section.type === "products") {
+        const productsSection = section as Section & { items?: unknown[] };
+        if (productsSection.items) {
+          const items = productsSection.items.map((item, idx) => ({
+            ...(item as object),
+            image: imgSources[idx] ?? (item as { image?: unknown }).image,
+          }));
+          updateSection(sectionId, { items } as Partial<Section>);
         }
       }
     }
