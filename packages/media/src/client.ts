@@ -2,7 +2,7 @@ import { sample, shuffle } from "lodash-es";
 import type { Logger } from "@muse/logger";
 import type { MediaClient, MediaProvider, ImagePlan, ImageSelection, ImageSearchOptions, ImageSearchResult, ImageCategory } from "./types";
 import type { ImageBank } from "./bank";
-import type { QueryNormalizer, MediaQueryIntent } from "./normalize";
+import type { QueryNormalizer, MediaQueryIntent, NormalizeResult } from "./normalize";
 import { createUnsplashProvider } from "./unsplash";
 import { createPexelsProvider } from "./pexels";
 
@@ -172,16 +172,25 @@ export function createMediaClient(config: MediaClientConfig): MediaClient {
       const selections: ImageSelection[] = [];
       const seen = new Set<string>(); // Track provider:id to dedupe
 
+      // Batch normalize all queries upfront (single LLM call instead of N parallel calls)
+      const normalizeCache = new Map<string, NormalizeResult>();
+      if (normalizer?.batch) {
+        const queries = plan.map(p => p.searchQuery);
+        const batchResults = await normalizer.batch(queries);
+        for (const [q, r] of batchResults) {
+          normalizeCache.set(q, r);
+        }
+        log.debug("batch_normalize_complete", { queries: queries.length, normalized: batchResults.size });
+      }
+
       // Parallelize block processing - fetches run concurrently,
       // selection phase serialized by event loop (seen set is safe)
       await Promise.all(plan.map(async (item) => {
         try {
           const count = item.count ?? 1;
 
-          // Normalize query for consistent caching
-          const normalizeResult = normalizer
-            ? await normalizer(item.searchQuery)
-            : null;
+          // Use pre-computed normalized result from batch call
+          const normalizeResult = normalizeCache.get(item.searchQuery) ?? null;
 
           const queryString = normalizeResult?.queryString ?? item.searchQuery;
 
