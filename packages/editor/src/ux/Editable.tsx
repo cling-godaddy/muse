@@ -1,6 +1,8 @@
 import { useRef, useEffect, type ElementType } from "react";
+import { type RichContent, type TextOrRich, getPlainText } from "@muse/core";
 import { useIsEditable } from "../context/EditorMode";
 import { SmartLink } from "./SmartLink";
+import { RichEditable } from "./RichEditable";
 
 interface EditableTextProps {
   value: string
@@ -8,9 +10,21 @@ interface EditableTextProps {
   as?: ElementType
   className?: string
   placeholder?: string
+  rich?: false
 }
 
-export function EditableText({
+interface RichEditableTextProps {
+  value: TextOrRich
+  onChange: (value: RichContent) => void
+  as?: ElementType
+  className?: string
+  placeholder?: string
+  rich: true
+}
+
+type Props = EditableTextProps | RichEditableTextProps;
+
+function PlainEditableText({
   value,
   onChange,
   as: Component = "span",
@@ -43,6 +57,39 @@ export function EditableText({
       style={{ resize: "none" }}
     />
   );
+}
+
+function RichEditableText({
+  value,
+  onChange,
+  as: Component = "span",
+  className,
+  placeholder,
+}: RichEditableTextProps) {
+  const isEditable = useIsEditable();
+  const plainText = getPlainText(value);
+
+  if (!isEditable) {
+    // TODO: render rich content properly when not editable
+    if (!plainText) return null;
+    return <Component className={className}>{plainText}</Component>;
+  }
+
+  return (
+    <RichEditable
+      value={value}
+      onChange={onChange}
+      className={className}
+      placeholder={placeholder}
+    />
+  );
+}
+
+export function EditableText(props: Props) {
+  if (props.rich) {
+    return <RichEditableText {...props} />;
+  }
+  return <PlainEditableText {...props} />;
 }
 
 interface EditableLinkProps {

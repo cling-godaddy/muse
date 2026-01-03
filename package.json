@@ -31,7 +31,32 @@
   "pnpm": {
     "onlyBuiltDependencies": [
       "faiss-node"
-    ]
+    ],
+    "overrides": {
+      "lexical": "^0.39.0",
+      "@lexical/clipboard": "^0.39.0",
+      "@lexical/code": "^0.39.0",
+      "@lexical/devtools-core": "^0.39.0",
+      "@lexical/dragon": "^0.39.0",
+      "@lexical/hashtag": "^0.39.0",
+      "@lexical/headless": "^0.39.0",
+      "@lexical/history": "^0.39.0",
+      "@lexical/html": "^0.39.0",
+      "@lexical/link": "^0.39.0",
+      "@lexical/list": "^0.39.0",
+      "@lexical/mark": "^0.39.0",
+      "@lexical/markdown": "^0.39.0",
+      "@lexical/offset": "^0.39.0",
+      "@lexical/overflow": "^0.39.0",
+      "@lexical/plain-text": "^0.39.0",
+      "@lexical/react": "^0.39.0",
+      "@lexical/rich-text": "^0.39.0",
+      "@lexical/selection": "^0.39.0",
+      "@lexical/table": "^0.39.0",
+      "@lexical/text": "^0.39.0",
+      "@lexical/utils": "^0.39.0",
+      "@lexical/yjs": "^0.39.0"
+    }
   },
   "lint-staged": {
     "*.{ts,tsx}": "eslint --fix"

@@ -1,5 +1,14 @@
 import { z } from "zod";
 
+// Rich content schema for RTE fields
+export const richContentSchema = z.object({
+  _rich: z.literal(true),
+  json: z.unknown(),
+  text: z.string(),
+});
+
+export const textOrRichSchema = z.union([z.string(), richContentSchema]);
+
 const sectionBase = z.object({
   id: z.string().uuid(),
   version: z.number().optional(),
@@ -21,7 +30,7 @@ const ctaLinkSchema = z.object({
 export const heroSectionSchema = sectionBase.extend({
   type: z.literal("hero"),
   headline: z.string(),
-  subheadline: z.string().optional(),
+  subheadline: textOrRichSchema.optional(),
   cta: ctaLinkSchema.optional(),
   secondaryCta: ctaLinkSchema.optional(),
   alignment: z.enum(["left", "center", "right"]).optional(),

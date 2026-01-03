@@ -1,4 +1,4 @@
-import type { HeroSection as HeroSectionType } from "@muse/core";
+import { type HeroSection as HeroSectionType, type RichContent } from "@muse/core";
 import { EditableText, EditableLink, ImageLoader } from "../ux";
 import styles from "./Hero.module.css";
 
@@ -19,8 +19,9 @@ function HeroContent({ section, onUpdate }: Omit<Props, "isPending">) {
         placeholder="Headline..."
       />
       <EditableText
+        rich
         value={section.subheadline ?? ""}
-        onChange={v => onUpdate({ subheadline: v || undefined })}
+        onChange={(v: RichContent) => onUpdate({ subheadline: v.text ? v : undefined })}
         as="p"
         className={styles.subheadline}
         placeholder="Subheadline..."

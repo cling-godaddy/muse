@@ -1,3 +1,7 @@
+// Rich content types
+export type { RichContent, TextOrRich } from "./types";
+export { isRichContent, getPlainText } from "./types";
+
 // Section data types
 export type {
   SectionBase,
@@ -190,6 +194,8 @@ export {
 
 // Schemas
 export {
+  richContentSchema,
+  textOrRichSchema,
   imageSourceSchema,
   heroSectionSchema,
   featuresSectionSchema,

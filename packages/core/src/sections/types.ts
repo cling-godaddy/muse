@@ -1,3 +1,20 @@
+// Rich content for RTE fields
+export interface RichContent {
+  _rich: true
+  json: unknown // Lexical SerializedEditorState
+  text: string // Plain text fallback
+}
+
+export type TextOrRich = string | RichContent;
+
+export function isRichContent(value: unknown): value is RichContent {
+  return typeof value === "object" && value !== null && "_rich" in value && value._rich === true;
+}
+
+export function getPlainText(value: TextOrRich): string {
+  return isRichContent(value) ? value.text : value;
+}
+
 export type SectionType
   = | "hero"
     | "features"
@@ -96,7 +113,7 @@ export interface ImageSource {
 export interface HeroSection extends SectionBase {
   type: "hero"
   headline: string
-  subheadline?: string
+  subheadline?: TextOrRich
   cta?: { text: string, href: string }
   secondaryCta?: { text: string, href: string }
   alignment?: "left" | "center" | "right"

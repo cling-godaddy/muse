@@ -1,0 +1,107 @@
+.toolbar {
+  position: absolute;
+  background: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+  padding: 4px;
+  display: flex;
+  gap: 2px;
+  z-index: 100;
+  animation: fadeIn 0.1s ease-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  font-size: 13px;
+  font-weight: 600;
+  color: #374151;
+  background: transparent;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background 0.1s, color 0.1s;
+}
+
+.button:hover {
+  background: #f3f4f6;
+}
+
+.button[data-active="true"] {
+  background: #e0e7ff;
+  color: #4f46e5;
+}
+
+.divider {
+  width: 1px;
+  margin: 4px 2px;
+  background: #e5e7eb;
+}
+
+.select {
+  padding: 4px 8px;
+  font-size: 12px;
+  font-weight: 500;
+  color: #374151;
+  background: transparent;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  outline: none;
+}
+
+.select:hover {
+  background: #f3f4f6;
+}
+
+.linkInput {
+  display: flex;
+  gap: 4px;
+  padding: 4px;
+  border-left: 1px solid #e5e7eb;
+  margin-left: 2px;
+}
+
+.linkInput input {
+  width: 160px;
+  padding: 4px 8px;
+  font-size: 12px;
+  border: 1px solid #e5e7eb;
+  border-radius: 4px;
+  outline: none;
+}
+
+.linkInput input:focus {
+  border-color: #6366f1;
+}
+
+.linkInput button {
+  padding: 4px 8px;
+  font-size: 12px;
+  font-weight: 500;
+  color: white;
+  background: #4f46e5;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.linkInput button:hover {
+  background: #4338ca;
+}

@@ -1,0 +1,16 @@
+.editor {
+  outline: none;
+  min-height: 1em;
+}
+
+.editor:focus {
+  outline: none;
+}
+
+.editor p {
+  margin: 0;
+}
+
+.editor p + p {
+  margin-top: 0.5em;
+}

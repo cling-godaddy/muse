@@ -33,6 +33,14 @@ html, body, #root {
   .muse-bold { @apply font-bold; }
   .muse-italic { @apply italic; }
   .muse-underline { @apply underline; }
+  .muse-strikethrough { @apply line-through; }
+  .muse-link { @apply text-blue-600 underline hover:text-blue-800 cursor-pointer; }
+  .muse-list-ul { @apply list-disc pl-6 my-2; }
+  .muse-list-ol { @apply list-decimal pl-6 my-2; }
+  .muse-listitem { @apply mb-1; }
+  .muse-h1 { @apply text-3xl font-bold mb-4; }
+  .muse-h2 { @apply text-2xl font-bold mb-3; }
+  .muse-h3 { @apply text-xl font-bold mb-2; }
   .muse-content { @apply min-h-[200px] p-4 outline-none flex-1 overflow-y-auto; }
 
   /* Base overflow protection for all section inputs */
