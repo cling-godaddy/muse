@@ -425,6 +425,22 @@ export const copySectionsSchema: ResponseSchema = {
                 type: { type: "string", const: "menu" },
                 headline: nullableString,
                 subheadline: nullableString,
+                // Flat items array - use for menu-cards preset (visual cards with images)
+                items: {
+                  type: ["array", "null"],
+                  items: {
+                    type: "object",
+                    properties: {
+                      name: { type: "string" },
+                      description: nullableString,
+                      price: { type: "string" },
+                      tags: { type: ["array", "null"], items: { type: "string" } },
+                    },
+                    required: ["name", "description", "price", "tags"],
+                    additionalProperties: false,
+                  },
+                },
+                // Nested categories - use for menu-list preset (text-based categorized menu)
                 categories: {
                   type: ["array", "null"],
                   items: {
@@ -451,7 +467,7 @@ export const copySectionsSchema: ResponseSchema = {
                   },
                 },
               },
-              required: ["id", "preset", "type", "headline", "subheadline", "categories"],
+              required: ["id", "preset", "type", "headline", "subheadline"],
               additionalProperties: false,
             },
             // Products

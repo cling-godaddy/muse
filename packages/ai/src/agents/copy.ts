@@ -30,7 +30,8 @@ Guidelines:
 - Use the EXACT section IDs from the structure above
 - Include the "preset" field in each section
 - Match the brand voice in your copy
-- Do NOT include images/backgroundImage - they are added automatically`;
+- Do NOT include images/backgroundImage - they are added automatically
+- For menu sections: use flat "items" array for menu-cards preset, use "categories" for menu-list preset`;
 }
 
 export const copyAgent: SyncAgent = {
