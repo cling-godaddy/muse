@@ -26,20 +26,20 @@ function MainApp() {
     setCurrentPage,
     sections,
     addSection,
-    updateSection,
+    updateSectionById,
     setSections,
     addNewPage,
     deletePage,
     updatePageSections,
     clearSite,
   } = useSite();
-  const sectionsRef = useRef(sections);
+  const siteRef = useRef(site);
   const [theme, setTheme] = useState<ThemeState>({ palette: "slate", typography: "inter", effects: "neutral" });
   const [pendingImageSections, setPendingImageSections] = useState<Set<string>>(new Set());
 
   useLayoutEffect(() => {
-    sectionsRef.current = sections;
-  }, [sections]);
+    siteRef.current = site;
+  }, [site]);
 
   const handleGeneratePage = useCallback((slug: string) => {
     // For now, create an empty page - in a full implementation,
@@ -85,13 +85,19 @@ function MainApp() {
   }, []);
 
   const handleImages = useCallback((images: ImageSelection[]) => {
-    const currentSections = sectionsRef.current;
+    const currentSite = siteRef.current;
     const bySection = groupBy(images, img => img.blockId);
     const resolvedSectionIds: string[] = [];
 
+    // Collect all sections from all pages
+    const allSections: Section[] = [];
+    for (const page of Object.values(currentSite.pages)) {
+      allSections.push(...page.sections);
+    }
+
     for (const [sectionId, sectionImages] of Object.entries(bySection)) {
       const imgSources = sectionImages.map(s => s.image);
-      const section = currentSections.find(s => s.id === sectionId);
+      const section = allSections.find(s => s.id === sectionId);
       if (!section) continue;
 
       // Get injection config from preset or fallback to section type default
@@ -102,7 +108,7 @@ function MainApp() {
       if (injection) {
         const updates = applyImageInjection(section, imgSources, injection);
         if (Object.keys(updates).length > 0) {
-          updateSection(sectionId, updates);
+          updateSectionById(sectionId, updates);
           resolvedSectionIds.push(sectionId);
         }
       }
@@ -115,7 +121,7 @@ function MainApp() {
         return next;
       });
     }
-  }, [updateSection]);
+  }, [updateSectionById]);
 
   const handlePages = useCallback((pages: PageInfo[]) => {
     // Clear existing site and populate with generated pages

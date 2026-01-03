@@ -17,6 +17,9 @@ export interface UseSite {
   updateSection: (id: string, data: Partial<Section>) => void
   setSections: (sections: Section[]) => void
 
+  // Section operations (site-wide)
+  updateSectionById: (id: string, data: Partial<Section>) => void
+
   // Page operations
   addNewPage: (slug: string, title: string) => string
   deletePage: (pageId: string) => void
@@ -115,6 +118,32 @@ export function useSite(initialName = "Untitled Site"): UseSite {
     });
   }, [currentPageId]);
 
+  // Update a section by ID across ALL pages (for image injection)
+  const updateSectionById = useCallback((id: string, data: Partial<Section>) => {
+    setSiteState((prev) => {
+      // Find which page contains this section
+      for (const [pageId, page] of Object.entries(prev.pages)) {
+        const sectionIndex = page.sections.findIndex(s => s.id === id);
+        if (sectionIndex !== -1) {
+          return {
+            ...prev,
+            pages: {
+              ...prev.pages,
+              [pageId]: {
+                ...page,
+                sections: page.sections.map(s =>
+                  s.id === id ? { ...s, ...data } as Section : s,
+                ),
+              },
+            },
+            updatedAt: new Date().toISOString(),
+          };
+        }
+      }
+      return prev;
+    });
+  }, []);
+
   const setSections = useCallback((newSections: Section[]) => {
     if (!currentPageId) return;
     updatePageSections(currentPageId, newSections);
@@ -167,6 +196,7 @@ export function useSite(initialName = "Untitled Site"): UseSite {
     sections,
     addSection,
     updateSection,
+    updateSectionById,
     setSections,
     addNewPage,
     deletePage,
