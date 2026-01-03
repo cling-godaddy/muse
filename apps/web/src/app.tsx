@@ -1,4 +1,5 @@
 import { useState, useMemo, useCallback, useEffect, useRef, useLayoutEffect } from "react";
+import { flushSync } from "react-dom";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { groupBy } from "lodash-es";
 import { SectionEditor, SiteProvider } from "@muse/editor";
@@ -134,27 +135,27 @@ function MainApp() {
   }, [updateSectionById]);
 
   const handlePages = useCallback((pages: PageInfo[]) => {
-    // Clear existing site and populate with generated pages
-    clearSite();
+    // Use flushSync to ensure state is committed before handleImages runs
+    // This fixes race condition where siteRef.current is stale during image injection
+    flushSync(() => {
+      clearSite();
 
-    let firstPageId: string | null = null;
-    for (const pageInfo of pages) {
-      const pageId = addNewPage(pageInfo.slug, pageInfo.title);
-      if (!firstPageId) firstPageId = pageId;
-      // Update the page with its sections
-      updatePageSections(pageId, pageInfo.sections);
-      // Track pending images for sections
-      for (const section of pageInfo.sections) {
-        if (sectionNeedsImages(section.type as SectionType)) {
-          setPendingImageSections(prev => new Set(prev).add(section.id));
+      let firstPageId: string | null = null;
+      for (const pageInfo of pages) {
+        const pageId = addNewPage(pageInfo.slug, pageInfo.title);
+        if (!firstPageId) firstPageId = pageId;
+        updatePageSections(pageId, pageInfo.sections);
+        for (const section of pageInfo.sections) {
+          if (sectionNeedsImages(section.type as SectionType)) {
+            setPendingImageSections(prev => new Set(prev).add(section.id));
+          }
         }
       }
-    }
 
-    // Select the first page
-    if (firstPageId) {
-      setCurrentPage(firstPageId);
-    }
+      if (firstPageId) {
+        setCurrentPage(firstPageId);
+      }
+    });
   }, [clearSite, addNewPage, updatePageSections, setCurrentPage]);
 
   return (
