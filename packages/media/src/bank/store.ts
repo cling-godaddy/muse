@@ -14,8 +14,8 @@ const BANK_INDEX_KEY = "bank/index.faiss";
 
 // Vector type weights for scoring
 const VECTOR_WEIGHTS = {
-  caption: 1.0, // Ground truth - highest weight
-  query: 0.85, // Original search queries
+  caption: 1.0, // Ground truth - semantic fallback
+  query: 1.0, // Original search queries - primary cache mechanism
   expansion: 0.7, // LLM-generated related terms
 };
 
@@ -256,13 +256,21 @@ export function createImageBankStore(config: BankConfig): ImageBankStore {
       const analysis = await analyze(image.displayUrl);
       log.debug("bank_analyze_complete", { entryId, subjects: analysis.subjects });
 
-      // Create caption embedding only (simplified strategy)
-      const captionVec = await embed(analysis.caption);
+      // Embed caption (semantic fallback) and query (cache hit)
+      const [captionVec, queryVec] = await Promise.all([
+        embed(analysis.caption),
+        embed(query),
+      ]);
 
       // Add caption vector to FAISS index
       const captionIndex = state.nextIndex++;
       state.index.add(Array.from(captionVec));
       state.vectorToEntry.set(captionIndex, { entryId, type: "caption" });
+
+      // Add query vector to FAISS index
+      const queryIndex = state.nextIndex++;
+      state.index.add(Array.from(queryVec));
+      state.vectorToEntry.set(queryIndex, { entryId, type: "query" });
 
       // Build metadata
       const metadata: ImageMetadata = {
@@ -294,7 +302,7 @@ export function createImageBankStore(config: BankConfig): ImageBankStore {
         metadata,
         vectors: {
           caption: captionIndex,
-          queries: [],
+          queries: [queryIndex],
           expansions: [],
         },
         createdAt: new Date().toISOString(),
@@ -306,7 +314,7 @@ export function createImageBankStore(config: BankConfig): ImageBankStore {
       log.info("bank_store_complete", {
         entryId,
         caption: analysis.caption.slice(0, 50),
-        vectors: 1,
+        vectors: 2,
       });
 
       return entry;

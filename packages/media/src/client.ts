@@ -29,7 +29,7 @@ interface CacheEntry {
 }
 
 const DEFAULT_CACHE_TTL = 15 * 60 * 1000; // 15 minutes
-const CONFIDENT_SCORE = 0.90; // Only use bank when highly confident
+const CONFIDENT_SCORE = 0.88; // Match DEFAULT_MIN_SCORE in store.ts
 const MIXED_ORIENTATIONS = ["horizontal", "vertical", "square"] as const;
 const DEDUP_BUFFER = 5; // Extra images per orientation to handle cross-block dedup
 
@@ -197,19 +197,36 @@ export function createMediaClient(config: MediaClientConfig): MediaClient {
           let results: ImageSearchResult[] = [];
 
           // Check bank first (semantic search) - only use if confident
-          // Skip bank for mixed orientation - parallel fetch handles it
-          if (bank && item.orientation !== "mixed") {
-            const bankResult = await bank.search(queryString, {
-              orientation: item.orientation,
-              limit: count,
-            });
-            if (bankResult.results.length > 0 && bankResult.topScore >= CONFIDENT_SCORE) {
-              results = bankResult.results;
-              log.debug("bank_hit_confident", { query: queryString, blockId: item.blockId, score: bankResult.topScore, count: results.length });
+          if (bank) {
+            const orientations = item.orientation === "mixed"
+              ? MIXED_ORIENTATIONS
+              : [item.orientation] as const;
+
+            // Search bank for each orientation in parallel
+            const bankResults = await Promise.all(
+              orientations.map(orientation =>
+                bank.search(queryString, { orientation, limit: Math.ceil(count / orientations.length) + 2 }),
+              ),
+            );
+
+            // Combine and dedupe results, track best score
+            const bankSeen = new Set<string>();
+            let topScore = 0;
+            for (const br of bankResults) {
+              topScore = Math.max(topScore, br.topScore);
+              for (const entry of br.results) {
+                if (bankSeen.has(entry.id)) continue;
+                bankSeen.add(entry.id);
+                results.push(entry);
+              }
             }
-            else if (bankResult.results.length > 0) {
-              log.debug("bank_hit_borderline", { query: queryString, blockId: item.blockId, score: bankResult.topScore });
-              // Fall through to provider - borderline match not trusted
+
+            if (results.length > 0 && topScore >= CONFIDENT_SCORE) {
+              log.debug("bank_hit_confident", { query: queryString, blockId: item.blockId, score: topScore, count: results.length, orientation: item.orientation });
+            }
+            else if (results.length > 0) {
+              log.debug("bank_hit_borderline", { query: queryString, blockId: item.blockId, score: topScore });
+              results = []; // Fall through to provider - borderline match not trusted
             }
           }
 
