@@ -3,17 +3,18 @@ import type { Section } from "@muse/core";
 import type { ImageSelection } from "@muse/media";
 import { Spinner } from "@muse/editor";
 import { useChat, type Message } from "../hooks/useChat";
-import type { AgentState, ThemeSelection } from "../utils/streamParser";
+import type { AgentState, ThemeSelection, PageInfo } from "../utils/streamParser";
 import { TimelineModal } from "./modals/timeline";
 
 interface ChatProps {
   onSectionParsed?: (section: Section) => void
   onThemeSelected?: (theme: ThemeSelection) => void
   onImages?: (images: ImageSelection[]) => void
+  onPages?: (pages: PageInfo[]) => void
 }
 
-export function Chat({ onSectionParsed, onThemeSelected, onImages }: ChatProps) {
-  const options = useMemo(() => ({ onSectionParsed, onThemeSelected, onImages }), [onSectionParsed, onThemeSelected, onImages]);
+export function Chat({ onSectionParsed, onThemeSelected, onImages, onPages }: ChatProps) {
+  const options = useMemo(() => ({ onSectionParsed, onThemeSelected, onImages, onPages }), [onSectionParsed, onThemeSelected, onImages, onPages]);
   const { messages, input, setInput, isLoading, error, send, sessionUsage, lastUsage, agents } = useChat(options);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
@@ -117,6 +118,10 @@ function getAgentSummary(agent: AgentState): string | null {
   switch (agent.name) {
     case "brief":
       return agent.summary ? `Targeting ${agent.summary}` : null;
+    case "sitemap":
+      return agent.data?.sectionCount
+        ? `Planned ${agent.data.sectionCount} pages`
+        : null;
     case "structure":
       if (agent.data?.sectionCount) {
         const types = agent.data.sectionTypes?.join(" → ") ?? "";
@@ -128,6 +133,10 @@ function getAgentSummary(agent: AgentState): string | null {
         return `Selected ${agent.data.palette} colors${agent.data.typography ? ` with ${agent.data.typography} typography` : ""}`;
       }
       return null;
+    case "pages":
+      return agent.data?.sectionCount
+        ? `Generated ${agent.data.sectionCount} pages`
+        : null;
     case "copy":
       return agent.data?.sectionCount
         ? `Wrote content for ${agent.data.sectionCount} sections`
@@ -208,10 +217,12 @@ interface AgentPersona {
 
 const agentPersonas: Record<string, AgentPersona> = {
   brief: { title: "Brand Strategist", running: "Researching your target audience..." },
+  sitemap: { title: "Site Planner", running: "Planning your site structure..." },
   structure: { title: "Page Architect", running: "Designing your page layout..." },
   theme: { title: "Visual Designer", running: "Selecting your color palette..." },
+  pages: { title: "Page Builder", running: "Generating your pages..." },
   copy: { title: "Copywriter", running: "Crafting your headlines and content..." },
-  image: { title: "Art Curator", running: "Curating images for your page..." },
+  image: { title: "Art Curator", running: "Curating images for your site..." },
 };
 
 function AgentTimeline({ agents, isLoading }: AgentTimelineProps) {

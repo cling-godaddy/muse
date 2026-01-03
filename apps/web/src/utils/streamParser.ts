@@ -1,10 +1,10 @@
 import { groupBy } from "lodash-es";
 import type { Section, SectionType } from "@muse/core";
 import { getPresetImageInjection, getImageInjection, applyImageInjection } from "@muse/core";
-import type { Usage } from "@muse/ai";
+import type { Usage, SitemapPlan } from "@muse/ai";
 import type { ImageSelection } from "@muse/media";
 
-export type AgentName = "brief" | "structure" | "theme" | "image" | "copy";
+export type AgentName = "brief" | "structure" | "theme" | "image" | "copy" | "sitemap" | "pages";
 export type AgentStatus = "pending" | "running" | "complete";
 
 export interface AgentState {
@@ -28,9 +28,17 @@ export interface ThemeSelection {
   effects?: string
 }
 
+export interface PageInfo {
+  slug: string
+  title: string
+  sections: Section[]
+}
+
 export interface ParseState {
   theme?: ThemeSelection
+  sitemap?: SitemapPlan
   sections: Section[]
+  pages: PageInfo[]
   agents: Map<AgentName, AgentState>
   images: ImageSelection[]
 }
@@ -38,7 +46,9 @@ export interface ParseState {
 export interface ParseResult {
   displayText: string
   theme?: ThemeSelection
+  sitemap?: SitemapPlan
   newSections: Section[]
+  newPages: PageInfo[]
   newImages: ImageSelection[]
   usage?: Usage
   agents: AgentState[]
@@ -46,9 +56,11 @@ export interface ParseResult {
 }
 
 const THEME_REGEX = /\[THEME:([^\]]+)\]/;
-const SECTIONS_REGEX = /\[SECTIONS:(\[[\s\S]*?\])\]/;
+const SECTIONS_REGEX = /\[SECTIONS:(\[[\s\S]*?\])\]/g;
 const USAGE_REGEX = /\[USAGE:(\{[^}]+\})\]/;
 const IMAGES_REGEX = /\[IMAGES:(\[[\s\S]*?\])\]/;
+const SITEMAP_REGEX = /\[SITEMAP:(\{[\s\S]*?\})\]/;
+const PAGE_REGEX = /\[PAGE:(\{[^}]+\})\]/g;
 const AGENT_START_REGEX = /\[AGENT:(\w+):start\]/g;
 const AGENT_COMPLETE_REGEX = /\[AGENT:(\w+):complete\](\{[^}]*\})?/g;
 
@@ -58,8 +70,10 @@ export function parseStream(
 ): ParseResult {
   let displayText = accumulated;
   let theme = previousState.theme;
+  let sitemap = previousState.sitemap;
   let usage: Usage | undefined;
   let newSections: Section[] = [];
+  let newPages: PageInfo[] = [];
   const agents = new Map<AgentName, AgentState>(previousState.agents);
 
   // extract agent start events
@@ -88,12 +102,13 @@ export function parseStream(
           typography?: string
           planned?: number
           resolved?: number
+          pageCount?: number
         };
         agent.duration = data.duration;
         agent.summary = data.summary;
-        if (data.sectionCount !== undefined || data.palette || data.typography || data.planned !== undefined) {
+        if (data.sectionCount !== undefined || data.palette || data.typography || data.planned !== undefined || data.pageCount !== undefined) {
           agent.data = {
-            sectionCount: data.sectionCount,
+            sectionCount: data.sectionCount ?? data.pageCount,
             sectionTypes: data.sectionTypes,
             palette: data.palette,
             typography: data.typography,
@@ -124,6 +139,19 @@ export function parseStream(
     }
   }
 
+  // extract sitemap if present
+  if (!sitemap) {
+    const sitemapMatch = accumulated.match(SITEMAP_REGEX);
+    if (sitemapMatch?.[1]) {
+      try {
+        sitemap = JSON.parse(sitemapMatch[1]) as SitemapPlan;
+      }
+      catch {
+        console.warn("failed to parse sitemap:", sitemapMatch[1]?.slice(0, 200));
+      }
+    }
+  }
+
   // extract images if present (parse once, carry forward in state)
   let images = previousState.images;
   if (images.length === 0) {
@@ -141,36 +169,78 @@ export function parseStream(
   // group images by sectionId for injection
   const imagesBySection = groupBy(images, img => img.blockId);
 
-  // extract sections (all at once now, not streaming)
+  // Helper to inject images into sections
+  const injectImages = (sections: Section[]): Section[] => {
+    return sections.map((section): Section => {
+      const sectionImages = imagesBySection[section.id];
+      if (!sectionImages || sectionImages.length === 0) return section;
+
+      const imgSources = sectionImages.map(s => s.image);
+      const injection = section.preset
+        ? getPresetImageInjection(section.preset)
+        : getImageInjection(section.type as SectionType);
+
+      if (injection) {
+        const updates = applyImageInjection(section, imgSources, injection);
+        return { ...section, ...updates } as Section;
+      }
+
+      return section;
+    });
+  };
+
+  // extract pages with their sections (multi-page format)
+  let pages = previousState.pages;
   let sections = previousState.sections;
-  if (sections.length === 0) {
-    const sectionsMatch = accumulated.match(SECTIONS_REGEX);
-    if (sectionsMatch?.[1]) {
-      try {
-        const parsedSections = JSON.parse(sectionsMatch[1]) as Section[];
 
-        // inject images into sections using declarative config
-        sections = parsedSections.map((section): Section => {
-          const sectionImages = imagesBySection[section.id];
-          if (!sectionImages || sectionImages.length === 0) return section;
+  if (pages.length === 0) {
+    // Try to parse PAGE markers followed by SECTIONS
+    const pageMatches = [...accumulated.matchAll(PAGE_REGEX)];
+    const sectionsMatches = [...accumulated.matchAll(SECTIONS_REGEX)];
 
-          const imgSources = sectionImages.map(s => s.image);
-          const injection = section.preset
-            ? getPresetImageInjection(section.preset)
-            : getImageInjection(section.type as SectionType);
-
-          if (injection) {
-            const updates = applyImageInjection(section, imgSources, injection);
-            return { ...section, ...updates } as Section;
+    if (pageMatches.length > 0 && sectionsMatches.length >= pageMatches.length) {
+      // Multi-page format
+      pages = pageMatches.map((pageMatch, idx) => {
+        try {
+          const pageJson = pageMatch[1];
+          if (!pageJson) return { slug: "/", title: "Home", sections: [] };
+          const pageInfo = JSON.parse(pageJson) as { slug: string, title: string, sectionCount: number };
+          const sectionsJson = sectionsMatches[idx]?.[1];
+          let pageSections: Section[] = [];
+          if (sectionsJson) {
+            pageSections = injectImages(JSON.parse(sectionsJson) as Section[]);
           }
-
-          return section;
-        });
-
+          return {
+            slug: pageInfo.slug,
+            title: pageInfo.title,
+            sections: pageSections,
+          };
+        }
+        catch {
+          return { slug: "/", title: "Home", sections: [] };
+        }
+      });
+      newPages = pages;
+      // Also set sections to first page for backward compatibility
+      if (pages.length > 0 && pages[0]) {
+        sections = pages[0].sections;
         newSections = sections;
       }
-      catch {
-        console.warn("failed to parse sections:", sectionsMatch[1]?.slice(0, 200));
+    }
+    else if (sectionsMatches.length > 0 && pageMatches.length === 0) {
+      // Single-page format (backward compatibility)
+      const sectionsJson = sectionsMatches[0]?.[1];
+      if (sectionsJson) {
+        try {
+          sections = injectImages(JSON.parse(sectionsJson) as Section[]);
+          newSections = sections;
+          // Create a default page
+          pages = [{ slug: "/", title: "Home", sections }];
+          newPages = pages;
+        }
+        catch {
+          console.warn("failed to parse sections:", sectionsJson?.slice(0, 200));
+        }
       }
     }
   }
@@ -178,6 +248,8 @@ export function parseStream(
   // strip markers from display text
   displayText = displayText
     .replace(THEME_REGEX, "")
+    .replace(SITEMAP_REGEX, "")
+    .replace(PAGE_REGEX, "")
     .replace(AGENT_START_REGEX, "")
     .replace(AGENT_COMPLETE_REGEX, "")
     .replace(SECTIONS_REGEX, "")
@@ -187,7 +259,7 @@ export function parseStream(
     .trim();
 
   // convert agents map to ordered array
-  const agentOrder: AgentName[] = ["brief", "structure", "theme", "copy", "image"];
+  const agentOrder: AgentName[] = ["brief", "sitemap", "theme", "pages", "copy", "image"];
   const agentsArray = agentOrder
     .map(name => agents.get(name))
     .filter((agent): agent is AgentState => agent !== undefined);
@@ -200,10 +272,12 @@ export function parseStream(
   return {
     displayText,
     theme,
+    sitemap,
     newSections,
+    newPages,
     newImages,
     usage,
     agents: agentsArray,
-    state: { theme, sections, agents, images },
+    state: { theme, sitemap, sections, pages, agents, images },
   };
 }

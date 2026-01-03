@@ -1,6 +1,6 @@
 import { Hono } from "hono";
 import { streamText } from "hono/streaming";
-import { createClient, createImageAnalyzer, orchestrate, type Message, type Provider } from "@muse/ai";
+import { createClient, createImageAnalyzer, orchestrateSite, type Message, type Provider } from "@muse/ai";
 import { embed } from "@muse/ai/rag";
 import { createLogger } from "@muse/logger";
 import { createMediaClient, createImageBank, createQueryNormalizer, type MediaClient, type ImageBank, type QueryNormalizer } from "@muse/media";
@@ -106,7 +106,7 @@ chatRoute.post("/", async (c) => {
 
   if (stream) {
     return streamText(c, async (textStream) => {
-      for await (const chunk of orchestrate({ messages }, getClient(), { config })) {
+      for await (const chunk of orchestrateSite({ messages }, getClient(), { config })) {
         await textStream.write(chunk);
       }
     });
@@ -114,7 +114,7 @@ chatRoute.post("/", async (c) => {
 
   // non-streaming: collect all chunks
   let content = "";
-  for await (const chunk of orchestrate({ messages }, getClient(), { config })) {
+  for await (const chunk of orchestrateSite({ messages }, getClient(), { config })) {
     content += chunk;
   }
   return c.json({ content });

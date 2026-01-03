@@ -2,7 +2,7 @@ import { useState, useCallback, useRef } from "react";
 import type { Section } from "@muse/core";
 import type { Usage } from "@muse/ai";
 import type { ImageSelection } from "@muse/media";
-import { parseStream, type ParseState, type AgentState, type ThemeSelection } from "../utils/streamParser";
+import { parseStream, type ParseState, type AgentState, type ThemeSelection, type PageInfo } from "../utils/streamParser";
 
 export interface Message {
   role: "user" | "assistant"
@@ -13,6 +13,7 @@ export interface UseChatOptions {
   onSectionParsed?: (section: Section) => void
   onThemeSelected?: (theme: ThemeSelection) => void
   onImages?: (images: ImageSelection[]) => void
+  onPages?: (pages: PageInfo[]) => void
   onUsage?: (usage: Usage) => void
 }
 
@@ -40,9 +41,10 @@ export function useChat(options: UseChatOptions = {}): UseChat {
   const [sessionUsage, setSessionUsage] = useState<Usage>(emptyUsage);
   const [lastUsage, setLastUsage] = useState<Usage | undefined>();
   const [agents, setAgents] = useState<AgentState[]>([]);
-  const parseStateRef = useRef<ParseState>({ sections: [], agents: new Map(), images: [] });
+  const parseStateRef = useRef<ParseState>({ sections: [], pages: [], agents: new Map(), images: [] });
   const usageProcessedRef = useRef(false);
   const themeProcessedRef = useRef(false);
+  const pagesProcessedRef = useRef(false);
 
   const send = useCallback(async () => {
     if (!input.trim() || isLoading) return;
@@ -55,9 +57,10 @@ export function useChat(options: UseChatOptions = {}): UseChat {
     setIsLoading(true);
     setError(null);
     setAgents([]);
-    parseStateRef.current = { sections: [], agents: new Map(), images: [] };
+    parseStateRef.current = { sections: [], pages: [], agents: new Map(), images: [] };
     usageProcessedRef.current = false;
     themeProcessedRef.current = false;
+    pagesProcessedRef.current = false;
 
     try {
       const response = await fetch(API_URL, {
@@ -104,6 +107,12 @@ export function useChat(options: UseChatOptions = {}): UseChat {
         // emit images when they arrive (for post-section injection)
         if (result.newImages.length > 0) {
           options.onImages?.(result.newImages);
+        }
+
+        // emit pages (only once per response)
+        if (result.newPages.length > 0 && !pagesProcessedRef.current) {
+          pagesProcessedRef.current = true;
+          options.onPages?.(result.newPages);
         }
 
         // update agents if changed

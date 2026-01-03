@@ -10,7 +10,7 @@ import { Chat } from "./components/chat";
 import { useSite } from "./hooks/useSite";
 import { PageSwitcher } from "./components/PageSwitcher";
 import { ReviewLayout, ReviewDashboard, ReviewEntry, ReviewSessionPage } from "./review";
-import type { ThemeSelection } from "./utils/streamParser";
+import type { ThemeSelection, PageInfo } from "./utils/streamParser";
 
 interface ThemeState {
   palette: string
@@ -30,6 +30,8 @@ function MainApp() {
     setSections,
     addNewPage,
     deletePage,
+    updatePageSections,
+    clearSite,
   } = useSite();
   const sectionsRef = useRef(sections);
   const [theme, setTheme] = useState<ThemeState>({ palette: "slate", typography: "inter", effects: "neutral" });
@@ -115,6 +117,30 @@ function MainApp() {
     }
   }, [updateSection]);
 
+  const handlePages = useCallback((pages: PageInfo[]) => {
+    // Clear existing site and populate with generated pages
+    clearSite();
+
+    let firstPageId: string | null = null;
+    for (const pageInfo of pages) {
+      const pageId = addNewPage(pageInfo.slug, pageInfo.title);
+      if (!firstPageId) firstPageId = pageId;
+      // Update the page with its sections
+      updatePageSections(pageId, pageInfo.sections);
+      // Track pending images for sections
+      for (const section of pageInfo.sections) {
+        if (sectionNeedsImages(section.type as SectionType)) {
+          setPendingImageSections(prev => new Set(prev).add(section.id));
+        }
+      }
+    }
+
+    // Select the first page
+    if (firstPageId) {
+      setCurrentPage(firstPageId);
+    }
+  }, [clearSite, addNewPage, updatePageSections, setCurrentPage]);
+
   return (
     <SiteProvider pageSlugs={pageSlugs} onGeneratePage={handleGeneratePage}>
       <div className="flex flex-col h-full font-sans text-text bg-bg">
@@ -137,7 +163,7 @@ function MainApp() {
         )}
         <main className="flex-1 flex gap-6 p-6 overflow-hidden">
           <div className="w-[400px] shrink-0">
-            <Chat onSectionParsed={handleSectionParsed} onThemeSelected={handleThemeSelected} onImages={handleImages} />
+            <Chat onSectionParsed={handleSectionParsed} onThemeSelected={handleThemeSelected} onImages={handleImages} onPages={handlePages} />
           </div>
           <div className="flex-1 min-w-0 overflow-y-auto">
             <div className="h-full overflow-y-auto" style={themeStyle} data-effects={effectsId}>
