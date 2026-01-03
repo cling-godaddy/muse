@@ -13,8 +13,9 @@ interface SectionEditorProps {
 
 export function SectionEditor({ sections, onChange, pendingImageSections, navbar, onNavbarChange }: SectionEditorProps) {
   // Combine navbar with sections for unified rendering
+  // Ensure navbar has required fields (handles legacy data without type)
   const allSections = useMemo(() => {
-    if (navbar) {
+    if (navbar && navbar.type === "navbar") {
       return [navbar as Section, ...sections];
     }
     return sections;
