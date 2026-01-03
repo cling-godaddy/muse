@@ -2,7 +2,7 @@ import { useState, useMemo, useCallback, useEffect, useRef, useLayoutEffect } fr
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { groupBy } from "lodash-es";
 import { SectionEditor, SiteProvider } from "@muse/editor";
-import type { Section, SectionType } from "@muse/core";
+import type { Section, SectionType, NavbarConfig } from "@muse/core";
 import { sectionNeedsImages, getPresetImageInjection, getImageInjection, applyImageInjection } from "@muse/core";
 import type { ImageSelection } from "@muse/media";
 import { resolveThemeWithEffects, themeToCssVars, getTypography, loadFonts } from "@muse/themes";
@@ -31,6 +31,7 @@ function MainApp() {
     addNewPage,
     deletePage,
     updatePageSections,
+    setNavbar,
     clearSite,
   } = useSite();
   const siteRef = useRef(site);
@@ -83,6 +84,10 @@ function MainApp() {
         : selection.palette === "synthwave" ? "neon" : "neutral");
     setTheme({ palette: selection.palette, typography: selection.typography, effects });
   }, []);
+
+  const handleNavbar = useCallback((navbar: NavbarConfig) => {
+    setNavbar(navbar);
+  }, [setNavbar]);
 
   const handleImages = useCallback((images: ImageSelection[]) => {
     const currentSite = siteRef.current;
@@ -169,11 +174,11 @@ function MainApp() {
         )}
         <main className="flex-1 flex gap-6 p-6 overflow-hidden">
           <div className="w-[400px] shrink-0">
-            <Chat onSectionParsed={handleSectionParsed} onThemeSelected={handleThemeSelected} onImages={handleImages} onPages={handlePages} />
+            <Chat onSectionParsed={handleSectionParsed} onThemeSelected={handleThemeSelected} onNavbar={handleNavbar} onImages={handleImages} onPages={handlePages} />
           </div>
           <div className="flex-1 min-w-0 overflow-y-auto">
             <div className="h-full overflow-y-auto" style={themeStyle} data-effects={effectsId}>
-              <SectionEditor sections={sections} onChange={setSections} pendingImageSections={pendingImageSections} />
+              <SectionEditor sections={sections} onChange={setSections} pendingImageSections={pendingImageSections} navbar={site.navbar} onNavbarChange={setNavbar} />
             </div>
           </div>
         </main>

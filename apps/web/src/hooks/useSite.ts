@@ -1,5 +1,5 @@
 import { useState, useCallback, useMemo } from "react";
-import type { Site, Page, Section } from "@muse/core";
+import type { Site, Page, Section, NavbarConfig } from "@muse/core";
 import { createSite, createPage, addPage, removePage, getPagesFlattened } from "@muse/core";
 
 export interface UseSite {
@@ -27,6 +27,7 @@ export interface UseSite {
 
   // Site operations
   setTheme: (palette: string, typography: string) => void
+  setNavbar: (navbar: NavbarConfig) => void
   setSite: (site: Site) => void
   clearSite: () => void
 }
@@ -173,6 +174,14 @@ export function useSite(initialName = "Untitled Site"): UseSite {
     }));
   }, []);
 
+  const setNavbar = useCallback((navbar: NavbarConfig) => {
+    setSiteState(prev => ({
+      ...prev,
+      navbar,
+      updatedAt: new Date().toISOString(),
+    }));
+  }, []);
+
   const setSite = useCallback((newSite: Site) => {
     setSiteState(newSite);
     // Set current page to first page if available
@@ -200,6 +209,7 @@ export function useSite(initialName = "Untitled Site"): UseSite {
     deletePage,
     updatePageSections,
     setTheme,
+    setNavbar,
     setSite,
     clearSite,
   };

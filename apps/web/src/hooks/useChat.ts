@@ -1,5 +1,5 @@
 import { useState, useCallback, useRef } from "react";
-import type { Section } from "@muse/core";
+import type { Section, NavbarConfig } from "@muse/core";
 import type { Usage } from "@muse/ai";
 import type { ImageSelection } from "@muse/media";
 import { parseStream, type ParseState, type AgentState, type ThemeSelection, type PageInfo } from "../utils/streamParser";
@@ -12,6 +12,7 @@ export interface Message {
 export interface UseChatOptions {
   onSectionParsed?: (section: Section) => void
   onThemeSelected?: (theme: ThemeSelection) => void
+  onNavbar?: (navbar: NavbarConfig) => void
   onImages?: (images: ImageSelection[]) => void
   onPages?: (pages: PageInfo[]) => void
   onUsage?: (usage: Usage) => void
@@ -44,6 +45,7 @@ export function useChat(options: UseChatOptions = {}): UseChat {
   const parseStateRef = useRef<ParseState>({ sections: [], pages: [], agents: new Map(), images: [] });
   const usageProcessedRef = useRef(false);
   const themeProcessedRef = useRef(false);
+  const navbarProcessedRef = useRef(false);
   const pagesProcessedRef = useRef(false);
 
   const send = useCallback(async () => {
@@ -60,6 +62,7 @@ export function useChat(options: UseChatOptions = {}): UseChat {
     parseStateRef.current = { sections: [], pages: [], agents: new Map(), images: [] };
     usageProcessedRef.current = false;
     themeProcessedRef.current = false;
+    navbarProcessedRef.current = false;
     pagesProcessedRef.current = false;
 
     try {
@@ -102,6 +105,12 @@ export function useChat(options: UseChatOptions = {}): UseChat {
         if (result.theme && !themeProcessedRef.current) {
           themeProcessedRef.current = true;
           options.onThemeSelected?.(result.theme);
+        }
+
+        // emit navbar (only once per response)
+        if (result.navbar && !navbarProcessedRef.current) {
+          navbarProcessedRef.current = true;
+          options.onNavbar?.(result.navbar);
         }
 
         // emit images when they arrive (for post-section injection)
