@@ -57,12 +57,12 @@ export interface ParseResult {
 
 const THEME_REGEX = /\[THEME:([^\]]+)\]/;
 const SECTIONS_REGEX = /\[SECTIONS:(\[[\s\S]*?\])\]/g;
-const USAGE_REGEX = /\[USAGE:(\{[^}]+\})\]/;
+const USAGE_REGEX = /\[USAGE:([^\]]+)\]/;
 const IMAGES_REGEX = /\[IMAGES:(\[[\s\S]*?\])\]/;
-const SITEMAP_REGEX = /\[SITEMAP:(\{[\s\S]*?\})\]/;
-const PAGE_REGEX = /\[PAGE:(\{[^}]+\})\]/g;
+const SITEMAP_REGEX = /\[SITEMAP:(.+)\](?=\n)/;
+const PAGE_REGEX = /\[PAGE:([^\]]+)\]/g;
 const AGENT_START_REGEX = /\[AGENT:(\w+):start\]/g;
-const AGENT_COMPLETE_REGEX = /\[AGENT:(\w+):complete\](\{[^}]*\})?/g;
+const AGENT_COMPLETE_REGEX = /\[AGENT:(\w+):complete\]([^\n]*)/g;
 
 export function parseStream(
   accumulated: string,
