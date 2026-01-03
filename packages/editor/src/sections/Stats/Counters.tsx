@@ -9,20 +9,36 @@ interface Props {
   onUpdate: (data: Partial<StatsSectionType>) => void
 }
 
-function parseNumericValue(value: string): number {
-  const parsed = parseInt(value.replace(/[^0-9.-]/g, ""), 10);
-  return isNaN(parsed) ? 0 : parsed;
+function parseAnimatable(value: string): { num: number, suffix: string, isFloat: boolean } | null {
+  // Ratio patterns like "24/7" or "4.8/5" - don't animate
+  if (/^\d+(\.\d+)?\/\d+$/.test(value)) return null;
+
+  // Extract leading number and suffix
+  const match = value.match(/^(\d+\.?\d*)(.*)$/);
+  if (!match?.[1]) return null;
+
+  const numStr = match[1];
+  const suffix = match[2] ?? "";
+  const isFloat = numStr.includes(".");
+  const num = isFloat ? parseFloat(numStr) : parseInt(numStr, 10);
+  if (isNaN(num)) return null;
+
+  return { num, suffix, isFloat };
 }
 
-function AnimatedValue({ value, prefix, suffix }: { value: string, prefix?: string, suffix?: string }) {
-  const targetValue = parseNumericValue(value);
-  const [displayValue, setDisplayValue] = useState(targetValue);
+function AnimatedValue({ value }: { value: string }) {
+  const parsed = parseAnimatable(value);
+  const [displayValue, setDisplayValue] = useState(0);
   const frameRef = useRef<number | undefined>(undefined);
   const hasAnimated = useRef(false);
 
+  const targetValue = parsed?.num ?? 0;
+  const suffix = parsed?.suffix ?? "";
+  const isFloat = parsed?.isFloat ?? false;
+  const canAnimate = parsed !== null;
+
   useEffect(() => {
-    // Only animate on first mount
-    if (hasAnimated.current) return;
+    if (!canAnimate || hasAnimated.current) return;
     hasAnimated.current = true;
 
     const duration = 1500;
@@ -31,9 +47,10 @@ function AnimatedValue({ value, prefix, suffix }: { value: string, prefix?: stri
     const animate = (currentTime: number) => {
       const elapsed = currentTime - startTime;
       const progress = Math.min(elapsed / duration, 1);
-      // Ease out cubic
       const eased = 1 - Math.pow(1 - progress, 3);
-      const current = Math.round(targetValue * eased);
+      const current = isFloat
+        ? Math.round(targetValue * eased * 10) / 10
+        : Math.round(targetValue * eased);
       setDisplayValue(current);
 
       if (progress < 1) {
@@ -48,12 +65,19 @@ function AnimatedValue({ value, prefix, suffix }: { value: string, prefix?: stri
         cancelAnimationFrame(frameRef.current);
       }
     };
-  }, [targetValue]);
+  }, [canAnimate, targetValue, isFloat]);
+
+  if (!canAnimate) {
+    return <span className={styles.value}>{value}</span>;
+  }
+
+  const formatted = isFloat
+    ? displayValue.toLocaleString(undefined, { minimumFractionDigits: 1, maximumFractionDigits: 1 })
+    : displayValue.toLocaleString();
 
   return (
     <span className={styles.value}>
-      {prefix}
-      {displayValue.toLocaleString()}
+      {formatted}
       {suffix}
     </span>
   );
@@ -95,29 +119,13 @@ export function Counters({ section, onUpdate }: Props) {
             {isEditable
               ? (
                 <>
-                  <div className={styles.valueRow}>
-                    <input
-                      type="text"
-                      className={styles.prefix}
-                      value={stat.prefix ?? ""}
-                      onChange={e => updateStat(i, { prefix: e.target.value || undefined })}
-                      placeholder=""
-                    />
-                    <input
-                      type="text"
-                      className={styles.valueInput}
-                      value={stat.value}
-                      onChange={e => updateStat(i, { value: e.target.value })}
-                      placeholder="100"
-                    />
-                    <input
-                      type="text"
-                      className={styles.suffix}
-                      value={stat.suffix ?? ""}
-                      onChange={e => updateStat(i, { suffix: e.target.value || undefined })}
-                      placeholder="+"
-                    />
-                  </div>
+                  <input
+                    type="text"
+                    className={styles.valueInput}
+                    value={stat.value}
+                    onChange={e => updateStat(i, { value: e.target.value })}
+                    placeholder="1500"
+                  />
                   <textarea
                     className={styles.label}
                     value={stat.label}
@@ -136,11 +144,7 @@ export function Counters({ section, onUpdate }: Props) {
               )
               : (
                 <>
-                  <AnimatedValue
-                    value={stat.value}
-                    prefix={stat.prefix}
-                    suffix={stat.suffix}
-                  />
+                  <AnimatedValue value={stat.value} />
                   <span className={styles.label}>{stat.label}</span>
                 </>
               )}

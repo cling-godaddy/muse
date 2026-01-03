@@ -44,29 +44,13 @@ export function Grid({ section, onUpdate }: Props) {
             {isEditable
               ? (
                 <>
-                  <div className={styles.valueRow}>
-                    <input
-                      type="text"
-                      className={styles.prefix}
-                      value={stat.prefix ?? ""}
-                      onChange={e => updateStat(i, { prefix: e.target.value || undefined })}
-                      placeholder=""
-                    />
-                    <input
-                      type="text"
-                      className={styles.value}
-                      value={stat.value}
-                      onChange={e => updateStat(i, { value: e.target.value })}
-                      placeholder="100"
-                    />
-                    <input
-                      type="text"
-                      className={styles.suffix}
-                      value={stat.suffix ?? ""}
-                      onChange={e => updateStat(i, { suffix: e.target.value || undefined })}
-                      placeholder="+"
-                    />
-                  </div>
+                  <input
+                    type="text"
+                    className={styles.value}
+                    value={stat.value}
+                    onChange={e => updateStat(i, { value: e.target.value })}
+                    placeholder="100+"
+                  />
                   <textarea
                     className={styles.label}
                     value={stat.label}
@@ -85,11 +69,7 @@ export function Grid({ section, onUpdate }: Props) {
               )
               : (
                 <>
-                  <span className={styles.value}>
-                    {stat.prefix}
-                    {stat.value}
-                    {stat.suffix}
-                  </span>
+                  <span className={styles.value}>{stat.value}</span>
                   <span className={styles.label}>{stat.label}</span>
                 </>
               )}

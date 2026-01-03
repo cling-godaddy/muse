@@ -244,8 +244,6 @@ export interface SubscribeSection extends SectionBase {
 export interface StatItem {
   value: string
   label: string
-  prefix?: string
-  suffix?: string
 }
 
 export interface StatsSection extends SectionBase {

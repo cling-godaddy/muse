@@ -50,33 +50,6 @@
   max-width: 14rem;
 }
 
-.valueRow {
-  display: flex;
-  align-items: baseline;
-  gap: 0;
-}
-
-.prefix,
-.suffix {
-  width: 1.5rem;
-  font-family: var(--muse-theme-heading-font, inherit);
-  font-size: clamp(1.25rem, 4vw, 2rem);
-  font-weight: 700;
-  color: var(--muse-theme-text, #0f172a);
-  background: transparent;
-  border: 1px dashed transparent;
-  text-align: center;
-  padding: 0;
-}
-
-.prefix {
-  text-align: right;
-}
-
-.suffix {
-  text-align: left;
-}
-
 .value {
   font-family: var(--muse-theme-heading-font, inherit);
   font-size: clamp(1.5rem, 5vw, 2.5rem);
@@ -84,13 +57,10 @@
   color: var(--muse-theme-primary, #6366f1);
   background: transparent;
   border: 1px dashed transparent;
-  text-align: right;
-  width: 6rem;
+  text-align: center;
   padding: 0;
 }
 
-.prefix:focus,
-.suffix:focus,
 .value:focus {
   border-color: var(--muse-theme-primary, #6366f1);
   outline: none;

@@ -167,8 +167,6 @@ export const subscribeSectionSchema = sectionBase.extend({
 const statItemSchema = z.object({
   value: z.string(),
   label: z.string(),
-  prefix: z.string().optional(),
-  suffix: z.string().optional(),
 });
 
 export const statsSectionSchema = sectionBase.extend({

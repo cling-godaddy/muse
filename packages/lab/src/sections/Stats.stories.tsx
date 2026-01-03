@@ -5,10 +5,10 @@ import { Stats } from "@muse/editor";
 import type { StatsSection, StatItem } from "@muse/core";
 
 const sampleStats: StatItem[] = [
-  { value: "10", suffix: "K+", label: "Customers" },
-  { value: "99", suffix: "%", label: "Uptime" },
-  { value: "50", suffix: "M", label: "Requests/day" },
-  { value: "24", suffix: "/7", label: "Support" },
+  { value: "10K+", label: "Customers" },
+  { value: "99%", label: "Uptime" },
+  { value: "50M", label: "Requests/day" },
+  { value: "24/7", label: "Support" },
 ];
 
 type StatsArgs = {
