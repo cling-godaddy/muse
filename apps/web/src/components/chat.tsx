@@ -268,7 +268,7 @@ function AgentTimeline({ agents, isLoading }: AgentTimelineProps) {
                 <span className="capitalize">{themeAgent.data.palette}</span>
                 {themeAgent.data.typography && (
                   <span className="capitalize">
-                    +
+                    {" + "}
                     {themeAgent.data.typography}
                   </span>
                 )}
