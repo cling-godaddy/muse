@@ -1,13 +1,14 @@
 import { useState, useMemo, useCallback, useEffect, useRef, useLayoutEffect } from "react";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { groupBy } from "lodash-es";
-import { SectionEditor } from "@muse/editor";
+import { SectionEditor, SiteProvider } from "@muse/editor";
 import type { Section, SectionType } from "@muse/core";
 import { sectionNeedsImages, getPresetImageInjection, getImageInjection, applyImageInjection } from "@muse/core";
 import type { ImageSelection } from "@muse/media";
 import { resolveThemeWithEffects, themeToCssVars, getTypography, loadFonts } from "@muse/themes";
 import { Chat } from "./components/chat";
-import { useSections } from "./hooks/useSections";
+import { useSite } from "./hooks/useSite";
+import { PageSwitcher } from "./components/PageSwitcher";
 import { ReviewLayout, ReviewDashboard, ReviewEntry, ReviewSessionPage } from "./review";
 import type { ThemeSelection } from "./utils/streamParser";
 
@@ -18,7 +19,18 @@ interface ThemeState {
 }
 
 function MainApp() {
-  const { sections, addSection, updateSection, setSections } = useSections();
+  const {
+    site,
+    currentPageId,
+    pageSlugs,
+    setCurrentPage,
+    sections,
+    addSection,
+    updateSection,
+    setSections,
+    addNewPage,
+    deletePage,
+  } = useSite();
   const sectionsRef = useRef(sections);
   const [theme, setTheme] = useState<ThemeState>({ palette: "slate", typography: "inter", effects: "neutral" });
   const [pendingImageSections, setPendingImageSections] = useState<Set<string>>(new Set());
@@ -26,6 +38,19 @@ function MainApp() {
   useLayoutEffect(() => {
     sectionsRef.current = sections;
   }, [sections]);
+
+  const handleGeneratePage = useCallback((slug: string) => {
+    // For now, create an empty page - in a full implementation,
+    // this would trigger the AI to generate the page content
+    const title = slug === "/" ? "Home" : slug.split("/").pop() ?? "New Page";
+    const pageId = addNewPage(slug, title);
+    setCurrentPage(pageId);
+  }, [addNewPage, setCurrentPage]);
+
+  const handleAddPage = useCallback(() => {
+    const slug = `/page-${Object.keys(site.pages).length + 1}`;
+    handleGeneratePage(slug);
+  }, [site.pages, handleGeneratePage]);
 
   const { themeStyle, effectsId } = useMemo(() => {
     const { theme: resolved, effects } = resolveThemeWithEffects({
@@ -91,26 +116,37 @@ function MainApp() {
   }, [updateSection]);
 
   return (
-    <div className="flex flex-col h-full font-sans text-text bg-bg">
-      <header className="px-6 py-3 border-b border-border bg-bg flex items-center gap-4">
-        <h1 className="m-0 text-xl font-semibold">Muse</h1>
-        <span className="text-sm text-text-muted">
-          {theme.palette}
-          {" + "}
-          {theme.typography}
-        </span>
-      </header>
-      <main className="flex-1 flex gap-6 p-6 overflow-hidden">
-        <div className="w-[400px] shrink-0">
-          <Chat onSectionParsed={handleSectionParsed} onThemeSelected={handleThemeSelected} onImages={handleImages} />
-        </div>
-        <div className="flex-1 min-w-0 overflow-y-auto">
-          <div className="h-full overflow-y-auto" style={themeStyle} data-effects={effectsId}>
-            <SectionEditor sections={sections} onChange={setSections} pendingImageSections={pendingImageSections} />
+    <SiteProvider pageSlugs={pageSlugs} onGeneratePage={handleGeneratePage}>
+      <div className="flex flex-col h-full font-sans text-text bg-bg">
+        <header className="px-6 py-3 border-b border-border bg-bg flex items-center gap-4">
+          <h1 className="m-0 text-xl font-semibold">Muse</h1>
+          <span className="text-sm text-text-muted">
+            {theme.palette}
+            {" + "}
+            {theme.typography}
+          </span>
+        </header>
+        {Object.keys(site.pages).length > 0 && (
+          <PageSwitcher
+            site={site}
+            currentPageId={currentPageId}
+            onSelectPage={setCurrentPage}
+            onAddPage={handleAddPage}
+            onDeletePage={deletePage}
+          />
+        )}
+        <main className="flex-1 flex gap-6 p-6 overflow-hidden">
+          <div className="w-[400px] shrink-0">
+            <Chat onSectionParsed={handleSectionParsed} onThemeSelected={handleThemeSelected} onImages={handleImages} />
           </div>
-        </div>
-      </main>
-    </div>
+          <div className="flex-1 min-w-0 overflow-y-auto">
+            <div className="h-full overflow-y-auto" style={themeStyle} data-effects={effectsId}>
+              <SectionEditor sections={sections} onChange={setSections} pendingImageSections={pendingImageSections} />
+            </div>
+          </div>
+        </main>
+      </div>
+    </SiteProvider>
   );
 }
 
