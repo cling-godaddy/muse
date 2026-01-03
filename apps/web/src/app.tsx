@@ -12,6 +12,11 @@ import { PageSwitcher } from "./components/PageSwitcher";
 import { ReviewLayout, ReviewDashboard, ReviewEntry, ReviewSessionPage } from "./review";
 import type { ThemeSelection, PageInfo } from "./utils/streamParser";
 
+function hasNavbarContent(navbar?: NavbarConfig): boolean {
+  if (!navbar) return false;
+  return !!(navbar.logo?.text || navbar.logo?.image || navbar.items?.length || navbar.cta);
+}
+
 interface ThemeState {
   palette: string
   typography: string
@@ -163,7 +168,7 @@ function MainApp() {
             {theme.typography}
           </span>
         </header>
-        {Object.keys(site.pages).length > 0 && (
+        {(Object.values(site.pages).some(p => p.sections.length > 0) || hasNavbarContent(site.navbar)) && (
           <PageSwitcher
             site={site}
             currentPageId={currentPageId}
