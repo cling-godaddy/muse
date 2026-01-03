@@ -163,11 +163,6 @@ function MainApp() {
       <div className="flex flex-col h-full font-sans text-text bg-bg">
         <header className="px-6 py-3 border-b border-border bg-bg flex items-center gap-4">
           <h1 className="m-0 text-xl font-semibold">Muse</h1>
-          <span className="text-sm text-text-muted">
-            {theme.palette}
-            {" + "}
-            {theme.typography}
-          </span>
         </header>
         {(Object.values(site.pages).some(p => p.sections.length > 0) || hasNavbarContent(site.navbar)) && (
           <PageSwitcher
