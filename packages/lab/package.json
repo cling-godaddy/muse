@@ -5,7 +5,9 @@
   "type": "module",
   "scripts": {
     "dev": "storybook dev -p 6006",
-    "build": "storybook build"
+    "build": "storybook build",
+    "test": "vitest run",
+    "test:watch": "vitest"
   },
   "dependencies": {
     "@muse/core": "workspace:*",
@@ -15,9 +17,11 @@
     "react-dom": "^19"
   },
   "devDependencies": {
+    "@storybook/addon-vitest": "^10.1.11",
     "@storybook/react-vite": "^10.1.11",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "@vitest/browser-playwright": "^4.0.16",
     "eslint-plugin-storybook": "10.1.11",
     "storybook": "^10.1.11"
   }
