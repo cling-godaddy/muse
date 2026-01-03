@@ -2,6 +2,7 @@ import { useRef, useEffect, useMemo } from "react";
 import type { Section, NavbarSection } from "@muse/core";
 import type { ImageSelection } from "@muse/media";
 import { Spinner } from "@muse/editor";
+import { getPalette } from "@muse/themes";
 import { useChat, type Message } from "../hooks/useChat";
 import type { AgentState, ThemeSelection, PageInfo } from "../utils/streamParser";
 import { TimelineModal } from "./modals/timeline";
@@ -236,37 +237,44 @@ const agentPersonas: Record<string, AgentPersona> = {
 function AgentTimeline({ agents, isLoading }: AgentTimelineProps) {
   if (agents.length === 0 && !isLoading) return null;
 
-  const formatDuration = (ms?: number) => ms ? `${(ms / 1000).toFixed(1)}s` : "";
+  const formatDuration = (ms?: number) => ms ? `${Math.round(ms / 1000)}s` : "";
 
   const allComplete = agents.length > 0 && agents.every(a => a.status === "complete");
   const runningAgent = agents.find(a => a.status === "running");
   const totalDuration = agents.reduce((sum, a) => sum + (a.duration ?? 0), 0);
   const themeAgent = agents.find(a => a.name === "theme");
+  const paletteColor = themeAgent?.data?.palette
+    ? getPalette(themeAgent.data.palette)?.colors.primary
+    : undefined;
 
   const trigger = (
-    <button className="text-primary hover:underline ml-2">
-      Details
-    </button>
-  );
-
-  return (
-    <div className="px-3 py-2 text-xs text-text-subtle bg-bg-subtle font-mono flex items-center gap-2">
+    <button className="w-full px-3 py-2 text-xs text-text-subtle bg-bg-subtle flex items-center gap-2 hover:bg-bg-subtle/80 transition-colors cursor-pointer text-left">
       {allComplete
         ? (
           <>
             <span className="text-success">✓</span>
             <span>
-              {agents.length}
-              {" "}
-              agents ·
+              Generated in
               {formatDuration(totalDuration)}
             </span>
             {themeAgent?.data?.palette && (
-              <span className="text-text-subtle">
-                {themeAgent.data.palette}
-                {themeAgent.data.typography && ` + ${themeAgent.data.typography}`}
+              <span className="flex items-center gap-1.5 text-text-subtle">
+                {paletteColor && (
+                  <span
+                    className="w-2.5 h-2.5 rounded-full shrink-0"
+                    style={{ backgroundColor: paletteColor }}
+                  />
+                )}
+                <span className="capitalize">{themeAgent.data.palette}</span>
+                {themeAgent.data.typography && (
+                  <span className="capitalize">
+                    +
+                    {themeAgent.data.typography}
+                  </span>
+                )}
               </span>
             )}
+            <span className="ml-auto text-text-subtle/60">›</span>
           </>
         )
         : (
@@ -286,7 +294,8 @@ function AgentTimeline({ agents, isLoading }: AgentTimelineProps) {
               : <span>Starting...</span>}
           </>
         )}
-      <TimelineModal agents={agents} isLoading={isLoading} trigger={trigger} />
-    </div>
+    </button>
   );
+
+  return <TimelineModal agents={agents} isLoading={isLoading} trigger={trigger} />;
 }
