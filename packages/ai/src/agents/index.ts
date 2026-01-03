@@ -6,9 +6,13 @@ export { imageAgent, parseImagePlan } from "./image";
 export { sitemapAgent, parseSitemap } from "./sitemap";
 export {
   orchestrate,
+  orchestrateSite,
   type OrchestratorInput,
   type OrchestratorConfig,
   type OrchestratorEvents,
+  type SiteOrchestratorEvents,
+  type GeneratedPage,
+  type SiteResult,
 } from "./orchestrator";
 
 export type {

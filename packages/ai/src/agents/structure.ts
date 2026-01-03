@@ -99,9 +99,18 @@ export const structureAgent: SyncAgent = {
 `
       : "";
 
+    // Page context for multi-page site generation
+    const pageContext = input.context?.pageSlug
+      ? `\nPage Context:
+- Page: ${input.context.pageSlug} (${input.context.pageTitle ?? "Untitled"})
+- Purpose: ${input.context.pagePurpose ?? ""}
+- Priority: ${input.context.pagePriority === "secondary" ? "secondary (3-5 sections)" : "primary (5-8 sections)"}
+${input.context.suggestedSections ? `- Suggested sections: ${(input.context.suggestedSections as string[]).join(", ")}` : ""}`
+      : "";
+
     const messages = [
       { role: "system" as const, content: systemPrompt },
-      { role: "user" as const, content: `${briefContext}\nUser Request: ${input.prompt}` },
+      { role: "user" as const, content: `${briefContext}${pageContext}\nUser Request: ${input.prompt}` },
     ];
     if (input.retryFeedback) {
       messages.push({ role: "user" as const, content: input.retryFeedback });
