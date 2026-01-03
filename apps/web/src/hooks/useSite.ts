@@ -54,10 +54,8 @@ export function useSite(initialName = "Untitled Site"): UseSite {
   }, [site]);
 
   const setCurrentPage = useCallback((pageId: string) => {
-    if (site.pages[pageId]) {
-      setCurrentPageId(pageId);
-    }
-  }, [site.pages]);
+    setCurrentPageId(pageId);
+  }, []);
 
   const updatePageSections = useCallback((pageId: string, newSections: Section[]) => {
     setSiteState((prev) => {
