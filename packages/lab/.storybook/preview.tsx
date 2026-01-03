@@ -66,6 +66,9 @@ const withLinkHandler: Decorator = Story => (
 );
 
 const preview: Preview = {
+  parameters: {
+    a11y: { test: "error" },
+  },
   decorators: [withTheme, withLinkHandler],
   globalTypes: {
     theme: {
