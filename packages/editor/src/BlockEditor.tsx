@@ -21,6 +21,12 @@ function toNavbarSection(config: NavbarConfig): NavbarSection {
   };
 }
 
+// Check if navbar has meaningful content
+function hasNavbarContent(navbar?: NavbarConfig): boolean {
+  if (!navbar) return false;
+  return !!(navbar.logo?.text || navbar.logo?.image || navbar.items?.length || navbar.cta);
+}
+
 export function SectionEditor({ sections, onChange, pendingImageSections, navbar, onNavbarChange }: SectionEditorProps) {
   const updateSection = (id: string, data: Partial<Section>) => {
     onChange(sections.map(s => (s.id === id ? { ...s, ...data } as Section : s)));
@@ -40,16 +46,18 @@ export function SectionEditor({ sections, onChange, pendingImageSections, navbar
     });
   };
 
+  const showNavbar = hasNavbarContent(navbar);
+
   return (
     <SelectionProvider>
       <div className="muse-section-editor">
-        {navbar && (
+        {showNavbar && navbar && (
           <Navbar
             section={toNavbarSection(navbar)}
             onUpdate={handleNavbarUpdate}
           />
         )}
-        {sections.length === 0 && !navbar && (
+        {sections.length === 0 && !showNavbar && (
           <div className="muse-section-editor-empty">
             No sections yet. Use AI to generate content.
           </div>
