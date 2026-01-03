@@ -14,6 +14,12 @@ interface ChatProps {
   onPages?: (pages: PageInfo[]) => void
 }
 
+function formatTokens(n: number): string {
+  if (n < 1000) return String(n);
+  if (n < 1_000_000) return `${Math.round(n / 1000)}k`;
+  return `${(n / 1_000_000).toFixed(1)}M`;
+}
+
 export function Chat({ onSectionParsed, onThemeSelected, onNavbar, onImages, onPages }: ChatProps) {
   const options = useMemo(() => ({ onSectionParsed, onThemeSelected, onNavbar, onImages, onPages }), [onSectionParsed, onThemeSelected, onNavbar, onImages, onPages]);
   const { messages, input, setInput, isLoading, error, send, sessionUsage, lastUsage, agents } = useChat(options);
@@ -39,9 +45,8 @@ export function Chat({ onSectionParsed, onThemeSelected, onNavbar, onImages, onP
             {sessionUsage.cost.toFixed(4)}
             {" "}
             (
-            {sessionUsage.input + sessionUsage.output}
-            {" "}
-            tokens)
+            {formatTokens(sessionUsage.input + sessionUsage.output)}
+            )
           </span>
           {lastUsage && (
             <span>
@@ -49,11 +54,13 @@ export function Chat({ onSectionParsed, onThemeSelected, onNavbar, onImages, onP
               {lastUsage.cost.toFixed(4)}
               {" "}
               (
-              {lastUsage.input}
-              ↓
+              {formatTokens(lastUsage.input)}
               {" "}
-              {lastUsage.output}
-              ↑)
+              in ·
+              {" "}
+              {formatTokens(lastUsage.output)}
+              {" "}
+              out)
             </span>
           )}
         </div>
