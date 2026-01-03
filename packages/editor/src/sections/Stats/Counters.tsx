@@ -122,13 +122,13 @@ export function Counters({ section, onUpdate }: Props) {
                   <input
                     type="text"
                     className={styles.valueInput}
-                    value={stat.value}
+                    value={stat.value ?? ""}
                     onChange={e => updateStat(i, { value: e.target.value })}
                     placeholder="1500"
                   />
                   <textarea
                     className={styles.label}
-                    value={stat.label}
+                    value={stat.label ?? ""}
                     onChange={e => updateStat(i, { label: e.target.value })}
                     placeholder="Customers"
                     rows={1}
