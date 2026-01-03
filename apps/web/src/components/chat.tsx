@@ -183,13 +183,13 @@ function MessageBubble({ message, isLast, isLoading, agents }: MessageBubbleProp
         {showTimeline && <AgentTimeline agents={agents} isLoading={isLoading} />}
         {showAgentSummaries
           ? (
-            <div className="p-3 text-sm text-text-muted space-y-1">
+            <div className="muse-fade-in-stagger p-3 text-sm text-text-muted space-y-1">
               {completedAgents.map((agent) => {
                 const summary = getAgentSummary(agent);
                 const persona = agentPersonas[agent.name];
                 if (!summary || !persona) return null;
                 return (
-                  <div key={agent.name} className="muse-agent-summary flex items-start gap-2">
+                  <div key={agent.name} className="flex items-start gap-2">
                     <span className="text-success">✓</span>
                     <span>
                       <span className="font-medium text-text">
@@ -248,7 +248,7 @@ function AgentTimeline({ agents, isLoading }: AgentTimelineProps) {
     : undefined;
 
   const trigger = (
-    <button className="w-full px-3 py-2 text-xs text-text-subtle bg-bg-subtle flex items-center gap-2 hover:bg-bg-subtle/80 transition-colors cursor-pointer text-left">
+    <button className="muse-fade-in w-full px-3 py-2 text-xs text-text-subtle bg-bg-subtle flex items-center gap-2 hover:bg-bg-subtle/80 transition-colors cursor-pointer text-left">
       {allComplete
         ? (
           <>
