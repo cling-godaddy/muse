@@ -28,12 +28,25 @@ export interface CopySectionContent {
   itemTitles?: string[]
 }
 
+export interface PagePlan {
+  slug: string
+  title: string
+  purpose: string
+  priority: "primary" | "secondary"
+  suggestedSections?: string[]
+}
+
+export interface SitemapPlan {
+  pages: PagePlan[]
+}
+
 export interface AgentInput {
   prompt: string
   messages?: Message[]
   brief?: BrandBrief
   structure?: PageStructure
   copySections?: CopySectionContent[]
+  existingPages?: { slug: string, title: string }[]
   context?: Record<string, unknown>
   retryFeedback?: string
 }

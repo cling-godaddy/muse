@@ -54,6 +54,36 @@ export const themeSchema: ResponseSchema = {
   },
 };
 
+export const sitemapSchema: ResponseSchema = {
+  name: "sitemap_plan",
+  schema: {
+    type: "object",
+    properties: {
+      pages: {
+        type: "array",
+        items: {
+          type: "object",
+          properties: {
+            slug: { type: "string", description: "URL path like '/' or '/services/web-design'" },
+            title: { type: "string", description: "Page title for meta and navigation" },
+            purpose: { type: "string", description: "What this page should accomplish" },
+            priority: { type: "string", enum: ["primary", "secondary"], description: "Primary pages get 5-8 sections, secondary get 3-5" },
+            suggestedSections: {
+              type: "array",
+              items: { type: "string" },
+              description: "Suggested section types like hero, features, pricing",
+            },
+          },
+          required: ["slug", "title", "purpose", "priority"],
+          additionalProperties: false,
+        },
+      },
+    },
+    required: ["pages"],
+    additionalProperties: false,
+  },
+};
+
 // Helper for nullable string
 const nullableString = { type: ["string", "null"] };
 

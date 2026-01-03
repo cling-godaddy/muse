@@ -3,6 +3,7 @@ export { structureAgent, parseStructure } from "./structure";
 export { themeAgent } from "./theme";
 export { copyAgent } from "./copy";
 export { imageAgent, parseImagePlan } from "./image";
+export { sitemapAgent, parseSitemap } from "./sitemap";
 export {
   orchestrate,
   type OrchestratorInput,
@@ -18,6 +19,8 @@ export type {
   BrandBrief,
   SectionStructure,
   PageStructure,
+  PagePlan,
+  SitemapPlan,
   ImagePlan,
   ImageSelection,
 } from "./types";
