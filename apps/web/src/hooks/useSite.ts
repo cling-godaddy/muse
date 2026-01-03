@@ -29,8 +29,13 @@ export interface UseSite {
 }
 
 export function useSite(initialName = "Untitled Site"): UseSite {
-  const [site, setSiteState] = useState<Site>(() => createSite(initialName));
-  const [currentPageId, setCurrentPageId] = useState<string | null>(null);
+  const [{ site: initialSite, defaultPageId }] = useState(() => {
+    const s = createSite(initialName);
+    const page = createPage("/", { title: "Home" });
+    return { site: addPage(s, page), defaultPageId: page.id };
+  });
+  const [site, setSiteState] = useState<Site>(initialSite);
+  const [currentPageId, setCurrentPageId] = useState<string | null>(defaultPageId);
 
   const currentPage = useMemo(() => {
     if (!currentPageId) return null;
