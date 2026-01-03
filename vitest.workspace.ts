@@ -13,4 +13,8 @@ export default defineWorkspace([
     extends: "./packages/ai/vitest.config.ts",
     test: { root: "./packages/ai" },
   },
+  {
+    extends: "./packages/lab/vitest.config.ts",
+    test: { root: "./packages/lab" },
+  },
 ]);
