@@ -265,6 +265,9 @@ importers:
         specifier: ^19
         version: 19.2.3(react@19.2.3)
     devDependencies:
+      '@storybook/addon-a11y':
+        specifier: ^10.1.11
+        version: 10.1.11(storybook@10.1.11(@testing-library/dom@10.4.1)(react-dom@19.2.3(react@19.2.3))(react@19.2.3))
       '@storybook/addon-vitest':
         specifier: ^10.1.11
         version: 10.1.11(@vitest/browser-playwright@4.0.16)(@vitest/browser@4.0.16(vite@6.4.1(@types/node@22.19.3)(jiti@2.6.1)(lightningcss@1.30.2)(tsx@4.21.0)(yaml@2.8.2))(vitest@4.0.16))(@vitest/runner@4.0.16)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)(storybook@10.1.11(@testing-library/dom@10.4.1)(react-dom@19.2.3(react@19.2.3))(react@19.2.3))(vitest@4.0.16)
@@ -1902,6 +1905,11 @@ packages:
   '@standard-schema/spec@1.1.0':
     resolution: {integrity: sha512-l2aFy5jALhniG5HgqrD6jXLi/rUWrKvqN/qJx6yoJsgKhblVd+iqqU4RCXavm/jPityDo5TCvKMnpjKnOriy0w==}
 
+  '@storybook/addon-a11y@10.1.11':
+    resolution: {integrity: sha512-3sr6HmcDgW1+TQAV9QtWBE3HlGyfFXVZY3RECTNLNH6fRC+rYQCItisvQIVxQpyftLSQ8EAMN9JQzs495MjWNg==}
+    peerDependencies:
+      storybook: ^10.1.11
+
   '@storybook/addon-vitest@10.1.11':
     resolution: {integrity: sha512-YbZzeKO3v+Xr97/malT4DZIATkVZT5EHNYx3xzEfPVuk19dDETAVYXO+tzcqCQHsgdKQHkmd56vv8nN3J3/kvw==}
     peerDependencies:
@@ -2340,6 +2348,10 @@ packages:
 
   ast-v8-to-istanbul@0.3.9:
     resolution: {integrity: sha512-dSC6tJeOJxbZrPzPbv5mMd6CMiQ1ugaVXXPRad2fXUSsy1kstFn9XQWemV9VW7Y7kpxgQ/4WMoZfwdH8XSU48w==}
+
+  axe-core@4.11.0:
+    resolution: {integrity: sha512-ilYanEU8vxxBexpJd8cWM4ElSQq4QctCLKih0TSfjIfCQTeyH/6zVrmIJfLPrKTKJRbiG+cfnZbQIjAlJmF1jQ==}
+    engines: {node: '>=4'}
 
   balanced-match@1.0.2:
     resolution: {integrity: sha512-3oSeUO0TMV67hN1AmbXsK4yaqU7tjiHlbxRDZOpH0KW9+CeX4bRAaX0Anxt0tx2MrpRpWwQaPwIlISEJhYU5Pw==}
@@ -5715,6 +5727,12 @@ snapshots:
 
   '@standard-schema/spec@1.1.0': {}
 
+  '@storybook/addon-a11y@10.1.11(storybook@10.1.11(@testing-library/dom@10.4.1)(react-dom@19.2.3(react@19.2.3))(react@19.2.3))':
+    dependencies:
+      '@storybook/global': 5.0.0
+      axe-core: 4.11.0
+      storybook: 10.1.11(@testing-library/dom@10.4.1)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)
+
   '@storybook/addon-vitest@10.1.11(@vitest/browser-playwright@4.0.16)(@vitest/browser@4.0.16(vite@6.4.1(@types/node@22.19.3)(jiti@2.6.1)(lightningcss@1.30.2)(tsx@4.21.0)(yaml@2.8.2))(vitest@4.0.16))(@vitest/runner@4.0.16)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)(storybook@10.1.11(@testing-library/dom@10.4.1)(react-dom@19.2.3(react@19.2.3))(react@19.2.3))(vitest@4.0.16)':
     dependencies:
       '@storybook/global': 5.0.0
@@ -6233,6 +6251,8 @@ snapshots:
       '@jridgewell/trace-mapping': 0.3.31
       estree-walker: 3.0.3
       js-tokens: 9.0.1
+
+  axe-core@4.11.0: {}
 
   balanced-match@1.0.2: {}
 
