@@ -1,6 +1,4 @@
-import { groupBy } from "lodash-es";
-import type { Section, SectionType, NavbarSection } from "@muse/core";
-import { getPresetImageInjection, getImageInjection, applyImageInjection } from "@muse/core";
+import type { Section, NavbarSection } from "@muse/core";
 import type { Usage, SitemapPlan } from "@muse/ai";
 import type { ImageSelection } from "@muse/media";
 
@@ -183,29 +181,6 @@ export function parseStream(
     }
   }
 
-  // group images by sectionId for injection
-  const imagesBySection = groupBy(images, img => img.blockId);
-
-  // Helper to inject images into sections
-  const injectImages = (sections: Section[]): Section[] => {
-    return sections.map((section): Section => {
-      const sectionImages = imagesBySection[section.id];
-      if (!sectionImages || sectionImages.length === 0) return section;
-
-      const imgSources = sectionImages.map(s => s.image);
-      const injection = section.preset
-        ? getPresetImageInjection(section.preset)
-        : getImageInjection(section.type as SectionType);
-
-      if (injection) {
-        const updates = applyImageInjection(section, imgSources, injection);
-        return { ...section, ...updates } as Section;
-      }
-
-      return section;
-    });
-  };
-
   // extract pages with their sections (multi-page format)
   let pages = previousState.pages;
   let sections = previousState.sections;
@@ -225,7 +200,7 @@ export function parseStream(
           const sectionsJson = sectionsMatches[idx]?.[1];
           let pageSections: Section[] = [];
           if (sectionsJson) {
-            pageSections = injectImages(JSON.parse(sectionsJson) as Section[]);
+            pageSections = JSON.parse(sectionsJson) as Section[];
           }
           return {
             slug: pageInfo.slug,
@@ -249,7 +224,7 @@ export function parseStream(
       const sectionsJson = sectionsMatches[0]?.[1];
       if (sectionsJson) {
         try {
-          sections = injectImages(JSON.parse(sectionsJson) as Section[]);
+          sections = JSON.parse(sectionsJson) as Section[];
           newSections = sections;
           // Create a default page
           pages = [{ slug: "/", title: "Home", sections }];
