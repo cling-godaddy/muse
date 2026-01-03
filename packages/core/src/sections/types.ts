@@ -125,7 +125,7 @@ export interface FeatureItem {
   icon?: string
   image?: ImageSource
   title: string
-  description: string
+  description: TextOrRich
 }
 
 export interface FeaturesSection extends SectionBase {
@@ -138,7 +138,7 @@ export interface FeaturesSection extends SectionBase {
 export interface CtaSection extends SectionBase {
   type: "cta"
   headline: string
-  description?: string
+  description?: TextOrRich
   buttonText: string
   buttonHref: string
   variant?: "primary" | "secondary"
@@ -169,7 +169,7 @@ export interface PricingPlan {
   name: string
   price: string
   period?: string
-  description?: string
+  description?: TextOrRich
   features: string[]
   cta?: { text: string, href: string }
   highlighted?: boolean
@@ -184,7 +184,7 @@ export interface PricingSection extends SectionBase {
 
 export interface FaqItem {
   question: string
-  answer: string
+  answer: TextOrRich
 }
 
 export interface FaqSection extends SectionBase {
@@ -238,13 +238,13 @@ export interface TeamMember {
   name: string
   role: string
   image?: ImageSource
-  bio?: string
+  bio?: TextOrRich
 }
 
 export interface AboutSection extends SectionBase {
   type: "about"
   headline?: string
-  body?: string
+  body?: TextOrRich
   image?: ImageSource
   teamMembers?: TeamMember[]
 }
@@ -282,7 +282,7 @@ export interface LogosSection extends SectionBase {
 
 export interface MenuItem {
   name: string
-  description?: string
+  description?: TextOrRich
   price: string
   tags?: string[]
   image?: ImageSource

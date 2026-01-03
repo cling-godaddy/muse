@@ -1,4 +1,4 @@
-import type { PricingSection as PricingSectionType, PricingPlan } from "@muse/core";
+import type { PricingSection as PricingSectionType, PricingPlan, RichContent } from "@muse/core";
 import { EditableText } from "../ux";
 import { useIsEditable } from "../context/EditorMode";
 import styles from "./Pricing.module.css";
@@ -77,8 +77,9 @@ export function Pricing({ section, onUpdate }: Props) {
                 )}
             </div>
             <EditableText
+              rich
               value={plan.description ?? ""}
-              onChange={v => updatePlan(i, { description: v || undefined })}
+              onChange={(v: RichContent) => updatePlan(i, { description: v.text ? v : undefined })}
               as="p"
               className={styles.description}
               placeholder="Plan description..."

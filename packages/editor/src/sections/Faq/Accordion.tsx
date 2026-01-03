@@ -1,5 +1,5 @@
 import { useState } from "react";
-import type { FaqSection as FaqSectionType, FaqItem } from "@muse/core";
+import type { FaqSection as FaqSectionType, FaqItem, RichContent } from "@muse/core";
 import { useIsEditable } from "../../context/EditorMode";
 import { EditableText } from "../../ux";
 import styles from "./Accordion.module.css";
@@ -77,8 +77,9 @@ export function Accordion({ section, onUpdate }: Props) {
               {isOpen && (
                 <div className={styles.content}>
                   <EditableText
+                    rich
                     value={item.answer}
-                    onChange={v => updateItem(i, { answer: v })}
+                    onChange={(v: RichContent) => updateItem(i, { answer: v })}
                     as="p"
                     className={styles.answer}
                     placeholder="Answer..."

@@ -1,4 +1,4 @@
-import type { FeaturesSection as FeaturesSectionType, FeatureItem } from "@muse/core";
+import type { FeaturesSection as FeaturesSectionType, FeatureItem, RichContent } from "@muse/core";
 import { EditableText } from "../../ux";
 import { useIsEditable } from "../../context/EditorMode";
 import { FeatureIcon } from "./icons";
@@ -69,8 +69,9 @@ export function Numbered({ section, onUpdate }: Props) {
                 />
               </div>
               <EditableText
+                rich
                 value={item.description}
-                onChange={v => updateItem(i, { description: v })}
+                onChange={(v: RichContent) => updateItem(i, { description: v })}
                 as="p"
                 className={styles.description}
                 placeholder="Step description..."

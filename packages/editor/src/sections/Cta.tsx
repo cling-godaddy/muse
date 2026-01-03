@@ -1,4 +1,4 @@
-import type { CtaSection as CtaSectionType } from "@muse/core";
+import type { CtaSection as CtaSectionType, RichContent } from "@muse/core";
 import { EditableText, EditableLink } from "../ux";
 import { useIsEditable } from "../context/EditorMode";
 import styles from "./Cta.module.css";
@@ -23,8 +23,9 @@ export function Cta({ section, onUpdate }: Props) {
         placeholder="CTA headline..."
       />
       <EditableText
+        rich
         value={section.description ?? ""}
-        onChange={v => onUpdate({ description: v || undefined })}
+        onChange={(v: RichContent) => onUpdate({ description: v.text ? v : undefined })}
         as="p"
         className={styles.description}
         placeholder="Description..."

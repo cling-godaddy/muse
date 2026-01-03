@@ -42,7 +42,7 @@ const featureItemSchema = z.object({
   icon: z.string().optional(),
   image: imageSourceSchema.optional(),
   title: z.string(),
-  description: z.string(),
+  description: textOrRichSchema,
 });
 
 export const featuresSectionSchema = sectionBase.extend({
@@ -55,7 +55,7 @@ export const featuresSectionSchema = sectionBase.extend({
 export const ctaSectionSchema = sectionBase.extend({
   type: z.literal("cta"),
   headline: z.string(),
-  description: z.string().optional(),
+  description: textOrRichSchema.optional(),
   buttonText: z.string(),
   buttonHref: z.string(),
   variant: z.enum(["primary", "secondary"]).optional(),
@@ -86,7 +86,7 @@ const pricingPlanSchema = z.object({
   name: z.string(),
   price: z.string(),
   period: z.string().optional(),
-  description: z.string().optional(),
+  description: textOrRichSchema.optional(),
   features: z.array(z.string()),
   cta: ctaLinkSchema.optional(),
   highlighted: z.boolean().optional(),
@@ -101,7 +101,7 @@ export const pricingSectionSchema = sectionBase.extend({
 
 const faqItemSchema = z.object({
   question: z.string(),
-  answer: z.string(),
+  answer: textOrRichSchema,
 });
 
 export const faqSectionSchema = sectionBase.extend({
@@ -153,13 +153,13 @@ const teamMemberSchema = z.object({
   name: z.string(),
   role: z.string(),
   image: imageSourceSchema.optional(),
-  bio: z.string().optional(),
+  bio: textOrRichSchema.optional(),
 });
 
 export const aboutSectionSchema = sectionBase.extend({
   type: z.literal("about"),
   headline: z.string().optional(),
-  body: z.string().optional(),
+  body: textOrRichSchema.optional(),
   image: imageSourceSchema.optional(),
   teamMembers: z.array(teamMemberSchema).optional(),
 });

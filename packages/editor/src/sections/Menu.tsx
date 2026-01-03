@@ -1,4 +1,4 @@
-import type { MenuSection as MenuSectionType, MenuItem, MenuCategory } from "@muse/core";
+import type { MenuSection as MenuSectionType, MenuItem, MenuCategory, RichContent } from "@muse/core";
 import { EditableText, ImageLoader } from "../ux";
 import { useIsEditable } from "../context/EditorMode";
 import styles from "./Menu.module.css";
@@ -51,8 +51,9 @@ function MenuItemRow({ item, onUpdate, onRemove, preset, isPending }: MenuItemRo
         </div>
         {!isSimple && item.description !== undefined && (
           <EditableText
+            rich
             value={item.description ?? ""}
-            onChange={v => onUpdate({ description: v || undefined })}
+            onChange={(v: RichContent) => onUpdate({ description: v.text ? v : undefined })}
             as="p"
             className={styles.itemDescription}
             placeholder="Description..."

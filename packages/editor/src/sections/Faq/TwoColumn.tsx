@@ -1,4 +1,4 @@
-import type { FaqSection as FaqSectionType, FaqItem } from "@muse/core";
+import type { FaqSection as FaqSectionType, FaqItem, RichContent } from "@muse/core";
 import { EditableText } from "../../ux";
 import styles from "./TwoColumn.module.css";
 
@@ -46,8 +46,9 @@ export function TwoColumn({ section, onUpdate }: Props) {
               placeholder="Question?"
             />
             <EditableText
+              rich
               value={item.answer}
-              onChange={v => updateItem(i, { answer: v })}
+              onChange={(v: RichContent) => updateItem(i, { answer: v })}
               as="p"
               className={styles.answer}
               placeholder="Answer..."

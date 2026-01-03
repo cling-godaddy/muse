@@ -1,4 +1,4 @@
-import type { FeaturesSection as FeaturesSectionType, FeatureItem } from "@muse/core";
+import type { FeaturesSection as FeaturesSectionType, FeatureItem, RichContent } from "@muse/core";
 import { EditableText, ImageLoader } from "../../ux";
 import { useIsEditable } from "../../context/EditorMode";
 import { FeatureIcon } from "./icons";
@@ -49,8 +49,9 @@ function BentoCard({ item, onUpdate, onRemove, isPending, isLarge }: BentoCardPr
           placeholder="Title..."
         />
         <EditableText
+          rich
           value={item.description}
-          onChange={v => onUpdate({ description: v })}
+          onChange={(v: RichContent) => onUpdate({ description: v })}
           as="p"
           className={styles.itemDescription}
           placeholder="Description..."

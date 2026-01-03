@@ -1,4 +1,4 @@
-import type { AboutSection as AboutSectionType, TeamMember } from "@muse/core";
+import type { AboutSection as AboutSectionType, TeamMember, RichContent } from "@muse/core";
 import { EditableText, ImageLoader } from "../../ux";
 import { useIsEditable } from "../../context/EditorMode";
 import styles from "./Team.module.css";
@@ -66,8 +66,9 @@ export function Team({ section, onUpdate, isPending }: Props) {
               placeholder="Role"
             />
             <EditableText
+              rich
               value={member.bio ?? ""}
-              onChange={v => updateMember(i, { bio: v || undefined })}
+              onChange={(v: RichContent) => updateMember(i, { bio: v.text ? v : undefined })}
               as="p"
               className={styles.memberBio}
               placeholder="Short bio..."

@@ -1,4 +1,4 @@
-import type { AboutSection as AboutSectionType } from "@muse/core";
+import type { AboutSection as AboutSectionType, RichContent } from "@muse/core";
 import { EditableText, ImageLoader } from "../../ux";
 import styles from "./Story.module.css";
 
@@ -24,8 +24,9 @@ export function Story({ section, onUpdate, isPending }: Props) {
       )}
 
       <EditableText
+        rich
         value={section.body ?? ""}
-        onChange={v => onUpdate({ body: v || undefined })}
+        onChange={(v: RichContent) => onUpdate({ body: v.text ? v : undefined })}
         as="p"
         className={styles.body}
         placeholder="Tell your story..."
