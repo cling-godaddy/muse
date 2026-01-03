@@ -24,7 +24,7 @@ export function PageSwitcher({
   }
 
   return (
-    <div className="flex items-center gap-1 px-2 py-1 bg-bg-subtle border-b border-border overflow-x-auto">
+    <div className="flex items-center gap-0.5 px-4 border-b border-border overflow-x-auto">
       {flattenedPages.map(({ page, path, depth }) => {
         const isActive = page.id === currentPageId;
         return (
@@ -32,10 +32,10 @@ export function PageSwitcher({
             key={page.id}
             onClick={() => onSelectPage(page.id)}
             className={`
-              flex items-center gap-2 px-3 py-1.5 text-sm rounded-md whitespace-nowrap transition-colors
+              group flex items-center gap-1.5 px-2.5 py-2 text-xs whitespace-nowrap transition-colors border-b-2 -mb-px
               ${isActive
-            ? "bg-bg text-text font-medium shadow-sm"
-            : "text-text-muted hover:text-text hover:bg-bg/50"
+            ? "border-text text-text"
+            : "border-transparent text-text-muted hover:text-text"
           }
             `}
             style={{ marginLeft: depth > 0 ? `${depth * 8}px` : undefined }}
@@ -55,7 +55,7 @@ export function PageSwitcher({
                     onDeletePage(page.id);
                   }
                 }}
-                className="opacity-0 group-hover:opacity-100 hover:text-red-500 ml-1"
+                className="opacity-0 group-hover:opacity-60 hover:!opacity-100 hover:text-red-500"
               >
                 <CloseIcon />
               </span>
@@ -66,7 +66,7 @@ export function PageSwitcher({
       {onAddPage && (
         <button
           onClick={onAddPage}
-          className="flex items-center justify-center w-7 h-7 text-text-muted hover:text-text hover:bg-bg/50 rounded-md transition-colors"
+          className="flex items-center justify-center w-6 h-6 ml-1 text-text-muted hover:text-text rounded transition-colors"
           title="Add page"
         >
           <PlusIcon />
