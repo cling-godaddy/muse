@@ -1,5 +1,6 @@
 import { useRef, useEffect, type ElementType } from "react";
 import { useIsEditable } from "../context/EditorMode";
+import { SmartLink } from "./SmartLink";
 
 interface EditableTextProps {
   value: string
@@ -64,9 +65,9 @@ export function EditableLink({
   if (!isEditable) {
     if (!text) return null;
     return (
-      <a href={href} className={className}>
+      <SmartLink href={href} className={className}>
         {text}
-      </a>
+      </SmartLink>
     );
   }
 

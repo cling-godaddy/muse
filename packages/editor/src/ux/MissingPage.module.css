@@ -1,0 +1,59 @@
+.content {
+  padding: 20px;
+}
+
+.message {
+  margin: 0 0 8px;
+  font-size: 14px;
+  color: var(--muse-text, #374151);
+}
+
+.slug {
+  padding: 2px 6px;
+  font-family: ui-monospace, monospace;
+  font-size: 13px;
+  background: var(--muse-bg-subtle, #f3f4f6);
+  border-radius: 4px;
+}
+
+.hint {
+  margin: 0 0 20px;
+  font-size: 14px;
+  color: var(--muse-text-muted, #6b7280);
+}
+
+.actions {
+  display: flex;
+  gap: 12px;
+  justify-content: flex-end;
+}
+
+.cancel,
+.generate {
+  padding: 8px 16px;
+  font-size: 14px;
+  font-weight: 500;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background 0.15s, opacity 0.15s;
+}
+
+.cancel {
+  color: var(--muse-text, #374151);
+  background: var(--muse-bg-subtle, #f3f4f6);
+  border: 1px solid var(--muse-border, #e5e7eb);
+}
+
+.cancel:hover {
+  background: var(--muse-bg-hover, #e5e7eb);
+}
+
+.generate {
+  color: #fff;
+  background: var(--muse-primary, #3b82f6);
+  border: none;
+}
+
+.generate:hover {
+  opacity: 0.9;
+}

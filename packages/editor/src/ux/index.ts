@@ -3,6 +3,8 @@ export { Dialog } from "./Dialog";
 export { EditableText, EditableLink } from "./Editable";
 export { Ellipsis } from "./Ellipsis";
 export { ImageLoader } from "./ImageLoader";
+export { MissingPage } from "./MissingPage";
 export { Progress } from "./Progress";
 export { Skeleton } from "./Skeleton";
+export { SmartLink } from "./SmartLink";
 export { Spinner } from "./Spinner";
