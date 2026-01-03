@@ -16,3 +16,4 @@ export * from "./Stats";
 export * from "./Logos";
 export * from "./Menu";
 export * from "./Products";
+export * from "./Navbar";

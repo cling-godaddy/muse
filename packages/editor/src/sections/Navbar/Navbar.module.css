@@ -1,0 +1,214 @@
+.navbar {
+  padding: 1rem 2rem;
+  background: var(--muse-theme-bg, #0f172a);
+  color: var(--muse-theme-text, #f8fafc);
+}
+
+.navbar[data-sticky="true"] {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+.container {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  max-width: 1200px;
+  margin: 0 auto;
+  gap: 2rem;
+}
+
+/* Logo */
+.logo {
+  flex-shrink: 0;
+}
+
+.logoText {
+  font-family: var(--muse-theme-heading-font, inherit);
+  font-weight: var(--muse-theme-heading-weight, 700);
+  font-size: 1.25rem;
+  color: inherit;
+  background: transparent;
+  border: 1px dashed transparent;
+  padding: 0.25rem 0.5rem;
+  min-width: 60px;
+}
+
+.logoText:hover {
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+.logoText:focus {
+  border-color: var(--muse-theme-primary, #6366f1);
+  outline: none;
+}
+
+.logoImage {
+  height: 2rem;
+  width: auto;
+}
+
+/* Navigation */
+.nav {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  flex: 1;
+  justify-content: center;
+}
+
+.navLink {
+  font-family: var(--muse-theme-body-font, inherit);
+  font-size: 0.875rem;
+  color: var(--muse-theme-text-muted, #94a3b8);
+  text-decoration: none;
+  padding: 0.5rem 0.75rem;
+  border-radius: 0.375rem;
+  cursor: pointer;
+  transition: color 0.15s, background 0.15s;
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.navLink:hover {
+  color: var(--muse-theme-text, #f8fafc);
+  background: rgba(255, 255, 255, 0.1);
+}
+
+/* Dropdown */
+.dropdown {
+  position: relative;
+}
+
+.dropdownArrow {
+  font-size: 0.625rem;
+  opacity: 0.6;
+}
+
+.dropdownMenu {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  min-width: 160px;
+  padding: 0.5rem 0;
+  background: var(--muse-theme-bg-alt, #1e293b);
+  border-radius: 0.5rem;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+  z-index: 50;
+}
+
+.dropdownItem {
+  display: block;
+  font-family: var(--muse-theme-body-font, inherit);
+  font-size: 0.875rem;
+  color: var(--muse-theme-text-muted, #94a3b8);
+  text-decoration: none;
+  padding: 0.5rem 1rem;
+  cursor: pointer;
+  transition: color 0.15s, background 0.15s;
+}
+
+.dropdownItem:hover {
+  color: var(--muse-theme-text, #f8fafc);
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.addSublink {
+  display: block;
+  width: 100%;
+  font-family: var(--muse-theme-body-font, inherit);
+  font-size: 0.75rem;
+  color: var(--muse-theme-text-muted, #64748b);
+  text-align: left;
+  padding: 0.5rem 1rem;
+  background: transparent;
+  border: none;
+  border-top: 1px dashed rgba(255, 255, 255, 0.1);
+  margin-top: 0.25rem;
+  cursor: pointer;
+  transition: color 0.15s;
+}
+
+.addSublink:hover {
+  color: var(--muse-theme-primary, #6366f1);
+}
+
+/* Add button */
+.addIcon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.75rem;
+  height: 1.75rem;
+  font-size: 1rem;
+  color: var(--muse-theme-text-muted, #64748b);
+  background: transparent;
+  border: 1px dashed var(--muse-theme-text-muted, #475569);
+  border-radius: 50%;
+  cursor: pointer;
+  opacity: 0;
+  transition: opacity 0.15s, color 0.15s, border-color 0.15s;
+}
+
+.nav:hover .addIcon {
+  opacity: 1;
+}
+
+.addIcon:hover {
+  color: var(--muse-theme-primary, #6366f1);
+  border-color: var(--muse-theme-primary, #6366f1);
+}
+
+/* CTA Button */
+.cta {
+  font-family: var(--muse-theme-body-font, inherit);
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--muse-theme-bg, #0f172a);
+  background: var(--muse-theme-primary, #6366f1);
+  text-decoration: none;
+  padding: 0.5rem 1rem;
+  border-radius: 0.375rem;
+  cursor: pointer;
+  transition: opacity 0.15s;
+  flex-shrink: 0;
+}
+
+.cta:hover {
+  opacity: 0.9;
+}
+
+.addCta {
+  font-family: var(--muse-theme-body-font, inherit);
+  font-size: 0.75rem;
+  color: var(--muse-theme-text-muted, #64748b);
+  background: transparent;
+  border: 1px dashed var(--muse-theme-text-muted, #475569);
+  padding: 0.375rem 0.75rem;
+  border-radius: 0.375rem;
+  cursor: pointer;
+  opacity: 0;
+  transition: opacity 0.15s, color 0.15s, border-color 0.15s;
+  flex-shrink: 0;
+}
+
+.navbar:hover .addCta {
+  opacity: 1;
+}
+
+.addCta:hover {
+  color: var(--muse-theme-primary, #6366f1);
+  border-color: var(--muse-theme-primary, #6366f1);
+}
+
+/* Transparent variant */
+:global(.muse-navbar--transparent) .navbar {
+  background: transparent;
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 100;
+}

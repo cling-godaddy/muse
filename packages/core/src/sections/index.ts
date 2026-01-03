@@ -17,6 +17,8 @@ export type {
   LogosSection,
   MenuSection,
   ProductsSection,
+  NavbarSection,
+  NavItem,
   ImageSource,
   FeatureItem,
   Quote,
@@ -51,6 +53,7 @@ export {
   isLogosSection,
   isMenuSection,
   isProductsSection,
+  isNavbarSection,
 } from "./types";
 
 // Preset types
@@ -82,6 +85,7 @@ export {
   logosPresets,
   menuPresets,
   productsPresets,
+  navbarPresets,
   allPresets,
   type HeroPresetId,
   type FeaturesPresetId,
@@ -98,6 +102,7 @@ export {
   type LogosPresetId,
   type MenuPresetId,
   type ProductsPresetId,
+  type NavbarPresetId,
 } from "./presets";
 
 import type { SectionPreset, SectionType, ImageRequirements, ImageInjection, ImageSource, Section } from "./types";
@@ -119,6 +124,7 @@ export const DEFAULT_PRESETS: Record<SectionType, string> = {
   logos: "logos-grid",
   menu: "menu-list",
   products: "products-grid",
+  navbar: "navbar-dropdown",
 };
 
 export const GALLERY_IMAGE_MINIMUMS: Record<string, number> = {
@@ -198,6 +204,7 @@ export {
   subscribeSectionSchema,
   statsSectionSchema,
   logosSectionSchema,
+  navbarSectionSchema,
   sectionSchema,
   validateSection,
   validateSections,

@@ -188,6 +188,29 @@ export const logosSectionSchema = sectionBase.extend({
   logos: z.array(logoItemSchema).min(1),
 });
 
+const navItemSchema: z.ZodType<{
+  label: string
+  href: string
+  children?: { label: string, href: string, children?: unknown[] }[]
+}> = z.lazy(() =>
+  z.object({
+    label: z.string(),
+    href: z.string(),
+    children: z.array(navItemSchema).optional(),
+  }),
+);
+
+export const navbarSectionSchema = sectionBase.extend({
+  type: z.literal("navbar"),
+  logo: z.object({
+    text: z.string().optional(),
+    image: imageSourceSchema.optional(),
+  }).optional(),
+  items: z.array(navItemSchema),
+  cta: ctaLinkSchema.optional(),
+  sticky: z.boolean().optional(),
+});
+
 export const sectionSchema = z.discriminatedUnion("type", [
   heroSectionSchema,
   featuresSectionSchema,
@@ -202,6 +225,7 @@ export const sectionSchema = z.discriminatedUnion("type", [
   subscribeSectionSchema,
   statsSectionSchema,
   logosSectionSchema,
+  navbarSectionSchema,
 ]);
 
 export function validateSection(data: unknown) {
