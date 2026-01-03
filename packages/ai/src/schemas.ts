@@ -467,7 +467,7 @@ export const copySectionsSchema: ResponseSchema = {
                   },
                 },
               },
-              required: ["id", "preset", "type", "headline", "subheadline"],
+              required: ["id", "preset", "type", "headline", "subheadline", "items", "categories"],
               additionalProperties: false,
             },
             // Products
