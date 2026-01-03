@@ -28,6 +28,8 @@ export const testimonialsGrid: SectionPreset = {
   requiredFields: ["quotes"],
   optionalFields: ["headline"],
   className: "muse-testimonials--grid",
+  imageRequirements: { category: "people", count: 3, orientation: "square" },
+  imageInjection: { type: "nested", array: "quotes", field: "avatar" },
 };
 
 export const testimonialsSingle: SectionPreset = {
