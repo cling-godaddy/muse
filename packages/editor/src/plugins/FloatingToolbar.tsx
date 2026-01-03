@@ -20,9 +20,7 @@ import {
   REMOVE_LIST_COMMAND,
   $isListNode,
 } from "@lexical/list";
-import { $isHeadingNode, $createHeadingNode, HeadingTagType } from "@lexical/rich-text";
-import { $setBlocksType } from "@lexical/selection";
-import { $createParagraphNode, $isElementNode } from "lexical";
+import { $isElementNode } from "lexical";
 import { $getNearestNodeOfType } from "@lexical/utils";
 import { ListNode } from "@lexical/list";
 import {
@@ -49,7 +47,6 @@ export function FloatingToolbarPlugin() {
   const [isItalic, setIsItalic] = useState(false);
   const [isLink, setIsLink] = useState(false);
   const [listType, setListType] = useState<"bullet" | "number" | null>(null);
-  const [blockType, setBlockType] = useState<string>("paragraph");
   const savedSelectionRef = useRef<{
     anchorKey: string
     anchorOffset: number
@@ -99,17 +96,6 @@ export function FloatingToolbarPlugin() {
     }
     else {
       setListType(null);
-    }
-
-    // Check for heading
-    if ($isHeadingNode(element)) {
-      setBlockType(element.getTag());
-    }
-    else if ($isListNode(element)) {
-      // keep list type
-    }
-    else {
-      setBlockType("paragraph");
     }
   }, []);
 
@@ -266,21 +252,6 @@ export function FloatingToolbarPlugin() {
     editor.focus();
   };
 
-  const formatHeading = (tag: HeadingTagType | "paragraph") => {
-    editor.update(() => {
-      const selection = $getSelection();
-      if ($isRangeSelection(selection)) {
-        if (tag === "paragraph") {
-          $setBlocksType(selection, () => $createParagraphNode());
-        }
-        else {
-          $setBlocksType(selection, () => $createHeadingNode(tag));
-        }
-      }
-    });
-    editor.focus();
-  };
-
   if (!isFocused) return null;
 
   return createPortal(
@@ -345,20 +316,6 @@ export function FloatingToolbarPlugin() {
       >
         <ListOrdered size={14} />
       </button>
-
-      <div className={styles.divider} />
-
-      <select
-        className={styles.select}
-        value={blockType}
-        onChange={e => formatHeading(e.target.value as HeadingTagType | "paragraph")}
-        title="Block type"
-      >
-        <option value="paragraph">Text</option>
-        <option value="h1">H1</option>
-        <option value="h2">H2</option>
-        <option value="h3">H3</option>
-      </select>
 
       {showLinkInput && (
         <div className={styles.linkInput}>
