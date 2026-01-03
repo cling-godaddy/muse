@@ -190,7 +190,11 @@ export function useSite(initialName = "Untitled Site"): UseSite {
   }, []);
 
   const clearSite = useCallback(() => {
-    setSiteState(createSite(initialName));
+    setSiteState((prev) => {
+      const fresh = createSite(initialName);
+      // Preserve navbar when clearing pages
+      return { ...fresh, navbar: prev.navbar };
+    });
     setCurrentPageId(null);
   }, [initialName]);
 
