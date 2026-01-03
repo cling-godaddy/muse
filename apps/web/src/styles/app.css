@@ -43,7 +43,6 @@ html, body, #root {
   }
   .muse-section textarea {
     resize: none;
-    overflow: hidden;
   }
 
   .muse-toolbar {

@@ -1,4 +1,4 @@
-import { useRef, useEffect, type ElementType } from "react";
+import { useRef, useLayoutEffect, useCallback, type ElementType } from "react";
 import { useIsEditable } from "../context/EditorMode";
 import { SmartLink } from "./SmartLink";
 
@@ -20,12 +20,19 @@ export function EditableText({
   const isEditable = useIsEditable();
   const ref = useRef<HTMLTextAreaElement>(null);
 
-  useEffect(() => {
-    if (ref.current && isEditable) {
+  const resize = useCallback(() => {
+    if (ref.current) {
       ref.current.style.height = "auto";
+      void ref.current.offsetHeight; // force reflow
       ref.current.style.height = `${ref.current.scrollHeight}px`;
     }
-  }, [value, isEditable]);
+  }, []);
+
+  useLayoutEffect(() => {
+    if (isEditable) {
+      resize();
+    }
+  }, [value, isEditable, resize]);
 
   if (!isEditable) {
     if (!value) return null;
@@ -36,11 +43,10 @@ export function EditableText({
     <textarea
       ref={ref}
       className={className}
-      rows={1}
       value={value}
       onChange={e => onChange(e.target.value)}
       placeholder={placeholder}
-      style={{ resize: "none" }}
+      style={{ resize: "none", overflow: "hidden" }}
     />
   );
 }
