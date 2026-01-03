@@ -74,9 +74,11 @@ export function RichEditable({
     <LexicalComposer initialConfig={initialConfig}>
       <RichTextPlugin
         contentEditable={(
-          <ContentEditable
-            className={`${styles.editor} ${className ?? ""}`}
-          />
+          <div>
+            <ContentEditable
+              className={`${styles.editor} ${className ?? ""}`}
+            />
+          </div>
         )}
         ErrorBoundary={LexicalErrorBoundary}
       />
