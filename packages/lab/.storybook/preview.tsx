@@ -67,7 +67,14 @@ const withLinkHandler: Decorator = Story => (
 
 const preview: Preview = {
   parameters: {
-    a11y: { test: "error" },
+    a11y: {
+      test: "error",
+      config: {
+        rules: [
+          { id: "frame-tested", enabled: false }, // can't test cross-origin iframes
+        ],
+      },
+    },
   },
   decorators: [withTheme, withLinkHandler],
   globalTypes: {
