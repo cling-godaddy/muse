@@ -1,5 +1,6 @@
 import React from "react";
 import type { Meta, StoryObj } from "@storybook/react-vite";
+import { expect, within } from "storybook/test";
 import { Features } from "@muse/editor";
 import type { FeaturesSection, FeatureItem } from "@muse/core";
 
@@ -63,7 +64,14 @@ const meta: Meta<FeaturesArgs> = {
 export default meta;
 type Story = StoryObj<FeaturesArgs>;
 
-export const Cards: Story = {};
+export const Cards: Story = {
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    await expect(canvas.getByRole("heading", { name: /why choose us/i })).toBeVisible();
+    await expect(canvas.getByText(/lightning fast/i)).toBeVisible();
+    await expect(canvas.getByText(/secure/i)).toBeVisible();
+  },
+};
 
 export const CardsWithImages: Story = {
   args: {

@@ -1,5 +1,6 @@
 import React from "react";
 import type { Meta, StoryObj } from "@storybook/react-vite";
+import { expect, within } from "storybook/test";
 import { Menu } from "@muse/editor";
 import type { MenuSection, MenuCategory, MenuItem } from "@muse/core";
 
@@ -91,6 +92,12 @@ export const List: Story = {
     };
     return <Menu section={section} onUpdate={console.log} />;
   },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    await expect(canvas.getByRole("heading", { name: /our menu/i })).toBeVisible();
+    await expect(canvas.getByText(/starters/i)).toBeVisible();
+    await expect(canvas.getByText(/soup of the day/i)).toBeVisible();
+  },
 };
 
 export const Cards: Story = {
@@ -111,6 +118,11 @@ export const Cards: Story = {
     };
     return <Menu section={section} onUpdate={console.log} />;
   },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    await expect(canvas.getByRole("heading", { name: /today's selection/i })).toBeVisible();
+    await expect(canvas.getByText(/croissant/i)).toBeVisible();
+  },
 };
 
 export const Simple: Story = {
@@ -130,5 +142,10 @@ export const Simple: Story = {
       items: sampleSimpleItems,
     };
     return <Menu section={section} onUpdate={console.log} />;
+  },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    await expect(canvas.getByRole("heading", { name: /drinks/i })).toBeVisible();
+    await expect(canvas.getByText(/house red/i)).toBeVisible();
   },
 };

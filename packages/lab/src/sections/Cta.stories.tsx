@@ -1,5 +1,6 @@
 import React from "react";
 import type { Meta, StoryObj } from "@storybook/react-vite";
+import { expect, within } from "storybook/test";
 import { Cta } from "@muse/editor";
 import type { CtaSection } from "@muse/core";
 
@@ -49,4 +50,10 @@ const meta: Meta<CtaArgs> = {
 export default meta;
 type Story = StoryObj<CtaArgs>;
 
-export const Centered: Story = {};
+export const Centered: Story = {
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    await expect(canvas.getByRole("heading", { name: /ready to get started/i })).toBeVisible();
+    await expect(canvas.getByRole("link", { name: /start now/i })).toBeVisible();
+  },
+};

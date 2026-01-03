@@ -1,5 +1,6 @@
 import React from "react";
 import type { Meta, StoryObj } from "@storybook/react-vite";
+import { expect, within } from "storybook/test";
 import { Logos } from "@muse/editor";
 import type { LogosSection, LogoItem } from "@muse/core";
 
@@ -55,8 +56,18 @@ const meta: Meta<LogosArgs> = {
 export default meta;
 type Story = StoryObj<LogosArgs>;
 
-export const Grid: Story = {};
+export const Grid: Story = {
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    await expect(canvas.getByRole("heading", { name: /trusted by/i })).toBeVisible();
+    await expect(canvas.getAllByRole("img").length).toBeGreaterThanOrEqual(1);
+  },
+};
 
 export const Marquee: Story = {
   args: { preset: "logos-marquee", logoCount: 8 },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    await expect(canvas.getAllByRole("img").length).toBeGreaterThanOrEqual(1);
+  },
 };

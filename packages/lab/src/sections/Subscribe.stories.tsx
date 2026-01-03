@@ -1,5 +1,6 @@
 import React from "react";
 import type { Meta, StoryObj } from "@storybook/react-vite";
+import { expect, within } from "storybook/test";
 import { Subscribe } from "@muse/editor";
 import type { SubscribeSection } from "@muse/core";
 
@@ -49,12 +50,28 @@ const meta: Meta<SubscribeArgs> = {
 export default meta;
 type Story = StoryObj<SubscribeArgs>;
 
-export const Inline: Story = {};
+export const Inline: Story = {
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    await expect(canvas.getByText(/stay updated/i)).toBeVisible();
+    await expect(canvas.getByRole("textbox")).toBeVisible();
+    await expect(canvas.getByRole("button", { name: /subscribe/i })).toBeVisible();
+  },
+};
 
 export const Card: Story = {
   args: { preset: "subscribe-card" },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    await expect(canvas.getByRole("heading", { name: /stay updated/i })).toBeVisible();
+    await expect(canvas.getByRole("button", { name: /subscribe/i })).toBeVisible();
+  },
 };
 
 export const Banner: Story = {
   args: { preset: "subscribe-banner" },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    await expect(canvas.getByRole("heading", { name: /stay updated/i })).toBeVisible();
+  },
 };

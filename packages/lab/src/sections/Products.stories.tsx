@@ -1,5 +1,6 @@
 import React from "react";
 import type { Meta, StoryObj } from "@storybook/react-vite";
+import { expect, within } from "storybook/test";
 import { Products } from "@muse/editor";
 import type { ProductsSection, ProductItem } from "@muse/core";
 
@@ -80,6 +81,12 @@ export const Grid: Story = {
     };
     return <Products section={section} onUpdate={console.log} />;
   },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    await expect(canvas.getByRole("heading", { name: /featured products/i })).toBeVisible();
+    await expect(canvas.getByText(/classic watch/i)).toBeVisible();
+    await expect(canvas.getByText(/\$249/)).toBeVisible();
+  },
 };
 
 export const Featured: Story = {
@@ -104,6 +111,10 @@ export const Featured: Story = {
     };
     return <Products section={section} onUpdate={console.log} />;
   },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    await expect(canvas.getByRole("heading", { name: /shop the collection/i })).toBeVisible();
+  },
 };
 
 export const Minimal: Story = {
@@ -127,5 +138,9 @@ export const Minimal: Story = {
       items: sampleMinimalProducts.slice(0, args.itemCount),
     };
     return <Products section={section} onUpdate={console.log} />;
+  },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    await expect(canvas.getByRole("heading", { name: /new arrivals/i })).toBeVisible();
   },
 };

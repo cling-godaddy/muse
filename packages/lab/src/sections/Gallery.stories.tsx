@@ -1,5 +1,6 @@
 import React from "react";
 import type { Meta, StoryObj } from "@storybook/react-vite";
+import { expect, within } from "storybook/test";
 import { Gallery } from "@muse/editor";
 import type { GallerySection, ImageSource } from "@muse/core";
 
@@ -64,10 +65,20 @@ const meta: Meta<GalleryArgs> = {
 export default meta;
 type Story = StoryObj<GalleryArgs>;
 
-export const Grid: Story = {};
+export const Grid: Story = {
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    await expect(canvas.getByRole("heading", { name: /our work/i })).toBeVisible();
+    await expect(canvas.getAllByRole("img").length).toBeGreaterThanOrEqual(1);
+  },
+};
 
 export const Masonry: Story = {
   args: { preset: "gallery-masonry", imageCount: 9 },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    await expect(canvas.getAllByRole("img").length).toBeGreaterThanOrEqual(1);
+  },
 };
 
 export const Carousel: Story = {
@@ -75,5 +86,9 @@ export const Carousel: Story = {
   argTypes: {
     preset: { table: { disable: true } },
     columns: { table: { disable: true } },
+  },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    await expect(canvas.getAllByRole("img").length).toBeGreaterThanOrEqual(1);
   },
 };

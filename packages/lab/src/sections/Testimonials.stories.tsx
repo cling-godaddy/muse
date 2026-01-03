@@ -1,5 +1,6 @@
 import React from "react";
 import type { Meta, StoryObj } from "@storybook/react-vite";
+import { expect, within } from "storybook/test";
 import { Testimonials } from "@muse/editor";
 import type { TestimonialsSection, Quote } from "@muse/core";
 
@@ -63,12 +64,27 @@ const meta: Meta<TestimonialsArgs> = {
 export default meta;
 type Story = StoryObj<TestimonialsArgs>;
 
-export const Grid: Story = {};
+export const Grid: Story = {
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    await expect(canvas.getByRole("heading", { name: /what our customers say/i })).toBeVisible();
+    await expect(canvas.getByText(/sarah chen/i)).toBeVisible();
+    await expect(canvas.getByText(/transformed how we work/i)).toBeVisible();
+  },
+};
 
 export const Carousel: Story = {
   args: { preset: "testimonials-carousel" },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    await expect(canvas.getByRole("heading", { name: /what our customers say/i })).toBeVisible();
+  },
 };
 
 export const Single: Story = {
   args: { preset: "testimonials-single", quoteCount: 1 },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    await expect(canvas.getByText(/sarah chen/i)).toBeVisible();
+  },
 };

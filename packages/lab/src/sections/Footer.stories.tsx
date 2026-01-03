@@ -1,5 +1,6 @@
 import React from "react";
 import type { Meta, StoryObj } from "@storybook/react-vite";
+import { expect, within } from "storybook/test";
 import { Footer } from "@muse/editor";
 import type { FooterSection, FooterLink, SocialLink } from "@muse/core";
 
@@ -60,4 +61,10 @@ const meta: Meta<FooterArgs> = {
 export default meta;
 type Story = StoryObj<FooterArgs>;
 
-export const Simple: Story = {};
+export const Simple: Story = {
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    await expect(canvas.getByRole("link", { name: /about/i })).toBeVisible();
+    await expect(canvas.getByRole("link", { name: /privacy/i })).toBeVisible();
+  },
+};

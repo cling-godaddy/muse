@@ -1,5 +1,6 @@
 import React from "react";
 import type { Meta, StoryObj } from "@storybook/react-vite";
+import { expect, within } from "storybook/test";
 import { Pricing } from "@muse/editor";
 import type { PricingSection, PricingPlan } from "@muse/core";
 
@@ -71,4 +72,11 @@ const meta: Meta<PricingArgs> = {
 export default meta;
 type Story = StoryObj<PricingArgs>;
 
-export const Cards: Story = {};
+export const Cards: Story = {
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    await expect(canvas.getByRole("heading", { name: /simple, transparent pricing/i })).toBeVisible();
+    await expect(canvas.getByRole("heading", { name: /starter/i })).toBeVisible();
+    await expect(canvas.getByRole("heading", { name: /^pro$/i })).toBeVisible();
+  },
+};

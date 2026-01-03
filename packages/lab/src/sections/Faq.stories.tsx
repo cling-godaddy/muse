@@ -1,5 +1,6 @@
 import React from "react";
 import type { Meta, StoryObj } from "@storybook/react-vite";
+import { expect, within } from "storybook/test";
 import { Faq } from "@muse/editor";
 import type { FaqSection, FaqItem } from "@muse/core";
 
@@ -51,8 +52,19 @@ const meta: Meta<FaqArgs> = {
 export default meta;
 type Story = StoryObj<FaqArgs>;
 
-export const Accordion: Story = {};
+export const Accordion: Story = {
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    await expect(canvas.getByRole("heading", { name: /frequently asked questions/i })).toBeVisible();
+    await expect(canvas.getByText(/how do i get started/i)).toBeVisible();
+    await expect(canvas.getByText(/what payment methods/i)).toBeVisible();
+  },
+};
 
 export const TwoColumn: Story = {
   args: { preset: "faq-two-column" },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    await expect(canvas.getByRole("heading", { name: /frequently asked questions/i })).toBeVisible();
+  },
 };

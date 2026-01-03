@@ -1,5 +1,6 @@
 import React from "react";
 import type { Meta, StoryObj } from "@storybook/react-vite";
+import { expect, within } from "storybook/test";
 import { Hero } from "@muse/editor";
 import type { HeroSection } from "@muse/core";
 
@@ -59,7 +60,13 @@ const meta: Meta<HeroArgs> = {
 export default meta;
 type Story = StoryObj<HeroArgs>;
 
-export const Centered: Story = {};
+export const Centered: Story = {
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    await expect(canvas.getByRole("heading")).toBeVisible();
+    await expect(canvas.getByRole("link", { name: /get started/i })).toBeVisible();
+  },
+};
 
 export const Overlay: Story = {
   args: { preset: "hero-overlay" },

@@ -1,5 +1,6 @@
 import React from "react";
 import type { Meta, StoryObj } from "@storybook/react-vite";
+import { expect, within } from "storybook/test";
 import { Contact } from "@muse/editor";
 import type { ContactSection, FormField } from "@muse/core";
 
@@ -60,11 +61,23 @@ const meta: Meta<ContactArgs> = {
 export default meta;
 type Story = StoryObj<ContactArgs>;
 
-export const Form: Story = {};
+export const Form: Story = {
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    await expect(canvas.getByRole("heading", { name: /get in touch/i })).toBeVisible();
+    await expect(canvas.getByPlaceholderText(/name/i)).toBeVisible();
+    await expect(canvas.getByRole("button", { name: /send message/i })).toBeVisible();
+  },
+};
 
 export const SplitMap: Story = {
   args: {
     preset: "contact-split-map",
     address: "1600 Amphitheatre Parkway, Mountain View, CA",
+  },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    await expect(canvas.getByRole("heading", { name: /get in touch/i })).toBeVisible();
+    await expect(canvas.getByText(/1600 amphitheatre/i)).toBeVisible();
   },
 };

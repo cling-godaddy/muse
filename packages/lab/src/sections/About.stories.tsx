@@ -1,5 +1,6 @@
 import React from "react";
 import type { Meta, StoryObj } from "@storybook/react-vite";
+import { expect, within } from "storybook/test";
 import { About } from "@muse/editor";
 import type { AboutSection, TeamMember } from "@muse/core";
 
@@ -70,7 +71,13 @@ const meta: Meta<AboutArgs> = {
 export default meta;
 type Story = StoryObj<AboutArgs>;
 
-export const Story: Story = {};
+export const Story: Story = {
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    await expect(canvas.getByRole("heading", { name: /our story/i })).toBeVisible();
+    await expect(canvas.getByText(/simple mission/i)).toBeVisible();
+  },
+};
 
 export const Team: Story = {
   args: {
@@ -78,5 +85,11 @@ export const Team: Story = {
     preset: "about-team",
     teamCount: 3,
     showImage: false,
+  },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    await expect(canvas.getByRole("heading", { name: /meet the team/i })).toBeVisible();
+    await expect(canvas.getByText(/alex johnson/i)).toBeVisible();
+    await expect(canvas.getByText(/sarah chen/i)).toBeVisible();
   },
 };
