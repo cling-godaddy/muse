@@ -113,15 +113,15 @@ export function useChat(options: UseChatOptions = {}): UseChat {
           options.onNavbar?.(result.navbar);
         }
 
-        // emit images when they arrive (for post-section injection)
-        if (result.newImages.length > 0) {
-          options.onImages?.(result.newImages);
-        }
-
-        // emit pages (only once per response)
+        // emit pages FIRST (before images) so sections exist when images are injected
         if (result.newPages.length > 0 && !pagesProcessedRef.current) {
           pagesProcessedRef.current = true;
           options.onPages?.(result.newPages);
+        }
+
+        // emit images AFTER pages so handleImages finds sections in siteRef.current
+        if (result.newImages.length > 0) {
+          options.onImages?.(result.newImages);
         }
 
         // update agents if changed
