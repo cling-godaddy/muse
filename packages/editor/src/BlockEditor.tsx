@@ -1,68 +1,49 @@
-import type { Section, NavbarConfig, NavbarSection } from "@muse/core";
-import { Section as SectionWrapper, Navbar } from "./sections";
+import { useMemo } from "react";
+import type { Section, NavbarSection } from "@muse/core";
+import { Section as SectionWrapper } from "./sections";
 import { SelectionProvider } from "./context/Selection";
 
 interface SectionEditorProps {
   sections: Section[]
   onChange: (sections: Section[]) => void
   pendingImageSections?: Set<string>
-  navbar?: NavbarConfig
-  onNavbarChange?: (navbar: NavbarConfig) => void
-}
-
-// Convert NavbarConfig to NavbarSection format for the Navbar component
-function toNavbarSection(config: NavbarConfig): NavbarSection {
-  return {
-    id: "site-navbar",
-    type: "navbar",
-    logo: config.logo,
-    items: (config.items ?? []).map(item => ({ label: item.label, href: item.href })),
-    cta: config.cta,
-  };
-}
-
-// Check if navbar has meaningful content
-function hasNavbarContent(navbar?: NavbarConfig): boolean {
-  if (!navbar) return false;
-  return !!(navbar.logo?.text || navbar.logo?.image || navbar.items?.length || navbar.cta);
+  navbar?: NavbarSection
+  onNavbarChange?: (navbar: NavbarSection) => void
 }
 
 export function SectionEditor({ sections, onChange, pendingImageSections, navbar, onNavbarChange }: SectionEditorProps) {
+  // Combine navbar with sections for unified rendering
+  const allSections = useMemo(() => {
+    if (navbar) {
+      return [navbar as Section, ...sections];
+    }
+    return sections;
+  }, [navbar, sections]);
+
   const updateSection = (id: string, data: Partial<Section>) => {
+    // Check if updating navbar
+    if (navbar && id === navbar.id) {
+      onNavbarChange?.({ ...navbar, ...data } as NavbarSection);
+      return;
+    }
     onChange(sections.map(s => (s.id === id ? { ...s, ...data } as Section : s)));
   };
 
   const deleteSection = (id: string) => {
+    // Don't allow deleting navbar for now
+    if (navbar && id === navbar.id) return;
     onChange(sections.filter(s => s.id !== id));
   };
-
-  const handleNavbarUpdate = (data: Partial<NavbarSection>) => {
-    if (!navbar || !onNavbarChange) return;
-    onNavbarChange({
-      ...navbar,
-      logo: data.logo ?? navbar.logo,
-      items: data.items?.map(item => ({ label: item.label, href: item.href })) ?? navbar.items,
-      cta: data.cta ?? navbar.cta,
-    });
-  };
-
-  const showNavbar = hasNavbarContent(navbar);
 
   return (
     <SelectionProvider>
       <div className="muse-section-editor">
-        {showNavbar && navbar && (
-          <Navbar
-            section={toNavbarSection(navbar)}
-            onUpdate={handleNavbarUpdate}
-          />
-        )}
-        {sections.length === 0 && !showNavbar && (
+        {allSections.length === 0 && (
           <div className="muse-section-editor-empty">
             No sections yet. Use AI to generate content.
           </div>
         )}
-        {sections.map(section => (
+        {allSections.map(section => (
           <SectionWrapper
             key={section.id}
             section={section}

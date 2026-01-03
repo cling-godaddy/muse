@@ -1,6 +1,7 @@
 import type { SectionType } from "@muse/core";
 
 const PRESET_SECTION_TYPES: SectionType[] = [
+  "navbar",
   "hero",
   "features",
   "testimonials",

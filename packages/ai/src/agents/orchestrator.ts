@@ -350,9 +350,12 @@ export async function* orchestrateSite(
   yield `[THEME:${theme.palette}]\n`;
   yield `[SITEMAP:${JSON.stringify(sitemap)}]\n`;
 
-  // Generate navbar with links to all pages
+  // Generate navbar section with links to all pages
   const homePage = sitemap.pages.find(p => p.slug === "/");
   const navbar = {
+    id: crypto.randomUUID(),
+    type: "navbar" as const,
+    preset: "navbar-minimal",
     logo: { text: homePage?.title || "Site" },
     items: sitemap.pages.map(p => ({ label: p.title, href: p.slug })),
   };

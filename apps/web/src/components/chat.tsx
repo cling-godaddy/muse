@@ -1,5 +1,5 @@
 import { useRef, useEffect, useMemo } from "react";
-import type { Section, NavbarConfig } from "@muse/core";
+import type { Section, NavbarSection } from "@muse/core";
 import type { ImageSelection } from "@muse/media";
 import { Spinner } from "@muse/editor";
 import { useChat, type Message } from "../hooks/useChat";
@@ -9,7 +9,7 @@ import { TimelineModal } from "./modals/timeline";
 interface ChatProps {
   onSectionParsed?: (section: Section) => void
   onThemeSelected?: (theme: ThemeSelection) => void
-  onNavbar?: (navbar: NavbarConfig) => void
+  onNavbar?: (navbar: NavbarSection) => void
   onImages?: (images: ImageSelection[]) => void
   onPages?: (pages: PageInfo[]) => void
 }

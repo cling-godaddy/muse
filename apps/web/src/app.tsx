@@ -2,7 +2,7 @@ import { useState, useMemo, useCallback, useEffect, useRef, useLayoutEffect } fr
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { groupBy } from "lodash-es";
 import { SectionEditor, SiteProvider } from "@muse/editor";
-import type { Section, SectionType, NavbarConfig } from "@muse/core";
+import type { Section, SectionType, NavbarSection } from "@muse/core";
 import { sectionNeedsImages, getPresetImageInjection, getImageInjection, applyImageInjection } from "@muse/core";
 import type { ImageSelection } from "@muse/media";
 import { resolveThemeWithEffects, themeToCssVars, getTypography, loadFonts } from "@muse/themes";
@@ -12,7 +12,7 @@ import { PageSwitcher } from "./components/PageSwitcher";
 import { ReviewLayout, ReviewDashboard, ReviewEntry, ReviewSessionPage } from "./review";
 import type { ThemeSelection, PageInfo } from "./utils/streamParser";
 
-function hasNavbarContent(navbar?: NavbarConfig): boolean {
+function hasNavbarContent(navbar?: NavbarSection): boolean {
   if (!navbar) return false;
   return !!(navbar.logo?.text || navbar.logo?.image || navbar.items?.length || navbar.cta);
 }
@@ -90,7 +90,7 @@ function MainApp() {
     setTheme({ palette: selection.palette, typography: selection.typography, effects });
   }, []);
 
-  const handleNavbar = useCallback((navbar: NavbarConfig) => {
+  const handleNavbar = useCallback((navbar: NavbarSection) => {
     setNavbar(navbar);
   }, [setNavbar]);
 

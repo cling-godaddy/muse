@@ -1,21 +1,10 @@
 import type { Page } from "../page/types";
-import type { ImageSource } from "../sections/types";
+import type { NavbarSection } from "../sections/types";
 
 export interface SiteNode {
   pageId: string
   slug: string
   children: SiteNode[]
-}
-
-export interface NavbarLink {
-  label: string
-  href: string
-}
-
-export interface NavbarConfig {
-  logo?: { text?: string, image?: ImageSource }
-  items?: NavbarLink[]
-  cta?: { text: string, href: string }
 }
 
 export interface SiteTheme {
@@ -29,7 +18,7 @@ export interface Site {
   pages: Record<string, Page>
   tree: SiteNode[]
   theme: SiteTheme
-  navbar: NavbarConfig
+  navbar?: NavbarSection
   createdAt: string
   updatedAt: string
 }
@@ -45,7 +34,6 @@ export function createSite(
     pages: {},
     tree: [],
     theme: { palette: "slate", typography: "inter" },
-    navbar: {},
     createdAt: now,
     updatedAt: now,
   };

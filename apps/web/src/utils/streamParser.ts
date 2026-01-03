@@ -1,5 +1,5 @@
 import { groupBy } from "lodash-es";
-import type { Section, SectionType, NavbarConfig } from "@muse/core";
+import type { Section, SectionType, NavbarSection } from "@muse/core";
 import { getPresetImageInjection, getImageInjection, applyImageInjection } from "@muse/core";
 import type { Usage, SitemapPlan } from "@muse/ai";
 import type { ImageSelection } from "@muse/media";
@@ -37,7 +37,7 @@ export interface PageInfo {
 export interface ParseState {
   theme?: ThemeSelection
   sitemap?: SitemapPlan
-  navbar?: NavbarConfig
+  navbar?: NavbarSection
   sections: Section[]
   pages: PageInfo[]
   agents: Map<AgentName, AgentState>
@@ -48,7 +48,7 @@ export interface ParseResult {
   displayText: string
   theme?: ThemeSelection
   sitemap?: SitemapPlan
-  navbar?: NavbarConfig
+  navbar?: NavbarSection
   newSections: Section[]
   newPages: PageInfo[]
   newImages: ImageSelection[]
@@ -161,7 +161,7 @@ export function parseStream(
     const navbarMatch = accumulated.match(NAVBAR_REGEX);
     if (navbarMatch?.[1]) {
       try {
-        navbar = JSON.parse(navbarMatch[1]) as NavbarConfig;
+        navbar = JSON.parse(navbarMatch[1]) as NavbarSection;
       }
       catch {
         console.warn("failed to parse navbar:", navbarMatch[1]?.slice(0, 200));
