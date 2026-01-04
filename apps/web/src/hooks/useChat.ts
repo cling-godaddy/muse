@@ -37,6 +37,8 @@ export interface UseChat {
   sessionUsage: Usage
   lastUsage?: Usage
   agents: AgentState[]
+  /** Index of the message that owns the agents timeline */
+  agentsMessageIndex: number | null
 }
 
 const API_URL = "http://localhost:3001/api/chat";
@@ -52,6 +54,7 @@ export function useChat(options: UseChatOptions = {}): UseChat {
   const [sessionUsage, setSessionUsage] = useState<Usage>(emptyUsage);
   const [lastUsage, setLastUsage] = useState<Usage | undefined>();
   const [agents, setAgents] = useState<AgentState[]>([]);
+  const [agentsMessageIndex, setAgentsMessageIndex] = useState<number | null>(null);
   const parseStateRef = useRef<ParseState>({ sections: [], pages: [], agents: new Map(), images: [] });
   const usageProcessedRef = useRef(false);
   const themeProcessedRef = useRef(false);
@@ -157,6 +160,7 @@ export function useChat(options: UseChatOptions = {}): UseChat {
       let accumulated = "";
 
       setMessages([...newMessages, { role: "assistant", content: "" }]);
+      setAgentsMessageIndex(newMessages.length); // Track which message owns the agents
 
       while (true) {
         const { done, value } = await reader.read();
@@ -235,5 +239,5 @@ export function useChat(options: UseChatOptions = {}): UseChat {
     }
   }, [input, messages, isLoading, options]);
 
-  return { messages, input, setInput, isLoading, error, send, sessionUsage, lastUsage, agents };
+  return { messages, input, setInput, isLoading, error, send, sessionUsage, lastUsage, agents, agentsMessageIndex };
 }

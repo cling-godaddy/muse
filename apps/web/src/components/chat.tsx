@@ -27,7 +27,7 @@ function formatTokens(n: number): string {
 
 export function Chat({ sections, onSectionParsed, onThemeSelected, onNavbar, onImages, onPages, onRefine }: ChatProps) {
   const options = useMemo(() => ({ sections, onSectionParsed, onThemeSelected, onNavbar, onImages, onPages, onRefine }), [sections, onSectionParsed, onThemeSelected, onNavbar, onImages, onPages, onRefine]);
-  const { messages, input, setInput, isLoading, error, send, sessionUsage, lastUsage, agents } = useChat(options);
+  const { messages, input, setInput, isLoading, error, send, sessionUsage, lastUsage, agents, agentsMessageIndex } = useChat(options);
   const isRefineMode = sections && sections.length > 0;
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
@@ -83,7 +83,7 @@ export function Chat({ sections, onSectionParsed, onThemeSelected, onNavbar, onI
             message={message}
             isLast={i === messages.length - 1}
             isLoading={isLoading}
-            agents={i === messages.length - 1 && message.role === "assistant" ? agents : []}
+            agents={i === agentsMessageIndex ? agents : []}
           />
         ))}
         {error && (
@@ -167,7 +167,8 @@ function getAgentSummary(agent: AgentState): string | null {
 
 function MessageBubble({ message, isLast, isLoading, agents }: MessageBubbleProps) {
   const isAssistant = message.role === "assistant";
-  const showTimeline = isAssistant && isLast && (agents.length > 0 || isLoading);
+  // Show timeline if this message has agents, or if loading the last message
+  const showTimeline = isAssistant && (agents.length > 0 || (isLast && isLoading));
   const completedAgents = agents.filter(a => a.status === "complete");
 
   // Show agent summaries when loading, or message content when available
