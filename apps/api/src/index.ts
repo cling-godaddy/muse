@@ -10,6 +10,7 @@ import { generateRoute } from "./routes/generate";
 import { uploadRoute } from "./routes/upload";
 import { searchRoute } from "./routes/search";
 import { reviewRoute } from "./routes/review";
+import { sitesRoute } from "./routes/sites";
 
 const app = new Hono();
 
@@ -19,6 +20,7 @@ app.route("/api/generate", generateRoute);
 app.route("/api/upload", uploadRoute);
 app.route("/api/search", searchRoute);
 app.route("/api/review", reviewRoute);
+app.route("/api/sites", sitesRoute);
 
 app.get("/health", c => c.json({ ok: true }));
 
