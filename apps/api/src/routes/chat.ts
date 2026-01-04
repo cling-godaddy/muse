@@ -122,9 +122,9 @@ chatRoute.post("/", async (c) => {
 });
 
 chatRoute.post("/refine", async (c) => {
-  const { sections, prompt } = await c.req.json<{
+  const { sections, messages } = await c.req.json<{
     sections: Section[]
-    prompt: string
+    messages: Message[]
   }>();
 
   // Tool executor with field validation
@@ -167,7 +167,7 @@ chatRoute.post("/refine", async (c) => {
     return { id: call.id, result: { success: true } };
   };
 
-  const result = await refine({ sections, prompt }, getClient(), executeTool);
+  const result = await refine({ sections, messages }, getClient(), executeTool);
 
   return c.json({
     message: result.message,

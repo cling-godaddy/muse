@@ -92,7 +92,7 @@ export function useChat(options: UseChatOptions = {}): UseChat {
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
             sections: options.sections,
-            prompt: input,
+            messages: newMessages, // Send full conversation history
           }),
         });
 

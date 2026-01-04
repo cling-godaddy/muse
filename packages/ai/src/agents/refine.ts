@@ -4,7 +4,7 @@ import type { Message, Provider, ToolCall, ToolResult } from "../types";
 import { editSectionTool } from "../tools";
 
 interface RefineInput {
-  prompt: string
+  messages: Message[] // Conversation history (user/assistant, no system)
   sections: Section[]
 }
 
@@ -62,9 +62,10 @@ export async function refine(
   provider: Provider,
   executeTool: (call: ToolCall) => Promise<ToolResult>,
 ): Promise<RefineResult> {
+  // Build messages: system prompt + conversation history
   const messages: Message[] = [
     { role: "system", content: buildSystemPrompt(input.sections) },
-    { role: "user", content: input.prompt },
+    ...input.messages.filter(m => m.role !== "system"),
   ];
 
   const response = await provider.chat({
