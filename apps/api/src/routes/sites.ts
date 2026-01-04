@@ -1,12 +1,20 @@
 import { Hono } from "hono";
-import { createSitesTable } from "@muse/db";
+import { createSitesTable, type SitesTable } from "@muse/db";
 import type { Site } from "@muse/core";
 
 export const sitesRoute = new Hono();
 
-const sites = createSitesTable();
+let sitesTable: SitesTable | null = null;
+
+async function getSites(): Promise<SitesTable> {
+  if (!sitesTable) {
+    sitesTable = await createSitesTable();
+  }
+  return sitesTable;
+}
 
 sitesRoute.get("/:id", async (c) => {
+  const sites = await getSites();
   const id = c.req.param("id");
   const site = await sites.getById(id);
 
@@ -18,6 +26,7 @@ sitesRoute.get("/:id", async (c) => {
 });
 
 sitesRoute.put("/:id", async (c) => {
+  const sites = await getSites();
   const id = c.req.param("id");
   const site = await c.req.json() as Site;
 
@@ -25,7 +34,6 @@ sitesRoute.put("/:id", async (c) => {
     return c.json({ error: "ID mismatch" }, 400);
   }
 
-  // Basic sanity checks (we trust frontend data)
   if (!site.id || !site.pages || !site.tree) {
     return c.json({ error: "Missing required fields" }, 400);
   }
@@ -35,7 +43,13 @@ sitesRoute.put("/:id", async (c) => {
 });
 
 sitesRoute.delete("/:id", async (c) => {
+  const sites = await getSites();
   const id = c.req.param("id");
   await sites.delete(id);
   return c.json({ success: true });
 });
+
+// For testing: reset the cached sites table
+export function resetSitesRoute(): void {
+  sitesTable = null;
+}

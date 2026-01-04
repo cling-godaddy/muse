@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeEach } from "vitest";
 import { Hono } from "hono";
-import { sitesRoute } from "./sites";
-import { resetStorage } from "@muse/db";
+import { sitesRoute, resetSitesRoute } from "./sites";
+import { resetSitesTable } from "@muse/db";
 import type { Site } from "@muse/core";
 
 function createTestSite(overrides: Partial<Site> = {}): Site {
@@ -21,7 +21,8 @@ describe("sites routes", () => {
   let app: Hono;
 
   beforeEach(() => {
-    resetStorage();
+    resetSitesTable();
+    resetSitesRoute();
     app = new Hono();
     app.route("/api/sites", sitesRoute);
   });
