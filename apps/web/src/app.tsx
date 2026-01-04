@@ -227,11 +227,9 @@ function MainApp() {
           />
         )}
         <main className="flex-1 flex gap-6 p-6 overflow-hidden">
-          {!isPreview && (
-            <div className="w-[400px] shrink-0">
-              <Chat sections={sections} onSectionParsed={handleSectionParsed} onThemeSelected={handleThemeSelected} onNavbar={handleNavbar} onImages={handleImages} onPages={handlePages} onRefine={handleRefine} onGenerationComplete={handleGenerationComplete} />
-            </div>
-          )}
+          <div className={`w-[400px] shrink-0 ${isPreview ? "hidden" : ""}`}>
+            <Chat sections={sections} onSectionParsed={handleSectionParsed} onThemeSelected={handleThemeSelected} onNavbar={handleNavbar} onImages={handleImages} onPages={handlePages} onRefine={handleRefine} onGenerationComplete={handleGenerationComplete} />
+          </div>
           <div className="flex-1 min-w-0 overflow-hidden">
             {isPreview
               ? (
