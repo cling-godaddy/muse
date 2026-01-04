@@ -8,7 +8,7 @@ import { sectionNeedsImages, getPresetImageInjection, getImageInjection, applyIm
 import type { ImageSelection } from "@muse/media";
 import { resolveThemeWithEffects, themeToCssVars, getTypography, loadFonts } from "@muse/themes";
 import { Chat } from "./components/chat";
-import { useSite } from "./hooks/useSite";
+import { useSiteWithHistory } from "./hooks/useSiteWithHistory";
 import type { RefineUpdate } from "./hooks/useChat";
 import { PageSwitcher } from "./components/PageSwitcher";
 import { ReviewLayout, ReviewDashboard, ReviewEntry, ReviewSessionPage } from "./review";
@@ -17,12 +17,6 @@ import type { ThemeSelection, PageInfo } from "./utils/streamParser";
 function hasNavbarContent(navbar?: NavbarSection): boolean {
   if (!navbar) return false;
   return !!(navbar.logo?.text || navbar.logo?.image || navbar.items?.length || navbar.cta);
-}
-
-interface ThemeState {
-  palette: string
-  typography: string
-  effects: string
 }
 
 function MainApp() {
@@ -40,9 +34,34 @@ function MainApp() {
     updatePageSections,
     setNavbar,
     clearSite,
-  } = useSite();
+    theme,
+    setTheme,
+    undo,
+    redo,
+    beginTransaction,
+    commitTransaction,
+  } = useSiteWithHistory();
+
+  // Global undo/redo keyboard shortcuts
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => {
+      // Skip if inside Lexical editor - it handles its own undo
+      if (document.activeElement?.closest("[data-lexical-editor]")) return;
+
+      if ((e.metaKey || e.ctrlKey) && e.key === "z") {
+        e.preventDefault();
+        if (e.shiftKey) {
+          redo();
+        }
+        else {
+          undo();
+        }
+      }
+    };
+    window.addEventListener("keydown", handler);
+    return () => window.removeEventListener("keydown", handler);
+  }, [undo, redo]);
   const siteRef = useRef(site);
-  const [theme, setTheme] = useState<ThemeState>({ palette: "slate", typography: "inter", effects: "neutral" });
   const [pendingImageSections, setPendingImageSections] = useState<Set<string>>(new Set());
 
   useLayoutEffect(() => {
@@ -84,13 +103,8 @@ function MainApp() {
   }, [addSection]);
 
   const handleThemeSelected = useCallback((selection: ThemeSelection) => {
-    // auto-apply effects based on palette
-    const effects = selection.effects
-      ?? (selection.palette === "terminal"
-        ? "crt"
-        : selection.palette === "synthwave" ? "neon" : "neutral");
-    setTheme({ palette: selection.palette, typography: selection.typography, effects });
-  }, []);
+    setTheme(selection.palette, selection.typography, selection.effects);
+  }, [setTheme]);
 
   const handleNavbar = useCallback((navbar: NavbarSection) => {
     setNavbar(navbar);
@@ -136,6 +150,7 @@ function MainApp() {
   }, [updateSectionById]);
 
   const handlePages = useCallback((pages: PageInfo[]) => {
+    beginTransaction();
     // Use flushSync to ensure state is committed before handleImages runs
     // This fixes race condition where siteRef.current is stale during image injection
     flushSync(() => {
@@ -157,13 +172,16 @@ function MainApp() {
         setCurrentPage(firstPageId);
       }
     });
-  }, [clearSite, addNewPage, updatePageSections, setCurrentPage]);
+    commitTransaction();
+  }, [clearSite, addNewPage, updatePageSections, setCurrentPage, beginTransaction, commitTransaction]);
 
   const handleRefine = useCallback((updates: RefineUpdate[]) => {
+    beginTransaction();
     for (const { sectionId, updates: sectionUpdates } of updates) {
       updateSectionById(sectionId, sectionUpdates);
     }
-  }, [updateSectionById]);
+    commitTransaction();
+  }, [updateSectionById, beginTransaction, commitTransaction]);
 
   return (
     <SiteProvider pageSlugs={pageSlugs} onGeneratePage={handleGeneratePage}>
