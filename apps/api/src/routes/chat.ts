@@ -169,9 +169,21 @@ chatRoute.post("/refine", async (c) => {
 
   const result = await refine({ sections, messages }, getClient(), executeTool);
 
+  // Transform tool calls to frontend format: { field, value } -> { updates: { [field]: value } }
+  const transformedToolCalls = result.toolCalls.map((tc) => {
+    if (tc.name === "edit_section" && tc.input.field) {
+      const { sectionId, field, value } = tc.input as { sectionId: string, field: string, value: unknown };
+      return {
+        name: tc.name,
+        input: { sectionId, updates: { [field]: value } },
+      };
+    }
+    return tc;
+  });
+
   return c.json({
     message: result.message,
-    toolCalls: result.toolCalls,
+    toolCalls: transformedToolCalls,
     usage: result.usage,
   });
 });
