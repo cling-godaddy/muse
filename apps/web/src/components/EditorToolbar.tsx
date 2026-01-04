@@ -1,22 +1,31 @@
 import { useMemo } from "react";
+import { Undo2, Redo2 } from "lucide-react";
 import type { Site } from "@muse/core";
 import { getPagesFlattened } from "@muse/core";
 
-interface PageSwitcherProps {
+interface EditorToolbarProps {
   site: Site
   currentPageId: string | null
   onSelectPage: (pageId: string) => void
   onAddPage?: () => void
   onDeletePage?: (pageId: string) => void
+  onUndo?: () => void
+  onRedo?: () => void
+  canUndo?: boolean
+  canRedo?: boolean
 }
 
-export function PageSwitcher({
+export function EditorToolbar({
   site,
   currentPageId,
   onSelectPage,
   onAddPage,
   onDeletePage,
-}: PageSwitcherProps) {
+  onUndo,
+  onRedo,
+  canUndo,
+  canRedo,
+}: EditorToolbarProps) {
   const flattenedPages = useMemo(() => getPagesFlattened(site), [site]);
 
   if (flattenedPages.length === 0) {
@@ -71,6 +80,32 @@ export function PageSwitcher({
         >
           <PlusIcon />
         </button>
+      )}
+
+      {/* Undo/Redo actions */}
+      {(onUndo || onRedo) && (
+        <div className="ml-auto flex items-center gap-1">
+          {onUndo && (
+            <button
+              onClick={onUndo}
+              disabled={!canUndo}
+              className="flex items-center justify-center w-7 h-7 text-text-muted hover:text-text hover:bg-border rounded transition-colors disabled:opacity-30 disabled:pointer-events-none"
+              title="Undo (⌘Z)"
+            >
+              <Undo2 size={16} />
+            </button>
+          )}
+          {onRedo && (
+            <button
+              onClick={onRedo}
+              disabled={!canRedo}
+              className="flex items-center justify-center w-7 h-7 text-text-muted hover:text-text hover:bg-border rounded transition-colors disabled:opacity-30 disabled:pointer-events-none"
+              title="Redo (⌘⇧Z)"
+            >
+              <Redo2 size={16} />
+            </button>
+          )}
+        </div>
       )}
     </div>
   );

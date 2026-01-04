@@ -10,7 +10,7 @@ import { resolveThemeWithEffects, themeToCssVars, getTypography, loadFonts } fro
 import { Chat } from "./components/chat";
 import { useSiteWithHistory } from "./hooks/useSiteWithHistory";
 import type { RefineUpdate } from "./hooks/useChat";
-import { PageSwitcher } from "./components/PageSwitcher";
+import { EditorToolbar } from "./components/EditorToolbar";
 import { ReviewLayout, ReviewDashboard, ReviewEntry, ReviewSessionPage } from "./review";
 import type { ThemeSelection, PageInfo } from "./utils/streamParser";
 
@@ -38,6 +38,8 @@ function MainApp() {
     setTheme,
     undo,
     redo,
+    canUndo,
+    canRedo,
     beginTransaction,
     commitTransaction,
   } = useSiteWithHistory();
@@ -189,13 +191,17 @@ function MainApp() {
         <header className="px-6 py-3 border-b border-border bg-bg flex items-center gap-4">
           <h1 className="m-0 text-xl font-semibold">Muse</h1>
         </header>
-        {(Object.values(site.pages).some(p => p.sections.length > 0) || hasNavbarContent(site.navbar)) && (
-          <PageSwitcher
+        {(Object.values(site.pages).some(p => p.sections.length > 0) || hasNavbarContent(site.navbar) || canUndo || canRedo) && (
+          <EditorToolbar
             site={site}
             currentPageId={currentPageId}
             onSelectPage={setCurrentPage}
             onAddPage={handleAddPage}
             onDeletePage={deletePage}
+            onUndo={undo}
+            onRedo={redo}
+            canUndo={canUndo}
+            canRedo={canRedo}
           />
         )}
         <main className="flex-1 flex gap-6 p-6 overflow-hidden">

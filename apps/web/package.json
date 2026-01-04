@@ -18,6 +18,7 @@
     "@muse/themes": "workspace:*",
     "chroma-js": "^3.2.0",
     "lodash-es": "^4.17.21",
+    "lucide-react": "^0.562.0",
     "react": "^19",
     "react-dom": "^19",
     "react-router-dom": "^7.11.0"
