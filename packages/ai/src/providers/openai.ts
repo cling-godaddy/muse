@@ -1,6 +1,28 @@
 import OpenAI from "openai";
-import type { ChatRequest, ChatResponse, Provider } from "../types";
+import type { ChatRequest, ChatResponse, Provider, ToolCall } from "../types";
 import { calculateCost } from "../pricing";
+
+type OpenAIMessage = OpenAI.ChatCompletionMessageParam;
+
+function buildMessages(request: ChatRequest): OpenAIMessage[] {
+  const messages: OpenAIMessage[] = request.messages.map(m => ({
+    role: m.role,
+    content: m.content,
+  }));
+
+  // Append tool results as tool messages
+  if (request.toolResults?.length) {
+    for (const r of request.toolResults) {
+      messages.push({
+        role: "tool",
+        tool_call_id: r.id,
+        content: JSON.stringify(r.result),
+      });
+    }
+  }
+
+  return messages;
+}
 
 export function createOpenAIProvider(apiKey: string): Provider {
   const client = new OpenAI({ apiKey });
@@ -9,6 +31,47 @@ export function createOpenAIProvider(apiKey: string): Provider {
     name: "openai",
 
     async chat(request: ChatRequest): Promise<ChatResponse> {
+      const messages = buildMessages(request);
+
+      // Agentic tool use
+      if (request.tools?.length) {
+        const response = await client.chat.completions.create({
+          model: request.model ?? "gpt-4o",
+          messages,
+          tools: request.tools.map(t => ({
+            type: "function" as const,
+            function: {
+              name: t.name,
+              description: t.description,
+              parameters: t.schema,
+            },
+          })),
+        });
+
+        const choice = response.choices[0];
+        const toolCalls: ToolCall[] = (choice?.message.tool_calls ?? [])
+          .filter((tc): tc is OpenAI.ChatCompletionMessageToolCall & { type: "function" } =>
+            tc.type === "function",
+          )
+          .map(tc => ({
+            id: tc.id,
+            name: tc.function.name,
+            input: JSON.parse(tc.function.arguments),
+          }));
+
+        return {
+          content: choice?.message.content ?? "",
+          model: response.model,
+          usage: response.usage
+            ? {
+              input: response.usage.prompt_tokens,
+              output: response.usage.completion_tokens,
+            }
+            : undefined,
+          toolCalls: toolCalls.length ? toolCalls : undefined,
+        };
+      }
+
       // Schema-based structured output takes precedence over jsonMode
       const responseFormat = request.responseSchema
         ? {
@@ -26,7 +89,7 @@ export function createOpenAIProvider(apiKey: string): Provider {
 
       const response = await client.chat.completions.create({
         model: request.model ?? "gpt-4o",
-        messages: request.messages,
+        messages,
         ...(responseFormat && { response_format: responseFormat }),
       });
 
