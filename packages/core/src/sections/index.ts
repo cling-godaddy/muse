@@ -192,6 +192,9 @@ export {
   getAllAISectionSchemas,
 } from "./ai";
 
+// Field definitions
+export { field, toZodShape, getEditableFields, resolveField, type FieldDef } from "./fields";
+
 // Schemas
 export {
   richContentSchema,
@@ -214,6 +217,23 @@ export {
   sectionSchema,
   validateSection,
   validateSections,
+  // Field definitions per section
+  heroFields,
+  featuresFields,
+  ctaFields,
+  testimonialsFields,
+  galleryFields,
+  pricingFields,
+  faqFields,
+  contactFields,
+  footerFields,
+  aboutFields,
+  subscribeFields,
+  statsFields,
+  logosFields,
+  navbarFields,
+  // Registry for runtime lookup
+  sectionFieldRegistry,
 } from "./schemas";
 
 // Metadata

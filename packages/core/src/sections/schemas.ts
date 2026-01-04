@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { field, toZodShape, type FieldDef } from "./fields";
 
 // Rich content schema for RTE fields
 export const richContentSchema = z.object({
@@ -27,16 +28,19 @@ const ctaLinkSchema = z.object({
   href: z.string(),
 });
 
-export const heroSectionSchema = sectionBase.extend({
-  type: z.literal("hero"),
-  headline: z.string(),
-  subheadline: textOrRichSchema.optional(),
-  cta: ctaLinkSchema.optional(),
-  secondaryCta: ctaLinkSchema.optional(),
-  alignment: z.enum(["left", "center", "right"]).optional(),
-  backgroundImage: imageSourceSchema.optional(),
-  backgroundOverlay: z.number().min(0).max(100).optional(),
-});
+// --- Hero ---
+export const heroFields = {
+  type: field(z.literal("hero"), { editable: false }),
+  headline: field(z.string(), { aliases: ["title", "heading"] }),
+  subheadline: field(textOrRichSchema.optional(), { aliases: ["subheading", "tagline", "subtitle"] }),
+  cta: field(ctaLinkSchema.optional(), { aliases: ["button", "action", "primary button"] }),
+  secondaryCta: field(ctaLinkSchema.optional(), { aliases: ["secondary button", "second button"] }),
+  alignment: field(z.enum(["left", "center", "right"]).optional()),
+  backgroundImage: field(imageSourceSchema.optional(), { editable: false }),
+  backgroundOverlay: field(z.number().min(0).max(100).optional()),
+};
+
+export const heroSectionSchema = sectionBase.extend(toZodShape(heroFields));
 
 const featureItemSchema = z.object({
   icon: z.string().optional(),
@@ -45,21 +49,27 @@ const featureItemSchema = z.object({
   description: textOrRichSchema,
 });
 
-export const featuresSectionSchema = sectionBase.extend({
-  type: z.literal("features"),
-  headline: z.string().optional(),
-  items: z.array(featureItemSchema).min(1),
-  columns: z.union([z.literal(2), z.literal(3), z.literal(4)]).optional(),
-});
+// --- Features ---
+export const featuresFields = {
+  type: field(z.literal("features"), { editable: false }),
+  headline: field(z.string().optional(), { aliases: ["title", "heading"] }),
+  items: field(z.array(featureItemSchema).min(1), { aliases: ["features"] }),
+  columns: field(z.union([z.literal(2), z.literal(3), z.literal(4)]).optional()),
+};
 
-export const ctaSectionSchema = sectionBase.extend({
-  type: z.literal("cta"),
-  headline: z.string(),
-  description: textOrRichSchema.optional(),
-  buttonText: z.string(),
-  buttonHref: z.string(),
-  variant: z.enum(["primary", "secondary"]).optional(),
-});
+export const featuresSectionSchema = sectionBase.extend(toZodShape(featuresFields));
+
+// --- CTA ---
+export const ctaFields = {
+  type: field(z.literal("cta"), { editable: false }),
+  headline: field(z.string(), { aliases: ["title", "heading"] }),
+  description: field(textOrRichSchema.optional(), { aliases: ["body", "text", "subheadline"] }),
+  buttonText: field(z.string(), { aliases: ["button", "cta text", "action text"] }),
+  buttonHref: field(z.string(), { aliases: ["button link", "cta link", "action link"] }),
+  variant: field(z.enum(["primary", "secondary"]).optional()),
+};
+
+export const ctaSectionSchema = sectionBase.extend(toZodShape(ctaFields));
 
 const quoteSchema = z.object({
   text: z.string(),
@@ -69,18 +79,24 @@ const quoteSchema = z.object({
   avatar: imageSourceSchema.optional(),
 });
 
-export const testimonialsSectionSchema = sectionBase.extend({
-  type: z.literal("testimonials"),
-  headline: z.string().optional(),
-  quotes: z.array(quoteSchema).min(1),
-});
+// --- Testimonials ---
+export const testimonialsFields = {
+  type: field(z.literal("testimonials"), { editable: false }),
+  headline: field(z.string().optional(), { aliases: ["title", "heading"] }),
+  quotes: field(z.array(quoteSchema).min(1), { aliases: ["testimonials", "reviews"] }),
+};
 
-export const gallerySectionSchema = sectionBase.extend({
-  type: z.literal("gallery"),
-  headline: z.string().optional(),
-  images: z.array(imageSourceSchema).min(1),
-  columns: z.union([z.literal(2), z.literal(3), z.literal(4)]).optional(),
-});
+export const testimonialsSectionSchema = sectionBase.extend(toZodShape(testimonialsFields));
+
+// --- Gallery ---
+export const galleryFields = {
+  type: field(z.literal("gallery"), { editable: false }),
+  headline: field(z.string().optional(), { aliases: ["title", "heading"] }),
+  images: field(z.array(imageSourceSchema).min(1), { editable: false }),
+  columns: field(z.union([z.literal(2), z.literal(3), z.literal(4)]).optional()),
+};
+
+export const gallerySectionSchema = sectionBase.extend(toZodShape(galleryFields));
 
 const pricingPlanSchema = z.object({
   name: z.string(),
@@ -92,24 +108,30 @@ const pricingPlanSchema = z.object({
   highlighted: z.boolean().optional(),
 });
 
-export const pricingSectionSchema = sectionBase.extend({
-  type: z.literal("pricing"),
-  headline: z.string().optional(),
-  subheadline: z.string().optional(),
-  plans: z.array(pricingPlanSchema).min(1),
-});
+// --- Pricing ---
+export const pricingFields = {
+  type: field(z.literal("pricing"), { editable: false }),
+  headline: field(z.string().optional(), { aliases: ["title", "heading"] }),
+  subheadline: field(z.string().optional(), { aliases: ["subheading", "tagline", "subtitle"] }),
+  plans: field(z.array(pricingPlanSchema).min(1), { aliases: ["tiers", "pricing plans"] }),
+};
+
+export const pricingSectionSchema = sectionBase.extend(toZodShape(pricingFields));
 
 const faqItemSchema = z.object({
   question: z.string(),
   answer: textOrRichSchema,
 });
 
-export const faqSectionSchema = sectionBase.extend({
-  type: z.literal("faq"),
-  headline: z.string().optional(),
-  subheadline: z.string().optional(),
-  items: z.array(faqItemSchema).min(1),
-});
+// --- FAQ ---
+export const faqFields = {
+  type: field(z.literal("faq"), { editable: false }),
+  headline: field(z.string().optional(), { aliases: ["title", "heading"] }),
+  subheadline: field(z.string().optional(), { aliases: ["subheading", "subtitle"] }),
+  items: field(z.array(faqItemSchema).min(1), { aliases: ["questions", "faqs"] }),
+};
+
+export const faqSectionSchema = sectionBase.extend(toZodShape(faqFields));
 
 const formFieldSchema = z.object({
   name: z.string(),
@@ -119,17 +141,20 @@ const formFieldSchema = z.object({
   required: z.boolean().optional(),
 });
 
-export const contactSectionSchema = sectionBase.extend({
-  type: z.literal("contact"),
-  headline: z.string().optional(),
-  subheadline: z.string().optional(),
-  email: z.string().optional(),
-  phone: z.string().optional(),
-  address: z.string().optional(),
-  formHeadline: z.string().optional(),
-  formFields: z.array(formFieldSchema).optional(),
-  submitText: z.string().optional(),
-});
+// --- Contact ---
+export const contactFields = {
+  type: field(z.literal("contact"), { editable: false }),
+  headline: field(z.string().optional(), { aliases: ["title", "heading"] }),
+  subheadline: field(z.string().optional(), { aliases: ["subheading", "subtitle"] }),
+  email: field(z.string().optional(), { aliases: ["email address"] }),
+  phone: field(z.string().optional(), { aliases: ["phone number", "telephone"] }),
+  address: field(z.string().optional(), { aliases: ["location"] }),
+  formHeadline: field(z.string().optional(), { aliases: ["form title"] }),
+  formFields: field(z.array(formFieldSchema).optional(), { editable: false }),
+  submitText: field(z.string().optional(), { aliases: ["submit button", "button text"] }),
+};
+
+export const contactSectionSchema = sectionBase.extend(toZodShape(contactFields));
 
 const footerLinkSchema = z.object({
   label: z.string(),
@@ -141,13 +166,16 @@ const socialLinkSchema = z.object({
   href: z.string(),
 });
 
-export const footerSectionSchema = sectionBase.extend({
-  type: z.literal("footer"),
-  companyName: z.string().optional(),
-  copyright: z.string().optional(),
-  links: z.array(footerLinkSchema).optional(),
-  socialLinks: z.array(socialLinkSchema).optional(),
-});
+// --- Footer ---
+export const footerFields = {
+  type: field(z.literal("footer"), { editable: false }),
+  companyName: field(z.string().optional(), { aliases: ["company", "business name"] }),
+  copyright: field(z.string().optional(), { aliases: ["copyright text"] }),
+  links: field(z.array(footerLinkSchema).optional(), { aliases: ["footer links", "navigation"] }),
+  socialLinks: field(z.array(socialLinkSchema).optional(), { aliases: ["social media", "socials"] }),
+};
+
+export const footerSectionSchema = sectionBase.extend(toZodShape(footerFields));
 
 const teamMemberSchema = z.object({
   name: z.string(),
@@ -156,44 +184,56 @@ const teamMemberSchema = z.object({
   bio: textOrRichSchema.optional(),
 });
 
-export const aboutSectionSchema = sectionBase.extend({
-  type: z.literal("about"),
-  headline: z.string().optional(),
-  body: textOrRichSchema.optional(),
-  image: imageSourceSchema.optional(),
-  teamMembers: z.array(teamMemberSchema).optional(),
-});
+// --- About ---
+export const aboutFields = {
+  type: field(z.literal("about"), { editable: false }),
+  headline: field(z.string().optional(), { aliases: ["title", "heading"] }),
+  body: field(textOrRichSchema.optional(), { aliases: ["description", "content", "text"] }),
+  image: field(imageSourceSchema.optional(), { editable: false }),
+  teamMembers: field(z.array(teamMemberSchema).optional(), { aliases: ["team", "members"] }),
+};
 
-export const subscribeSectionSchema = sectionBase.extend({
-  type: z.literal("subscribe"),
-  headline: z.string().optional(),
-  subheadline: z.string().optional(),
-  buttonText: z.string(),
-  placeholderText: z.string().optional(),
-  disclaimer: z.string().optional(),
-});
+export const aboutSectionSchema = sectionBase.extend(toZodShape(aboutFields));
+
+// --- Subscribe ---
+export const subscribeFields = {
+  type: field(z.literal("subscribe"), { editable: false }),
+  headline: field(z.string().optional(), { aliases: ["title", "heading"] }),
+  subheadline: field(z.string().optional(), { aliases: ["subheading", "subtitle"] }),
+  buttonText: field(z.string(), { aliases: ["button", "submit text"] }),
+  placeholderText: field(z.string().optional(), { aliases: ["placeholder", "input placeholder"] }),
+  disclaimer: field(z.string().optional(), { aliases: ["fine print", "terms"] }),
+};
+
+export const subscribeSectionSchema = sectionBase.extend(toZodShape(subscribeFields));
 
 const statItemSchema = z.object({
   value: z.string(),
   label: z.string(),
 });
 
-export const statsSectionSchema = sectionBase.extend({
-  type: z.literal("stats"),
-  headline: z.string().optional(),
-  stats: z.array(statItemSchema).min(1),
-});
+// --- Stats ---
+export const statsFields = {
+  type: field(z.literal("stats"), { editable: false }),
+  headline: field(z.string().optional(), { aliases: ["title", "heading"] }),
+  stats: field(z.array(statItemSchema).min(1), { aliases: ["statistics", "metrics", "numbers"] }),
+};
+
+export const statsSectionSchema = sectionBase.extend(toZodShape(statsFields));
 
 const logoItemSchema = z.object({
   image: imageSourceSchema,
   href: z.string().optional(),
 });
 
-export const logosSectionSchema = sectionBase.extend({
-  type: z.literal("logos"),
-  headline: z.string().optional(),
-  logos: z.array(logoItemSchema).min(1),
-});
+// --- Logos ---
+export const logosFields = {
+  type: field(z.literal("logos"), { editable: false }),
+  headline: field(z.string().optional(), { aliases: ["title", "heading"] }),
+  logos: field(z.array(logoItemSchema).min(1), { editable: false }),
+};
+
+export const logosSectionSchema = sectionBase.extend(toZodShape(logosFields));
 
 const navItemSchema: z.ZodType<{
   label: string
@@ -207,16 +247,19 @@ const navItemSchema: z.ZodType<{
   }),
 );
 
-export const navbarSectionSchema = sectionBase.extend({
-  type: z.literal("navbar"),
-  logo: z.object({
+// --- Navbar ---
+export const navbarFields = {
+  type: field(z.literal("navbar"), { editable: false }),
+  logo: field(z.object({
     text: z.string().optional(),
     image: imageSourceSchema.optional(),
-  }).optional(),
-  items: z.array(navItemSchema),
-  cta: ctaLinkSchema.optional(),
-  sticky: z.boolean().optional(),
-});
+  }).optional(), { aliases: ["logo text", "brand"] }),
+  items: field(z.array(navItemSchema), { aliases: ["navigation", "nav items", "menu"] }),
+  cta: field(ctaLinkSchema.optional(), { aliases: ["button", "action"] }),
+  sticky: field(z.boolean().optional()),
+};
+
+export const navbarSectionSchema = sectionBase.extend(toZodShape(navbarFields));
 
 export const sectionSchema = z.discriminatedUnion("type", [
   heroSectionSchema,
@@ -242,3 +285,21 @@ export function validateSection(data: unknown) {
 export function validateSections(data: unknown) {
   return z.array(sectionSchema).safeParse(data);
 }
+
+// Field registry for runtime lookup
+export const sectionFieldRegistry: Record<string, Record<string, FieldDef>> = {
+  hero: heroFields,
+  features: featuresFields,
+  cta: ctaFields,
+  testimonials: testimonialsFields,
+  gallery: galleryFields,
+  pricing: pricingFields,
+  faq: faqFields,
+  contact: contactFields,
+  footer: footerFields,
+  about: aboutFields,
+  subscribe: subscribeFields,
+  stats: statsFields,
+  logos: logosFields,
+  navbar: navbarFields,
+};

@@ -28,7 +28,12 @@ export {
 
 export { refine } from "./agents/refine";
 
-export { editSectionTool } from "./tools";
+export {
+  editSectionTool,
+  getValidFields,
+  resolveFieldAlias,
+  getFieldAliases,
+} from "./tools";
 
 export type {
   Message,

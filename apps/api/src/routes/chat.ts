@@ -1,6 +1,6 @@
 import { Hono } from "hono";
 import { streamText } from "hono/streaming";
-import { createClient, createImageAnalyzer, orchestrateSite, refine, type Message, type Provider, type ToolCall } from "@muse/ai";
+import { createClient, createImageAnalyzer, orchestrateSite, refine, resolveFieldAlias, getValidFields, type Message, type Provider, type ToolCall } from "@muse/ai";
 import { embed } from "@muse/ai/rag";
 import { createLogger } from "@muse/logger";
 import { createMediaClient, createImageBank, createQueryNormalizer, type MediaClient, type ImageBank, type QueryNormalizer } from "@muse/media";
@@ -127,10 +127,43 @@ chatRoute.post("/refine", async (c) => {
     prompt: string
   }>();
 
-  // Tool executor: for now, just acknowledge the tool call
+  // Tool executor with field validation
   // Actual state mutation happens on the frontend
   const executeTool = async (call: ToolCall) => {
     logger.info("tool_call", { name: call.name, input: call.input });
+
+    if (call.name === "edit_section") {
+      const { sectionId, field, value } = call.input as {
+        sectionId: string
+        field: string
+        value: unknown
+      };
+
+      // Find the section
+      const section = sections.find(s => s.id === sectionId);
+      if (!section) {
+        logger.warn("section_not_found", { sectionId });
+        return { id: call.id, result: { error: `Section not found: ${sectionId}` } };
+      }
+
+      // Resolve field alias to actual field name
+      const resolvedField = resolveFieldAlias(section.type, field);
+      if (!resolvedField) {
+        const validFields = getValidFields(section.type);
+        logger.warn("invalid_field", { field, sectionType: section.type, validFields });
+        return {
+          id: call.id,
+          result: { error: `Invalid field "${field}" for ${section.type}. Valid fields: ${validFields.join(", ")}` },
+        };
+      }
+
+      logger.info("field_resolved", { input: field, resolved: resolvedField });
+      return {
+        id: call.id,
+        result: { success: true, field: resolvedField, value },
+      };
+    }
+
     return { id: call.id, result: { success: true } };
   };
 

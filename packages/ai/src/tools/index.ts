@@ -1,1 +1,6 @@
-export { editSectionTool } from "./edit-section";
+export {
+  editSectionTool,
+  getValidFields,
+  resolveFieldAlias,
+  getFieldAliases,
+} from "./edit-section";
