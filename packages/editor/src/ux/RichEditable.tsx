@@ -13,7 +13,7 @@ import { ListPlugin } from "@lexical/react/LexicalListPlugin";
 import { OnChangePlugin } from "@lexical/react/LexicalOnChangePlugin";
 import type { EditorState } from "lexical";
 import { $getRoot } from "lexical";
-import { type RichContent, type TextOrRich } from "@muse/core";
+import { type RichContent, type TextOrRich, getPlainText } from "@muse/core";
 import { theme } from "../theme";
 import { FloatingToolbarPlugin } from "../plugins/FloatingToolbar";
 import { LinkEditorPlugin } from "../plugins/LinkEditor";
@@ -27,21 +27,43 @@ interface RichEditableProps {
   placeholder?: string
 }
 
-function InitializePlugin({
+function SyncPlugin({
   value,
-  initializedRef,
 }: {
   value: TextOrRich
-  initializedRef: React.MutableRefObject<boolean>
 }) {
   const [editor] = useLexicalComposerContext();
+  const initializedRef = useRef(false);
+  const lastValueRef = useRef<TextOrRich>(value);
 
   useEffect(() => {
+    // First mount: initialize editor with initial value
     if (!initializedRef.current) {
       initializeFromValue(editor, value);
       initializedRef.current = true;
+      lastValueRef.current = value;
+      return;
     }
-  }, [editor, value, initializedRef]);
+
+    // Subsequent updates: check if value changed externally
+    // Compare by text content to avoid object reference issues
+    const prevText = getPlainText(lastValueRef.current);
+    const newText = getPlainText(value);
+
+    if (prevText !== newText) {
+      // Value changed - check if it differs from editor content
+      let editorText = "";
+      editor.getEditorState().read(() => {
+        editorText = $getRoot().getTextContent();
+      });
+
+      // Only sync if external change (editor content doesn't match new value)
+      if (editorText !== newText) {
+        initializeFromValue(editor, value);
+      }
+      lastValueRef.current = value;
+    }
+  }, [editor, value]);
 
   return null;
 }
@@ -51,8 +73,6 @@ export function RichEditable({
   onChange,
   className,
 }: RichEditableProps) {
-  const initializedRef = useRef(false);
-
   const initialConfig = {
     namespace: "muse-rich-editable",
     theme,
@@ -87,7 +107,7 @@ export function RichEditable({
       <ListPlugin />
       <FloatingToolbarPlugin />
       <LinkEditorPlugin />
-      <InitializePlugin value={value} initializedRef={initializedRef} />
+      <SyncPlugin value={value} />
       <OnChangePlugin onChange={handleChange} ignoreSelectionChange />
     </LexicalComposer>
   );
