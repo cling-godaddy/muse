@@ -64,19 +64,23 @@ export function useChat(options: UseChatOptions = {}): UseChat {
     const userMessage: Message = { role: "user", content: input };
     const newMessages = [...messages, userMessage];
 
+    // Refine mode: when sections exist, use refine endpoint
+    const isRefineMode = options.sections && options.sections.length > 0;
+
     setMessages(newMessages);
     setInput("");
     setIsLoading(true);
     setError(null);
-    setAgents([]);
-    parseStateRef.current = { sections: [], pages: [], agents: new Map(), images: [] };
-    usageProcessedRef.current = false;
-    themeProcessedRef.current = false;
-    navbarProcessedRef.current = false;
-    pagesProcessedRef.current = false;
 
-    // Refine mode: when sections exist, use refine endpoint
-    const isRefineMode = options.sections && options.sections.length > 0;
+    // Only clear generation state when in generation mode
+    if (!isRefineMode) {
+      setAgents([]);
+      parseStateRef.current = { sections: [], pages: [], agents: new Map(), images: [] };
+      usageProcessedRef.current = false;
+      themeProcessedRef.current = false;
+      navbarProcessedRef.current = false;
+      pagesProcessedRef.current = false;
+    }
 
     if (isRefineMode) {
       try {
