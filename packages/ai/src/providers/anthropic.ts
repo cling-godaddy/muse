@@ -1,6 +1,31 @@
 import Anthropic from "@anthropic-ai/sdk";
-import type { ChatRequest, ChatResponse, Provider } from "../types";
+import type { ChatRequest, ChatResponse, Provider, ToolCall } from "../types";
 import { calculateCost } from "../pricing";
+
+type AnthropicMessage = Anthropic.MessageParam;
+
+function buildMessages(request: ChatRequest): AnthropicMessage[] {
+  const messages: AnthropicMessage[] = [];
+
+  for (const m of request.messages) {
+    if (m.role === "system") continue;
+    messages.push({ role: m.role as "user" | "assistant", content: m.content });
+  }
+
+  // Append tool results as a user message with tool_result blocks
+  if (request.toolResults?.length) {
+    messages.push({
+      role: "user",
+      content: request.toolResults.map(r => ({
+        type: "tool_result" as const,
+        tool_use_id: r.id,
+        content: JSON.stringify(r.result),
+      })),
+    });
+  }
+
+  return messages;
+}
 
 export function createAnthropicProvider(apiKey: string): Provider {
   const client = new Anthropic({ apiKey });
@@ -10,11 +35,47 @@ export function createAnthropicProvider(apiKey: string): Provider {
 
     async chat(request: ChatRequest): Promise<ChatResponse> {
       const systemMessage = request.messages.find(m => m.role === "system");
-      const messages = request.messages
-        .filter(m => m.role !== "system")
-        .map(m => ({ role: m.role as "user" | "assistant", content: m.content }));
+      const messages = buildMessages(request);
 
-      // Use tool use for schema-based structured output
+      // Agentic tool use: model chooses whether to call tools
+      if (request.tools?.length) {
+        const response = await client.messages.create({
+          model: request.model ?? "claude-sonnet-4-20250514",
+          max_tokens: 4096,
+          system: systemMessage?.content,
+          messages,
+          tools: request.tools.map(t => ({
+            name: t.name,
+            description: t.description,
+            input_schema: t.schema as Anthropic.Tool.InputSchema,
+          })),
+        });
+
+        // Extract tool calls
+        const toolCalls: ToolCall[] = response.content
+          .filter((block): block is Anthropic.ToolUseBlock => block.type === "tool_use")
+          .map(block => ({
+            id: block.id,
+            name: block.name,
+            input: block.input as Record<string, unknown>,
+          }));
+
+        // Extract text content
+        const textBlock = response.content.find(block => block.type === "text");
+        const content = textBlock?.type === "text" ? textBlock.text : "";
+
+        return {
+          content,
+          model: response.model,
+          usage: {
+            input: response.usage.input_tokens,
+            output: response.usage.output_tokens,
+          },
+          toolCalls: toolCalls.length ? toolCalls : undefined,
+        };
+      }
+
+      // Use tool use for schema-based structured output (forced tool choice)
       if (request.responseSchema) {
         const response = await client.messages.create({
           model: request.model ?? "claude-sonnet-4-20250514",
@@ -44,6 +105,7 @@ export function createAnthropicProvider(apiKey: string): Provider {
         };
       }
 
+      // Plain text response
       const response = await client.messages.create({
         model: request.model ?? "claude-sonnet-4-20250514",
         max_tokens: 4096,
@@ -69,9 +131,7 @@ export function createAnthropicProvider(apiKey: string): Provider {
     async* chatStream(request: ChatRequest): AsyncGenerator<string> {
       const model = request.model ?? "claude-sonnet-4-20250514";
       const systemMessage = request.messages.find(m => m.role === "system");
-      const messages = request.messages
-        .filter(m => m.role !== "system")
-        .map(m => ({ role: m.role as "user" | "assistant", content: m.content }));
+      const messages = buildMessages(request);
 
       const stream = client.messages.stream({
         model,

@@ -26,6 +26,10 @@ export interface ChatRequest {
   jsonMode?: boolean
   /** OpenAI: json_schema response format. Anthropic: tool use. Takes precedence over jsonMode. */
   responseSchema?: ResponseSchema
+  /** Available tools for the model to call */
+  tools?: ToolDefinition[]
+  /** Results from previous tool calls (for multi-turn) */
+  toolResults?: ToolResult[]
 }
 
 export interface ChatResponse {
@@ -35,6 +39,25 @@ export interface ChatResponse {
     input: number
     output: number
   }
+  toolCalls?: ToolCall[]
+}
+
+// Tool definitions for agentic tool use
+export interface ToolDefinition {
+  name: string
+  description: string
+  schema: Record<string, unknown>
+}
+
+export interface ToolCall {
+  id: string
+  name: string
+  input: Record<string, unknown>
+}
+
+export interface ToolResult {
+  id: string
+  result: unknown
 }
 
 export type ProviderName = "openai" | "anthropic";

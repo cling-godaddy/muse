@@ -1,9 +1,10 @@
 import { Hono } from "hono";
 import { streamText } from "hono/streaming";
-import { createClient, createImageAnalyzer, orchestrateSite, type Message, type Provider } from "@muse/ai";
+import { createClient, createImageAnalyzer, orchestrateSite, refine, type Message, type Provider, type ToolCall } from "@muse/ai";
 import { embed } from "@muse/ai/rag";
 import { createLogger } from "@muse/logger";
 import { createMediaClient, createImageBank, createQueryNormalizer, type MediaClient, type ImageBank, type QueryNormalizer } from "@muse/media";
+import type { Section } from "@muse/core";
 
 const logger = createLogger();
 let client: Provider | null = null;
@@ -118,4 +119,26 @@ chatRoute.post("/", async (c) => {
     content += chunk;
   }
   return c.json({ content });
+});
+
+chatRoute.post("/refine", async (c) => {
+  const { sections, prompt } = await c.req.json<{
+    sections: Section[]
+    prompt: string
+  }>();
+
+  // Tool executor: for now, just acknowledge the tool call
+  // Actual state mutation happens on the frontend
+  const executeTool = async (call: ToolCall) => {
+    logger.info("tool_call", { name: call.name, input: call.input });
+    return { id: call.id, result: { success: true } };
+  };
+
+  const result = await refine({ sections, prompt }, getClient(), executeTool);
+
+  return c.json({
+    message: result.message,
+    toolCalls: result.toolCalls,
+    usage: result.usage,
+  });
 });

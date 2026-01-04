@@ -26,6 +26,10 @@ export {
   parseSitemap,
 } from "./agents";
 
+export { refine } from "./agents/refine";
+
+export { editSectionTool } from "./tools";
+
 export type {
   Message,
   Role,
@@ -34,6 +38,9 @@ export type {
   Provider,
   ProviderName,
   Usage,
+  ToolDefinition,
+  ToolCall,
+  ToolResult,
 } from "./types";
 
 export type {
