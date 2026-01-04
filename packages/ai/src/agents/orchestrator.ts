@@ -22,6 +22,14 @@ function parseJson<T>(json: string): T {
   return JSON.parse(json);
 }
 
+// Replace AI-generated section IDs with proper UUIDs
+function assignSectionIds(sections: Section[]): Section[] {
+  return sections.map(section => ({
+    ...section,
+    id: crypto.randomUUID(),
+  }));
+}
+
 // Extract copy section summaries for image agent context
 function extractCopySectionSummaries(sections: Section[]): CopySectionContent[] {
   return sections.map(section => ({
@@ -163,7 +171,7 @@ export async function* orchestrate(
   let sections: Section[] = [];
   try {
     const parsed = JSON.parse(copyResult.content) as { sections: Section[] };
-    sections = parsed.sections ?? [];
+    sections = assignSectionIds(parsed.sections ?? []);
   }
   catch (err) {
     copyLog.warn("parse_failed", { error: String(err), input: copyResult.content.slice(0, 200) });
@@ -399,7 +407,7 @@ export async function* orchestrateSite(
       let sections: Section[] = [];
       try {
         const parsed = JSON.parse(copyResult.content) as { sections: Section[] };
-        sections = parsed.sections ?? [];
+        sections = assignSectionIds(parsed.sections ?? []);
       }
       catch (err) {
         pageLog.warn("copy_parse_failed", { error: String(err) });
