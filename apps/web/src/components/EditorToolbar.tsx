@@ -1,7 +1,9 @@
 import { useMemo } from "react";
-import { Undo2, Redo2 } from "lucide-react";
+import { Undo2, Redo2, Eye, PenLine } from "lucide-react";
 import type { Site } from "@muse/core";
 import { getPagesFlattened } from "@muse/core";
+
+type EditorMode = "edit" | "preview";
 
 interface EditorToolbarProps {
   site: Site
@@ -13,6 +15,9 @@ interface EditorToolbarProps {
   onRedo?: () => void
   canUndo?: boolean
   canRedo?: boolean
+  editorMode?: EditorMode
+  onEditorModeChange?: (mode: EditorMode) => void
+  isGenerationComplete?: boolean
 }
 
 export function EditorToolbar({
@@ -25,7 +30,12 @@ export function EditorToolbar({
   onRedo,
   canUndo,
   canRedo,
+  editorMode = "edit",
+  onEditorModeChange,
+  isGenerationComplete = true,
 }: EditorToolbarProps) {
+  const isPreview = editorMode === "preview";
+  const canPreview = isGenerationComplete;
   const flattenedPages = useMemo(() => getPagesFlattened(site), [site]);
 
   if (flattenedPages.length === 0) {
@@ -82,31 +92,39 @@ export function EditorToolbar({
         </button>
       )}
 
-      {/* Undo/Redo actions */}
-      {(onUndo || onRedo) && (
-        <div className="ml-auto flex items-center gap-1">
-          {onUndo && (
-            <button
-              onClick={onUndo}
-              disabled={!canUndo}
-              className="flex items-center justify-center w-7 h-7 text-text-muted hover:text-text hover:bg-border rounded transition-colors disabled:opacity-30 disabled:pointer-events-none"
-              title="Undo (⌘Z)"
-            >
-              <Undo2 size={16} />
-            </button>
-          )}
-          {onRedo && (
-            <button
-              onClick={onRedo}
-              disabled={!canRedo}
-              className="flex items-center justify-center w-7 h-7 text-text-muted hover:text-text hover:bg-border rounded transition-colors disabled:opacity-30 disabled:pointer-events-none"
-              title="Redo (⌘⇧Z)"
-            >
-              <Redo2 size={16} />
-            </button>
-          )}
-        </div>
-      )}
+      {/* Undo/Redo actions and Preview toggle */}
+      <div className="ml-auto flex items-center gap-1">
+        {onUndo && (
+          <button
+            onClick={onUndo}
+            disabled={!canUndo || isPreview}
+            className="flex items-center justify-center w-7 h-7 text-text-muted hover:text-text hover:bg-border rounded transition-colors disabled:opacity-30 disabled:pointer-events-none"
+            title="Undo (⌘Z)"
+          >
+            <Undo2 size={16} />
+          </button>
+        )}
+        {onRedo && (
+          <button
+            onClick={onRedo}
+            disabled={!canRedo || isPreview}
+            className="flex items-center justify-center w-7 h-7 text-text-muted hover:text-text hover:bg-border rounded transition-colors disabled:opacity-30 disabled:pointer-events-none"
+            title="Redo (⌘⇧Z)"
+          >
+            <Redo2 size={16} />
+          </button>
+        )}
+        {onEditorModeChange && (
+          <button
+            onClick={() => onEditorModeChange(isPreview ? "edit" : "preview")}
+            disabled={!canPreview && !isPreview}
+            className="flex items-center justify-center w-7 h-7 text-text-muted hover:text-text hover:bg-border rounded transition-colors disabled:opacity-30 disabled:pointer-events-none"
+            title={isPreview ? "Exit Preview" : "Preview"}
+          >
+            {isPreview ? <PenLine size={16} /> : <Eye size={16} />}
+          </button>
+        )}
+      </div>
     </div>
   );
 }

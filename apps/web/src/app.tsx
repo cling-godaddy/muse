@@ -2,7 +2,7 @@ import { useState, useMemo, useCallback, useEffect, useRef, useLayoutEffect } fr
 import { flushSync } from "react-dom";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { groupBy } from "lodash-es";
-import { SectionEditor, SiteProvider } from "@muse/editor";
+import { SectionEditor, SiteProvider, EditorModeProvider } from "@muse/editor";
 import type { Section, SectionType, NavbarSection } from "@muse/core";
 import { sectionNeedsImages, getPresetImageInjection, getImageInjection, applyImageInjection } from "@muse/core";
 import type { ImageSelection } from "@muse/media";
@@ -43,6 +43,7 @@ function MainApp() {
     beginTransaction,
     commitTransaction,
     enableHistory,
+    isGenerationComplete,
   } = useSiteWithHistory();
 
   // Global undo/redo keyboard shortcuts
@@ -66,6 +67,8 @@ function MainApp() {
   }, [undo, redo]);
   const siteRef = useRef(site);
   const [pendingImageSections, setPendingImageSections] = useState<Set<string>>(new Set());
+  const [editorMode, setEditorMode] = useState<"edit" | "preview">("edit");
+  const isPreview = editorMode === "preview";
 
   useLayoutEffect(() => {
     siteRef.current = site;
@@ -207,15 +210,22 @@ function MainApp() {
             onRedo={redo}
             canUndo={canUndo}
             canRedo={canRedo}
+            editorMode={editorMode}
+            onEditorModeChange={setEditorMode}
+            isGenerationComplete={isGenerationComplete}
           />
         )}
         <main className="flex-1 flex gap-6 p-6 overflow-hidden">
-          <div className="w-[400px] shrink-0">
-            <Chat sections={sections} onSectionParsed={handleSectionParsed} onThemeSelected={handleThemeSelected} onNavbar={handleNavbar} onImages={handleImages} onPages={handlePages} onRefine={handleRefine} onGenerationComplete={handleGenerationComplete} />
-          </div>
+          {!isPreview && (
+            <div className="w-[400px] shrink-0">
+              <Chat sections={sections} onSectionParsed={handleSectionParsed} onThemeSelected={handleThemeSelected} onNavbar={handleNavbar} onImages={handleImages} onPages={handlePages} onRefine={handleRefine} onGenerationComplete={handleGenerationComplete} />
+            </div>
+          )}
           <div className="flex-1 min-w-0 overflow-y-auto">
             <div className="h-full overflow-y-auto" style={themeStyle} data-effects={effectsId}>
-              <SectionEditor sections={sections} onChange={setSections} pendingImageSections={pendingImageSections} navbar={site.navbar} onNavbarChange={setNavbar} />
+              <EditorModeProvider mode={editorMode}>
+                <SectionEditor sections={sections} onChange={setSections} pendingImageSections={pendingImageSections} navbar={site.navbar} onNavbarChange={setNavbar} />
+              </EditorModeProvider>
             </div>
           </div>
         </main>

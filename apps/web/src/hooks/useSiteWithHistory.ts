@@ -33,6 +33,9 @@ export interface UseSiteWithHistory extends Omit<UseSite, "setSite"> {
 
   // Enable history tracking (call after initial generation completes)
   enableHistory: () => void
+
+  // Whether initial generation is complete (history is enabled)
+  isGenerationComplete: boolean
 }
 
 const DEFAULT_THEME: ThemeState = {
@@ -195,5 +198,8 @@ export function useSiteWithHistory(initialName = "Untitled Site"): UseSiteWithHi
 
     // Enable history tracking (call after initial generation completes)
     enableHistory,
+
+    // Whether initial generation is complete
+    isGenerationComplete: historyEnabled,
   };
 }

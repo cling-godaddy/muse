@@ -2,6 +2,7 @@ import { useMemo } from "react";
 import type { Section, NavbarSection } from "@muse/core";
 import { Section as SectionWrapper } from "./sections";
 import { SelectionProvider } from "./context/Selection";
+import { useIsEditable } from "./context/EditorMode";
 
 interface SectionEditorProps {
   sections: Section[]
@@ -12,6 +13,8 @@ interface SectionEditorProps {
 }
 
 export function SectionEditor({ sections, onChange, pendingImageSections, navbar, onNavbarChange }: SectionEditorProps) {
+  const isEditable = useIsEditable();
+
   // Combine navbar with sections for unified rendering
   // Ensure navbar has required fields (handles legacy data without type)
   const allSections = useMemo(() => {
@@ -39,7 +42,7 @@ export function SectionEditor({ sections, onChange, pendingImageSections, navbar
   return (
     <SelectionProvider>
       <div className="muse-section-editor">
-        {allSections.length === 0 && (
+        {allSections.length === 0 && isEditable && (
           <div className="muse-section-editor-empty">
             No sections yet. Use AI to generate content.
           </div>

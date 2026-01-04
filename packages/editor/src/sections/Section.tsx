@@ -4,6 +4,7 @@ import { getSectionComponent, type SectionComponent } from "./registry";
 import { PresetPicker } from "../controls/PresetPicker";
 import { supportsPresets } from "../controls/presets";
 import { useSelection } from "../context/Selection";
+import { useIsEditable } from "../context/EditorMode";
 
 interface Props {
   section: SectionType
@@ -28,6 +29,7 @@ export function Section({ section, onUpdate, onDelete, isPending }: Props) {
     [section.type],
   );
 
+  const isEditable = useIsEditable();
   const { select, isSelected } = useSelection();
   const showPresetPicker = supportsPresets(section.type);
 
@@ -41,23 +43,25 @@ export function Section({ section, onUpdate, onDelete, isPending }: Props) {
 
   return (
     <div className="muse-section" data-section-type={section.type}>
-      <div className="muse-section-controls">
-        {showPresetPicker && (
-          <PresetPicker
-            sectionType={section.type}
-            currentPreset={section.preset}
-            onChange={preset => onUpdate({ preset })}
-          />
-        )}
-        <button
-          type="button"
-          className="muse-section-delete"
-          onClick={onDelete}
-          aria-label="Delete section"
-        >
-          ×
-        </button>
-      </div>
+      {isEditable && (
+        <div className="muse-section-controls">
+          {showPresetPicker && (
+            <PresetPicker
+              sectionType={section.type}
+              currentPreset={section.preset}
+              onChange={preset => onUpdate({ preset })}
+            />
+          )}
+          <button
+            type="button"
+            className="muse-section-delete"
+            onClick={onDelete}
+            aria-label="Delete section"
+          >
+            ×
+          </button>
+        </div>
+      )}
       {/* eslint-disable-next-line react-hooks/static-components -- registry lookup, not component creation */}
       <Component
         section={section}
