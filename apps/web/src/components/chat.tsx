@@ -17,6 +17,8 @@ interface ChatProps {
   onPages?: (pages: PageInfo[]) => void
   /** Called when AI refines sections */
   onRefine?: (updates: RefineUpdate[]) => void
+  /** Called when generation (not refine) completes */
+  onGenerationComplete?: () => void
 }
 
 function formatTokens(n: number): string {
@@ -25,11 +27,27 @@ function formatTokens(n: number): string {
   return `${(n / 1_000_000).toFixed(1)}M`;
 }
 
-export function Chat({ sections, onSectionParsed, onThemeSelected, onNavbar, onImages, onPages, onRefine }: ChatProps) {
+export function Chat({ sections, onSectionParsed, onThemeSelected, onNavbar, onImages, onPages, onRefine, onGenerationComplete }: ChatProps) {
   const options = useMemo(() => ({ sections, onSectionParsed, onThemeSelected, onNavbar, onImages, onPages, onRefine }), [sections, onSectionParsed, onThemeSelected, onNavbar, onImages, onPages, onRefine]);
   const { messages, input, setInput, isLoading, error, send, sessionUsage, lastUsage, agents, agentsMessageIndex } = useChat(options);
   const isRefineMode = sections && sections.length > 0;
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const wasLoadingRef = useRef(false);
+  const wasGenerationRef = useRef(false);
+
+  // Detect when generation completes
+  // Capture mode at request START (when isLoading goes true), check at END (when isLoading goes false)
+  useEffect(() => {
+    if (!wasLoadingRef.current && isLoading) {
+      // Request just started - capture if this is a generation (not refine)
+      wasGenerationRef.current = !isRefineMode;
+    }
+    if (wasLoadingRef.current && !isLoading && wasGenerationRef.current) {
+      // Generation just completed
+      onGenerationComplete?.();
+    }
+    wasLoadingRef.current = isLoading;
+  }, [isLoading, isRefineMode, onGenerationComplete]);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });

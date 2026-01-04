@@ -1,4 +1,4 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import type { Site, Section, NavbarSection } from "@muse/core";
 import { useSite, type UseSite } from "./useSite";
 import { useHistory } from "./useHistory";
@@ -30,6 +30,9 @@ export interface UseSiteWithHistory extends Omit<UseSite, "setSite"> {
   beginTransaction: () => void
   commitTransaction: () => void
   rollbackTransaction: () => void
+
+  // Enable history tracking (call after initial generation completes)
+  enableHistory: () => void
 }
 
 const DEFAULT_THEME: ThemeState = {
@@ -41,6 +44,7 @@ const DEFAULT_THEME: ThemeState = {
 export function useSiteWithHistory(initialName = "Untitled Site"): UseSiteWithHistory {
   const siteHook = useSite(initialName);
   const [theme, setThemeState] = useState<ThemeState>(DEFAULT_THEME);
+  const [historyEnabled, setHistoryEnabled] = useState(false);
 
   const initialSnapshot: Snapshot = {
     site: siteHook.site,
@@ -56,59 +60,67 @@ export function useSiteWithHistory(initialName = "Untitled Site"): UseSiteWithHi
     currentPageId: siteHook.currentPageId,
   }), [siteHook.site, siteHook.currentPageId, theme]);
 
-  // Wrapped mutations that push history before executing
+  // Keep history's present in sync with current state (after mutations complete)
+  useEffect(() => {
+    if (historyEnabled) {
+      history.setBaseline(snapshot());
+    }
+  }, [historyEnabled, history, snapshot]);
+
+  // Wrapped mutations that push to history before executing (only when enabled)
+  // Note: push() saves current present to past, then useEffect syncs present with new state
   const addSection = useCallback((section: Section, index?: number) => {
-    history.push(snapshot());
+    if (historyEnabled) history.push();
     siteHook.addSection(section, index);
-  }, [history, snapshot, siteHook]);
+  }, [history, siteHook, historyEnabled]);
 
   const updateSection = useCallback((id: string, data: Partial<Section>) => {
-    history.push(snapshot());
+    if (historyEnabled) history.push();
     siteHook.updateSection(id, data);
-  }, [history, snapshot, siteHook]);
+  }, [history, siteHook, historyEnabled]);
 
   const setSections = useCallback((sections: Section[]) => {
-    history.push(snapshot());
+    if (historyEnabled) history.push();
     siteHook.setSections(sections);
-  }, [history, snapshot, siteHook]);
+  }, [history, siteHook, historyEnabled]);
 
   const updateSectionById = useCallback((id: string, data: Partial<Section>) => {
-    history.push(snapshot());
+    if (historyEnabled) history.push();
     siteHook.updateSectionById(id, data);
-  }, [history, snapshot, siteHook]);
+  }, [history, siteHook, historyEnabled]);
 
   const addNewPage = useCallback((slug: string, title: string): string => {
-    history.push(snapshot());
+    if (historyEnabled) history.push();
     return siteHook.addNewPage(slug, title);
-  }, [history, snapshot, siteHook]);
+  }, [history, siteHook, historyEnabled]);
 
   const deletePage = useCallback((pageId: string) => {
-    history.push(snapshot());
+    if (historyEnabled) history.push();
     siteHook.deletePage(pageId);
-  }, [history, snapshot, siteHook]);
+  }, [history, siteHook, historyEnabled]);
 
   const updatePageSections = useCallback((pageId: string, sections: Section[]) => {
-    history.push(snapshot());
+    if (historyEnabled) history.push();
     siteHook.updatePageSections(pageId, sections);
-  }, [history, snapshot, siteHook]);
+  }, [history, siteHook, historyEnabled]);
 
   const setNavbar = useCallback((navbar: NavbarSection) => {
-    history.push(snapshot());
+    if (historyEnabled) history.push();
     siteHook.setNavbar(navbar);
-  }, [history, snapshot, siteHook]);
+  }, [history, siteHook, historyEnabled]);
 
   const clearSite = useCallback(() => {
-    history.push(snapshot());
+    if (historyEnabled) history.push();
     siteHook.clearSite();
-  }, [history, snapshot, siteHook]);
+  }, [history, siteHook, historyEnabled]);
 
   // Theme mutation with history
   const setTheme = useCallback((palette: string, typography: string, effects?: string) => {
-    history.push(snapshot());
+    if (historyEnabled) history.push();
     const resolvedEffects = effects
       ?? (palette === "terminal" ? "crt" : palette === "synthwave" ? "neon" : "neutral");
     setThemeState({ palette, typography, effects: resolvedEffects });
-  }, [history, snapshot]);
+  }, [history, historyEnabled]);
 
   // Undo/redo that restore full state
   const undo = useCallback(() => {
@@ -140,6 +152,11 @@ export function useSiteWithHistory(initialName = "Untitled Site"): UseSiteWithHi
       setThemeState(restored.theme);
     }
   }, [history, siteHook]);
+
+  const enableHistory = useCallback(() => {
+    setHistoryEnabled(true);
+    // Note: useEffect will sync present with current state when historyEnabled changes
+  }, []);
 
   return {
     // Pass through read-only state
@@ -175,5 +192,8 @@ export function useSiteWithHistory(initialName = "Untitled Site"): UseSiteWithHi
     beginTransaction: history.beginTransaction,
     commitTransaction: history.commitTransaction,
     rollbackTransaction,
+
+    // Enable history tracking (call after initial generation completes)
+    enableHistory,
   };
 }

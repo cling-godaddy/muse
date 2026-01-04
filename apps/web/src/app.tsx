@@ -42,6 +42,7 @@ function MainApp() {
     canRedo,
     beginTransaction,
     commitTransaction,
+    enableHistory,
   } = useSiteWithHistory();
 
   // Global undo/redo keyboard shortcuts
@@ -185,6 +186,10 @@ function MainApp() {
     commitTransaction();
   }, [updateSectionById, beginTransaction, commitTransaction]);
 
+  const handleGenerationComplete = useCallback(() => {
+    enableHistory();
+  }, [enableHistory]);
+
   return (
     <SiteProvider pageSlugs={pageSlugs} onGeneratePage={handleGeneratePage}>
       <div className="flex flex-col h-full font-sans text-text bg-bg">
@@ -206,7 +211,7 @@ function MainApp() {
         )}
         <main className="flex-1 flex gap-6 p-6 overflow-hidden">
           <div className="w-[400px] shrink-0">
-            <Chat sections={sections} onSectionParsed={handleSectionParsed} onThemeSelected={handleThemeSelected} onNavbar={handleNavbar} onImages={handleImages} onPages={handlePages} onRefine={handleRefine} />
+            <Chat sections={sections} onSectionParsed={handleSectionParsed} onThemeSelected={handleThemeSelected} onNavbar={handleNavbar} onImages={handleImages} onPages={handlePages} onRefine={handleRefine} onGenerationComplete={handleGenerationComplete} />
           </div>
           <div className="flex-1 min-w-0 overflow-y-auto">
             <div className="h-full overflow-y-auto" style={themeStyle} data-effects={effectsId}>
