@@ -9,6 +9,7 @@ import type { ImageSelection } from "@muse/media";
 import { resolveThemeWithEffects, themeToCssVars, getTypography, loadFonts } from "@muse/themes";
 import { Chat } from "./components/chat";
 import { useSite } from "./hooks/useSite";
+import type { RefineUpdate } from "./hooks/useChat";
 import { PageSwitcher } from "./components/PageSwitcher";
 import { ReviewLayout, ReviewDashboard, ReviewEntry, ReviewSessionPage } from "./review";
 import type { ThemeSelection, PageInfo } from "./utils/streamParser";
@@ -158,6 +159,12 @@ function MainApp() {
     });
   }, [clearSite, addNewPage, updatePageSections, setCurrentPage]);
 
+  const handleRefine = useCallback((updates: RefineUpdate[]) => {
+    for (const { sectionId, updates: sectionUpdates } of updates) {
+      updateSectionById(sectionId, sectionUpdates);
+    }
+  }, [updateSectionById]);
+
   return (
     <SiteProvider pageSlugs={pageSlugs} onGeneratePage={handleGeneratePage}>
       <div className="flex flex-col h-full font-sans text-text bg-bg">
@@ -175,7 +182,7 @@ function MainApp() {
         )}
         <main className="flex-1 flex gap-6 p-6 overflow-hidden">
           <div className="w-[400px] shrink-0">
-            <Chat onSectionParsed={handleSectionParsed} onThemeSelected={handleThemeSelected} onNavbar={handleNavbar} onImages={handleImages} onPages={handlePages} />
+            <Chat sections={sections} onSectionParsed={handleSectionParsed} onThemeSelected={handleThemeSelected} onNavbar={handleNavbar} onImages={handleImages} onPages={handlePages} onRefine={handleRefine} />
           </div>
           <div className="flex-1 min-w-0 overflow-y-auto">
             <div className="h-full overflow-y-auto" style={themeStyle} data-effects={effectsId}>

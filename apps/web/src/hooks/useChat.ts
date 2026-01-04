@@ -9,13 +9,22 @@ export interface Message {
   content: string
 }
 
+export interface RefineUpdate {
+  sectionId: string
+  updates: Partial<Section>
+}
+
 export interface UseChatOptions {
+  /** Current sections - when provided, chat switches to refine mode */
+  sections?: Section[]
   onSectionParsed?: (section: Section) => void
   onThemeSelected?: (theme: ThemeSelection) => void
   onNavbar?: (navbar: NavbarSection) => void
   onImages?: (images: ImageSelection[]) => void
   onPages?: (pages: PageInfo[]) => void
   onUsage?: (usage: Usage) => void
+  /** Called when refine returns updates to apply */
+  onRefine?: (updates: RefineUpdate[]) => void
 }
 
 export interface UseChat {
@@ -31,6 +40,7 @@ export interface UseChat {
 }
 
 const API_URL = "http://localhost:3001/api/chat";
+const REFINE_URL = "http://localhost:3001/api/chat/refine";
 
 const emptyUsage: Usage = { input: 0, output: 0, cost: 0, model: "" };
 
@@ -65,6 +75,63 @@ export function useChat(options: UseChatOptions = {}): UseChat {
     navbarProcessedRef.current = false;
     pagesProcessedRef.current = false;
 
+    // Refine mode: when sections exist, use refine endpoint
+    const isRefineMode = options.sections && options.sections.length > 0;
+
+    if (isRefineMode) {
+      try {
+        const response = await fetch(REFINE_URL, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            sections: options.sections,
+            prompt: input,
+          }),
+        });
+
+        if (!response.ok) {
+          throw new Error(`API error: ${response.status}`);
+        }
+
+        const result = await response.json();
+
+        // Apply updates via callback
+        if (result.toolCalls?.length && options.onRefine) {
+          const updates: RefineUpdate[] = result.toolCalls
+            .filter((tc: { name: string }) => tc.name === "edit_section")
+            .map((tc: { input: { sectionId: string, updates: Partial<Section> } }) => ({
+              sectionId: tc.input.sectionId,
+              updates: tc.input.updates,
+            }));
+          options.onRefine(updates);
+        }
+
+        // Track usage
+        if (result.usage) {
+          const usage = { ...result.usage, cost: result.usage.cost ?? 0, model: result.usage.model ?? "unknown" };
+          setLastUsage(usage);
+          setSessionUsage(prev => ({
+            input: prev.input + usage.input,
+            output: prev.output + usage.output,
+            cost: prev.cost + usage.cost,
+            model: usage.model,
+          }));
+        }
+
+        setMessages([...newMessages, { role: "assistant", content: result.message || "Done" }]);
+      }
+      catch (err) {
+        const message = err instanceof Error ? err.message : "Unknown error";
+        console.error("Refine error:", err);
+        setError(message);
+      }
+      finally {
+        setIsLoading(false);
+      }
+      return;
+    }
+
+    // Generation mode: stream from chat endpoint
     try {
       const response = await fetch(API_URL, {
         method: "POST",

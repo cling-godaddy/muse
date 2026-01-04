@@ -3,16 +3,20 @@ import type { Section, NavbarSection } from "@muse/core";
 import type { ImageSelection } from "@muse/media";
 import { Spinner } from "@muse/editor";
 import { getPalette } from "@muse/themes";
-import { useChat, type Message } from "../hooks/useChat";
+import { useChat, type Message, type RefineUpdate } from "../hooks/useChat";
 import type { AgentState, ThemeSelection, PageInfo } from "../utils/streamParser";
 import { TimelineModal } from "./modals/timeline";
 
 interface ChatProps {
+  /** Current sections - enables refine mode when provided */
+  sections?: Section[]
   onSectionParsed?: (section: Section) => void
   onThemeSelected?: (theme: ThemeSelection) => void
   onNavbar?: (navbar: NavbarSection) => void
   onImages?: (images: ImageSelection[]) => void
   onPages?: (pages: PageInfo[]) => void
+  /** Called when AI refines sections */
+  onRefine?: (updates: RefineUpdate[]) => void
 }
 
 function formatTokens(n: number): string {
@@ -21,9 +25,10 @@ function formatTokens(n: number): string {
   return `${(n / 1_000_000).toFixed(1)}M`;
 }
 
-export function Chat({ onSectionParsed, onThemeSelected, onNavbar, onImages, onPages }: ChatProps) {
-  const options = useMemo(() => ({ onSectionParsed, onThemeSelected, onNavbar, onImages, onPages }), [onSectionParsed, onThemeSelected, onNavbar, onImages, onPages]);
+export function Chat({ sections, onSectionParsed, onThemeSelected, onNavbar, onImages, onPages, onRefine }: ChatProps) {
+  const options = useMemo(() => ({ sections, onSectionParsed, onThemeSelected, onNavbar, onImages, onPages, onRefine }), [sections, onSectionParsed, onThemeSelected, onNavbar, onImages, onPages, onRefine]);
   const { messages, input, setInput, isLoading, error, send, sessionUsage, lastUsage, agents } = useChat(options);
+  const isRefineMode = sections && sections.length > 0;
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -96,7 +101,7 @@ export function Chat({ onSectionParsed, onThemeSelected, onNavbar, onImages, onP
           value={input}
           onChange={e => setInput(e.target.value)}
           onKeyDown={handleKeyDown}
-          placeholder="Describe the landing page you want..."
+          placeholder={isRefineMode ? "Ask to refine sections..." : "Describe the landing page you want..."}
           rows={3}
           disabled={isLoading}
         />
