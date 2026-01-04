@@ -169,7 +169,14 @@ chatRoute.post("/refine", async (c) => {
 
   const result = await refine({ sections, messages }, getClient(), executeTool);
 
-  // Transform tool calls to frontend format: { field, value } -> { updates: { [field]: value } }
+  // Log detailed errors for debugging
+  if (result.failedCalls.length > 0) {
+    for (const failed of result.failedCalls) {
+      logger.warn("refine_tool_failed", { tool: failed.name, error: failed.error });
+    }
+  }
+
+  // Transform successful tool calls to frontend format
   const transformedToolCalls = result.toolCalls.map((tc) => {
     if (tc.name === "edit_section" && tc.input.field) {
       const { sectionId, field, value } = tc.input as { sectionId: string, field: string, value: unknown };
@@ -181,8 +188,19 @@ chatRoute.post("/refine", async (c) => {
     return tc;
   });
 
+  // Build user-friendly message
+  let message = result.message;
+  if (result.failedCalls.length > 0 && result.toolCalls.length === 0) {
+    // All calls failed - add friendly error
+    message = "I wasn't able to make that change. Could you try rephrasing your request?";
+  }
+  else if (result.failedCalls.length > 0) {
+    // Some calls failed - note partial success
+    message = `${message} (Some changes couldn't be applied)`;
+  }
+
   return c.json({
-    message: result.message,
+    message,
     toolCalls: transformedToolCalls,
     usage: result.usage,
   });

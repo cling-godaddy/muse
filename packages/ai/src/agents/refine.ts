@@ -11,6 +11,8 @@ interface RefineInput {
 interface RefineResult {
   message: string
   toolCalls: { name: string, input: Record<string, unknown> }[]
+  /** Tool calls that failed validation */
+  failedCalls: { name: string, error: string }[]
   usage: { input: number, output: number }
 }
 
@@ -75,18 +77,25 @@ export async function refine(
 
   const usage = response.usage ?? { input: 0, output: 0 };
   const toolCalls: { name: string, input: Record<string, unknown> }[] = [];
+  const failedCalls: { name: string, error: string }[] = [];
 
-  // Execute any tool calls
+  // Execute any tool calls, tracking successes and failures
   if (response.toolCalls?.length) {
     for (const call of response.toolCalls) {
-      toolCalls.push({ name: call.name, input: call.input });
-      await executeTool(call);
+      const result = await executeTool(call);
+      if (result.result && typeof result.result === "object" && "error" in result.result) {
+        failedCalls.push({ name: call.name, error: result.result.error as string });
+      }
+      else {
+        toolCalls.push({ name: call.name, input: call.input });
+      }
     }
   }
 
   return {
     message: response.content || "Done",
     toolCalls,
+    failedCalls,
     usage,
   };
 }
