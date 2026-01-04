@@ -3,7 +3,7 @@ import { flushSync } from "react-dom";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { groupBy } from "lodash-es";
 import { SectionEditor, SiteProvider, EditorModeProvider } from "@muse/editor";
-import type { Section, SectionType, NavbarSection } from "@muse/core";
+import type { Section, SectionType, NavbarSection, PreviewDevice } from "@muse/core";
 import { sectionNeedsImages, getPresetImageInjection, getImageInjection, applyImageInjection } from "@muse/core";
 import type { ImageSelection } from "@muse/media";
 import { resolveThemeWithEffects, themeToCssVars, getTypography, loadFonts } from "@muse/themes";
@@ -11,6 +11,7 @@ import { Chat } from "./components/chat";
 import { useSiteWithHistory } from "./hooks/useSiteWithHistory";
 import type { RefineUpdate } from "./hooks/useChat";
 import { EditorToolbar } from "./components/EditorToolbar";
+import { PreviewContainer } from "./components/PreviewContainer";
 import { ReviewLayout, ReviewDashboard, ReviewEntry, ReviewSessionPage } from "./review";
 import type { ThemeSelection, PageInfo } from "./utils/streamParser";
 
@@ -68,7 +69,15 @@ function MainApp() {
   const siteRef = useRef(site);
   const [pendingImageSections, setPendingImageSections] = useState<Set<string>>(new Set());
   const [editorMode, setEditorMode] = useState<"edit" | "preview">("edit");
+  const [previewDevice, setPreviewDevice] = useState<PreviewDevice>("desktop");
   const isPreview = editorMode === "preview";
+
+  const handleEditorModeChange = useCallback((mode: "edit" | "preview") => {
+    setEditorMode(mode);
+    if (mode === "edit") {
+      setPreviewDevice("desktop");
+    }
+  }, []);
 
   useLayoutEffect(() => {
     siteRef.current = site;
@@ -211,8 +220,10 @@ function MainApp() {
             canUndo={canUndo}
             canRedo={canRedo}
             editorMode={editorMode}
-            onEditorModeChange={setEditorMode}
+            onEditorModeChange={handleEditorModeChange}
             isGenerationComplete={isGenerationComplete}
+            previewDevice={previewDevice}
+            onPreviewDeviceChange={setPreviewDevice}
           />
         )}
         <main className="flex-1 flex gap-6 p-6 overflow-hidden">
@@ -221,12 +232,24 @@ function MainApp() {
               <Chat sections={sections} onSectionParsed={handleSectionParsed} onThemeSelected={handleThemeSelected} onNavbar={handleNavbar} onImages={handleImages} onPages={handlePages} onRefine={handleRefine} onGenerationComplete={handleGenerationComplete} />
             </div>
           )}
-          <div className="flex-1 min-w-0 overflow-y-auto">
-            <div className="h-full overflow-y-auto" style={themeStyle} data-effects={effectsId}>
-              <EditorModeProvider mode={editorMode}>
-                <SectionEditor sections={sections} onChange={setSections} pendingImageSections={pendingImageSections} navbar={site.navbar} onNavbarChange={setNavbar} />
-              </EditorModeProvider>
-            </div>
+          <div className="flex-1 min-w-0 overflow-hidden">
+            {isPreview
+              ? (
+                <PreviewContainer device={previewDevice}>
+                  <div style={themeStyle} data-effects={effectsId}>
+                    <EditorModeProvider mode={editorMode}>
+                      <SectionEditor sections={sections} onChange={setSections} pendingImageSections={pendingImageSections} navbar={site.navbar} onNavbarChange={setNavbar} />
+                    </EditorModeProvider>
+                  </div>
+                </PreviewContainer>
+              )
+              : (
+                <div className="h-full overflow-y-auto" style={themeStyle} data-effects={effectsId}>
+                  <EditorModeProvider mode={editorMode}>
+                    <SectionEditor sections={sections} onChange={setSections} pendingImageSections={pendingImageSections} navbar={site.navbar} onNavbarChange={setNavbar} />
+                  </EditorModeProvider>
+                </div>
+              )}
           </div>
         </main>
       </div>

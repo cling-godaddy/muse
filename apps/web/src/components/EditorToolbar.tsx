@@ -1,9 +1,31 @@
 import { useMemo } from "react";
-import { Undo2, Redo2, Eye, PenLine } from "lucide-react";
-import type { Site } from "@muse/core";
+import { Undo2, Redo2, Eye, PenLine, Smartphone, Tablet, Monitor, RotateCcw } from "lucide-react";
+import type { Site, PreviewDevice } from "@muse/core";
 import { getPagesFlattened } from "@muse/core";
 
 type EditorMode = "edit" | "preview";
+
+type DeviceCategory = "mobile" | "tablet" | "desktop";
+
+function getDeviceCategory(device: PreviewDevice): DeviceCategory {
+  if (device === "mobile" || device === "mobile-landscape") return "mobile";
+  if (device === "tablet" || device === "tablet-landscape") return "tablet";
+  return "desktop";
+}
+
+function isLandscape(device: PreviewDevice): boolean {
+  return device === "mobile-landscape" || device === "tablet-landscape";
+}
+
+function toggleOrientation(device: PreviewDevice): PreviewDevice {
+  switch (device) {
+    case "mobile": return "mobile-landscape";
+    case "mobile-landscape": return "mobile";
+    case "tablet": return "tablet-landscape";
+    case "tablet-landscape": return "tablet";
+    default: return device;
+  }
+}
 
 interface EditorToolbarProps {
   site: Site
@@ -18,6 +40,8 @@ interface EditorToolbarProps {
   editorMode?: EditorMode
   onEditorModeChange?: (mode: EditorMode) => void
   isGenerationComplete?: boolean
+  previewDevice?: PreviewDevice
+  onPreviewDeviceChange?: (device: PreviewDevice) => void
 }
 
 export function EditorToolbar({
@@ -33,10 +57,34 @@ export function EditorToolbar({
   editorMode = "edit",
   onEditorModeChange,
   isGenerationComplete = true,
+  previewDevice = "desktop",
+  onPreviewDeviceChange,
 }: EditorToolbarProps) {
   const isPreview = editorMode === "preview";
   const canPreview = isGenerationComplete;
   const flattenedPages = useMemo(() => getPagesFlattened(site), [site]);
+
+  const deviceCategory = getDeviceCategory(previewDevice);
+  const canRotate = deviceCategory !== "desktop";
+
+  const handleDeviceSelect = (category: DeviceCategory) => {
+    if (!onPreviewDeviceChange) return;
+    if (category === "desktop") {
+      onPreviewDeviceChange("desktop");
+    }
+    else if (category === "mobile") {
+      onPreviewDeviceChange(isLandscape(previewDevice) && deviceCategory === "mobile" ? "mobile-landscape" : "mobile");
+    }
+    else {
+      onPreviewDeviceChange(isLandscape(previewDevice) && deviceCategory === "tablet" ? "tablet-landscape" : "tablet");
+    }
+  };
+
+  const handleRotate = () => {
+    if (onPreviewDeviceChange && canRotate) {
+      onPreviewDeviceChange(toggleOrientation(previewDevice));
+    }
+  };
 
   if (flattenedPages.length === 0) {
     return null;
@@ -92,8 +140,43 @@ export function EditorToolbar({
         </button>
       )}
 
+      {/* Device selector (preview mode only) */}
+      {isPreview && onPreviewDeviceChange && (
+        <div className="ml-auto flex items-center gap-1 border-r border-border pr-2 mr-2">
+          <button
+            onClick={() => handleDeviceSelect("mobile")}
+            className={`flex items-center justify-center w-7 h-7 rounded transition-colors ${deviceCategory === "mobile" ? "text-text bg-border" : "text-text-muted hover:text-text hover:bg-border"}`}
+            title="Mobile"
+          >
+            <Smartphone size={16} />
+          </button>
+          <button
+            onClick={() => handleDeviceSelect("tablet")}
+            className={`flex items-center justify-center w-7 h-7 rounded transition-colors ${deviceCategory === "tablet" ? "text-text bg-border" : "text-text-muted hover:text-text hover:bg-border"}`}
+            title="Tablet"
+          >
+            <Tablet size={16} />
+          </button>
+          <button
+            onClick={() => handleDeviceSelect("desktop")}
+            className={`flex items-center justify-center w-7 h-7 rounded transition-colors ${deviceCategory === "desktop" ? "text-text bg-border" : "text-text-muted hover:text-text hover:bg-border"}`}
+            title="Desktop"
+          >
+            <Monitor size={16} />
+          </button>
+          <button
+            onClick={handleRotate}
+            disabled={!canRotate}
+            className="flex items-center justify-center w-7 h-7 text-text-muted hover:text-text hover:bg-border rounded transition-colors disabled:opacity-30 disabled:pointer-events-none"
+            title="Rotate"
+          >
+            <RotateCcw size={16} />
+          </button>
+        </div>
+      )}
+
       {/* Undo/Redo actions and Preview toggle */}
-      <div className="ml-auto flex items-center gap-1">
+      <div className={`flex items-center gap-1 ${!isPreview ? "ml-auto" : ""}`}>
         {onUndo && (
           <button
             onClick={onUndo}
