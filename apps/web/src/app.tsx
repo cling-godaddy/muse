@@ -1,6 +1,6 @@
 import { useState, useMemo, useCallback, useEffect, useRef, useLayoutEffect } from "react";
 import { flushSync } from "react-dom";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, useParams, useNavigate } from "react-router-dom";
 import { groupBy } from "lodash-es";
 import { SectionEditor, SiteProvider, EditorModeProvider } from "@muse/editor";
 import type { Section, SectionType, NavbarSection, PreviewDevice } from "@muse/core";
@@ -9,6 +9,7 @@ import type { ImageSelection } from "@muse/media";
 import { resolveThemeWithEffects, themeToCssVars, getTypography, loadFonts } from "@muse/themes";
 import { Chat } from "./components/chat";
 import { useSiteWithHistory } from "./hooks/useSiteWithHistory";
+import { useSitePersistence } from "./hooks/useSitePersistence";
 import type { RefineUpdate } from "./hooks/useChat";
 import { EditorToolbar } from "./components/EditorToolbar";
 import { PreviewContainer } from "./components/PreviewContainer";
@@ -21,8 +22,12 @@ function hasNavbarContent(navbar?: NavbarSection): boolean {
 }
 
 function MainApp() {
+  const { siteId: urlSiteId } = useParams<{ siteId?: string }>();
+  const navigate = useNavigate();
+
   const {
     site,
+    setSite,
     currentPageId,
     pageSlugs,
     setCurrentPage,
@@ -47,10 +52,41 @@ function MainApp() {
     isGenerationComplete,
   } = useSiteWithHistory();
 
-  // Global undo/redo keyboard shortcuts
+  const persistence = useSitePersistence({ site, setSite });
+
+  // Load site from URL on mount (only if URL id differs from current site)
+  const loadedRef = useRef<string | null>(null);
+  useEffect(() => {
+    if (urlSiteId && urlSiteId !== site.id && urlSiteId !== loadedRef.current) {
+      loadedRef.current = urlSiteId;
+      persistence.load(urlSiteId).then((found) => {
+        if (!found) {
+          navigate("/", { replace: true });
+        }
+      });
+    }
+  }, [urlSiteId, site.id, persistence, navigate]);
+
+  // Update URL when generation completes
+  useEffect(() => {
+    if (isGenerationComplete && !urlSiteId) {
+      navigate(`/sites/${site.id}`, { replace: true });
+    }
+  }, [isGenerationComplete, urlSiteId, site.id, navigate]);
+
+  // Global keyboard shortcuts (undo/redo/save)
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
-      // Skip if inside Lexical editor - it handles its own undo
+      // Cmd+S to save
+      if ((e.metaKey || e.ctrlKey) && e.key === "s") {
+        e.preventDefault();
+        if (isGenerationComplete && persistence.hasUnsavedChanges && !persistence.isSaving) {
+          persistence.save();
+        }
+        return;
+      }
+
+      // Skip undo/redo if inside Lexical editor - it handles its own undo
       if (document.activeElement?.closest("[data-lexical-editor]")) return;
 
       if ((e.metaKey || e.ctrlKey) && e.key === "z") {
@@ -65,7 +101,7 @@ function MainApp() {
     };
     window.addEventListener("keydown", handler);
     return () => window.removeEventListener("keydown", handler);
-  }, [undo, redo]);
+  }, [undo, redo, isGenerationComplete, persistence]);
   const siteRef = useRef(site);
   const [pendingImageSections, setPendingImageSections] = useState<Set<string>>(new Set());
   const [editorMode, setEditorMode] = useState<"edit" | "preview">("edit");
@@ -224,6 +260,9 @@ function MainApp() {
             isGenerationComplete={isGenerationComplete}
             previewDevice={previewDevice}
             onPreviewDeviceChange={setPreviewDevice}
+            onSave={persistence.save}
+            isSaving={persistence.isSaving}
+            hasUnsavedChanges={persistence.hasUnsavedChanges}
           />
         )}
         <main className="flex-1 flex gap-6 p-6 overflow-hidden">
@@ -260,6 +299,7 @@ export function App() {
     <BrowserRouter>
       <Routes>
         <Route path="/" element={<MainApp />} />
+        <Route path="/sites/:siteId" element={<MainApp />} />
         <Route path="/review" element={<ReviewLayout />}>
           <Route index element={<ReviewDashboard />} />
           <Route path="session" element={<ReviewSessionPage />} />

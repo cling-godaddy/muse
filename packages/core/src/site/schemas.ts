@@ -1,6 +1,6 @@
 import { z } from "zod";
 import { pageSchema } from "../page/schemas";
-import { imageSourceSchema } from "../sections/schemas";
+import { navbarSectionSchema } from "../sections/schemas";
 
 export const siteNodeSchema: z.ZodType<{
   pageId: string
@@ -14,17 +14,6 @@ export const siteNodeSchema: z.ZodType<{
   }),
 );
 
-export const navbarConfigSchema = z.object({
-  logo: z.object({
-    text: z.string().optional(),
-    image: imageSourceSchema.optional(),
-  }).optional(),
-  cta: z.object({
-    text: z.string(),
-    href: z.string(),
-  }).optional(),
-});
-
 export const siteThemeSchema = z.object({
   palette: z.string(),
   typography: z.string(),
@@ -36,7 +25,7 @@ export const siteSchema = z.object({
   pages: z.record(z.string().uuid(), pageSchema),
   tree: z.array(siteNodeSchema),
   theme: siteThemeSchema,
-  navbar: navbarConfigSchema,
+  navbar: navbarSectionSchema.optional(),
   createdAt: z.string(),
   updatedAt: z.string(),
 });

@@ -1,5 +1,5 @@
 import { useMemo } from "react";
-import { Undo2, Redo2, Eye, PenLine, Smartphone, Tablet, Monitor, RotateCcw } from "lucide-react";
+import { Undo2, Redo2, Eye, PenLine, Smartphone, Tablet, Monitor, RotateCcw, Save, Loader2 } from "lucide-react";
 import type { Site, PreviewDevice } from "@muse/core";
 import { getPagesFlattened } from "@muse/core";
 
@@ -42,6 +42,9 @@ interface EditorToolbarProps {
   isGenerationComplete?: boolean
   previewDevice?: PreviewDevice
   onPreviewDeviceChange?: (device: PreviewDevice) => void
+  onSave?: () => void
+  isSaving?: boolean
+  hasUnsavedChanges?: boolean
 }
 
 export function EditorToolbar({
@@ -59,6 +62,9 @@ export function EditorToolbar({
   isGenerationComplete = true,
   previewDevice = "desktop",
   onPreviewDeviceChange,
+  onSave,
+  isSaving,
+  hasUnsavedChanges,
 }: EditorToolbarProps) {
   const isPreview = editorMode === "preview";
   const canPreview = isGenerationComplete;
@@ -205,6 +211,17 @@ export function EditorToolbar({
             title={isPreview ? "Exit Preview" : "Preview"}
           >
             {isPreview ? <PenLine size={16} /> : <Eye size={16} />}
+          </button>
+        )}
+        {onSave && isGenerationComplete && (
+          <button
+            onClick={onSave}
+            disabled={isSaving || !hasUnsavedChanges}
+            className="flex items-center justify-center gap-1 px-2 h-7 text-xs text-text-muted hover:text-text hover:bg-border rounded transition-colors disabled:opacity-30 disabled:pointer-events-none ml-2"
+            title={hasUnsavedChanges ? "Save (⌘S)" : "Saved"}
+          >
+            {isSaving ? <Loader2 size={14} className="animate-spin" /> : <Save size={14} />}
+            <span>{isSaving ? "Saving..." : hasUnsavedChanges ? "Save" : "Saved"}</span>
           </button>
         )}
       </div>

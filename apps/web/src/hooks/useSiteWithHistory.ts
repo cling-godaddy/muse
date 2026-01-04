@@ -16,6 +16,9 @@ interface Snapshot {
 }
 
 export interface UseSiteWithHistory extends Omit<UseSite, "setSite"> {
+  // Full site replacement (for loading from persistence)
+  setSite: (site: Site) => void
+
   // Theme state (moved here from app.tsx)
   theme: ThemeState
   setTheme: (palette: string, typography: string, effects?: string) => void
@@ -161,6 +164,22 @@ export function useSiteWithHistory(initialName = "Untitled Site"): UseSiteWithHi
     // Note: useEffect will sync present with current state when historyEnabled changes
   }, []);
 
+  // Full site replacement (for loading from persistence)
+  const setSite = useCallback((newSite: Site) => {
+    siteHook.setSite(newSite);
+    // Set theme from loaded site
+    setThemeState(prev => ({
+      ...prev,
+      palette: newSite.theme.palette,
+      typography: newSite.theme.typography,
+    }));
+    // Select first page
+    const firstPageId = Object.keys(newSite.pages)[0];
+    if (firstPageId) {
+      siteHook.setCurrentPage(firstPageId);
+    }
+  }, [siteHook]);
+
   return {
     // Pass through read-only state
     site: siteHook.site,
@@ -169,6 +188,9 @@ export function useSiteWithHistory(initialName = "Untitled Site"): UseSiteWithHi
     pageSlugs: siteHook.pageSlugs,
     sections: siteHook.sections,
     setCurrentPage: siteHook.setCurrentPage,
+
+    // Full site replacement
+    setSite,
 
     // Theme state
     theme,
