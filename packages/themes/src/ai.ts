@@ -34,7 +34,10 @@ export function generatePaletteTypographyPrompt(): string {
 
   const typographyLines = Object.entries(typographyByCategory).map(([cat, items]) => {
     const desc = typographyCategoryDescriptions[cat as TypographyCategory];
-    const itemList = items.map(t => `  - ${t.id}: ${t.description}`).join("\n");
+    const itemList = items.map((t) => {
+      const hints = [t.mood, ...t.tags.slice(0, 3)].join(", ");
+      return `  - ${t.id}: ${t.description} [${hints}]`;
+    }).join("\n");
     return `${cat.toUpperCase()} (${desc}):\n${itemList}`;
   });
 
