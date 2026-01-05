@@ -5,8 +5,9 @@ CREATE TABLE sites (
   user_id TEXT NOT NULL,
   name TEXT NOT NULL,
   theme JSONB NOT NULL,
-  navbar JSONB,
   tree JSONB NOT NULL,
+  domain TEXT UNIQUE,
+  published_at TIMESTAMPTZ,
   created_at TIMESTAMPTZ DEFAULT NOW(),
   updated_at TIMESTAMPTZ DEFAULT NOW()
 );
@@ -28,7 +29,6 @@ CREATE TABLE sections (
   preset TEXT,
   position INTEGER NOT NULL,
   content JSONB NOT NULL,
-  version INTEGER DEFAULT 1,
   created_at TIMESTAMPTZ DEFAULT NOW(),
   updated_at TIMESTAMPTZ DEFAULT NOW()
 );
@@ -44,6 +44,7 @@ CREATE TABLE messages (
 );
 
 CREATE INDEX idx_sites_user_id ON sites(user_id);
+CREATE INDEX idx_sites_domain ON sites(domain);
 CREATE INDEX idx_pages_site_id ON pages(site_id);
 CREATE INDEX idx_sections_page_id ON sections(page_id);
 CREATE INDEX idx_messages_site_id ON messages(site_id);

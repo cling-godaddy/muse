@@ -1,4 +1,4 @@
-import type { Site, SiteTheme, SiteNode, Page, Section, NavbarSection } from "@muse/core";
+import type { Site, SiteTheme, SiteNode, Page, Section } from "@muse/core";
 import type { SitesTable, SiteSummary, MessagesTable, StoredMessage, StoredUsage, StoredAgentState } from "./types";
 import { getDb } from "../db";
 
@@ -7,8 +7,9 @@ interface SiteRow {
   user_id: string
   name: string
   theme: SiteTheme
-  navbar: NavbarSection | null
   tree: SiteNode[]
+  domain: string | null
+  published_at: string | null
   created_at: string
   updated_at: string
 }
@@ -44,12 +45,11 @@ export function createPostgresSitesTable(): SitesTable {
 
       try {
         await sql`
-          INSERT INTO sites (id, user_id, name, theme, navbar, tree, created_at, updated_at)
-          VALUES (${site.id}, ${userId}, ${site.name}, ${JSON.stringify(site.theme)}, ${site.navbar ? JSON.stringify(site.navbar) : null}, ${JSON.stringify(site.tree)}, ${site.createdAt}, ${now})
+          INSERT INTO sites (id, user_id, name, theme, tree, created_at, updated_at)
+          VALUES (${site.id}, ${userId}, ${site.name}, ${JSON.stringify(site.theme)}, ${JSON.stringify(site.tree)}, ${site.createdAt}, ${now})
           ON CONFLICT (id) DO UPDATE SET
             name = EXCLUDED.name,
             theme = EXCLUDED.theme,
-            navbar = EXCLUDED.navbar,
             tree = EXCLUDED.tree,
             updated_at = EXCLUDED.updated_at
         `;
@@ -148,7 +148,6 @@ export function createPostgresSitesTable(): SitesTable {
         id: siteRow.id,
         name: siteRow.name,
         theme: siteRow.theme,
-        navbar: siteRow.navbar ?? undefined,
         tree: siteRow.tree,
         pages,
         createdAt: siteRow.created_at,
@@ -197,7 +196,6 @@ export function createPostgresSitesTable(): SitesTable {
         id: siteRow.id,
         name: siteRow.name,
         theme: siteRow.theme,
-        navbar: siteRow.navbar ?? undefined,
         tree: siteRow.tree,
         pages,
         createdAt: siteRow.created_at,
