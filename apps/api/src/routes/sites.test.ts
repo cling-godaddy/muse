@@ -273,5 +273,29 @@ describe("sites routes", () => {
 
       expect(res.status).toBe(404);
     });
+
+    it("prevents user from deleting another user's site", async () => {
+      // Create site as user 1
+      const site = createTestSite();
+      await app.request(`/api/sites/${site.id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(site),
+      });
+
+      // Switch to user 2
+      mockUserId = "different_user";
+
+      // Attempt to delete - should succeed (204) but not actually delete
+      const deleteRes = await app.request(`/api/sites/${site.id}`, {
+        method: "DELETE",
+      });
+      expect(deleteRes.status).toBe(204);
+
+      // Switch back to user 1 - site should still exist
+      mockUserId = "test_user_123";
+      const getRes = await app.request(`/api/sites/${site.id}`);
+      expect(getRes.status).toBe(200);
+    });
   });
 });
