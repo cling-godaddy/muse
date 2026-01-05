@@ -27,40 +27,39 @@ function formatRelativeTime(dateStr: string): string {
   return date.toLocaleDateString();
 }
 
-function SiteCard({ site, onClick, onDelete }: { site: SiteSummary, onClick: () => void, onDelete: () => void }) {
+function SiteCard({ site, to, onDelete }: { site: SiteSummary, to: string, onDelete: () => void }) {
   return (
-    <button
-      onClick={onClick}
-      className="group bg-bg-muted rounded-lg overflow-hidden hover:ring-2 ring-primary text-left transition-all relative"
-    >
-      <div className="aspect-video bg-bg-subtle flex items-center justify-center">
-        <span className="text-4xl text-text-subtle font-medium">
-          {site.name.charAt(0).toUpperCase()}
-        </span>
-      </div>
+    <div className="group relative">
+      <Link
+        to={to}
+        className="block bg-bg-muted rounded-lg overflow-hidden hover:ring-2 ring-primary transition-all"
+      >
+        <div className="aspect-video bg-bg-subtle flex items-center justify-center">
+          <span className="text-4xl text-text-subtle font-medium">
+            {site.name.charAt(0).toUpperCase()}
+          </span>
+        </div>
+        <div className="p-4">
+          <h3 className="font-medium truncate text-text">{site.name}</h3>
+          <p className="text-sm text-text-muted">
+            {site.pageCount}
+            {" "}
+            page
+            {site.pageCount !== 1 ? "s" : ""}
+            {" "}
+            ·
+            {formatRelativeTime(site.updatedAt)}
+          </p>
+        </div>
+      </Link>
       <button
-        onClick={(e) => {
-          e.stopPropagation();
-          onDelete();
-        }}
+        onClick={onDelete}
         className="absolute top-2 right-2 p-1.5 rounded bg-bg/80 opacity-0 group-hover:opacity-100 hover:bg-red-500 hover:text-white text-text-muted transition-all"
         aria-label="Delete site"
       >
         <Trash2 size={16} />
       </button>
-      <div className="p-4">
-        <h3 className="font-medium truncate text-text">{site.name}</h3>
-        <p className="text-sm text-text-muted">
-          {site.pageCount}
-          {" "}
-          page
-          {site.pageCount !== 1 ? "s" : ""}
-          {" "}
-          ·
-          {formatRelativeTime(site.updatedAt)}
-        </p>
-      </div>
-    </button>
+    </div>
   );
 }
 
@@ -166,7 +165,7 @@ export function SitesDashboard() {
                   <SiteCard
                     key={site.id}
                     site={site}
-                    onClick={() => navigate(`/sites/${site.id}`)}
+                    to={`/sites/${site.id}`}
                     onDelete={() => setDeletingSite(site)}
                   />
                 ))}
