@@ -20,7 +20,7 @@ export function Dialog({ open, onOpenChange, trigger, title, children }: DialogP
       )}
       <DialogPrimitive.Portal>
         <DialogPrimitive.Overlay className={styles.overlay} />
-        <DialogPrimitive.Content className={styles.content}>
+        <DialogPrimitive.Content className={styles.content} aria-describedby={undefined}>
           {title && (
             <DialogPrimitive.Title className={styles.title}>
               {title}
