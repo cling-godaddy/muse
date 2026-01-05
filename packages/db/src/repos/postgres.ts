@@ -1,5 +1,5 @@
 import type { Site, SiteTheme, SiteNode, Page, Section, NavbarSection } from "@muse/core";
-import type { SitesTable } from "./types";
+import type { SitesTable, MessagesTable, StoredMessage, StoredUsage, StoredAgentState } from "./types";
 import { getDb } from "../db";
 
 interface SiteRow {
@@ -157,6 +157,95 @@ export function createPostgresSitesTable(): SitesTable {
 
     async delete(id: string): Promise<void> {
       await sql`DELETE FROM sites WHERE id = ${id}`;
+    },
+  };
+}
+
+interface MessageRow {
+  id: string
+  site_id: string
+  role: "user" | "assistant"
+  content: string
+  created_at: string
+  usage: StoredUsage | null
+  agents: StoredAgentState[] | null
+}
+
+export function createPostgresMessagesTable(): MessagesTable {
+  const sql = getDb();
+
+  return {
+    async save(message: StoredMessage): Promise<void> {
+      await sql`
+        INSERT INTO messages (id, site_id, role, content, created_at, usage, agents)
+        VALUES (
+          ${message.id},
+          ${message.siteId},
+          ${message.role},
+          ${message.content},
+          ${message.createdAt},
+          ${message.usage ? JSON.stringify(message.usage) : null},
+          ${message.agents ? JSON.stringify(message.agents) : null}
+        )
+        ON CONFLICT (id) DO UPDATE SET
+          content = EXCLUDED.content,
+          usage = EXCLUDED.usage,
+          agents = EXCLUDED.agents
+      `;
+    },
+
+    async saveBatch(messages: StoredMessage[]): Promise<void> {
+      if (messages.length === 0) return;
+
+      await sql`BEGIN`;
+      try {
+        for (const message of messages) {
+          await sql`
+            INSERT INTO messages (id, site_id, role, content, created_at, usage, agents)
+            VALUES (
+              ${message.id},
+              ${message.siteId},
+              ${message.role},
+              ${message.content},
+              ${message.createdAt},
+              ${message.usage ? JSON.stringify(message.usage) : null},
+              ${message.agents ? JSON.stringify(message.agents) : null}
+            )
+            ON CONFLICT (id) DO UPDATE SET
+              content = EXCLUDED.content,
+              usage = EXCLUDED.usage,
+              agents = EXCLUDED.agents
+          `;
+        }
+        await sql`COMMIT`;
+      }
+      catch (error) {
+        await sql`ROLLBACK`;
+        throw error;
+      }
+    },
+
+    async getBySiteId(siteId: string): Promise<StoredMessage[]> {
+      const rows = await sql`
+        SELECT id, site_id, role, content, created_at, usage, agents
+        FROM messages
+        WHERE site_id = ${siteId}
+        ORDER BY created_at ASC
+      ` as MessageRow[];
+
+      return rows.map(row => ({
+        id: row.id,
+        siteId: row.site_id,
+        role: row.role,
+        content: row.content,
+        createdAt: row.created_at,
+        usage: row.usage ?? undefined,
+        agents: row.agents ?? undefined,
+      }));
+    },
+
+    async deleteBySiteId(siteId: string): Promise<void> {
+      await sql`DELETE FROM messages WHERE site_id = ${siteId}`;
     },
   };
 }

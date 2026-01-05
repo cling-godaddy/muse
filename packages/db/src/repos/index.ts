@@ -1,9 +1,10 @@
-import type { SitesTable } from "./types";
-import { createMemorySitesTable, resetMemoryStore } from "./memory";
+import type { SitesTable, MessagesTable, StoredMessage } from "./types";
+import { createMemorySitesTable, createMemoryMessagesTable, resetMemoryStore } from "./memory";
 
-export type { SitesTable };
+export type { SitesTable, MessagesTable, StoredMessage };
 
 let _sitesTable: SitesTable | null = null;
+let _messagesTable: MessagesTable | null = null;
 
 export async function createSitesTable(): Promise<SitesTable> {
   if (!_sitesTable) {
@@ -18,7 +19,21 @@ export async function createSitesTable(): Promise<SitesTable> {
   return _sitesTable;
 }
 
+export async function createMessagesTable(): Promise<MessagesTable> {
+  if (!_messagesTable) {
+    if (process.env.TESTING) {
+      _messagesTable = createMemoryMessagesTable();
+    }
+    else {
+      const { createPostgresMessagesTable } = await import("./postgres");
+      _messagesTable = createPostgresMessagesTable();
+    }
+  }
+  return _messagesTable;
+}
+
 export function resetSitesTable(): void {
   _sitesTable = null;
+  _messagesTable = null;
   resetMemoryStore();
 }
