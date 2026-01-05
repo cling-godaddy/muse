@@ -358,17 +358,6 @@ export async function* orchestrateSite(
   yield `[THEME:${theme.palette}]\n`;
   yield `[SITEMAP:${JSON.stringify(sitemap)}]\n`;
 
-  // Generate navbar section with links to all pages
-  const homePage = sitemap.pages.find(p => p.slug === "/");
-  const navbar = {
-    id: crypto.randomUUID(),
-    type: "navbar" as const,
-    preset: "navbar-minimal",
-    logo: { text: homePage?.title || "Site" },
-    items: sitemap.pages.map(p => ({ label: p.title, href: p.slug })),
-  };
-  yield `[NAVBAR:${JSON.stringify(navbar)}]\n`;
-
   // Step 3: Generate pages in parallel (structure + copy for each)
   const generatedPages: GeneratedPage[] = [];
 
