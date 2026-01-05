@@ -22,12 +22,15 @@ function parseJson<T>(json: string): T {
   return JSON.parse(json);
 }
 
-// Replace AI-generated section IDs with proper UUIDs
-function assignSectionIds(sections: Section[]): Section[] {
-  return sections.map(section => ({
-    ...section,
-    id: crypto.randomUUID(),
-  }));
+// Replace AI-generated section IDs with proper UUIDs, returning a mapping for image plan remapping
+function assignSectionIds(sections: Section[]): { sections: Section[], idMap: Map<string, string> } {
+  const idMap = new Map<string, string>();
+  const newSections = sections.map((section) => {
+    const newId = crypto.randomUUID();
+    if (section.id) idMap.set(section.id, newId);
+    return { ...section, id: newId };
+  });
+  return { sections: newSections, idMap };
 }
 
 // Extract copy section summaries for image agent context
@@ -169,9 +172,20 @@ export async function* orchestrate(
 
   // Parse copy result as { sections: Section[] }
   let sections: Section[] = [];
+  let sectionIdMap = new Map<string, string>();
   try {
     const parsed = JSON.parse(copyResult.content) as { sections: Section[] };
-    sections = assignSectionIds(parsed.sections ?? []);
+    copyLog.debug("copy_output_ids", { ids: parsed.sections?.map(s => s.id) ?? [] });
+
+    const result = assignSectionIds(parsed.sections ?? []);
+    sections = result.sections;
+    sectionIdMap = result.idMap;
+
+    copyLog.debug("id_mapping", {
+      structureIds: structure.sections.map(s => s.id),
+      copyIds: parsed.sections?.map(s => s.id) ?? [],
+      mapping: Object.fromEntries(result.idMap),
+    });
   }
   catch (err) {
     copyLog.warn("parse_failed", { error: String(err), input: copyResult.content.slice(0, 200) });
@@ -210,17 +224,32 @@ export async function* orchestrate(
 
     const imagePlan = parseImagePlan(imageResult.content, mixedOrientationSections);
     imageLog.debug("parsed_plan", { plan: imagePlan, mixedSections: Array.from(mixedOrientationSections) });
+    imageLog.debug("image_plan_blockIds", { blockIds: imagePlan.map(p => p.blockId) });
 
     if (imagePlan.length > 0) {
-      // Compute minimum image counts per gallery section
+      // Remap structure IDs to actual section UUIDs
+      const remappedPlan = imagePlan.map(p => ({
+        ...p,
+        blockId: sectionIdMap.get(p.blockId) ?? p.blockId,
+      }));
+
+      imageLog.debug("remapped_blockIds", {
+        before: imagePlan.map(p => p.blockId),
+        after: remappedPlan.map(p => p.blockId),
+        matched: imagePlan.filter(p => sectionIdMap.has(p.blockId)).length,
+        total: imagePlan.length,
+      });
+
+      // Compute minimum image counts per gallery section (using remapped IDs)
       const minPerSection: Record<string, number> = {};
       for (const section of structure.sections) {
         if (section.type === "gallery" && section.preset) {
-          minPerSection[section.id] = getMinimumImages(section.preset);
+          const remappedId = sectionIdMap.get(section.id) ?? section.id;
+          minPerSection[remappedId] = getMinimumImages(section.preset);
         }
       }
 
-      images = await config.mediaClient.executePlan(imagePlan, { minPerSection });
+      images = await config.mediaClient.executePlan(remappedPlan, { minPerSection });
       events?.onImages?.(images);
     }
 
@@ -394,9 +423,21 @@ export async function* orchestrateSite(
       );
 
       let sections: Section[] = [];
+      let idMap = new Map<string, string>();
       try {
         const parsed = JSON.parse(copyResult.content) as { sections: Section[] };
-        sections = assignSectionIds(parsed.sections ?? []);
+        pageLog.debug("copy_output_ids", { page: pagePlan.slug, ids: parsed.sections?.map(s => s.id) ?? [] });
+
+        const result = assignSectionIds(parsed.sections ?? []);
+        sections = result.sections;
+        idMap = result.idMap;
+
+        pageLog.debug("id_mapping", {
+          page: pagePlan.slug,
+          structureIds: structure.sections.map(s => s.id),
+          copyIds: parsed.sections?.map(s => s.id) ?? [],
+          mapping: Object.fromEntries(result.idMap),
+        });
       }
       catch (err) {
         pageLog.warn("copy_parse_failed", { error: String(err) });
@@ -411,6 +452,7 @@ export async function* orchestrateSite(
       return {
         page,
         structure,
+        idMap,
         usage: {
           input: (structureResult.usage?.input ?? 0) + (copyResult.usage?.input ?? 0),
           output: (structureResult.usage?.output ?? 0) + (copyResult.usage?.output ?? 0),
@@ -449,8 +491,15 @@ export async function* orchestrateSite(
     const imageLog = log.child({ agent: "image" });
 
     // Combine all sections for image planning
+    // Use UUID IDs from actual sections to avoid collisions across pages
+    // (multiple pages have section-1, section-2, etc. - using UUIDs makes them unique)
     const allSections = generatedPages.flatMap(gp => gp.page.sections);
-    const allStructures = generatedPages.flatMap(gp => gp.structure.sections);
+    const allStructures = generatedPages.flatMap(gp =>
+      gp.structure.sections.map((structSection, idx) => ({
+        ...structSection,
+        id: gp.page.sections[idx]?.id ?? structSection.id,
+      })),
+    );
     const copySections = extractCopySectionSummaries(allSections);
 
     const combinedStructure: PageStructure = { sections: allStructures };
@@ -468,9 +517,13 @@ export async function* orchestrateSite(
     );
 
     const imagePlan = parseImagePlan(imageResult.content, mixedOrientationSections);
+    imageLog.debug("image_plan_blockIds", { blockIds: imagePlan.map(p => p.blockId) });
 
     let images: ImageSelection[] = [];
     if (imagePlan.length > 0) {
+      // No remapping needed - image plan already has UUID blockIds
+
+      // Compute minimum image counts per gallery section
       const minPerSection: Record<string, number> = {};
       for (const section of allStructures) {
         if (section.type === "gallery" && section.preset) {

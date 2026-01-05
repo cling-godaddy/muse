@@ -21,7 +21,7 @@ searchRoute.get("/images", async (c) => {
 
   const results = await client.search({
     query,
-    provider: provider || "unsplash",
+    provider: provider || "pexels",
     count: 12,
   });
 

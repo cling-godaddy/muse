@@ -98,6 +98,7 @@ export const imageAgent: SyncAgent = {
     }
 
     const response = await provider.chat({
+      model: "gpt-4o-mini",
       messages,
       responseSchema: imagePlanSchema,
     });

@@ -1,5 +1,4 @@
-import { useState, useMemo, useCallback, useEffect, useRef, useLayoutEffect } from "react";
-import { flushSync } from "react-dom";
+import { useState, useMemo, useCallback, useEffect, useRef } from "react";
 import { BrowserRouter, Routes, Route, useParams, useNavigate, Link } from "react-router-dom";
 import { UserButton } from "@clerk/clerk-react";
 import { groupBy } from "lodash-es";
@@ -107,7 +106,6 @@ function MainApp() {
     window.addEventListener("keydown", handler);
     return () => window.removeEventListener("keydown", handler);
   }, [undo, redo, isGenerationComplete, persistence]);
-  const siteRef = useRef(site);
   const [pendingImageSections, setPendingImageSections] = useState<Set<string>>(new Set());
   const [editorMode, setEditorMode] = useState<"edit" | "preview">("edit");
   const [previewDevice, setPreviewDevice] = useState<PreviewDevice>("desktop");
@@ -119,10 +117,6 @@ function MainApp() {
       setPreviewDevice("desktop");
     }
   }, []);
-
-  useLayoutEffect(() => {
-    siteRef.current = site;
-  }, [site]);
 
   const handleGeneratePage = useCallback((slug: string) => {
     // For now, create an empty page - in a full implementation,
@@ -162,20 +156,13 @@ function MainApp() {
     setTheme(selection.palette, selection.typography, selection.effects);
   }, [setTheme]);
 
-  const handleImages = useCallback((images: ImageSelection[]) => {
-    const currentSite = siteRef.current;
+  const handleImages = useCallback((images: ImageSelection[], sections: Section[]) => {
     const bySection = groupBy(images, img => img.blockId);
     const resolvedSectionIds: string[] = [];
 
-    // Collect all sections from all pages
-    const allSections: Section[] = [];
-    for (const page of Object.values(currentSite.pages)) {
-      allSections.push(...page.sections);
-    }
-
     for (const [sectionId, sectionImages] of Object.entries(bySection)) {
       const imgSources = sectionImages.map(s => s.image);
-      const section = allSections.find(s => s.id === sectionId);
+      const section = sections.find(s => s.id === sectionId);
       if (!section) continue;
 
       // Get injection config from preset or fallback to section type default
@@ -203,27 +190,23 @@ function MainApp() {
 
   const handlePages = useCallback((pages: PageInfo[]) => {
     beginTransaction();
-    // Use flushSync to ensure state is committed before handleImages runs
-    // This fixes race condition where siteRef.current is stale during image injection
-    flushSync(() => {
-      clearSite();
+    clearSite();
 
-      let firstPageId: string | null = null;
-      for (const pageInfo of pages) {
-        const pageId = addNewPage(pageInfo.slug, pageInfo.title);
-        if (!firstPageId) firstPageId = pageId;
-        updatePageSections(pageId, pageInfo.sections);
-        for (const section of pageInfo.sections) {
-          if (sectionNeedsImages(section.type as SectionType)) {
-            setPendingImageSections(prev => new Set(prev).add(section.id));
-          }
+    let firstPageId: string | null = null;
+    for (const pageInfo of pages) {
+      const pageId = addNewPage(pageInfo.slug, pageInfo.title);
+      if (!firstPageId) firstPageId = pageId;
+      updatePageSections(pageId, pageInfo.sections);
+      for (const section of pageInfo.sections) {
+        if (sectionNeedsImages(section.type as SectionType)) {
+          setPendingImageSections(prev => new Set(prev).add(section.id));
         }
       }
+    }
 
-      if (firstPageId) {
-        setCurrentPage(firstPageId);
-      }
-    });
+    if (firstPageId) {
+      setCurrentPage(firstPageId);
+    }
     commitTransaction();
   }, [clearSite, addNewPage, updatePageSections, setCurrentPage, beginTransaction, commitTransaction]);
 

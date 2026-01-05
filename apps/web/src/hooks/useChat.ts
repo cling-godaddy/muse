@@ -26,7 +26,7 @@ export interface UseChatOptions {
   sections?: Section[]
   onSectionParsed?: (section: Section) => void
   onThemeSelected?: (theme: ThemeSelection) => void
-  onImages?: (images: ImageSelection[]) => void
+  onImages?: (images: ImageSelection[], sections: Section[]) => void
   onPages?: (pages: PageInfo[]) => void
   onUsage?: (usage: Usage) => void
   /** Called when refine returns updates to apply */
@@ -243,9 +243,10 @@ export function useChat(options: UseChatOptions = {}): UseChat {
           options.onPages?.(result.newPages);
         }
 
-        // emit images AFTER pages so handleImages finds sections in siteRef.current
+        // emit images with sections from current parse result (not stale ref)
         if (result.newImages.length > 0) {
-          options.onImages?.(result.newImages);
+          const allSections = result.state.pages.flatMap(p => p.sections);
+          options.onImages?.(result.newImages, allSections);
         }
 
         // update agents if changed

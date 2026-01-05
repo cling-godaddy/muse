@@ -14,7 +14,7 @@ interface ChatProps {
   sections?: Section[]
   onSectionParsed?: (section: Section) => void
   onThemeSelected?: (theme: ThemeSelection) => void
-  onImages?: (images: ImageSelection[]) => void
+  onImages?: (images: ImageSelection[], sections: Section[]) => void
   onPages?: (pages: PageInfo[]) => void
   /** Called when AI refines sections */
   onRefine?: (updates: RefineUpdate[]) => void
