@@ -1,22 +1,51 @@
 import type { Site } from "@muse/core";
-import type { SitesTable, MessagesTable, StoredMessage } from "./types";
+import type { SitesTable, SiteSummary, MessagesTable, StoredMessage } from "./types";
 
-const store = new Map<string, Site>();
+interface StoredSite {
+  site: Site
+  userId: string
+}
+
+const store = new Map<string, StoredSite>();
 const messagesStore = new Map<string, StoredMessage[]>();
 
 export function createMemorySitesTable(): SitesTable {
   return {
-    async save(site: Site): Promise<void> {
-      store.set(site.id, structuredClone(site));
+    async save(site: Site, userId: string): Promise<void> {
+      store.set(site.id, { site: structuredClone(site), userId });
     },
 
     async getById(id: string): Promise<Site | null> {
-      const site = store.get(id);
-      return site ? structuredClone(site) : null;
+      const entry = store.get(id);
+      return entry ? structuredClone(entry.site) : null;
     },
 
-    async delete(id: string): Promise<void> {
-      store.delete(id);
+    async getByIdForUser(id: string, userId: string): Promise<Site | null> {
+      const entry = store.get(id);
+      if (!entry || entry.userId !== userId) return null;
+      return structuredClone(entry.site);
+    },
+
+    async listByUser(userId: string): Promise<SiteSummary[]> {
+      const results: SiteSummary[] = [];
+      for (const entry of store.values()) {
+        if (entry.userId === userId) {
+          results.push({
+            id: entry.site.id,
+            name: entry.site.name,
+            updatedAt: entry.site.updatedAt,
+            pageCount: Object.keys(entry.site.pages).length,
+          });
+        }
+      }
+      return results.sort((a, b) => b.updatedAt.localeCompare(a.updatedAt));
+    },
+
+    async delete(id: string, userId: string): Promise<void> {
+      const entry = store.get(id);
+      if (entry && entry.userId === userId) {
+        store.delete(id);
+      }
     },
   };
 }

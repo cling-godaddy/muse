@@ -1,7 +1,7 @@
-import type { SitesTable, MessagesTable, StoredMessage } from "./types";
+import type { SitesTable, SiteSummary, MessagesTable, StoredMessage } from "./types";
 import { createMemorySitesTable, createMemoryMessagesTable, resetMemoryStore } from "./memory";
 
-export type { SitesTable, MessagesTable, StoredMessage };
+export type { SitesTable, SiteSummary, MessagesTable, StoredMessage };
 
 let _sitesTable: SitesTable | null = null;
 let _messagesTable: MessagesTable | null = null;
