@@ -1,4 +1,5 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
+import { useAuth } from "@clerk/clerk-react";
 import { Spinner } from "@muse/editor";
 
 interface Stats {
@@ -36,6 +37,7 @@ interface Props {
 const API_BASE = "/api/review";
 
 export function Dashboard({ onStartReview, onSelectEntry, onBackToMain }: Props) {
+  const { getToken } = useAuth();
   const [stats, setStats] = useState<Stats | null>(null);
   const [entries, setEntries] = useState<EntryItem[]>([]);
   const [total, setTotal] = useState(0);
@@ -45,10 +47,21 @@ export function Dashboard({ onStartReview, onSelectEntry, onBackToMain }: Props)
   const [refreshKey, setRefreshKey] = useState(0);
   const [loadedImages, setLoadedImages] = useState<Set<string>>(new Set());
 
+  const authFetch = useCallback(async (url: string, options: RequestInit = {}) => {
+    const token = await getToken();
+    return fetch(url, {
+      ...options,
+      headers: {
+        ...options.headers,
+        Authorization: `Bearer ${token}`,
+      },
+    });
+  }, [getToken]);
+
   const handleRefresh = async () => {
     setRefreshing(true);
     try {
-      await fetch(`${API_BASE}/refresh`, { method: "POST" });
+      await authFetch(`${API_BASE}/refresh`, { method: "POST" });
       setRefreshKey(k => k + 1);
     }
     catch (err) {
@@ -60,11 +73,11 @@ export function Dashboard({ onStartReview, onSelectEntry, onBackToMain }: Props)
   };
 
   useEffect(() => {
-    fetch(`${API_BASE}/stats`)
+    authFetch(`${API_BASE}/stats`)
       .then(r => r.json())
       .then(setStats)
       .catch(console.error);
-  }, [refreshKey]);
+  }, [refreshKey, authFetch]);
 
   useEffect(() => {
     let cancelled = false;
@@ -76,7 +89,7 @@ export function Dashboard({ onStartReview, onSelectEntry, onBackToMain }: Props)
     if (filter !== "all") params.set("status", filter);
     params.set("limit", "100");
 
-    fetch(`${API_BASE}/entries?${params}`)
+    authFetch(`${API_BASE}/entries?${params}`)
       .then(r => r.json())
       .then((data) => {
         if (!cancelled) {
@@ -93,7 +106,7 @@ export function Dashboard({ onStartReview, onSelectEntry, onBackToMain }: Props)
     return () => {
       cancelled = true;
     };
-  }, [filter, refreshKey]);
+  }, [filter, refreshKey, authFetch]);
 
   const pct = stats ? Math.round((stats.reviewed / stats.total) * 100) : 0;
 

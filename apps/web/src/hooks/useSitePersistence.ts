@@ -1,4 +1,5 @@
 import { useState, useCallback, useEffect, useRef } from "react";
+import { useAuth } from "@clerk/clerk-react";
 import type { Site } from "@muse/core";
 
 const API_URL = "http://localhost:3001";
@@ -22,6 +23,7 @@ export function useSitePersistence({
   site,
   setSite,
 }: UseSitePersistenceOptions): UseSitePersistence {
+  const { getToken } = useAuth();
   const [isSaving, setIsSaving] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -51,9 +53,13 @@ export function useSitePersistence({
     setError(null);
 
     try {
+      const token = await getToken();
       const res = await fetch(`${API_URL}/api/sites/${currentSite.id}`, {
         method: "PUT",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${token}`,
+        },
         body: JSON.stringify(currentSite),
       });
 
@@ -72,7 +78,7 @@ export function useSitePersistence({
     finally {
       setIsSaving(false);
     }
-  }, []);
+  }, [getToken]);
 
   const load = useCallback(
     async (id: string): Promise<boolean> => {
@@ -80,7 +86,12 @@ export function useSitePersistence({
       setError(null);
 
       try {
-        const res = await fetch(`${API_URL}/api/sites/${id}`);
+        const token = await getToken();
+        const res = await fetch(`${API_URL}/api/sites/${id}`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
 
         if (res.status === 404) {
           return false;
@@ -105,7 +116,7 @@ export function useSitePersistence({
         setIsLoading(false);
       }
     },
-    [setSite],
+    [getToken, setSite],
   );
 
   const clearError = useCallback(() => {

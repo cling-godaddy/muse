@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
+import { useAuth } from "@clerk/clerk-react";
 import { Spinner } from "@muse/editor";
 import { AccuracyReview } from "./AccuracyReview";
 
@@ -29,33 +30,45 @@ interface Props {
 const API_BASE = "/api/review";
 
 export function ReviewSession({ entryId, onBack, onNavigate }: Props) {
+  const { getToken } = useAuth();
   const [entry, setEntry] = useState<EntryData | null>(null);
   const [stats, setStats] = useState<Stats | null>(null);
   const [loading, setLoading] = useState(true);
   const [sessionCount, setSessionCount] = useState(0);
 
+  const authFetch = useCallback(async (url: string, options: RequestInit = {}) => {
+    const token = await getToken();
+    return fetch(url, {
+      ...options,
+      headers: {
+        ...options.headers,
+        Authorization: `Bearer ${token}`,
+      },
+    });
+  }, [getToken]);
+
   const loadStats = useCallback(async () => {
     try {
-      const res = await fetch(`${API_BASE}/stats`);
+      const res = await authFetch(`${API_BASE}/stats`);
       const data = await res.json();
       setStats({ total: data.total, reviewed: data.reviewed });
     }
     catch (err) {
       console.error("Failed to load stats:", err);
     }
-  }, []);
+  }, [authFetch]);
 
   const loadEntry = useCallback(async (id?: string) => {
     setLoading(true);
     try {
       if (id) {
-        const res = await fetch(`${API_BASE}/entries/${encodeURIComponent(id)}`);
+        const res = await authFetch(`${API_BASE}/entries/${encodeURIComponent(id)}`);
         const data = await res.json();
         setEntry(data);
       }
       else {
         const afterParam = entry?.id ? `?after=${encodeURIComponent(entry.id)}` : "";
-        const res = await fetch(`${API_BASE}/next${afterParam}`);
+        const res = await authFetch(`${API_BASE}/next${afterParam}`);
         const data = await res.json();
         if (data.entry) {
           setEntry(data.entry);
@@ -72,7 +85,7 @@ export function ReviewSession({ entryId, onBack, onNavigate }: Props) {
     finally {
       setLoading(false);
     }
-  }, [entry?.id, onNavigate]);
+  }, [authFetch, entry?.id, onNavigate]);
 
   useEffect(() => {
     loadStats();

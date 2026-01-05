@@ -1,4 +1,5 @@
 import { useState, useCallback, useRef } from "react";
+import { useAuth } from "@clerk/clerk-react";
 import type { Section, NavbarSection } from "@muse/core";
 import type { Usage } from "@muse/ai";
 import type { ImageSelection } from "@muse/media";
@@ -47,6 +48,7 @@ const REFINE_URL = "http://localhost:3001/api/chat/refine";
 const emptyUsage: Usage = { input: 0, output: 0, cost: 0, model: "" };
 
 export function useChat(options: UseChatOptions = {}): UseChat {
+  const { getToken } = useAuth();
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -87,9 +89,13 @@ export function useChat(options: UseChatOptions = {}): UseChat {
 
     if (isRefineMode) {
       try {
+        const token = await getToken();
         const response = await fetch(REFINE_URL, {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${token}`,
+          },
           body: JSON.stringify({
             sections: options.sections,
             messages: newMessages, // Send full conversation history
@@ -140,9 +146,13 @@ export function useChat(options: UseChatOptions = {}): UseChat {
 
     // Generation mode: stream from chat endpoint
     try {
+      const token = await getToken();
       const response = await fetch(API_URL, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${token}`,
+        },
         body: JSON.stringify({
           messages: newMessages,
           stream: true,
@@ -237,7 +247,7 @@ export function useChat(options: UseChatOptions = {}): UseChat {
     finally {
       setIsLoading(false);
     }
-  }, [input, messages, isLoading, options]);
+  }, [input, messages, isLoading, options, getToken]);
 
   return { messages, input, setInput, isLoading, error, send, sessionUsage, lastUsage, agents, agentsMessageIndex };
 }

@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
+import { useAuth } from "@clerk/clerk-react";
 import { getColorStyle } from "./color";
 
 type AccuracyRating = "accurate" | "partial" | "wrong";
@@ -23,15 +24,27 @@ interface Props {
 const API_BASE = "/api/review";
 
 export function AccuracyReview({ entry, onComplete }: Props) {
+  const { getToken } = useAuth();
   const [notes, setNotes] = useState("");
   const [saving, setSaving] = useState(false);
   const [blacklisted, setBlacklisted] = useState(entry.blacklisted ?? false);
+
+  const authFetch = useCallback(async (url: string, options: RequestInit = {}) => {
+    const token = await getToken();
+    return fetch(url, {
+      ...options,
+      headers: {
+        ...options.headers,
+        Authorization: `Bearer ${token}`,
+      },
+    });
+  }, [getToken]);
 
   const handleToggleBlacklist = useCallback(async () => {
     const newValue = !blacklisted;
     setBlacklisted(newValue);
     try {
-      await fetch(`${API_BASE}/entries/${encodeURIComponent(entry.id)}/blacklist`, {
+      await authFetch(`${API_BASE}/entries/${encodeURIComponent(entry.id)}/blacklist`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ blacklisted: newValue }),
@@ -41,12 +54,12 @@ export function AccuracyReview({ entry, onComplete }: Props) {
       console.error("Failed to update blacklist:", err);
       setBlacklisted(!newValue); // revert on error
     }
-  }, [entry.id, blacklisted]);
+  }, [authFetch, entry.id, blacklisted]);
 
   const handleRate = useCallback(async (accuracy: AccuracyRating) => {
     setSaving(true);
     try {
-      await fetch(`${API_BASE}/entries/${encodeURIComponent(entry.id)}/accuracy`, {
+      await authFetch(`${API_BASE}/entries/${encodeURIComponent(entry.id)}/accuracy`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -62,7 +75,7 @@ export function AccuracyReview({ entry, onComplete }: Props) {
     finally {
       setSaving(false);
     }
-  }, [entry.id, notes, onComplete]);
+  }, [authFetch, entry.id, notes, onComplete]);
 
   // Keyboard shortcuts
   useEffect(() => {
