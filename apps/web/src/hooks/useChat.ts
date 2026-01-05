@@ -1,13 +1,17 @@
-import { useState, useCallback, useRef } from "react";
+import { useState, useCallback, useRef, useEffect } from "react";
 import { useAuth } from "@clerk/clerk-react";
 import type { Section, NavbarSection } from "@muse/core";
 import type { Usage } from "@muse/ai";
 import type { ImageSelection } from "@muse/media";
 import { parseStream, type ParseState, type AgentState, type ThemeSelection, type PageInfo } from "../utils/streamParser";
 
+const MESSAGES_URL = "http://localhost:3001/api/messages";
+
 export interface Message {
   role: "user" | "assistant"
   content: string
+  agents?: AgentState[]
+  usage?: Usage
 }
 
 export interface RefineUpdate {
@@ -16,6 +20,8 @@ export interface RefineUpdate {
 }
 
 export interface UseChatOptions {
+  /** Site ID for message persistence */
+  siteId?: string
   /** Current sections - when provided, chat switches to refine mode */
   sections?: Section[]
   onSectionParsed?: (section: Section) => void
@@ -26,6 +32,10 @@ export interface UseChatOptions {
   onUsage?: (usage: Usage) => void
   /** Called when refine returns updates to apply */
   onRefine?: (updates: RefineUpdate[]) => void
+  /** Called after generation completes */
+  onGenerationComplete?: () => void
+  /** Called when messages change (for persistence) */
+  onMessagesChange?: (messages: Message[]) => void
 }
 
 export interface UseChat {
@@ -62,6 +72,43 @@ export function useChat(options: UseChatOptions = {}): UseChat {
   const themeProcessedRef = useRef(false);
   const navbarProcessedRef = useRef(false);
   const pagesProcessedRef = useRef(false);
+  const loadedSiteIdRef = useRef<string | null>(null);
+
+  // Load messages when siteId changes
+  useEffect(() => {
+    if (!options.siteId || options.siteId === loadedSiteIdRef.current) return;
+
+    const loadMessages = async () => {
+      try {
+        const token = await getToken();
+        const response = await fetch(`${MESSAGES_URL}/${options.siteId}`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        if (response.ok) {
+          const data = await response.json();
+          if (data.messages?.length > 0) {
+            setMessages(data.messages.map((m: { role: string, content: string, agents?: AgentState[], usage?: Usage }) => ({
+              role: m.role as "user" | "assistant",
+              content: m.content,
+              agents: m.agents,
+              usage: m.usage,
+            })));
+          }
+        }
+        loadedSiteIdRef.current = options.siteId ?? null;
+      }
+      catch (err) {
+        console.error("Failed to load messages:", err);
+      }
+    };
+
+    loadMessages();
+  }, [options.siteId, getToken]);
+
+  // Notify parent when messages change
+  useEffect(() => {
+    options.onMessagesChange?.(messages);
+  }, [messages, options.onMessagesChange]);
 
   const send = useCallback(async () => {
     if (!input.trim() || isLoading) return;
@@ -131,7 +178,8 @@ export function useChat(options: UseChatOptions = {}): UseChat {
           }));
         }
 
-        setMessages([...newMessages, { role: "assistant", content: result.message || "Done" }]);
+        const finalMessages = [...newMessages, { role: "assistant" as const, content: result.message || "Done" }];
+        setMessages(finalMessages);
       }
       catch (err) {
         const message = err instanceof Error ? err.message : "Unknown error";
@@ -237,6 +285,20 @@ export function useChat(options: UseChatOptions = {}): UseChat {
           { role: "assistant", content: result.displayText },
         ]);
       }
+
+      // Update final message with agents for persistence
+      const finalResult = parseStream(accumulated, parseStateRef.current);
+      const finalAgents = Array.from(parseStateRef.current.agents.values());
+      setMessages([
+        ...newMessages,
+        {
+          role: "assistant",
+          content: finalResult.displayText,
+          agents: finalAgents,
+          usage: finalResult.usage,
+        },
+      ]);
+      options.onGenerationComplete?.();
     }
     catch (err) {
       const message = err instanceof Error ? err.message : "Unknown error";

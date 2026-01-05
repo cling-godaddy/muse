@@ -1,12 +1,14 @@
 import { useState, useCallback, useEffect, useRef } from "react";
 import { useAuth } from "@clerk/clerk-react";
 import type { Site } from "@muse/core";
+import type { Message } from "./useChat";
 
 const API_URL = "http://localhost:3001";
 
 interface UseSitePersistenceOptions {
   site: Site
   setSite: (site: Site) => void
+  messages?: Message[]
 }
 
 export interface UseSitePersistence {
@@ -22,6 +24,7 @@ export interface UseSitePersistence {
 export function useSitePersistence({
   site,
   setSite,
+  messages = [],
 }: UseSitePersistenceOptions): UseSitePersistence {
   const { getToken } = useAuth();
   const [isSaving, setIsSaving] = useState(false);
@@ -32,6 +35,9 @@ export function useSitePersistence({
 
   const siteRef = useRef(site);
   siteRef.current = site;
+
+  const messagesRef = useRef(messages);
+  messagesRef.current = messages;
 
   // Track changes since last save
   useEffect(() => {
@@ -49,11 +55,14 @@ export function useSitePersistence({
 
   const save = useCallback(async () => {
     const currentSite = siteRef.current;
+    const currentMessages = messagesRef.current;
     setIsSaving(true);
     setError(null);
 
     try {
       const token = await getToken();
+
+      // Save site
       const res = await fetch(`${API_URL}/api/sites/${currentSite.id}`, {
         method: "PUT",
         headers: {
@@ -65,7 +74,33 @@ export function useSitePersistence({
 
       if (!res.ok) {
         const data = await res.json();
-        throw new Error(data.error ?? "Failed to save");
+        throw new Error(data.error ?? "Failed to save site");
+      }
+
+      // Save messages
+      if (currentMessages.length > 0) {
+        const storedMessages = currentMessages.map((m, i) => ({
+          id: crypto.randomUUID(),
+          siteId: currentSite.id,
+          role: m.role,
+          content: m.content,
+          createdAt: new Date(Date.now() + i).toISOString(),
+          agents: m.agents,
+          usage: m.usage,
+        }));
+
+        const msgRes = await fetch(`${API_URL}/api/messages/${currentSite.id}`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${token}`,
+          },
+          body: JSON.stringify({ messages: storedMessages }),
+        });
+
+        if (!msgRes.ok) {
+          console.error("Failed to save messages:", msgRes.status);
+        }
       }
 
       setLastSavedAt(new Date());

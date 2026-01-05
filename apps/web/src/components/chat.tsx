@@ -8,6 +8,8 @@ import type { AgentState, ThemeSelection, PageInfo } from "../utils/streamParser
 import { TimelineModal } from "./modals/timeline";
 
 interface ChatProps {
+  /** Site ID for message persistence */
+  siteId?: string
   /** Current sections - enables refine mode when provided */
   sections?: Section[]
   onSectionParsed?: (section: Section) => void
@@ -19,6 +21,8 @@ interface ChatProps {
   onRefine?: (updates: RefineUpdate[]) => void
   /** Called when generation (not refine) completes */
   onGenerationComplete?: () => void
+  /** Called when messages change (for persistence) */
+  onMessagesChange?: (messages: Message[]) => void
 }
 
 function formatTokens(n: number): string {
@@ -27,27 +31,11 @@ function formatTokens(n: number): string {
   return `${(n / 1_000_000).toFixed(1)}M`;
 }
 
-export function Chat({ sections, onSectionParsed, onThemeSelected, onNavbar, onImages, onPages, onRefine, onGenerationComplete }: ChatProps) {
-  const options = useMemo(() => ({ sections, onSectionParsed, onThemeSelected, onNavbar, onImages, onPages, onRefine }), [sections, onSectionParsed, onThemeSelected, onNavbar, onImages, onPages, onRefine]);
+export function Chat({ siteId, sections, onSectionParsed, onThemeSelected, onNavbar, onImages, onPages, onRefine, onGenerationComplete, onMessagesChange }: ChatProps) {
+  const options = useMemo(() => ({ siteId, sections, onSectionParsed, onThemeSelected, onNavbar, onImages, onPages, onRefine, onGenerationComplete, onMessagesChange }), [siteId, sections, onSectionParsed, onThemeSelected, onNavbar, onImages, onPages, onRefine, onGenerationComplete, onMessagesChange]);
   const { messages, input, setInput, isLoading, error, send, sessionUsage, lastUsage, agents, agentsMessageIndex } = useChat(options);
   const isRefineMode = sections && sections.length > 0;
   const messagesEndRef = useRef<HTMLDivElement>(null);
-  const wasLoadingRef = useRef(false);
-  const wasGenerationRef = useRef(false);
-
-  // Detect when generation completes
-  // Capture mode at request START (when isLoading goes true), check at END (when isLoading goes false)
-  useEffect(() => {
-    if (!wasLoadingRef.current && isLoading) {
-      // Request just started - capture if this is a generation (not refine)
-      wasGenerationRef.current = !isRefineMode;
-    }
-    if (wasLoadingRef.current && !isLoading && wasGenerationRef.current) {
-      // Generation just completed
-      onGenerationComplete?.();
-    }
-    wasLoadingRef.current = isLoading;
-  }, [isLoading, isRefineMode, onGenerationComplete]);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -101,7 +89,7 @@ export function Chat({ sections, onSectionParsed, onThemeSelected, onNavbar, onI
             message={message}
             isLast={i === messages.length - 1}
             isLoading={isLoading}
-            agents={i === agentsMessageIndex ? agents : []}
+            agents={message.agents ?? (i === agentsMessageIndex ? agents : [])}
           />
         ))}
         {error && (

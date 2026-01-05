@@ -11,7 +11,7 @@ import { resolveThemeWithEffects, themeToCssVars, getTypography, loadFonts } fro
 import { Chat } from "./components/chat";
 import { useSiteWithHistory } from "./hooks/useSiteWithHistory";
 import { useSitePersistence } from "./hooks/useSitePersistence";
-import type { RefineUpdate } from "./hooks/useChat";
+import type { RefineUpdate, Message } from "./hooks/useChat";
 import { EditorToolbar } from "./components/EditorToolbar";
 import { PreviewContainer } from "./components/PreviewContainer";
 import { ReviewLayout, ReviewDashboard, ReviewEntry, ReviewSessionPage } from "./review";
@@ -56,7 +56,8 @@ function MainApp() {
     isGenerationComplete,
   } = useSiteWithHistory();
 
-  const persistence = useSitePersistence({ site, setSite });
+  const [messages, setMessages] = useState<Message[]>([]);
+  const persistence = useSitePersistence({ site, setSite, messages });
 
   // Load site from URL on mount (only if URL id differs from current site)
   const loadedRef = useRef<string | null>(null);
@@ -274,7 +275,7 @@ function MainApp() {
         )}
         <main className="flex-1 flex gap-6 p-6 overflow-hidden">
           <div className={`w-[400px] shrink-0 ${isPreview ? "hidden" : ""}`}>
-            <Chat sections={sections} onSectionParsed={handleSectionParsed} onThemeSelected={handleThemeSelected} onNavbar={handleNavbar} onImages={handleImages} onPages={handlePages} onRefine={handleRefine} onGenerationComplete={handleGenerationComplete} />
+            <Chat siteId={site.id} sections={sections} onSectionParsed={handleSectionParsed} onThemeSelected={handleThemeSelected} onNavbar={handleNavbar} onImages={handleImages} onPages={handlePages} onRefine={handleRefine} onGenerationComplete={handleGenerationComplete} onMessagesChange={setMessages} />
           </div>
           <div className="flex-1 min-w-0 overflow-hidden">
             {isPreview
