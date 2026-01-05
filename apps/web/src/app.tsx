@@ -1,6 +1,7 @@
 import { useState, useMemo, useCallback, useEffect, useRef, useLayoutEffect } from "react";
 import { flushSync } from "react-dom";
 import { BrowserRouter, Routes, Route, useParams, useNavigate } from "react-router-dom";
+import { UserButton } from "@clerk/clerk-react";
 import { groupBy } from "lodash-es";
 import { SectionEditor, SiteProvider, EditorModeProvider } from "@muse/editor";
 import type { Section, SectionType, NavbarSection, PreviewDevice } from "@muse/core";
@@ -14,6 +15,9 @@ import type { RefineUpdate } from "./hooks/useChat";
 import { EditorToolbar } from "./components/EditorToolbar";
 import { PreviewContainer } from "./components/PreviewContainer";
 import { ReviewLayout, ReviewDashboard, ReviewEntry, ReviewSessionPage } from "./review";
+import { ProtectedRoute } from "./components/ProtectedRoute";
+import { SignInPage } from "./pages/sign-in";
+import { SignUpPage } from "./pages/sign-up";
 import type { ThemeSelection, PageInfo } from "./utils/streamParser";
 
 function hasNavbarContent(navbar?: NavbarSection): boolean {
@@ -243,6 +247,9 @@ function MainApp() {
       <div className="flex flex-col h-full font-sans text-text bg-bg">
         <header className="px-6 py-3 border-b border-border bg-bg flex items-center gap-4">
           <h1 className="m-0 text-xl font-semibold">Muse</h1>
+          <div className="ml-auto">
+            <UserButton afterSignOutUrl="/sign-in" />
+          </div>
         </header>
         {(Object.values(site.pages).some(p => p.sections.length > 0) || hasNavbarContent(site.navbar) || canUndo || canRedo) && (
           <EditorToolbar
@@ -298,9 +305,11 @@ export function App() {
   return (
     <BrowserRouter>
       <Routes>
-        <Route path="/" element={<MainApp />} />
-        <Route path="/sites/:siteId" element={<MainApp />} />
-        <Route path="/review" element={<ReviewLayout />}>
+        <Route path="/sign-in/*" element={<SignInPage />} />
+        <Route path="/sign-up/*" element={<SignUpPage />} />
+        <Route path="/" element={<ProtectedRoute><MainApp /></ProtectedRoute>} />
+        <Route path="/sites/:siteId" element={<ProtectedRoute><MainApp /></ProtectedRoute>} />
+        <Route path="/review" element={<ProtectedRoute><ReviewLayout /></ProtectedRoute>}>
           <Route index element={<ReviewDashboard />} />
           <Route path="session" element={<ReviewSessionPage />} />
           <Route path="entries/:id" element={<ReviewEntry />} />
