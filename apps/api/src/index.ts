@@ -12,6 +12,7 @@ import { uploadRoute } from "./routes/upload";
 import { searchRoute } from "./routes/search";
 import { reviewRoute } from "./routes/review";
 import { sitesRoute } from "./routes/sites";
+import { messagesRoute } from "./routes/messages";
 
 const app = new Hono();
 
@@ -26,6 +27,7 @@ app.route("/api/upload", uploadRoute);
 app.route("/api/search", searchRoute);
 app.route("/api/review", reviewRoute);
 app.route("/api/sites", sitesRoute);
+app.route("/api/messages", messagesRoute);
 
 const port = Number(process.env.PORT) || 3001;
 
