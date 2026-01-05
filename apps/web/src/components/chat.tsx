@@ -267,7 +267,7 @@ function AgentTimeline({ agents, isLoading }: AgentTimelineProps) {
             <span className="text-success">✓</span>
             <span>
               Generated in
-              {formatDuration(totalDuration)}
+              {` ${formatDuration(totalDuration)}`}
             </span>
             {themeAgent?.data?.palette && (
               <span className="flex items-center gap-1.5 text-text-subtle">
