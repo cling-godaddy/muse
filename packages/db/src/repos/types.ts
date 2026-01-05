@@ -1,9 +1,18 @@
 import type { Site } from "@muse/core";
 
+export interface SiteSummary {
+  id: string
+  name: string
+  updatedAt: string
+  pageCount: number
+}
+
 export interface SitesTable {
-  save(site: Site): Promise<void>
+  save(site: Site, userId: string): Promise<void>
   getById(id: string): Promise<Site | null>
-  delete(id: string): Promise<void>
+  getByIdForUser(id: string, userId: string): Promise<Site | null>
+  listByUser(userId: string): Promise<SiteSummary[]>
+  delete(id: string, userId: string): Promise<void>
 }
 
 export type AgentName = "brief" | "structure" | "theme" | "image" | "copy" | "sitemap" | "pages";

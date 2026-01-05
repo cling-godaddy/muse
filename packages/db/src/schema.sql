@@ -2,6 +2,7 @@
 
 CREATE TABLE sites (
   id UUID PRIMARY KEY,
+  user_id TEXT NOT NULL,
   name TEXT NOT NULL,
   theme JSONB NOT NULL,
   navbar JSONB,
@@ -42,6 +43,7 @@ CREATE TABLE messages (
   agents JSONB
 );
 
+CREATE INDEX idx_sites_user_id ON sites(user_id);
 CREATE INDEX idx_pages_site_id ON pages(site_id);
 CREATE INDEX idx_sections_page_id ON sections(page_id);
 CREATE INDEX idx_messages_site_id ON messages(site_id);
