@@ -32,5 +32,16 @@ CREATE TABLE sections (
   updated_at TIMESTAMPTZ DEFAULT NOW()
 );
 
+CREATE TABLE messages (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  site_id UUID NOT NULL REFERENCES sites(id) ON DELETE CASCADE,
+  role TEXT NOT NULL CHECK (role IN ('user', 'assistant')),
+  content TEXT NOT NULL,
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  usage JSONB,
+  agents JSONB
+);
+
 CREATE INDEX idx_pages_site_id ON pages(site_id);
 CREATE INDEX idx_sections_page_id ON sections(page_id);
+CREATE INDEX idx_messages_site_id ON messages(site_id);
