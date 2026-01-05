@@ -4,7 +4,7 @@ import { BrowserRouter, Routes, Route, useParams, useNavigate, Link } from "reac
 import { UserButton } from "@clerk/clerk-react";
 import { groupBy } from "lodash-es";
 import { SectionEditor, SiteProvider, EditorModeProvider } from "@muse/editor";
-import type { Section, SectionType, NavbarSection, PreviewDevice } from "@muse/core";
+import type { Section, SectionType, PreviewDevice } from "@muse/core";
 import { sectionNeedsImages, getPresetImageInjection, getImageInjection, applyImageInjection } from "@muse/core";
 import type { ImageSelection } from "@muse/media";
 import { resolveThemeWithEffects, themeToCssVars, getTypography, loadFonts } from "@muse/themes";
@@ -20,11 +20,6 @@ import { SignInPage } from "./pages/sign-in";
 import { SignUpPage } from "./pages/sign-up";
 import { SitesDashboard } from "./components/SitesDashboard";
 import type { ThemeSelection, PageInfo } from "./utils/streamParser";
-
-function hasNavbarContent(navbar?: NavbarSection): boolean {
-  if (!navbar) return false;
-  return !!(navbar.logo?.text || navbar.logo?.image || navbar.items?.length || navbar.cta);
-}
 
 function MainApp() {
   const { siteId: urlSiteId } = useParams<{ siteId?: string }>();
@@ -43,7 +38,6 @@ function MainApp() {
     addNewPage,
     deletePage,
     updatePageSections,
-    setNavbar,
     clearSite,
     theme,
     setTheme,
@@ -163,10 +157,6 @@ function MainApp() {
     setTheme(selection.palette, selection.typography, selection.effects);
   }, [setTheme]);
 
-  const handleNavbar = useCallback((navbar: NavbarSection) => {
-    setNavbar(navbar);
-  }, [setNavbar]);
-
   const handleImages = useCallback((images: ImageSelection[]) => {
     const currentSite = siteRef.current;
     const bySection = groupBy(images, img => img.blockId);
@@ -255,7 +245,7 @@ function MainApp() {
             <UserButton afterSignOutUrl="/sign-in" />
           </div>
         </header>
-        {(Object.values(site.pages).some(p => p.sections.length > 0) || hasNavbarContent(site.navbar) || canUndo || canRedo) && (
+        {(Object.values(site.pages).some(p => p.sections.length > 0) || canUndo || canRedo) && (
           <EditorToolbar
             site={site}
             currentPageId={currentPageId}
@@ -278,7 +268,7 @@ function MainApp() {
         )}
         <main className="flex-1 flex gap-6 p-6 overflow-hidden">
           <div className={`w-[400px] shrink-0 ${isPreview ? "hidden" : ""}`}>
-            <Chat siteId={site.id} sections={sections} onSectionParsed={handleSectionParsed} onThemeSelected={handleThemeSelected} onNavbar={handleNavbar} onImages={handleImages} onPages={handlePages} onRefine={handleRefine} onGenerationComplete={handleGenerationComplete} onMessagesChange={setMessages} />
+            <Chat siteId={site.id} sections={sections} onSectionParsed={handleSectionParsed} onThemeSelected={handleThemeSelected} onImages={handleImages} onPages={handlePages} onRefine={handleRefine} onGenerationComplete={handleGenerationComplete} onMessagesChange={setMessages} />
           </div>
           <div className="flex-1 min-w-0 overflow-hidden">
             {isPreview
@@ -286,7 +276,7 @@ function MainApp() {
                 <PreviewContainer device={previewDevice}>
                   <div style={themeStyle} data-effects={effectsId}>
                     <EditorModeProvider mode={editorMode}>
-                      <SectionEditor sections={sections} onChange={setSections} pendingImageSections={pendingImageSections} navbar={site.navbar} onNavbarChange={setNavbar} />
+                      <SectionEditor sections={sections} onChange={setSections} pendingImageSections={pendingImageSections} />
                     </EditorModeProvider>
                   </div>
                 </PreviewContainer>
@@ -294,7 +284,7 @@ function MainApp() {
               : (
                 <div className="h-full overflow-y-auto" style={themeStyle} data-effects={effectsId}>
                   <EditorModeProvider mode={editorMode}>
-                    <SectionEditor sections={sections} onChange={setSections} pendingImageSections={pendingImageSections} navbar={site.navbar} onNavbarChange={setNavbar} />
+                    <SectionEditor sections={sections} onChange={setSections} pendingImageSections={pendingImageSections} />
                   </EditorModeProvider>
                 </div>
               )}

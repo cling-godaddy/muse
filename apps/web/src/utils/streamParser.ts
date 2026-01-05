@@ -1,4 +1,4 @@
-import type { Section, NavbarSection } from "@muse/core";
+import type { Section } from "@muse/core";
 import type { Usage, SitemapPlan } from "@muse/ai";
 import type { ImageSelection } from "@muse/media";
 
@@ -35,7 +35,6 @@ export interface PageInfo {
 export interface ParseState {
   theme?: ThemeSelection
   sitemap?: SitemapPlan
-  navbar?: NavbarSection
   sections: Section[]
   pages: PageInfo[]
   agents: Map<AgentName, AgentState>
@@ -46,7 +45,6 @@ export interface ParseResult {
   displayText: string
   theme?: ThemeSelection
   sitemap?: SitemapPlan
-  navbar?: NavbarSection
   newSections: Section[]
   newPages: PageInfo[]
   newImages: ImageSelection[]
@@ -60,7 +58,6 @@ const SECTIONS_REGEX = /\[SECTIONS:(\[[\s\S]*?\])\]/g;
 const USAGE_REGEX = /\[USAGE:([^\]]+)\]/;
 const IMAGES_REGEX = /\[IMAGES:(\[[\s\S]*?\])\]/;
 const SITEMAP_REGEX = /\[SITEMAP:(.+)\](?=\n)/;
-const NAVBAR_REGEX = /\[NAVBAR:(.+)\](?=\n)/;
 const PAGE_REGEX = /\[PAGE:([^\]]+)\]/g;
 const AGENT_START_REGEX = /\[AGENT:(\w+):start\]/g;
 const AGENT_COMPLETE_REGEX = /\[AGENT:(\w+):complete\]([^\n]*)/g;
@@ -153,20 +150,6 @@ export function parseStream(
     }
   }
 
-  // extract navbar if present
-  let navbar = previousState.navbar;
-  if (!navbar) {
-    const navbarMatch = accumulated.match(NAVBAR_REGEX);
-    if (navbarMatch?.[1]) {
-      try {
-        navbar = JSON.parse(navbarMatch[1]) as NavbarSection;
-      }
-      catch {
-        console.warn("failed to parse navbar:", navbarMatch[1]?.slice(0, 200));
-      }
-    }
-  }
-
   // extract images if present (parse once, carry forward in state)
   let images = previousState.images;
   if (images.length === 0) {
@@ -241,7 +224,6 @@ export function parseStream(
   displayText = displayText
     .replace(THEME_REGEX, "")
     .replace(SITEMAP_REGEX, "")
-    .replace(NAVBAR_REGEX, "")
     .replace(PAGE_REGEX, "")
     .replace(AGENT_START_REGEX, "")
     .replace(AGENT_COMPLETE_REGEX, "")
@@ -266,12 +248,11 @@ export function parseStream(
     displayText,
     theme,
     sitemap,
-    navbar,
     newSections,
     newPages,
     newImages,
     usage,
     agents: agentsArray,
-    state: { theme, sitemap, navbar, sections, pages, agents, images },
+    state: { theme, sitemap, sections, pages, agents, images },
   };
 }

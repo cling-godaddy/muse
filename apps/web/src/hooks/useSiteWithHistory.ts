@@ -1,5 +1,5 @@
 import { useState, useCallback, useEffect } from "react";
-import type { Site, Section, NavbarSection } from "@muse/core";
+import type { Site, Section } from "@muse/core";
 import { useSite, type UseSite } from "./useSite";
 import { useHistory } from "./useHistory";
 
@@ -110,11 +110,6 @@ export function useSiteWithHistory(initialName = "Untitled Site"): UseSiteWithHi
     siteHook.updatePageSections(pageId, sections);
   }, [history, siteHook, historyEnabled]);
 
-  const setNavbar = useCallback((navbar: NavbarSection) => {
-    if (historyEnabled) history.push();
-    siteHook.setNavbar(navbar);
-  }, [history, siteHook, historyEnabled]);
-
   const clearSite = useCallback(() => {
     if (historyEnabled) history.push();
     siteHook.clearSite();
@@ -204,7 +199,6 @@ export function useSiteWithHistory(initialName = "Untitled Site"): UseSiteWithHi
     addNewPage,
     deletePage,
     updatePageSections,
-    setNavbar,
     clearSite,
 
     // History controls

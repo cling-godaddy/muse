@@ -1,5 +1,5 @@
 import { useRef, useEffect, useMemo } from "react";
-import type { Section, NavbarSection } from "@muse/core";
+import type { Section } from "@muse/core";
 import type { ImageSelection } from "@muse/media";
 import { Spinner } from "@muse/editor";
 import { getPalette } from "@muse/themes";
@@ -14,7 +14,6 @@ interface ChatProps {
   sections?: Section[]
   onSectionParsed?: (section: Section) => void
   onThemeSelected?: (theme: ThemeSelection) => void
-  onNavbar?: (navbar: NavbarSection) => void
   onImages?: (images: ImageSelection[]) => void
   onPages?: (pages: PageInfo[]) => void
   /** Called when AI refines sections */
@@ -31,8 +30,8 @@ function formatTokens(n: number): string {
   return `${(n / 1_000_000).toFixed(1)}M`;
 }
 
-export function Chat({ siteId, sections, onSectionParsed, onThemeSelected, onNavbar, onImages, onPages, onRefine, onGenerationComplete, onMessagesChange }: ChatProps) {
-  const options = useMemo(() => ({ siteId, sections, onSectionParsed, onThemeSelected, onNavbar, onImages, onPages, onRefine, onGenerationComplete, onMessagesChange }), [siteId, sections, onSectionParsed, onThemeSelected, onNavbar, onImages, onPages, onRefine, onGenerationComplete, onMessagesChange]);
+export function Chat({ siteId, sections, onSectionParsed, onThemeSelected, onImages, onPages, onRefine, onGenerationComplete, onMessagesChange }: ChatProps) {
+  const options = useMemo(() => ({ siteId, sections, onSectionParsed, onThemeSelected, onImages, onPages, onRefine, onGenerationComplete, onMessagesChange }), [siteId, sections, onSectionParsed, onThemeSelected, onImages, onPages, onRefine, onGenerationComplete, onMessagesChange]);
   const { messages, input, setInput, isLoading, error, send, sessionUsage, lastUsage, agents, agentsMessageIndex } = useChat(options);
   const isRefineMode = sections && sections.length > 0;
   const messagesEndRef = useRef<HTMLDivElement>(null);

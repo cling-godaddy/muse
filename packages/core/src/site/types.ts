@@ -1,5 +1,4 @@
 import type { Page } from "../page/types";
-import type { NavbarSection } from "../sections/types";
 
 export interface SiteNode {
   pageId: string
@@ -18,7 +17,6 @@ export interface Site {
   pages: Record<string, Page>
   tree: SiteNode[]
   theme: SiteTheme
-  navbar?: NavbarSection
   createdAt: string
   updatedAt: string
 }
