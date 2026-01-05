@@ -1,6 +1,6 @@
 import { useState, useMemo, useCallback, useEffect, useRef, useLayoutEffect } from "react";
 import { flushSync } from "react-dom";
-import { BrowserRouter, Routes, Route, useParams, useNavigate } from "react-router-dom";
+import { BrowserRouter, Routes, Route, useParams, useNavigate, Link } from "react-router-dom";
 import { UserButton } from "@clerk/clerk-react";
 import { groupBy } from "lodash-es";
 import { SectionEditor, SiteProvider, EditorModeProvider } from "@muse/editor";
@@ -18,6 +18,7 @@ import { ReviewLayout, ReviewDashboard, ReviewEntry, ReviewSessionPage } from ".
 import { ProtectedRoute } from "./components/ProtectedRoute";
 import { SignInPage } from "./pages/sign-in";
 import { SignUpPage } from "./pages/sign-up";
+import { SitesDashboard } from "./components/SitesDashboard";
 import type { ThemeSelection, PageInfo } from "./utils/streamParser";
 
 function hasNavbarContent(navbar?: NavbarSection): boolean {
@@ -247,7 +248,9 @@ function MainApp() {
     <SiteProvider pageSlugs={pageSlugs} onGeneratePage={handleGeneratePage}>
       <div className="flex flex-col h-full font-sans text-text bg-bg">
         <header className="px-6 py-3 border-b border-border bg-bg flex items-center gap-4">
-          <h1 className="m-0 text-xl font-semibold">Muse</h1>
+          <Link to="/" className="text-xl font-semibold hover:text-primary transition-colors">
+            Muse
+          </Link>
           <div className="ml-auto">
             <UserButton afterSignOutUrl="/sign-in" />
           </div>
@@ -308,7 +311,7 @@ export function App() {
       <Routes>
         <Route path="/sign-in/*" element={<SignInPage />} />
         <Route path="/sign-up/*" element={<SignUpPage />} />
-        <Route path="/" element={<ProtectedRoute><MainApp /></ProtectedRoute>} />
+        <Route path="/" element={<ProtectedRoute><SitesDashboard /></ProtectedRoute>} />
         <Route path="/sites/:siteId" element={<ProtectedRoute><MainApp /></ProtectedRoute>} />
         <Route path="/review" element={<ProtectedRoute><ReviewLayout /></ProtectedRoute>}>
           <Route index element={<ReviewDashboard />} />
