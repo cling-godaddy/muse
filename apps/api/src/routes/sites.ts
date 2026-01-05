@@ -1,7 +1,7 @@
 import { Hono } from "hono";
 import { createSitesTable, type SitesTable } from "@muse/db";
+import { createSite, createPage, addPage, type Site } from "@muse/core";
 import { requireAuth } from "../middleware/auth";
-import type { Site } from "@muse/core";
 
 export const sitesRoute = new Hono();
 
@@ -16,10 +16,31 @@ async function getSites(): Promise<SitesTable> {
   return sitesTable;
 }
 
+sitesRoute.get("/", async (c) => {
+  const sites = await getSites();
+  const userId = c.get("userId");
+  const list = await sites.listByUser(userId);
+  return c.json({ sites: list });
+});
+
+sitesRoute.post("/", async (c) => {
+  const sites = await getSites();
+  const userId = c.get("userId");
+  const { name } = await c.req.json() as { name?: string };
+
+  let site = createSite(name ?? "Untitled Site");
+  const page = createPage("/", { title: "Home" });
+  site = addPage(site, page);
+
+  await sites.save(site, userId);
+  return c.json(site, 201);
+});
+
 sitesRoute.get("/:id", async (c) => {
   const sites = await getSites();
+  const userId = c.get("userId");
   const id = c.req.param("id");
-  const site = await sites.getById(id);
+  const site = await sites.getByIdForUser(id, userId);
 
   if (!site) {
     return c.json({ error: "Site not found" }, 404);
@@ -30,6 +51,7 @@ sitesRoute.get("/:id", async (c) => {
 
 sitesRoute.put("/:id", async (c) => {
   const sites = await getSites();
+  const userId = c.get("userId");
   const id = c.req.param("id");
   const site = await c.req.json() as Site;
 
@@ -41,14 +63,24 @@ sitesRoute.put("/:id", async (c) => {
     return c.json({ error: "Missing required fields" }, 400);
   }
 
-  await sites.save(site);
+  // Check if site exists and verify ownership
+  const existing = await sites.getById(id);
+  if (existing) {
+    const owned = await sites.getByIdForUser(id, userId);
+    if (!owned) {
+      return c.json({ error: "Site not found" }, 404);
+    }
+  }
+
+  await sites.save(site, userId);
   return c.json({ success: true });
 });
 
 sitesRoute.delete("/:id", async (c) => {
   const sites = await getSites();
+  const userId = c.get("userId");
   const id = c.req.param("id");
-  await sites.delete(id);
+  await sites.delete(id, userId);
   return c.json({ success: true });
 });
 

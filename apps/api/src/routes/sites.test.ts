@@ -4,9 +4,11 @@ import { sitesRoute, resetSitesRoute } from "./sites";
 import { resetSitesTable } from "@muse/db";
 import type { Site } from "@muse/core";
 
-// Mock clerk auth to always return a valid user
+let mockUserId = "test_user_123";
+
+// Mock clerk auth to return configurable user
 vi.mock("@hono/clerk-auth", () => ({
-  getAuth: () => ({ userId: "test_user_123" }),
+  getAuth: () => ({ userId: mockUserId }),
 }));
 
 function createTestSite(overrides: Partial<Site> = {}): Site {
@@ -26,6 +28,7 @@ describe("sites routes", () => {
   let app: Hono;
 
   beforeEach(() => {
+    mockUserId = "test_user_123";
     resetSitesTable();
     resetSitesRoute();
     app = new Hono();
@@ -155,6 +158,120 @@ describe("sites routes", () => {
       });
 
       expect(res.status).toBe(200);
+    });
+  });
+
+  describe("GET /api/sites", () => {
+    it("returns empty list initially", async () => {
+      const res = await app.request("/api/sites");
+
+      expect(res.status).toBe(200);
+      const body = await res.json();
+      expect(body.sites).toEqual([]);
+    });
+
+    it("returns user's sites", async () => {
+      const site = createTestSite({ name: "My Site" });
+
+      await app.request(`/api/sites/${site.id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(site),
+      });
+
+      const res = await app.request("/api/sites");
+
+      expect(res.status).toBe(200);
+      const body = await res.json();
+      expect(body.sites).toHaveLength(1);
+      expect(body.sites[0].name).toBe("My Site");
+      expect(body.sites[0].id).toBe(site.id);
+    });
+
+    it("only returns sites for current user", async () => {
+      // Create site as user 1
+      const site = createTestSite({ name: "User 1 Site" });
+      await app.request(`/api/sites/${site.id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(site),
+      });
+
+      // Switch to user 2
+      mockUserId = "different_user";
+
+      const res = await app.request("/api/sites");
+
+      expect(res.status).toBe(200);
+      const body = await res.json();
+      expect(body.sites).toEqual([]);
+    });
+  });
+
+  describe("POST /api/sites", () => {
+    it("creates a new site with default name", async () => {
+      const res = await app.request("/api/sites", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({}),
+      });
+
+      expect(res.status).toBe(201);
+      const body = await res.json();
+      expect(body.name).toBe("Untitled Site");
+      expect(body.id).toBeDefined();
+    });
+
+    it("creates a new site with custom name", async () => {
+      const res = await app.request("/api/sites", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name: "My New Site" }),
+      });
+
+      expect(res.status).toBe(201);
+      const body = await res.json();
+      expect(body.name).toBe("My New Site");
+    });
+  });
+
+  describe("ownership enforcement", () => {
+    it("prevents user from accessing another user's site", async () => {
+      // Create site as user 1
+      const site = createTestSite();
+      await app.request(`/api/sites/${site.id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(site),
+      });
+
+      // Switch to user 2
+      mockUserId = "different_user";
+
+      const res = await app.request(`/api/sites/${site.id}`);
+
+      expect(res.status).toBe(404);
+    });
+
+    it("prevents user from updating another user's site", async () => {
+      // Create site as user 1
+      const site = createTestSite();
+      await app.request(`/api/sites/${site.id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(site),
+      });
+
+      // Switch to user 2
+      mockUserId = "different_user";
+
+      const res = await app.request(`/api/sites/${site.id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ ...site, name: "Hijacked!" }),
+      });
+
+      expect(res.status).toBe(404);
     });
   });
 });
