@@ -81,7 +81,7 @@ sitesRoute.delete("/:id", async (c) => {
   const userId = c.get("userId");
   const id = c.req.param("id");
   await sites.delete(id, userId);
-  return c.json({ success: true });
+  return c.body(null, 204);
 });
 
 // For testing: reset the cached sites table
