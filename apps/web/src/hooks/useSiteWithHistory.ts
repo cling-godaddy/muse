@@ -15,9 +15,12 @@ interface Snapshot {
   currentPageId: string | null
 }
 
-export interface UseSiteWithHistory extends Omit<UseSite, "setSite"> {
+export interface UseSiteWithHistory extends Omit<UseSite, "setSite" | "updateSiteName"> {
   // Full site replacement (for loading from persistence)
   setSite: (site: Site) => void
+
+  // Site name update (with history)
+  updateSiteName: (name: string) => void
 
   // Theme state (moved here from app.tsx)
   theme: ThemeState
@@ -115,6 +118,11 @@ export function useSiteWithHistory(initialName = "Untitled Site"): UseSiteWithHi
     siteHook.clearSite();
   }, [history, siteHook, historyEnabled]);
 
+  const updateSiteName = useCallback((name: string) => {
+    if (historyEnabled) history.push();
+    siteHook.updateSiteName(name);
+  }, [history, siteHook, historyEnabled]);
+
   // Theme mutation with history
   const setTheme = useCallback((palette: string, typography: string, effects?: string) => {
     if (historyEnabled) history.push();
@@ -200,6 +208,7 @@ export function useSiteWithHistory(initialName = "Untitled Site"): UseSiteWithHi
     deletePage,
     updatePageSections,
     clearSite,
+    updateSiteName,
 
     // History controls
     undo,

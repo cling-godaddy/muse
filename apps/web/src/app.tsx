@@ -14,6 +14,7 @@ import { useSitePersistence } from "./hooks/useSitePersistence";
 import type { RefineUpdate, Message } from "./hooks/useChat";
 import { EditorToolbar } from "./components/EditorToolbar";
 import { PreviewContainer } from "./components/PreviewContainer";
+import { SiteTitleInput } from "./components/SiteTitleInput";
 import { ReviewLayout, ReviewDashboard, ReviewEntry, ReviewSessionPage } from "./review";
 import { ProtectedRoute } from "./components/ProtectedRoute";
 import { SignInPage } from "./pages/sign-in";
@@ -39,6 +40,7 @@ function MainApp() {
     deletePage,
     updatePageSections,
     clearSite,
+    updateSiteName,
     theme,
     setTheme,
     undo,
@@ -60,12 +62,15 @@ function MainApp() {
     if (urlSiteId && urlSiteId !== site.id && urlSiteId !== loadedRef.current) {
       loadedRef.current = urlSiteId;
       persistence.load(urlSiteId).then((found) => {
-        if (!found) {
+        if (found) {
+          enableHistory();
+        }
+        else {
           navigate("/", { replace: true });
         }
       });
     }
-  }, [urlSiteId, site.id, persistence, navigate]);
+  }, [urlSiteId, site.id, persistence, navigate, enableHistory]);
 
   // Update URL when generation completes
   useEffect(() => {
@@ -241,6 +246,9 @@ function MainApp() {
           <Link to="/" className="text-xl font-semibold hover:text-primary transition-colors">
             Muse
           </Link>
+          {isGenerationComplete && (
+            <SiteTitleInput value={site.name} onChange={updateSiteName} />
+          )}
           <div className="ml-auto">
             <UserButton afterSignOutUrl="/sign-in" />
           </div>

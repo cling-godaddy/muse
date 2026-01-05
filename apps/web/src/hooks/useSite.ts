@@ -29,6 +29,7 @@ export interface UseSite {
   setTheme: (palette: string, typography: string) => void
   setSite: (site: Site) => void
   clearSite: () => void
+  updateSiteName: (name: string) => void
 }
 
 export function useSite(initialName = "Untitled Site"): UseSite {
@@ -185,6 +186,14 @@ export function useSite(initialName = "Untitled Site"): UseSite {
     setCurrentPageId(null);
   }, [initialName]);
 
+  const updateSiteName = useCallback((name: string) => {
+    setSiteState(prev => ({
+      ...prev,
+      name,
+      updatedAt: new Date().toISOString(),
+    }));
+  }, []);
+
   return {
     site,
     currentPageId,
@@ -202,5 +211,6 @@ export function useSite(initialName = "Untitled Site"): UseSite {
     setTheme,
     setSite,
     clearSite,
+    updateSiteName,
   };
 }
