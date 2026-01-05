@@ -1,5 +1,6 @@
 import { Hono } from "hono";
 import { createImageAnalyzer } from "@muse/ai";
+import { requireAuth } from "../middleware/auth";
 import { embed } from "@muse/ai/rag";
 import { createLogger } from "@muse/logger";
 import {
@@ -56,6 +57,8 @@ async function getStore(forceReload = false): Promise<ImageBankStore | null> {
 }
 
 export const reviewRoute = new Hono();
+
+reviewRoute.use("/*", requireAuth);
 
 // GET /entries - list entries with filters
 reviewRoute.get("/entries", async (c) => {

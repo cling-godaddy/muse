@@ -5,6 +5,7 @@ config({ path: resolve(import.meta.dirname, "../../../.env") });
 import { serve } from "@hono/node-server";
 import { Hono } from "hono";
 import { cors } from "hono/cors";
+import { clerkMiddleware } from "@hono/clerk-auth";
 import { chatRoute } from "./routes/chat";
 import { generateRoute } from "./routes/generate";
 import { uploadRoute } from "./routes/upload";
@@ -15,14 +16,16 @@ import { sitesRoute } from "./routes/sites";
 const app = new Hono();
 
 app.use("/*", cors());
+app.use("/api/*", clerkMiddleware());
+
+app.get("/health", c => c.json({ ok: true }));
+
 app.route("/api/chat", chatRoute);
 app.route("/api/generate", generateRoute);
 app.route("/api/upload", uploadRoute);
 app.route("/api/search", searchRoute);
 app.route("/api/review", reviewRoute);
 app.route("/api/sites", sitesRoute);
-
-app.get("/health", c => c.json({ ok: true }));
 
 const port = Number(process.env.PORT) || 3001;
 

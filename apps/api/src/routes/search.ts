@@ -1,7 +1,10 @@
 import { Hono } from "hono";
 import { createMediaClient } from "@muse/media";
+import { requireAuth } from "../middleware/auth";
 
 export const searchRoute = new Hono();
+
+searchRoute.use("/*", requireAuth);
 
 searchRoute.get("/images", async (c) => {
   const query = c.req.query("q");

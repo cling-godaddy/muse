@@ -1,6 +1,7 @@
 import { Hono } from "hono";
 import { streamText } from "hono/streaming";
 import { createClient, createImageAnalyzer, orchestrateSite, refine, resolveFieldAlias, getValidFields, type Message, type Provider, type ToolCall } from "@muse/ai";
+import { requireAuth } from "../middleware/auth";
 import { embed } from "@muse/ai/rag";
 import { createLogger } from "@muse/logger";
 import { createMediaClient, createImageBank, createQueryNormalizer, type MediaClient, type ImageBank, type QueryNormalizer } from "@muse/media";
@@ -96,6 +97,8 @@ async function getMediaClient(): Promise<MediaClient | null> {
 }
 
 export const chatRoute = new Hono();
+
+chatRoute.use("/*", requireAuth);
 
 chatRoute.post("/", async (c) => {
   const { messages, stream } = await c.req.json<{

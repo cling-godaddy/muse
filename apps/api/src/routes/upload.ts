@@ -1,5 +1,6 @@
 import { Hono } from "hono";
 import { createS3Operations } from "@muse/media/s3";
+import { requireAuth } from "../middleware/auth";
 import sharp from "sharp";
 import { randomUUID } from "crypto";
 
@@ -17,6 +18,8 @@ function getS3() {
 }
 
 export const uploadRoute = new Hono();
+
+uploadRoute.use("/*", requireAuth);
 
 uploadRoute.post("/image", async (c) => {
   const body = await c.req.parseBody();
@@ -46,8 +49,7 @@ uploadRoute.post("/image", async (c) => {
     .toBuffer();
 
   // Upload to S3
-  // TODO: replace hardcoded user with actual user ID when auth is implemented
-  const userId = "czling";
+  const userId = c.get("userId");
   const id = randomUUID();
   const key = `users/${userId}/images/${id}.webp`;
 

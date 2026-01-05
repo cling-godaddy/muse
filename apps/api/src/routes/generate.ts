@@ -1,5 +1,6 @@
 import { Hono } from "hono";
 import { createClient, type Provider } from "@muse/ai";
+import { requireAuth } from "../middleware/auth";
 import { generateSectionSchemaPrompt, validateSections, type Section } from "@muse/core";
 import { generateThemePrompt, getTheme } from "@muse/themes";
 
@@ -46,6 +47,8 @@ Guidelines:
 - Respond with ONLY the JSON, no markdown or explanation`;
 
 export const generateRoute = new Hono();
+
+generateRoute.use("/*", requireAuth);
 
 generateRoute.post("/page", async (c) => {
   const { prompt } = await c.req.json<{ prompt: string }>();

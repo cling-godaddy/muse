@@ -1,8 +1,11 @@
 import { Hono } from "hono";
 import { createSitesTable, type SitesTable } from "@muse/db";
+import { requireAuth } from "../middleware/auth";
 import type { Site } from "@muse/core";
 
 export const sitesRoute = new Hono();
+
+sitesRoute.use("/*", requireAuth);
 
 let sitesTable: SitesTable | null = null;
 

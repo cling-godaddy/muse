@@ -1,8 +1,13 @@
-import { describe, it, expect, beforeEach } from "vitest";
+import { describe, it, expect, beforeEach, vi } from "vitest";
 import { Hono } from "hono";
 import { sitesRoute, resetSitesRoute } from "./sites";
 import { resetSitesTable } from "@muse/db";
 import type { Site } from "@muse/core";
+
+// Mock clerk auth to always return a valid user
+vi.mock("@hono/clerk-auth", () => ({
+  getAuth: () => ({ userId: "test_user_123" }),
+}));
 
 function createTestSite(overrides: Partial<Site> = {}): Site {
   return {

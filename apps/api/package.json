@@ -11,6 +11,8 @@
     "test": "TESTING=1 vitest run"
   },
   "dependencies": {
+    "@clerk/backend": "^2.29.0",
+    "@hono/clerk-auth": "^3.0.3",
     "@hono/node-server": "^1",
     "@muse/ai": "workspace:*",
     "@muse/core": "workspace:*",
