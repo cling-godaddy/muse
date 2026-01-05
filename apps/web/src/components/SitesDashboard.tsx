@@ -1,8 +1,9 @@
 import { useState, useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { UserButton } from "@clerk/clerk-react";
+import { Trash2 } from "lucide-react";
 import { useAuthFetch } from "../hooks/useAuthFetch";
-import { Spinner } from "@muse/editor";
+import { Dialog, Spinner } from "@muse/editor";
 
 interface SiteSummary {
   id: string
@@ -26,17 +27,27 @@ function formatRelativeTime(dateStr: string): string {
   return date.toLocaleDateString();
 }
 
-function SiteCard({ site, onClick }: { site: SiteSummary, onClick: () => void }) {
+function SiteCard({ site, onClick, onDelete }: { site: SiteSummary, onClick: () => void, onDelete: () => void }) {
   return (
     <button
       onClick={onClick}
-      className="group bg-bg-muted rounded-lg overflow-hidden hover:ring-2 ring-primary text-left transition-all"
+      className="group bg-bg-muted rounded-lg overflow-hidden hover:ring-2 ring-primary text-left transition-all relative"
     >
       <div className="aspect-video bg-bg-subtle flex items-center justify-center">
         <span className="text-4xl text-text-subtle font-medium">
           {site.name.charAt(0).toUpperCase()}
         </span>
       </div>
+      <button
+        onClick={(e) => {
+          e.stopPropagation();
+          onDelete();
+        }}
+        className="absolute top-2 right-2 p-1.5 rounded bg-bg/80 opacity-0 group-hover:opacity-100 hover:bg-red-500 hover:text-white text-text-muted transition-all"
+        aria-label="Delete site"
+      >
+        <Trash2 size={16} />
+      </button>
       <div className="p-4">
         <h3 className="font-medium truncate text-text">{site.name}</h3>
         <p className="text-sm text-text-muted">
@@ -75,6 +86,8 @@ export function SitesDashboard() {
   const [sites, setSites] = useState<SiteSummary[]>([]);
   const [loading, setLoading] = useState(true);
   const [creating, setCreating] = useState(false);
+  const [deletingSite, setDeletingSite] = useState<SiteSummary | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   useEffect(() => {
     authFetch("/api/sites")
@@ -96,6 +109,19 @@ export function SitesDashboard() {
     }
     finally {
       setCreating(false);
+    }
+  };
+
+  const handleDelete = async () => {
+    if (!deletingSite) return;
+    setIsDeleting(true);
+    try {
+      await authFetch(`/api/sites/${deletingSite.id}`, { method: "DELETE" });
+      setSites(prev => prev.filter(s => s.id !== deletingSite.id));
+      setDeletingSite(null);
+    }
+    finally {
+      setIsDeleting(false);
     }
   };
 
@@ -141,11 +167,42 @@ export function SitesDashboard() {
                     key={site.id}
                     site={site}
                     onClick={() => navigate(`/sites/${site.id}`)}
+                    onDelete={() => setDeletingSite(site)}
                   />
                 ))}
               </div>
             )}
       </div>
+
+      <Dialog
+        open={!!deletingSite}
+        onOpenChange={open => !open && setDeletingSite(null)}
+        title="Delete Site"
+      >
+        <div className="p-5 pt-0">
+          <p className="text-text-muted mb-6">
+            Are you sure you want to delete
+            {" "}
+            <span className="font-medium text-text">{deletingSite?.name}</span>
+            ? This action cannot be undone.
+          </p>
+          <div className="flex gap-3 justify-end">
+            <button
+              onClick={() => setDeletingSite(null)}
+              className="px-4 py-2 rounded-lg border border-border hover:bg-bg-subtle transition-colors"
+            >
+              Cancel
+            </button>
+            <button
+              onClick={handleDelete}
+              disabled={isDeleting}
+              className="px-4 py-2 rounded-lg bg-red-500 hover:bg-red-600 text-white transition-colors disabled:opacity-50 flex items-center gap-2"
+            >
+              {isDeleting ? <Spinner /> : "Delete"}
+            </button>
+          </div>
+        </div>
+      </Dialog>
     </div>
   );
 }
