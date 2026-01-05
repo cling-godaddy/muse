@@ -97,7 +97,7 @@ export function EditorToolbar({
   }
 
   return (
-    <div className="flex items-center gap-0.5 px-4 border-b border-border overflow-x-auto">
+    <div className="flex items-center gap-0.5 px-4 border-b border-border overflow-hidden">
       {flattenedPages.map(({ page, path, depth }) => {
         const isActive = page.id === currentPageId;
         return (
