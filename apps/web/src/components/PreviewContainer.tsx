@@ -33,9 +33,9 @@ export function PreviewContainer({ device, children }: PreviewContainerProps) {
     return () => observer.disconnect();
   }, [handleResize]);
 
-  // Desktop mode - no constraints
+  // Desktop mode - no constraints, but needs scroll container
   if (!deviceWidth) {
-    return <>{children}</>;
+    return <div className="h-full overflow-y-auto">{children}</div>;
   }
 
   // Calculate scale based on available width
