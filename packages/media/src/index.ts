@@ -20,7 +20,5 @@ export {
   type BankEntry,
   type BankSearchResult,
   type BankSearchOptions,
-  type ImageMetadata,
   type EmbedFn,
-  type AnalyzeFn,
 } from "./bank";

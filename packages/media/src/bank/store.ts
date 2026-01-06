@@ -3,16 +3,13 @@ import { fromEnv } from "@aws-sdk/credential-provider-env";
 import faiss from "faiss-node";
 import type { Logger } from "@muse/logger";
 import type { ImageSearchResult } from "../types";
-import type { BankConfig, BankEntry, BankSearchResult, BankSearchOptions, ImageBank, ImageMetadata } from "./types";
+import type { BankConfig, BankEntry, BankSearchResult, BankSearchOptions, ImageBank } from "./types";
 
 const { IndexFlatIP } = faiss;
 const EMBEDDING_DIM = 1536;
 const BANK_DATA_KEY = "bank.json";
 const BANK_INDEX_KEY = "bank.index";
 const DEFAULT_MIN_SCORE = 0.88;
-
-// cache analysis results by URL to avoid re-analyzing same images
-const analysisCache = new Map<string, ImageMetadata>();
 
 interface BankData {
   entries: BankEntry[]
@@ -36,7 +33,7 @@ const noopLogger: Logger = {
 };
 
 export async function createImageBank(config: BankConfig): Promise<ImageBank> {
-  const { bucket, region, prefix = "bank/", embed, analyze } = config;
+  const { bucket, region, prefix = "bank/", embed } = config;
   const log = config.logger ?? noopLogger;
 
   const s3 = new S3Client({ region, credentials: fromEnv() });
@@ -123,7 +120,7 @@ export async function createImageBank(config: BankConfig): Promise<ImageBank> {
       }
     },
 
-    async store(image: ImageSearchResult): Promise<void> {
+    async store(image: ImageSearchResult, query: string): Promise<void> {
       const entryId = `${image.provider}:${image.id}`;
 
       if (state.entries.has(entryId)) {
@@ -131,33 +128,12 @@ export async function createImageBank(config: BankConfig): Promise<ImageBank> {
         return;
       }
 
-      log.debug("bank_store_start", { entryId, url: image.displayUrl });
+      log.debug("bank_store_start", { entryId, query });
 
-      // analyze image via URL (no download)
-      let metadata: ImageMetadata;
-
-      // check cache first
-      const cachedMetadata = analysisCache.get(image.displayUrl);
-      if (cachedMetadata) {
-        metadata = cachedMetadata;
-        log.debug("bank_analyze_cache_hit", { entryId, url: image.displayUrl });
-      }
-      else {
-        try {
-          metadata = await analyze(image.displayUrl);
-          analysisCache.set(image.displayUrl, metadata);
-          log.debug("bank_analyze_complete", { entryId, caption: metadata.caption.slice(0, 50) });
-        }
-        catch (err) {
-          log.error("bank_analyze_failed", { entryId, error: err instanceof Error ? err.message : String(err) });
-          return;
-        }
-      }
-
-      // embed the caption
+      // embed the query
       let embedding: number[];
       try {
-        embedding = await embed(metadata.caption);
+        embedding = await embed(query);
       }
       catch (err) {
         log.error("bank_embed_failed", { entryId, error: err instanceof Error ? err.message : String(err) });
@@ -169,7 +145,7 @@ export async function createImageBank(config: BankConfig): Promise<ImageBank> {
         id: entryId,
         provider: image.provider,
         url: image.displayUrl,
-        metadata,
+        query,
         embedding,
         createdAt: new Date().toISOString(),
       };
@@ -183,7 +159,7 @@ export async function createImageBank(config: BankConfig): Promise<ImageBank> {
       state.entries.set(entryId, entry);
       state.dirty = true;
 
-      log.debug("bank_store_complete", { entryId, vectorIndex });
+      log.debug("bank_store_complete", { entryId, vectorIndex, query });
     },
 
     async search(query: string, options: BankSearchOptions = {}): Promise<BankSearchResult> {
@@ -219,7 +195,7 @@ export async function createImageBank(config: BankConfig): Promise<ImageBank> {
 
         results.push({
           id: entry.id.split(":")[1] ?? entry.id,
-          title: entry.metadata.caption,
+          title: entry.query,
           previewUrl: entry.url,
           displayUrl: entry.url,
           width: 0,

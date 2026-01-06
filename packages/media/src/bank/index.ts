@@ -5,7 +5,5 @@ export type {
   BankEntry,
   BankSearchResult,
   BankSearchOptions,
-  ImageMetadata,
   EmbedFn,
-  AnalyzeFn,
 } from "./types";
