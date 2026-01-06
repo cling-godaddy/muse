@@ -194,9 +194,14 @@ function MainApp() {
     }
   }, [updateSectionById]);
 
-  const handlePages = useCallback((pages: PageInfo[]) => {
+  const handlePages = useCallback((pages: PageInfo[], themeOverride?: ThemeSelection) => {
     beginTransaction();
     clearSite();
+
+    // apply theme after clearSite (avoids stale closure issue)
+    if (themeOverride) {
+      setTheme(themeOverride.palette, themeOverride.typography, themeOverride.effects);
+    }
 
     let firstPageId: string | null = null;
     for (const pageInfo of pages) {
@@ -225,7 +230,7 @@ function MainApp() {
       setCurrentPage(firstPageId);
     }
     commitTransaction();
-  }, [clearSite, addNewPage, updatePageSections, setCurrentPage, beginTransaction, commitTransaction, setNavbar, site.name]);
+  }, [clearSite, addNewPage, updatePageSections, setCurrentPage, beginTransaction, commitTransaction, setNavbar, site.name, setTheme]);
 
   const handleRefine = useCallback((updates: RefineUpdate[]) => {
     beginTransaction();
