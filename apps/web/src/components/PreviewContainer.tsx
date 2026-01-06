@@ -51,11 +51,11 @@ export function PreviewContainer({ device, children }: PreviewContainerProps) {
       className="h-full flex justify-center items-start p-6 bg-[var(--muse-border)]"
     >
       <div
-        className="bg-bg shadow-lg origin-top overflow-auto"
+        className="bg-bg shadow-lg origin-top overflow-x-hidden overflow-y-auto"
         style={{
           width: deviceWidth,
           maxHeight: scale < 1 ? `calc(100% / ${scale})` : "100%",
-          transform: scale < 1 ? `scale(${scale})` : undefined,
+          transform: `scale(${scale})`,
         }}
       >
         {children}
