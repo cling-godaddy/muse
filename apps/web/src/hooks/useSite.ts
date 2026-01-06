@@ -182,9 +182,15 @@ export function useSite(initialName = "Untitled Site"): UseSite {
   }, []);
 
   const clearSite = useCallback(() => {
-    setSiteState(createSite(initialName));
+    setSiteState(prev => ({
+      ...createSite(prev.name),
+      id: prev.id,
+      description: prev.description,
+      location: prev.location,
+      siteType: prev.siteType,
+    }));
     setCurrentPageId(null);
-  }, [initialName]);
+  }, []);
 
   const updateSiteName = useCallback((name: string) => {
     setSiteState(prev => ({
