@@ -139,7 +139,8 @@ export function useSiteWithHistory(initialName = "Untitled Site"): UseSiteWithHi
     const resolvedEffects = effects
       ?? (palette === "terminal" ? "crt" : palette === "synthwave" ? "neon" : "neutral");
     setThemeState({ palette, typography, effects: resolvedEffects });
-  }, [history, historyEnabled]);
+    siteHook.setTheme(palette, typography);
+  }, [history, historyEnabled, siteHook]);
 
   // Undo/redo that restore full state
   const undo = useCallback(() => {
