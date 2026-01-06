@@ -19,6 +19,7 @@
     "@muse/core": "workspace:*",
     "@muse/logger": "workspace:*",
     "faiss-node": "^0.5.1",
+    "gd-auth-client": "^2.1.1",
     "lodash-es": "^4.17.22",
     "openai": "^6.15.0"
   },

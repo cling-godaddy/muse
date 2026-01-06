@@ -4,7 +4,7 @@
   "type": "module",
   "scripts": {
     "build": "turbo build",
-    "dev": "turbo dev",
+    "dev": "./scripts/dev.sh",
     "lint": "turbo lint",
     "test": "turbo test",
     "typecheck": "turbo typecheck",

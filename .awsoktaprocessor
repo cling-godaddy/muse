@@ -1,0 +1,5 @@
+[authenticate]
+factor=token:hardware:yubico
+application=https://godaddy.okta.com/home/amazon_aws/0oakmpp1rkb2ZuZsQ0x7/272
+role=arn:aws:iam::795066905288:role/GD-AWS-USA-CPO-IMCoreAppSvc-Dev-Private-PowerUser
+organization=godaddy.okta.com

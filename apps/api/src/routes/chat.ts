@@ -4,7 +4,7 @@ import { createClient, createImageAnalyzer, orchestrateSite, refine, resolveFiel
 import { requireAuth } from "../middleware/auth";
 import { embed } from "@muse/ai/rag";
 import { createLogger } from "@muse/logger";
-import { createMediaClient, createImageBank, createQueryNormalizer, type MediaClient, type ImageBank, type QueryNormalizer } from "@muse/media";
+import { createMediaClient, createImageBank, createQueryNormalizer, getIamJwt, type MediaClient, type ImageBank, type QueryNormalizer } from "@muse/media";
 import type { Section } from "@muse/core";
 
 const logger = createLogger();
@@ -76,10 +76,6 @@ async function getMediaClient(): Promise<MediaClient | null> {
   const unsplashKey = process.env.UNSPLASH_ACCESS_KEY;
   const pexelsKey = process.env.PEXELS_API_KEY;
 
-  if (!unsplashKey && !pexelsKey) {
-    return null;
-  }
-
   const bank = await getImageBank();
 
   // Recreate client if bank became available
@@ -88,6 +84,7 @@ async function getMediaClient(): Promise<MediaClient | null> {
   mediaClient = createMediaClient({
     unsplashKey,
     pexelsKey,
+    gettyJwt: getIamJwt,
     bank: bank ?? undefined,
     normalizer: getNormalizer(),
     logger: logger.child({ agent: "media" }),

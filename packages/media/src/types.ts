@@ -20,7 +20,7 @@ export interface ImageSearchResult {
 
 export interface ImageSearchOptions {
   query: string
-  provider: "unsplash" | "pexels"
+  provider: "unsplash" | "pexels" | "getty"
   orientation?: "horizontal" | "vertical" | "square"
   count?: number
 }
@@ -30,7 +30,7 @@ export type ImageCategory = "ambient" | "subject" | "people";
 export interface ImagePlan {
   blockId: string
   category: ImageCategory
-  provider: "unsplash" | "pexels"
+  provider: "unsplash" | "pexels" | "getty"
   searchQuery: string
   orientation: "horizontal" | "vertical" | "square" | "mixed"
   count?: number

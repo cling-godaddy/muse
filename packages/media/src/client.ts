@@ -5,10 +5,12 @@ import type { ImageBank } from "./bank";
 import type { QueryNormalizer, MediaQueryIntent, NormalizeResult } from "./normalize";
 import { createUnsplashProvider } from "./unsplash";
 import { createPexelsProvider } from "./pexels";
+import { createGettyProvider } from "./getty";
 
 export interface MediaClientConfig {
   unsplashKey?: string
   pexelsKey?: string
+  gettyJwt?: () => Promise<string>
   cacheTtlMs?: number
   logger?: Logger
   bank?: ImageBank
@@ -95,6 +97,10 @@ export function createMediaClient(config: MediaClientConfig): MediaClient {
 
   if (config.pexelsKey) {
     providers.set("pexels", createPexelsProvider(config.pexelsKey));
+  }
+
+  if (config.gettyJwt) {
+    providers.set("getty", createGettyProvider({ getJwt: config.gettyJwt }));
   }
 
   if (providers.size === 0) {
