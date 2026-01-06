@@ -28,10 +28,6 @@ export function Navbar({ section, onUpdate }: Props) {
     onUpdate({ items });
   };
 
-  const addItem = () => {
-    onUpdate({ items: [...section.items, { label: "Link", href: "#" }] });
-  };
-
   const removeItem = (index: number) => {
     onUpdate({ items: section.items.filter((_, i) => i !== index) });
   };
@@ -147,11 +143,6 @@ export function Navbar({ section, onUpdate }: Props) {
                   <a key={i} href={item.href} className={styles.navLink}>{item.label}</a>
                 )
           ))}
-          {isEditable && (
-            <button type="button" className={styles.addIcon} onClick={addItem} title="Add link">
-              +
-            </button>
-          )}
         </div>
 
         {/* Mobile hamburger */}

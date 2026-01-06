@@ -135,32 +135,6 @@
   color: var(--muse-theme-primary, #6366f1);
 }
 
-/* Add button */
-.addIcon {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 1.75rem;
-  height: 1.75rem;
-  font-size: 1rem;
-  color: var(--muse-theme-text-muted, #64748b);
-  background: transparent;
-  border: 1px dashed var(--muse-theme-text-muted, #475569);
-  border-radius: 50%;
-  cursor: pointer;
-  opacity: 0;
-  transition: opacity 0.15s, color 0.15s, border-color 0.15s;
-}
-
-.nav:hover .addIcon {
-  opacity: 1;
-}
-
-.addIcon:hover {
-  color: var(--muse-theme-primary, #6366f1);
-  border-color: var(--muse-theme-primary, #6366f1);
-}
-
 /* Transparent variant */
 :global(.muse-navbar--transparent) .navbar {
   background: transparent;
