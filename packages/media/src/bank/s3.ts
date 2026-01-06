@@ -4,6 +4,7 @@ import {
   PutObjectCommand,
   HeadObjectCommand,
 } from "@aws-sdk/client-s3";
+import { fromEnv } from "@aws-sdk/credential-provider-env";
 
 export interface S3Config {
   bucket: string
@@ -23,7 +24,7 @@ export interface S3Operations {
 export function createS3Operations(config: S3Config): S3Operations {
   const { bucket, region, prefix = "" } = config;
 
-  const client = new S3Client({ region });
+  const client = new S3Client({ region, credentials: fromEnv() });
 
   function fullKey(key: string): string {
     return prefix ? `${prefix}${key}` : key;
