@@ -36,7 +36,7 @@ export interface UseChatOptions {
   onSectionParsed?: (section: Section) => void
   onThemeSelected?: (theme: ThemeSelection) => void
   onImages?: (images: ImageSelection[], sections: Section[]) => void
-  onPages?: (pages: PageInfo[]) => void
+  onPages?: (pages: PageInfo[], theme?: ThemeSelection) => void
   onUsage?: (usage: Usage) => void
   /** Called when refine returns updates to apply */
   onRefine?: (updates: RefineUpdate[]) => void
@@ -252,7 +252,7 @@ export function useChat(options: UseChatOptions = {}): UseChat {
         // emit pages FIRST (before images) so sections exist when images are injected
         if (result.newPages.length > 0 && !pagesProcessedRef.current) {
           pagesProcessedRef.current = true;
-          options.onPages?.(result.newPages);
+          options.onPages?.(result.newPages, result.theme);
         }
 
         // emit images with sections from current parse result (not stale ref)
