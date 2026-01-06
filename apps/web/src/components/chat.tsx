@@ -3,15 +3,27 @@ import type { Section } from "@muse/core";
 import type { ImageSelection } from "@muse/media";
 import { Spinner } from "@muse/editor";
 import { getPalette } from "@muse/themes";
-import { useChat, type Message, type RefineUpdate } from "../hooks/useChat";
+import { useChat, type Message, type RefineUpdate, type SiteContext } from "../hooks/useChat";
 import type { AgentState, ThemeSelection, PageInfo } from "../utils/streamParser";
 import { TimelineModal } from "./modals/timeline";
+
+interface IntakeContext {
+  name?: string
+  description?: string
+  location?: string
+}
 
 interface ChatProps {
   /** Site ID for message persistence */
   siteId?: string
+  /** Business context for content generation */
+  siteContext?: SiteContext
   /** Current sections - enables refine mode when provided */
   sections?: Section[]
+  /** Initial prompt to auto-send on mount (only if no existing messages/sections) */
+  autoSendPrompt?: string
+  /** Intake form data to display in chat */
+  intakeContext?: IntakeContext
   onSectionParsed?: (section: Section) => void
   onThemeSelected?: (theme: ThemeSelection) => void
   onImages?: (images: ImageSelection[], sections: Section[]) => void
@@ -30,11 +42,20 @@ function formatTokens(n: number): string {
   return `${(n / 1_000_000).toFixed(1)}M`;
 }
 
-export function Chat({ siteId, sections, onSectionParsed, onThemeSelected, onImages, onPages, onRefine, onGenerationComplete, onMessagesChange }: ChatProps) {
-  const options = useMemo(() => ({ siteId, sections, onSectionParsed, onThemeSelected, onImages, onPages, onRefine, onGenerationComplete, onMessagesChange }), [siteId, sections, onSectionParsed, onThemeSelected, onImages, onPages, onRefine, onGenerationComplete, onMessagesChange]);
+export function Chat({ siteId, siteContext, sections, autoSendPrompt, intakeContext, onSectionParsed, onThemeSelected, onImages, onPages, onRefine, onGenerationComplete, onMessagesChange }: ChatProps) {
+  const options = useMemo(() => ({ siteId, siteContext, sections, onSectionParsed, onThemeSelected, onImages, onPages, onRefine, onGenerationComplete, onMessagesChange }), [siteId, siteContext, sections, onSectionParsed, onThemeSelected, onImages, onPages, onRefine, onGenerationComplete, onMessagesChange]);
   const { messages, input, setInput, isLoading, error, send, sessionUsage, lastUsage, agents, agentsMessageIndex } = useChat(options);
   const isRefineMode = sections && sections.length > 0;
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const autoSendTriggeredRef = useRef(false);
+
+  // auto-send initial prompt if provided and no existing content
+  useEffect(() => {
+    if (autoSendPrompt && !autoSendTriggeredRef.current && messages.length === 0 && !isRefineMode && !isLoading) {
+      autoSendTriggeredRef.current = true;
+      send(autoSendPrompt);
+    }
+  }, [autoSendPrompt, messages.length, isRefineMode, isLoading, send]);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -89,6 +110,7 @@ export function Chat({ siteId, sections, onSectionParsed, onThemeSelected, onIma
             isLast={i === messages.length - 1}
             isLoading={isLoading}
             agents={message.agents ?? (i === agentsMessageIndex ? agents : [])}
+            intakeContext={i === 0 && message.role === "user" ? intakeContext : undefined}
           />
         ))}
         {error && (
@@ -112,7 +134,7 @@ export function Chat({ siteId, sections, onSectionParsed, onThemeSelected, onIma
         />
         <button
           className="px-4 py-2 bg-primary text-white border-none rounded cursor-pointer font-medium hover:bg-primary-hover disabled:bg-border disabled:cursor-not-allowed"
-          onClick={send}
+          onClick={() => send()}
           disabled={isLoading || !input.trim()}
         >
           {isLoading ? "..." : "Send"}
@@ -127,6 +149,7 @@ interface MessageBubbleProps {
   isLast: boolean
   isLoading: boolean
   agents: AgentState[]
+  intakeContext?: IntakeContext
 }
 
 function getAgentSummary(agent: AgentState): string | null {
@@ -170,7 +193,7 @@ function getAgentSummary(agent: AgentState): string | null {
   }
 }
 
-function MessageBubble({ message, isLast, isLoading, agents }: MessageBubbleProps) {
+function MessageBubble({ message, isLast, isLoading, agents, intakeContext }: MessageBubbleProps) {
   const isAssistant = message.role === "assistant";
   // Show timeline if this message has agents, or if loading the last message
   const showTimeline = isAssistant && (agents.length > 0 || (isLast && isLoading));
@@ -218,6 +241,34 @@ function MessageBubble({ message, isLast, isLoading, agents }: MessageBubbleProp
           : (
             <div className={`p-3 whitespace-pre-wrap break-words ${showTimeline && message.content ? "border-t border-border-light" : ""}`}>
               {message.content || (isLast && isLoading && agents.length === 0 ? "Generating..." : "")}
+              {!isAssistant && intakeContext && (
+                <details className="mt-2 text-xs text-text-muted">
+                  <summary className="cursor-pointer hover:text-text">Business context ›</summary>
+                  <div className="mt-1 pl-3 space-y-0.5">
+                    {intakeContext.name && (
+                      <div>
+                        <span className="text-text-subtle">Name:</span>
+                        {" "}
+                        {intakeContext.name}
+                      </div>
+                    )}
+                    {intakeContext.description && (
+                      <div>
+                        <span className="text-text-subtle">Description:</span>
+                        {" "}
+                        {intakeContext.description}
+                      </div>
+                    )}
+                    {intakeContext.location && (
+                      <div>
+                        <span className="text-text-subtle">Location:</span>
+                        {" "}
+                        {intakeContext.location}
+                      </div>
+                    )}
+                  </div>
+                </details>
+              )}
             </div>
           )}
       </div>

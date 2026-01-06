@@ -1,5 +1,5 @@
 import { useState, useMemo, useCallback, useEffect, useRef } from "react";
-import { BrowserRouter, Routes, Route, useParams, useNavigate, Link } from "react-router-dom";
+import { BrowserRouter, Routes, Route, useParams, useNavigate, useLocation, Link } from "react-router-dom";
 import { UserButton } from "@clerk/clerk-react";
 import { groupBy } from "lodash-es";
 import { SectionEditor, SiteProvider, EditorModeProvider } from "@muse/editor";
@@ -10,7 +10,7 @@ import { resolveThemeWithEffects, themeToCssVars, getTypography, loadFonts } fro
 import { Chat } from "./components/chat";
 import { useSiteWithHistory } from "./hooks/useSiteWithHistory";
 import { useSitePersistence } from "./hooks/useSitePersistence";
-import type { RefineUpdate, Message } from "./hooks/useChat";
+import type { RefineUpdate, Message, SiteContext } from "./hooks/useChat";
 import { EditorToolbar } from "./components/EditorToolbar";
 import { PreviewContainer } from "./components/PreviewContainer";
 import { SiteTitleInput } from "./components/SiteTitleInput";
@@ -24,6 +24,8 @@ import type { ThemeSelection, PageInfo } from "./utils/streamParser";
 function MainApp() {
   const { siteId: urlSiteId } = useParams<{ siteId?: string }>();
   const navigate = useNavigate();
+  const location = useLocation();
+  const locationState = location.state as { autoGenerate?: boolean } | null;
 
   const {
     site,
@@ -222,6 +224,29 @@ function MainApp() {
     enableHistory();
   }, [enableHistory]);
 
+  const siteContext: SiteContext = useMemo(() => ({
+    name: site.name,
+    description: site.description,
+    location: site.location,
+    siteType: site.siteType,
+  }), [site.name, site.description, site.location, site.siteType]);
+
+  // generate auto-send prompt if navigated with autoGenerate flag (wait for site to load)
+  const autoSendPrompt = useMemo(() => {
+    if (!locationState?.autoGenerate) return void 0;
+    if (urlSiteId && site.id !== urlSiteId) return void 0;
+    const typeLabel = site.siteType === "full" ? "a full website" : "a landing page";
+    const subject = site.name && site.name !== "Untitled Site" ? site.name : "this business";
+    return `Create ${typeLabel} for ${subject}.`;
+  }, [locationState?.autoGenerate, site.siteType, urlSiteId, site.id, site.name]);
+
+  // intake context for display in chat (only for auto-generated prompts)
+  const intakeContext = useMemo(() => {
+    if (!locationState?.autoGenerate) return void 0;
+    if (!site.description && !site.location) return void 0;
+    return { name: site.name, description: site.description, location: site.location };
+  }, [locationState?.autoGenerate, site.name, site.description, site.location]);
+
   return (
     <SiteProvider pageSlugs={pageSlugs} onGeneratePage={handleGeneratePage}>
       <div className="flex flex-col h-full font-sans text-text bg-bg">
@@ -259,7 +284,7 @@ function MainApp() {
         )}
         <main className="flex-1 flex gap-6 p-6 overflow-hidden">
           <div className={`w-[400px] shrink-0 ${isPreview ? "hidden" : ""}`}>
-            <Chat siteId={site.id} sections={sections} onSectionParsed={handleSectionParsed} onThemeSelected={handleThemeSelected} onImages={handleImages} onPages={handlePages} onRefine={handleRefine} onGenerationComplete={handleGenerationComplete} onMessagesChange={setMessages} />
+            <Chat siteId={site.id} siteContext={siteContext} sections={sections} autoSendPrompt={autoSendPrompt} intakeContext={intakeContext} onSectionParsed={handleSectionParsed} onThemeSelected={handleThemeSelected} onImages={handleImages} onPages={handlePages} onRefine={handleRefine} onGenerationComplete={handleGenerationComplete} onMessagesChange={setMessages} />
           </div>
           <div className="flex-1 min-w-0 overflow-hidden">
             {isPreview

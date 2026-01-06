@@ -19,9 +19,18 @@ export interface RefineUpdate {
   updates: Partial<Section>
 }
 
+export interface SiteContext {
+  name?: string
+  description?: string
+  location?: string
+  siteType?: "landing" | "full"
+}
+
 export interface UseChatOptions {
   /** Site ID for message persistence */
   siteId?: string
+  /** Business context for content generation */
+  siteContext?: SiteContext
   /** Current sections - when provided, chat switches to refine mode */
   sections?: Section[]
   onSectionParsed?: (section: Section) => void
@@ -43,7 +52,7 @@ export interface UseChat {
   setInput: (input: string) => void
   isLoading: boolean
   error: string | null
-  send: () => Promise<void>
+  send: (message?: string) => Promise<void>
   sessionUsage: Usage
   lastUsage?: Usage
   agents: AgentState[]
@@ -109,10 +118,11 @@ export function useChat(options: UseChatOptions = {}): UseChat {
     onMessagesChange?.(messages);
   }, [messages, onMessagesChange]);
 
-  const send = useCallback(async () => {
-    if (!input.trim() || isLoading) return;
+  const send = useCallback(async (message?: string) => {
+    const content = message ?? input;
+    if (!content.trim() || isLoading) return;
 
-    const userMessage: Message = { role: "user", content: input };
+    const userMessage: Message = { role: "user", content };
     const newMessages = [...messages, userMessage];
 
     // Refine mode: when sections exist, use refine endpoint
@@ -202,6 +212,7 @@ export function useChat(options: UseChatOptions = {}): UseChat {
         body: JSON.stringify({
           messages: newMessages,
           stream: true,
+          siteContext: options.siteContext,
         }),
       });
 
