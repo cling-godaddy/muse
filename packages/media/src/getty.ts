@@ -56,15 +56,22 @@ export function createGettyProvider(config: GettyProviderConfig): MediaProvider 
 
       const results: GettyImageResult[] = await response.json();
 
-      return results.map((image): ImageSearchResult => ({
-        id: image.id,
-        title: `Getty Image ${image.id}`,
-        previewUrl: image.url,
-        displayUrl: image.url,
-        width: 0,
-        height: 0,
-        provider: "getty",
-      }));
+      return results.map((image): ImageSearchResult => {
+        // prefer media.gettyimages.com URLs from display_sizes (public, no auth)
+        // fall back to isteam URL (requires auth, may fail for vision)
+        const gettyUrl = image.display_sizes
+          ?.find(d => d.uri.includes("media.gettyimages.com"))?.uri;
+
+        return {
+          id: image.id,
+          title: `Getty Image ${image.id}`,
+          previewUrl: gettyUrl ?? image.url,
+          displayUrl: gettyUrl ?? image.url,
+          width: 0,
+          height: 0,
+          provider: "getty",
+        };
+      });
     },
   };
 }
