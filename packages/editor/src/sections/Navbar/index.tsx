@@ -1,3 +1,4 @@
+import { useState } from "react";
 import type { NavbarSection as NavbarSectionType, NavItem } from "@muse/core";
 import { EditableText } from "../../ux";
 import { useIsEditable } from "../../context/EditorMode";
@@ -18,6 +19,7 @@ interface Props {
 
 export function Navbar({ section, onUpdate }: Props) {
   const isEditable = useIsEditable();
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   const updateItem = (index: number, data: Partial<NavItem>) => {
     const items = section.items.map((item, i) =>
@@ -199,6 +201,65 @@ export function Navbar({ section, onUpdate }: Props) {
           >
             + CTA
           </button>
+        )}
+
+        {/* Mobile hamburger */}
+        <button
+          type="button"
+          className={styles.hamburger}
+          onClick={() => setIsMenuOpen(true)}
+          aria-label="Open menu"
+        >
+          <span />
+          <span />
+          <span />
+        </button>
+      </div>
+
+      {/* Mobile drawer overlay */}
+      <div
+        className={styles.drawerOverlay}
+        data-open={isMenuOpen}
+        onClick={() => setIsMenuOpen(false)}
+      />
+
+      {/* Mobile drawer */}
+      <div className={styles.drawer} data-open={isMenuOpen}>
+        <div className={styles.drawerHeader}>
+          <div className={styles.logo}>
+            {section.logo?.image
+              ? <img src={section.logo.image.url} alt={section.logo.image.alt} className={styles.logoImage} />
+              : <span className={styles.logoText}>{section.logo?.text}</span>}
+          </div>
+          <button
+            type="button"
+            className={styles.drawerClose}
+            onClick={() => setIsMenuOpen(false)}
+            aria-label="Close menu"
+          >
+            ×
+          </button>
+        </div>
+        <nav className={styles.drawerNav}>
+          {section.items.map((item, i) => (
+            <a
+              key={i}
+              href={item.href}
+              className={styles.drawerLink}
+              onClick={() => setIsMenuOpen(false)}
+            >
+              {item.label}
+            </a>
+          ))}
+        </nav>
+        {section.cta && (
+          <a
+            href={section.cta.href}
+            className={styles.drawerCta}
+            onClick={() => setIsMenuOpen(false)}
+          >
+            {section.cta.text}
+          </a>
         )}
       </div>
     </nav>
