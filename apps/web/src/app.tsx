@@ -1,6 +1,6 @@
 import { useState, useMemo, useCallback, useEffect, useRef } from "react";
 import { BrowserRouter, Routes, Route, useParams, useNavigate, useLocation, Link } from "react-router-dom";
-import { UserButton } from "@clerk/clerk-react";
+import { UserButton, useAuth } from "@clerk/clerk-react";
 import { groupBy } from "lodash-es";
 import { SectionEditor, SiteProvider, EditorModeProvider } from "@muse/editor";
 import type { Section, SectionType, PreviewDevice } from "@muse/core";
@@ -27,6 +27,7 @@ function MainApp() {
   const navigate = useNavigate();
   const location = useLocation();
   const locationState = location.state as { autoGenerate?: boolean } | null;
+  const { getToken } = useAuth();
 
   const {
     site,
@@ -158,13 +159,6 @@ function MainApp() {
     }
   }, [addSection]);
 
-  const handleAddSection = useCallback((section: Section, index: number) => {
-    addSection(section, index);
-    if (sectionNeedsImages(section.type as SectionType)) {
-      setPendingImageSections(prev => new Set(prev).add(section.id));
-    }
-  }, [addSection]);
-
   const handleThemeSelected = useCallback((selection: ThemeSelection) => {
     setTheme(selection.palette, selection.typography, selection.effects);
   }, [setTheme]);
@@ -202,6 +196,58 @@ function MainApp() {
       });
     }
   }, [updateSectionById]);
+
+  const handleAddSection = useCallback(async (section: Section, index: number) => {
+    addSection(section, index);
+    if (sectionNeedsImages(section.type as SectionType)) {
+      setPendingImageSections(prev => new Set(prev).add(section.id));
+    }
+
+    try {
+      const token = await getToken();
+      const response = await fetch("/api/chat/generate-section", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          sectionType: section.type,
+          preset: section.preset,
+          siteContext: {
+            name: site.name,
+            description: site.description,
+            location: site.location,
+          },
+          existingSections: sections,
+        }),
+      });
+
+      if (!response.ok) throw new Error("Generation failed");
+
+      const { section: populated, images } = await response.json();
+
+      updateSectionById(section.id, populated);
+
+      if (images.length > 0) {
+        handleImages(images, [populated]);
+      }
+
+      setPendingImageSections((prev) => {
+        const next = new Set(prev);
+        next.delete(section.id);
+        return next;
+      });
+    }
+    catch (err) {
+      console.error("Failed to generate content:", err);
+      setPendingImageSections((prev) => {
+        const next = new Set(prev);
+        next.delete(section.id);
+        return next;
+      });
+    }
+  }, [addSection, getToken, site, sections, updateSectionById, handleImages]);
 
   const handlePages = useCallback((pages: PageInfo[], themeOverride?: ThemeSelection) => {
     beginTransaction();
