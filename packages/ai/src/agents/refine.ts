@@ -1,7 +1,7 @@
 import type { Section } from "@muse/core";
 import { sectionFieldRegistry, getEditableFields } from "@muse/core";
 import type { Message, Provider, ToolCall, ToolResult } from "../types";
-import { editSectionTool } from "../tools";
+import { editSectionTool, moveSectionTool } from "../tools";
 
 interface RefineInput {
   messages: Message[] // Conversation history (user/assistant, no system)
@@ -40,7 +40,7 @@ function buildFieldReference(sections: Section[]): string {
 function buildSystemPrompt(sections: Section[]): string {
   return `You are helping refine a website. The user will ask you to make changes to sections.
 
-CURRENT SECTIONS:
+CURRENT SECTIONS (in page order, top to bottom):
 ${JSON.stringify(sections, null, 2)}
 
 EDITABLE FIELDS (use exact field names when calling edit_section):
@@ -50,11 +50,18 @@ RULES:
 1. Use the field names listed above. Aliases are shown in parentheses for reference.
 2. If the user says "subheading", use the field name "subheadline".
 3. If the request is ambiguous (could apply to multiple fields/sections), ask for clarification.
+4. The navbar is always fixed at the top of the page and cannot be moved or reordered.
+5. Footer sections cannot be moved (they must stay at the bottom).
 
-You have access to the edit_section tool. Call it with:
-- sectionId: The ID of the section to modify
-- field: The exact field name to update
-- value: The new value
+TOOLS:
+1. edit_section: Update a section's content
+   - sectionId: The ID of the section to modify
+   - field: The exact field name to update
+   - value: The new value
+
+2. move_section: Reorder sections on the page
+   - sectionId: The ID of the section to move
+   - direction: "up" (towards top) or "down" (towards bottom)
 
 Make the requested changes, then briefly confirm what you did.`;
 }
@@ -72,7 +79,7 @@ export async function refine(
 
   const response = await provider.chat({
     messages,
-    tools: [editSectionTool],
+    tools: [editSectionTool, moveSectionTool],
   });
 
   const usage = response.usage ?? { input: 0, output: 0 };

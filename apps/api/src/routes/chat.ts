@@ -147,6 +147,30 @@ chatRoute.post("/refine", async (c) => {
       };
     }
 
+    if (call.name === "move_section") {
+      const { sectionId, direction } = call.input as {
+        sectionId: string
+        direction: "up" | "down"
+      };
+
+      const section = sections.find(s => s.id === sectionId);
+      if (!section) {
+        logger.warn("section_not_found", { sectionId });
+        return { id: call.id, result: { error: `Section not found: ${sectionId}` } };
+      }
+
+      if (section.type === "footer") {
+        logger.warn("cannot_move_footer", { sectionId });
+        return { id: call.id, result: { error: "Footer sections cannot be moved" } };
+      }
+
+      logger.info("move_section", { sectionId, direction });
+      return {
+        id: call.id,
+        result: { success: true, sectionId, direction },
+      };
+    }
+
     return { id: call.id, result: { success: true } };
   };
 
