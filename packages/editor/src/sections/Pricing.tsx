@@ -1,15 +1,49 @@
 import type { PricingSection as PricingSectionType, PricingPlan, RichContent } from "@muse/core";
-import { EditableText } from "../ux";
+import { EditableText, Skeleton } from "../ux";
 import { useIsEditable } from "../context/EditorMode";
 import styles from "./Pricing.module.css";
 
 interface Props {
   section: PricingSectionType
   onUpdate: (data: Partial<PricingSectionType>) => void
+  isPending?: boolean
 }
 
-export function Pricing({ section, onUpdate }: Props) {
+export function Pricing({ section, onUpdate, isPending }: Props) {
   const isEditable = useIsEditable();
+
+  // Show section-level skeleton when empty array during generation
+  if (isPending && section.plans.length === 0) {
+    return (
+      <div className={styles.section}>
+        {section.headline !== undefined && (
+          <Skeleton variant="text" height="2em" width="50%" className={styles.headline} />
+        )}
+        {section.subheadline !== undefined && (
+          <Skeleton variant="text" height="1.2em" width="60%" className={styles.subheadline} />
+        )}
+        <div className={styles.plans}>
+          {[0, 1, 2].map(i => (
+            <div key={i} className={styles.plan}>
+              <Skeleton variant="text" height="1.8em" width="60%" className={styles.name} />
+              <div className={styles.price}>
+                <Skeleton variant="text" height="2.5em" width="80px" />
+                <Skeleton variant="text" height="1em" width="60px" />
+              </div>
+              <Skeleton variant="text" height="1em" width="100%" />
+              <div>
+                <Skeleton variant="text" height="1em" width="90%" />
+                <Skeleton variant="text" height="1em" width="85%" />
+                <Skeleton variant="text" height="1em" width="90%" />
+                <Skeleton variant="text" height="1em" width="88%" />
+              </div>
+              <Skeleton variant="rect" height="44px" width="100%" />
+            </div>
+          ))}
+        </div>
+      </div>
+    );
+  }
 
   const updatePlan = (index: number, data: Partial<PricingPlan>) => {
     const plans = section.plans.map((p, i) =>
