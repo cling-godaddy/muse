@@ -313,7 +313,7 @@ function MainApp() {
               ? (
                 <PreviewContainer device={previewDevice}>
                   <PreviewLinkInterceptor pageMap={pageMap} onNavigate={setCurrentPage}>
-                    <div style={themeStyle} data-effects={effectsId}>
+                    <div style={themeStyle} data-effects={effectsId} data-preview-device={previewDevice}>
                       <EditorModeProvider mode={editorMode}>
                         <SectionEditor sections={sections} onChange={setSections} pendingImageSections={pendingImageSections} navbar={navbar ?? void 0} onNavbarChange={updateNavbar} />
                       </EditorModeProvider>
