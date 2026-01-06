@@ -231,13 +231,21 @@ export async function* orchestrate(
     const imageStart = Date.now();
     const imageLog = log.child({ agent: "image" });
 
-    const imageResult = await imageAgent.run({ prompt, brief, structure, copySections }, provider);
+    // Replace structure IDs with actual section UUIDs using idMap
+    const structureWithUUIDs: PageStructure = {
+      sections: structure.sections.map(structSection => ({
+        ...structSection,
+        id: sectionIdMap.get(structSection.id) ?? structSection.id,
+      })),
+    };
+
+    const imageResult = await imageAgent.run({ prompt, brief, structure: structureWithUUIDs, copySections }, provider);
     addUsage(imageResult.usage);
     imageLog.debug("raw_response", { response: imageResult.content });
 
     // Identify sections that need mixed orientations for masonry-style layouts
     const mixedOrientationSections = new Set(
-      structure.sections
+      structureWithUUIDs.sections
         .filter(s => s.preset && getImageRequirements(s.preset)?.orientation === "mixed")
         .map(s => s.id),
     );
@@ -247,31 +255,19 @@ export async function* orchestrate(
     imageLog.debug("image_plan_blockIds", { blockIds: imagePlan.map(p => p.blockId) });
 
     if (imagePlan.length > 0) {
-      // Remap structure IDs to actual section UUIDs
-      const remappedPlan = imagePlan.map(p => ({
-        ...p,
-        blockId: sectionIdMap.get(p.blockId) ?? p.blockId,
-      }));
+      // No remapping needed - image plan already has UUID blockIds
+      const remappedPlan = imagePlan;
 
-      imageLog.debug("remapped_blockIds", {
-        before: imagePlan.map(p => p.blockId),
-        after: remappedPlan.map(p => p.blockId),
-        matched: imagePlan.filter(p => sectionIdMap.has(p.blockId)).length,
-        total: imagePlan.length,
-      });
-
-      // Compute minimum image counts per gallery section (using remapped IDs)
+      // Compute minimum image counts per gallery section (using UUID IDs)
       const minPerSection: Record<string, number> = {};
-      for (const section of structure.sections) {
+      for (const section of structureWithUUIDs.sections) {
         if (section.type === "gallery" && section.preset) {
-          const remappedId = sectionIdMap.get(section.id) ?? section.id;
-          minPerSection[remappedId] = getMinimumImages(section.preset);
+          minPerSection[section.id] = getMinimumImages(section.preset);
         }
       }
 
       images = await config.mediaClient.executePlan(remappedPlan, { minPerSection });
       events?.onImages?.(images);
-      await config.mediaClient.persist();
     }
 
     const imageDuration = Date.now() - imageStart;
@@ -311,6 +307,7 @@ export interface SiteOrchestratorEvents extends OrchestratorEvents {
 export interface GeneratedPage {
   page: Page
   structure: PageStructure
+  idMap: Map<string, string>
 }
 
 export interface SiteResult {
@@ -486,7 +483,7 @@ export async function* orchestrateSite(
 
   // Process results and emit events
   for (const result of pageResults) {
-    generatedPages.push({ page: result.page, structure: result.structure });
+    generatedPages.push({ page: result.page, structure: result.structure, idMap: result.idMap });
     addUsage(result.usage);
     events?.onPage?.(result.page, result.index);
     events?.onSections?.(result.page.sections);
@@ -517,9 +514,9 @@ export async function* orchestrateSite(
     // (multiple pages have section-1, section-2, etc. - using UUIDs makes them unique)
     const allSections = generatedPages.flatMap(gp => gp.page.sections);
     const allStructures = generatedPages.flatMap(gp =>
-      gp.structure.sections.map((structSection, idx) => ({
+      gp.structure.sections.map(structSection => ({
         ...structSection,
-        id: gp.page.sections[idx]?.id ?? structSection.id,
+        id: gp.idMap.get(structSection.id) ?? structSection.id,
       })),
     );
     const copySections = extractCopySectionSummaries(allSections);
@@ -555,7 +552,6 @@ export async function* orchestrateSite(
 
       images = await config.mediaClient.executePlan(imagePlan, { minPerSection });
       events?.onImages?.(images);
-      await config.mediaClient.persist();
     }
 
     const imageDuration = Date.now() - imageStart;
