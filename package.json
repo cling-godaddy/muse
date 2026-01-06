@@ -5,6 +5,8 @@
   "scripts": {
     "build": "turbo build",
     "dev": "./scripts/dev.sh",
+    "dev:all": "./scripts/dev.sh --all",
+    "dev:lab": "turbo dev --filter=@muse/lab",
     "lint": "turbo lint",
     "test": "turbo test",
     "typecheck": "turbo typecheck",

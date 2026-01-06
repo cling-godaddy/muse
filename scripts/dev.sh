@@ -16,6 +16,11 @@ export AWS_ACCESS_KEY_ID
 export AWS_SECRET_ACCESS_KEY
 export AWS_SESSION_TOKEN
 
-# Run all dev servers
+# Run dev servers
 cd "$(dirname "$0")/.."
-turbo dev
+
+if [ "$1" = "--all" ]; then
+  turbo dev
+else
+  turbo dev --filter='!@muse/lab'
+fi
