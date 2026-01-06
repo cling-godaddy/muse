@@ -274,7 +274,10 @@ chatRoute.post("/generate-section", async (c) => {
   const parsed = JSON.parse(sectionResult.content) as { section: Record<string, unknown> };
   const section = parsed.section;
 
-  logger.info("section_generated", { sectionId: section.id, sectionType: section.type });
+  // remap AI-generated ID to proper UUID (matches orchestrator pattern)
+  const sectionWithUUID: Record<string, unknown> = { ...section, id: crypto.randomUUID() };
+
+  logger.info("section_generated", { sectionId: sectionWithUUID.id, sectionType: sectionWithUUID.type });
 
   // generate images if needed
   let images: ImageSelection[] = [];
@@ -289,18 +292,18 @@ chatRoute.post("/generate-section", async (c) => {
           structure: {
             sections: [
               {
-                id: String(section.id),
+                id: sectionWithUUID.id as string,
                 type: sectionType,
                 preset,
-                purpose: (typeof section.headline === "string" ? section.headline : "Content") as string,
+                purpose: (typeof sectionWithUUID.headline === "string" ? sectionWithUUID.headline : "Content") as string,
               },
             ],
           },
           copySections: [
             {
-              id: String(section.id),
-              headline: (typeof section.headline === "string" ? section.headline : void 0) as string | undefined,
-              subheadline: (typeof section.subheadline === "string" ? section.subheadline : void 0) as string | undefined,
+              id: sectionWithUUID.id as string,
+              headline: (typeof sectionWithUUID.headline === "string" ? sectionWithUUID.headline : void 0) as string | undefined,
+              subheadline: (typeof sectionWithUUID.subheadline === "string" ? sectionWithUUID.subheadline : void 0) as string | undefined,
             },
           ],
         },
@@ -322,7 +325,7 @@ chatRoute.post("/generate-section", async (c) => {
   }
 
   return c.json({
-    section,
+    section: sectionWithUUID,
     images,
     usage: sectionResult.usage,
   });
