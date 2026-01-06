@@ -6,9 +6,11 @@ import styles from "./Masonry.module.css";
 interface Props {
   section: GallerySectionType
   onUpdate: (data: Partial<GallerySectionType>) => void
+  isPending?: boolean
 }
 
-export function Masonry({ section, onUpdate }: Props) {
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+export function Masonry({ section, onUpdate, isPending }: Props) {
   const columns = section.columns ?? 3;
   const images = section.images ?? [];
 
