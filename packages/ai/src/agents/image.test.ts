@@ -174,6 +174,8 @@ describe("buildPlanningPrompt", () => {
     targetAudience: "Food enthusiasts",
     imageryStyle: "Professional photography",
     brandVoice: ["friendly", "authentic"],
+    colorDirection: "warm",
+    constraints: [],
   };
 
   it("uses preset-specific image requirements when preset is specified", () => {
