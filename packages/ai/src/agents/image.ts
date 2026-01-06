@@ -50,7 +50,7 @@ ${sectionsWithImages.map(({ section, req }) =>
 ).join("\n")}`
     : "No sections require images.";
 
-  return `You are an image curator for landing pages. Generate search queries for the required images.
+  return `You are a Getty Images search specialist for landing pages. Generate SHORT KEYWORD queries (not sentences or phrases).
 
 BRAND BRIEF:
 - Target Audience: ${brief.targetAudience}
@@ -68,12 +68,69 @@ ${structure.sections.map((s) => {
 
 ${requirementsSection}
 
-RULES:
-- Output exactly ONE plan item per section listed above
-- Use the exact category, count, and orientation specified
-- Do NOT split sections into multiple plan items
-- Search queries should be specific and evocative, using the headline/copy context when available
+CRITICAL: Generate SHORT KEYWORDS (4-7 words, 1-2 words each). Stock photos show TYPES not SPECIFICS.
+
+CORE PRINCIPLES:
+
+1. SPECIFICITY PARADOX
+   Use specific activities from context:
+   ✅ Keep: "kung fu", "embroidery", "sushi", "swimming" (when mentioned)
+   ❌ Avoid: Generic terms like "activities", "crafts", "food" (too vague)
+
+   BUT generalize ultra-specific cultural identifiers:
+   ✅ "Mexican traditional" NOT "Otomi"
+   ✅ "South Asian classical" NOT "Kuchipudi"
+   ✅ "Japanese traditional" NOT "Edomae-ryu"
+
+2. IDENTITY EXTRACTION (for people images)
+   Extract and apply consistently:
+   - Cultural/ethnic background: Mexican, Japanese, South Asian, European
+   - Diaspora context: "Mexican American", "South Asian Canadian" (preserve if mentioned)
+   - Age: child, young, adult, elderly
+   - Role: chef, teacher, student, professional
+
+   Transform names to attributes:
+   ❌ "Chef Junichiro Saitama" → ✅ "Japanese master chef"
+   ❌ "Maria Gonzalez teaching" → ✅ "Mexican American teacher"
+
+3. SEARCHABILITY
+   Stock photos work at country/region level:
+   ✅ KEEP: Country names, generic activities, common roles
+   ❌ REMOVE: Person names, brand names, business names, ultra-specific traditions
+
+4. KEYWORD FORMAT
+   - 4-7 keywords total
+   - Each keyword: 1-2 words max
+   - No sentences, phrases, or filler words (the, a, with)
+
+CATEGORY GUIDANCE:
+
+People: Include identity + action
+- Good: "Japanese master chef preparing sushi"
+- Good: "South Asian child kung fu swimming"
+- Bad: "Chef Junichiro Saitama at work"
+
+Subject/Object: Visual attributes + style
+- Good: "elegant sushi presentation traditional style"
+- Good: "Mexican traditional embroidery textiles"
+- Bad: "Chef Saitama's signature dish Edomae"
+
+Ambient: Setting + atmosphere
+- Good: "minimalist Japanese restaurant interior"
+- Good: "cozy urban cafe outdoor seating"
+- Bad: "Saitama Sushi San Francisco location"
+
+TRANSFORMATION EXAMPLES:
+✅ "Chef Junichiro Saitama, Edomae master" → "Japanese master chef traditional sushi"
+✅ "Mexican American girl learning Otomi embroidery" → "Mexican American child traditional embroidery"
+✅ "Saitama Sushi restaurant interior" → "elegant sushi restaurant minimalist interior"
+✅ "Chef's seasonal nigiri platter" → "elegant sushi presentation seasonal ingredients"
+
+TECHNICAL RULES:
+- Output exactly ONE plan item per section
+- Use exact category, count, orientation specified
 - Provider: always use "getty"
+- Queries must be 4-7 SHORT keywords
 
 Return empty items array if no images needed.`;
 }
