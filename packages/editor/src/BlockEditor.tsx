@@ -1,6 +1,9 @@
-import { useMemo, useCallback } from "react";
-import type { Section, NavbarSection } from "@muse/core";
+import { useMemo, useCallback, Fragment } from "react";
+import type { Section, NavbarSection, Site, Page } from "@muse/core";
+import { getPreset } from "@muse/core";
 import { Section as SectionWrapper } from "./sections";
+import { SectionGap } from "./sections/SectionGap";
+import { createSectionFromPreset } from "./sections/sectionFactory";
 import { SelectionProvider } from "./context/Selection";
 import { useIsEditable } from "./context/EditorMode";
 
@@ -10,9 +13,21 @@ interface SectionEditorProps {
   pendingImageSections?: Set<string>
   navbar?: NavbarSection
   onNavbarChange?: (navbar: NavbarSection) => void
+  site?: Site
+  currentPage?: Page
+  onAddSection?: (section: Section, index: number) => void
 }
 
-export function SectionEditor({ sections, onChange, pendingImageSections, navbar, onNavbarChange }: SectionEditorProps) {
+export function SectionEditor({
+  sections,
+  onChange,
+  pendingImageSections,
+  navbar,
+  onNavbarChange,
+  site,
+  currentPage,
+  onAddSection,
+}: SectionEditorProps) {
   const isEditable = useIsEditable();
 
   // Combine navbar with sections for unified rendering
@@ -47,8 +62,28 @@ export function SectionEditor({ sections, onChange, pendingImageSections, navbar
     onChange(next);
   }, [sections, onChange]);
 
+  const handleAddSection = useCallback((index: number, presetId: string) => {
+    const preset = getPreset(presetId);
+    if (!preset) return;
+
+    const section = createSectionFromPreset(preset);
+
+    if (onAddSection) {
+      onAddSection(section, index);
+    }
+    else {
+      // fallback: insert directly into sections
+      const next = [...sections];
+      next.splice(index, 0, section);
+      onChange(next);
+    }
+  }, [sections, onChange, onAddSection]);
+
   const lastIsFooter = sections.length > 0 && sections.at(-1)?.type === "footer";
   const lastMoveableIndex = lastIsFooter ? sections.length - 2 : sections.length - 1;
+
+  // only show gaps if site and currentPage are provided
+  const canAddSections = isEditable && site && currentPage;
 
   return (
     <SelectionProvider>
@@ -58,6 +93,14 @@ export function SectionEditor({ sections, onChange, pendingImageSections, navbar
             No sections yet. Use AI to generate content.
           </div>
         )}
+        {canAddSections && (
+          <SectionGap
+            index={0}
+            site={site}
+            currentPage={currentPage}
+            onAdd={handleAddSection}
+          />
+        )}
         {allSections.map((section) => {
           const isNavbar = navbar && section.id === navbar.id;
           const isFooter = section.type === "footer";
@@ -65,17 +108,26 @@ export function SectionEditor({ sections, onChange, pendingImageSections, navbar
           const showMoveControls = !isNavbar && !isFooter;
 
           return (
-            <SectionWrapper
-              key={section.id}
-              section={section}
-              onUpdate={data => updateSection(section.id, data)}
-              onDelete={() => deleteSection(section.id)}
-              isPending={pendingImageSections?.has(section.id) ?? false}
-              onMoveUp={showMoveControls ? () => moveSection(sectionIndex, sectionIndex - 1) : void 0}
-              onMoveDown={showMoveControls ? () => moveSection(sectionIndex, sectionIndex + 1) : void 0}
-              canMoveUp={showMoveControls && sectionIndex > 0}
-              canMoveDown={showMoveControls && sectionIndex < lastMoveableIndex}
-            />
+            <Fragment key={section.id}>
+              <SectionWrapper
+                section={section}
+                onUpdate={data => updateSection(section.id, data)}
+                onDelete={() => deleteSection(section.id)}
+                isPending={pendingImageSections?.has(section.id) ?? false}
+                onMoveUp={showMoveControls ? () => moveSection(sectionIndex, sectionIndex - 1) : void 0}
+                onMoveDown={showMoveControls ? () => moveSection(sectionIndex, sectionIndex + 1) : void 0}
+                canMoveUp={showMoveControls && sectionIndex > 0}
+                canMoveDown={showMoveControls && sectionIndex < lastMoveableIndex}
+              />
+              {canAddSections && !isNavbar && (
+                <SectionGap
+                  index={sectionIndex + 1}
+                  site={site}
+                  currentPage={currentPage}
+                  onAdd={handleAddSection}
+                />
+              )}
+            </Fragment>
           );
         })}
       </div>
