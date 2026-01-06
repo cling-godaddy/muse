@@ -10,7 +10,7 @@ import { resolveThemeWithEffects, themeToCssVars, getTypography, loadFonts } fro
 import { Chat } from "./components/chat";
 import { useSiteWithHistory } from "./hooks/useSiteWithHistory";
 import { useSitePersistence } from "./hooks/useSitePersistence";
-import type { RefineUpdate, Message, SiteContext } from "./hooks/useChat";
+import type { RefineUpdate, MoveUpdate, Message, SiteContext } from "./hooks/useChat";
 import { EditorToolbar } from "./components/EditorToolbar";
 import { PreviewContainer } from "./components/PreviewContainer";
 import { PreviewLinkInterceptor } from "./components/PreviewLinkInterceptor";
@@ -240,6 +240,23 @@ function MainApp() {
     commitTransaction();
   }, [updateSectionById, beginTransaction, commitTransaction]);
 
+  const handleMove = useCallback((moves: MoveUpdate[]) => {
+    beginTransaction();
+    const currentSections = [...sections];
+    for (const { sectionId, direction } of moves) {
+      const index = currentSections.findIndex(s => s.id === sectionId);
+      if (index === -1) continue;
+      const newIndex = direction === "up" ? index - 1 : index + 1;
+      if (newIndex < 0 || newIndex >= currentSections.length) continue;
+      // skip if trying to move past footer
+      if (direction === "down" && currentSections[newIndex]?.type === "footer") continue;
+      const [moved] = currentSections.splice(index, 1);
+      if (moved) currentSections.splice(newIndex, 0, moved);
+    }
+    setSections(currentSections);
+    commitTransaction();
+  }, [sections, setSections, beginTransaction, commitTransaction]);
+
   const handleGenerationComplete = useCallback(() => {
     enableHistory();
   }, [enableHistory]);
@@ -311,7 +328,7 @@ function MainApp() {
         )}
         <main className="flex-1 flex gap-6 p-6 overflow-hidden">
           <div className={`w-[400px] shrink-0 ${isPreview ? "hidden" : ""}`}>
-            <Chat siteId={site.id} siteContext={siteContext} sections={sections} autoSendPrompt={autoSendPrompt} intakeContext={intakeContext} onSectionParsed={handleSectionParsed} onThemeSelected={handleThemeSelected} onImages={handleImages} onPages={handlePages} onRefine={handleRefine} onGenerationComplete={handleGenerationComplete} onMessagesChange={setMessages} />
+            <Chat siteId={site.id} siteContext={siteContext} sections={sections} autoSendPrompt={autoSendPrompt} intakeContext={intakeContext} onSectionParsed={handleSectionParsed} onThemeSelected={handleThemeSelected} onImages={handleImages} onPages={handlePages} onRefine={handleRefine} onMove={handleMove} onGenerationComplete={handleGenerationComplete} onMessagesChange={setMessages} />
           </div>
           <div className="flex-1 min-w-0 overflow-hidden">
             {isPreview

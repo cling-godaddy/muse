@@ -4,7 +4,7 @@ import type { ImageSelection } from "@muse/media";
 import { Spinner } from "@muse/editor";
 import { Building2, MapPin } from "lucide-react";
 import { getPalette } from "@muse/themes";
-import { useChat, type Message, type RefineUpdate, type SiteContext } from "../hooks/useChat";
+import { useChat, type Message, type RefineUpdate, type MoveUpdate, type SiteContext } from "../hooks/useChat";
 import type { AgentState, ThemeSelection, PageInfo } from "../utils/streamParser";
 import { TimelineModal } from "./modals/timeline";
 
@@ -31,6 +31,8 @@ interface ChatProps {
   onPages?: (pages: PageInfo[]) => void
   /** Called when AI refines sections */
   onRefine?: (updates: RefineUpdate[]) => void
+  /** Called when AI moves sections */
+  onMove?: (moves: MoveUpdate[]) => void
   /** Called when generation (not refine) completes */
   onGenerationComplete?: () => void
   /** Called when messages change (for persistence) */
@@ -43,8 +45,8 @@ function formatTokens(n: number): string {
   return `${(n / 1_000_000).toFixed(1)}M`;
 }
 
-export function Chat({ siteId, siteContext, sections, autoSendPrompt, intakeContext, onSectionParsed, onThemeSelected, onImages, onPages, onRefine, onGenerationComplete, onMessagesChange }: ChatProps) {
-  const options = useMemo(() => ({ siteId, siteContext, sections, onSectionParsed, onThemeSelected, onImages, onPages, onRefine, onGenerationComplete, onMessagesChange }), [siteId, siteContext, sections, onSectionParsed, onThemeSelected, onImages, onPages, onRefine, onGenerationComplete, onMessagesChange]);
+export function Chat({ siteId, siteContext, sections, autoSendPrompt, intakeContext, onSectionParsed, onThemeSelected, onImages, onPages, onRefine, onMove, onGenerationComplete, onMessagesChange }: ChatProps) {
+  const options = useMemo(() => ({ siteId, siteContext, sections, onSectionParsed, onThemeSelected, onImages, onPages, onRefine, onMove, onGenerationComplete, onMessagesChange }), [siteId, siteContext, sections, onSectionParsed, onThemeSelected, onImages, onPages, onRefine, onMove, onGenerationComplete, onMessagesChange]);
   const { messages, input, setInput, isLoading, error, send, sessionUsage, lastUsage, agents, agentsMessageIndex } = useChat(options);
   const isRefineMode = sections && sections.length > 0;
   const messagesEndRef = useRef<HTMLDivElement>(null);

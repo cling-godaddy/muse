@@ -19,6 +19,11 @@ export interface RefineUpdate {
   updates: Partial<Section>
 }
 
+export interface MoveUpdate {
+  sectionId: string
+  direction: "up" | "down"
+}
+
 export interface SiteContext {
   name?: string
   description?: string
@@ -40,6 +45,8 @@ export interface UseChatOptions {
   onUsage?: (usage: Usage) => void
   /** Called when refine returns updates to apply */
   onRefine?: (updates: RefineUpdate[]) => void
+  /** Called when refine returns move operations to apply */
+  onMove?: (moves: MoveUpdate[]) => void
   /** Called after generation completes */
   onGenerationComplete?: () => void
   /** Called when messages change (for persistence) */
@@ -163,15 +170,33 @@ export function useChat(options: UseChatOptions = {}): UseChat {
 
         const result = await response.json();
 
-        // Apply updates via callback
-        if (result.toolCalls?.length && options.onRefine) {
-          const updates: RefineUpdate[] = result.toolCalls
-            .filter((tc: { name: string }) => tc.name === "edit_section")
-            .map((tc: { input: { sectionId: string, updates: Partial<Section> } }) => ({
-              sectionId: tc.input.sectionId,
-              updates: tc.input.updates,
-            }));
-          options.onRefine(updates);
+        // Apply updates via callbacks
+        if (result.toolCalls?.length) {
+          // Handle edit_section calls
+          if (options.onRefine) {
+            const updates: RefineUpdate[] = result.toolCalls
+              .filter((tc: { name: string }) => tc.name === "edit_section")
+              .map((tc: { input: { sectionId: string, updates: Partial<Section> } }) => ({
+                sectionId: tc.input.sectionId,
+                updates: tc.input.updates,
+              }));
+            if (updates.length > 0) {
+              options.onRefine(updates);
+            }
+          }
+
+          // Handle move_section calls
+          if (options.onMove) {
+            const moves: MoveUpdate[] = result.toolCalls
+              .filter((tc: { name: string }) => tc.name === "move_section")
+              .map((tc: { input: { sectionId: string, direction: "up" | "down" } }) => ({
+                sectionId: tc.input.sectionId,
+                direction: tc.input.direction,
+              }));
+            if (moves.length > 0) {
+              options.onMove(moves);
+            }
+          }
         }
 
         // Track usage
