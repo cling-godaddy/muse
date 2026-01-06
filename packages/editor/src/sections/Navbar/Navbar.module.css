@@ -161,48 +161,6 @@
   border-color: var(--muse-theme-primary, #6366f1);
 }
 
-/* CTA Button */
-.cta {
-  font-family: var(--muse-theme-body-font, inherit);
-  font-size: 0.875rem;
-  font-weight: 500;
-  color: var(--muse-theme-bg, #0f172a);
-  background: var(--muse-theme-primary, #6366f1);
-  text-decoration: none;
-  padding: 0.5rem 1rem;
-  border-radius: 0.375rem;
-  cursor: pointer;
-  transition: opacity 0.15s;
-  flex-shrink: 0;
-}
-
-.cta:hover {
-  opacity: 0.9;
-}
-
-.addCta {
-  font-family: var(--muse-theme-body-font, inherit);
-  font-size: 0.75rem;
-  color: var(--muse-theme-text-muted, #64748b);
-  background: transparent;
-  border: 1px dashed var(--muse-theme-text-muted, #475569);
-  padding: 0.375rem 0.75rem;
-  border-radius: 0.375rem;
-  cursor: pointer;
-  opacity: 0;
-  transition: opacity 0.15s, color 0.15s, border-color 0.15s;
-  flex-shrink: 0;
-}
-
-.navbar:hover .addCta {
-  opacity: 1;
-}
-
-.addCta:hover {
-  color: var(--muse-theme-primary, #6366f1);
-  border-color: var(--muse-theme-primary, #6366f1);
-}
-
 /* Transparent variant */
 :global(.muse-navbar--transparent) .navbar {
   background: transparent;
@@ -307,33 +265,10 @@
   border-bottom: 1px solid var(--muse-theme-text-muted, rgba(148, 163, 184, 0.2));
 }
 
-.drawerCta {
-  margin-top: 2rem;
-  padding: 0.75rem 1.5rem;
-  font-family: var(--muse-theme-body-font, inherit);
-  font-size: 1rem;
-  font-weight: 500;
-  color: var(--muse-theme-bg, #0f172a);
-  background: var(--muse-theme-primary, #6366f1);
-  text-decoration: none;
-  text-align: center;
-  border-radius: 0.375rem;
-}
-
 /* Mobile/tablet responsive - preview device attribute */
 :global([data-preview-device="mobile"]) .nav,
 :global([data-preview-device="mobile-landscape"]) .nav,
 :global([data-preview-device="tablet"]) .nav {
-  display: none;
-}
-:global([data-preview-device="mobile"]) .cta,
-:global([data-preview-device="mobile-landscape"]) .cta,
-:global([data-preview-device="tablet"]) .cta {
-  display: none;
-}
-:global([data-preview-device="mobile"]) .addCta,
-:global([data-preview-device="mobile-landscape"]) .addCta,
-:global([data-preview-device="tablet"]) .addCta {
   display: none;
 }
 :global([data-preview-device="mobile"]) .hamburger,
@@ -345,12 +280,6 @@
 /* Mobile responsive - actual viewport (production) */
 @media (max-width: 767px) {
   .nav {
-    display: none;
-  }
-  .cta {
-    display: none;
-  }
-  .addCta {
     display: none;
   }
   .hamburger {

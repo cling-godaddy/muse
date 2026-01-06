@@ -71,10 +71,6 @@ export function Navbar({ section, onUpdate }: Props) {
     onUpdate({ items });
   };
 
-  const updateCta = (data: Partial<{ text: string, href: string }>) => {
-    onUpdate({ cta: { ...section.cta, text: "", href: "#", ...data } });
-  };
-
   return (
     <nav className={styles.navbar} data-sticky={section.sticky}>
       <div className={styles.container}>
@@ -158,51 +154,6 @@ export function Navbar({ section, onUpdate }: Props) {
           )}
         </div>
 
-        {/* CTA Button */}
-        {section.cta && (
-          isEditable
-            ? (
-              <ItemPopover
-                trigger={(
-                  <span className={styles.cta}>{section.cta.text || "CTA"}</span>
-                )}
-              >
-                <PopoverField label="Text">
-                  <PopoverInput
-                    value={section.cta.text}
-                    onChange={value => updateCta({ text: value })}
-                    placeholder="Get Started"
-                  />
-                </PopoverField>
-                <PopoverField label="URL">
-                  <PopoverInput
-                    value={section.cta.href}
-                    onChange={value => updateCta({ href: value })}
-                    placeholder="/signup or https://..."
-                    type="url"
-                  />
-                </PopoverField>
-                <PopoverActions>
-                  <PopoverButton variant="danger" onClick={() => onUpdate({ cta: undefined })}>
-                    Remove CTA
-                  </PopoverButton>
-                </PopoverActions>
-              </ItemPopover>
-            )
-            : (
-              <a href={section.cta.href} className={styles.cta}>{section.cta.text}</a>
-            )
-        )}
-        {!section.cta && isEditable && (
-          <button
-            type="button"
-            className={styles.addCta}
-            onClick={() => onUpdate({ cta: { text: "Get Started", href: "#" } })}
-          >
-            + CTA
-          </button>
-        )}
-
         {/* Mobile hamburger */}
         <button
           type="button"
@@ -252,15 +203,6 @@ export function Navbar({ section, onUpdate }: Props) {
             </a>
           ))}
         </nav>
-        {section.cta && (
-          <a
-            href={section.cta.href}
-            className={styles.drawerCta}
-            onClick={() => setIsMenuOpen(false)}
-          >
-            {section.cta.text}
-          </a>
-        )}
       </div>
     </nav>
   );
