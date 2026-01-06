@@ -45,8 +45,15 @@ function extractCopySectionSummaries(sections: Section[]): CopySectionContent[] 
   }));
 }
 
+export interface SiteContext {
+  name?: string
+  description?: string
+  location?: string
+}
+
 export interface OrchestratorInput {
   messages: Message[]
+  siteContext?: SiteContext
 }
 
 export interface OrchestratorConfig {
@@ -62,6 +69,18 @@ export interface OrchestratorEvents {
   onImages?: (images: ImageSelection[]) => void
 }
 
+function buildAugmentedPrompt(userPrompt: string, siteContext?: SiteContext): string {
+  if (!siteContext) return userPrompt;
+
+  const parts: string[] = [];
+  if (siteContext.name) parts.push(`Business: ${siteContext.name}`);
+  if (siteContext.description) parts.push(`Description: ${siteContext.description}`);
+  if (siteContext.location) parts.push(`Location: ${siteContext.location}`);
+
+  if (parts.length === 0) return userPrompt;
+  return `${parts.join("\n")}\n\nUser request: ${userPrompt}`;
+}
+
 export async function* orchestrate(
   input: OrchestratorInput,
   provider: Provider,
@@ -73,7 +92,8 @@ export async function* orchestrate(
   const { config, events } = options ?? {};
   const log = config?.logger ?? createLogger();
   const userMessage = input.messages.find(m => m.role === "user");
-  const prompt = userMessage?.content ?? "";
+  const rawPrompt = userMessage?.content ?? "";
+  const prompt = buildAugmentedPrompt(rawPrompt, input.siteContext);
 
   // Track total usage across all agents
   const totalUsage: UsageAccumulator = { input: 0, output: 0 };
@@ -310,7 +330,8 @@ export async function* orchestrateSite(
   const { config, events } = options ?? {};
   const log = config?.logger ?? createLogger();
   const userMessage = input.messages.find(m => m.role === "user");
-  const prompt = userMessage?.content ?? "";
+  const rawPrompt = userMessage?.content ?? "";
+  const prompt = buildAugmentedPrompt(rawPrompt, input.siteContext);
 
   const totalUsage: UsageAccumulator = { input: 0, output: 0 };
   const addUsage = (usage?: { input: number, output: number }) => {
