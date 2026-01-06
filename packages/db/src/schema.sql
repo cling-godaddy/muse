@@ -9,6 +9,7 @@ CREATE TABLE sites (
   site_type TEXT DEFAULT 'landing',
   theme JSONB NOT NULL,
   tree JSONB NOT NULL,
+  navbar JSONB,
   domain TEXT UNIQUE,
   published_at TIMESTAMPTZ,
   created_at TIMESTAMPTZ DEFAULT NOW(),

@@ -1,4 +1,4 @@
-import type { Site, SiteTheme, SiteNode, Page, Section } from "@muse/core";
+import type { Site, SiteTheme, SiteNode, Page, Section, NavbarSection } from "@muse/core";
 import type { SitesTable, SiteSummary, MessagesTable, StoredMessage, StoredUsage, StoredAgentState } from "./types";
 import { getDb } from "../db";
 
@@ -11,6 +11,7 @@ interface SiteRow {
   site_type: string | null
   theme: SiteTheme
   tree: SiteNode[]
+  navbar: NavbarSection | null
   domain: string | null
   published_at: string | null
   created_at: string
@@ -48,8 +49,8 @@ export function createPostgresSitesTable(): SitesTable {
 
       try {
         await sql`
-          INSERT INTO sites (id, user_id, name, description, location, site_type, theme, tree, created_at, updated_at)
-          VALUES (${site.id}, ${userId}, ${site.name}, ${site.description ?? null}, ${site.location ?? null}, ${site.siteType ?? "landing"}, ${JSON.stringify(site.theme)}, ${JSON.stringify(site.tree)}, ${site.createdAt}, ${now})
+          INSERT INTO sites (id, user_id, name, description, location, site_type, theme, tree, navbar, created_at, updated_at)
+          VALUES (${site.id}, ${userId}, ${site.name}, ${site.description ?? null}, ${site.location ?? null}, ${site.siteType ?? "landing"}, ${JSON.stringify(site.theme)}, ${JSON.stringify(site.tree)}, ${site.navbar ? JSON.stringify(site.navbar) : null}, ${site.createdAt}, ${now})
           ON CONFLICT (id) DO UPDATE SET
             name = EXCLUDED.name,
             description = EXCLUDED.description,
@@ -57,6 +58,7 @@ export function createPostgresSitesTable(): SitesTable {
             site_type = EXCLUDED.site_type,
             theme = EXCLUDED.theme,
             tree = EXCLUDED.tree,
+            navbar = EXCLUDED.navbar,
             updated_at = EXCLUDED.updated_at
         `;
 
@@ -158,6 +160,7 @@ export function createPostgresSitesTable(): SitesTable {
         siteType: (siteRow.site_type as "landing" | "full") ?? void 0,
         theme: siteRow.theme,
         tree: siteRow.tree,
+        navbar: siteRow.navbar ?? void 0,
         pages,
         createdAt: siteRow.created_at,
         updatedAt: siteRow.updated_at,
@@ -209,6 +212,7 @@ export function createPostgresSitesTable(): SitesTable {
         siteType: (siteRow.site_type as "landing" | "full") ?? void 0,
         theme: siteRow.theme,
         tree: siteRow.tree,
+        navbar: siteRow.navbar ?? void 0,
         pages,
         createdAt: siteRow.created_at,
         updatedAt: siteRow.updated_at,
