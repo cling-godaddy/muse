@@ -63,19 +63,151 @@ function SiteCard({ site, to, onDelete }: { site: SiteSummary, to: string, onDel
   );
 }
 
-function EmptyState({ onCreate, isCreating }: { onCreate: () => void, isCreating: boolean }) {
+function EmptyState({ onCreate }: { onCreate: () => void }) {
   return (
     <div className="text-center py-16">
       <div className="text-6xl mb-4 text-text-subtle">+</div>
       <p className="text-text-muted mb-6">No sites yet. Create your first one.</p>
       <button
         onClick={onCreate}
-        disabled={isCreating}
-        className="px-6 py-3 bg-primary hover:bg-primary-hover text-white rounded-lg font-medium transition-colors disabled:opacity-50"
+        className="px-6 py-3 bg-primary hover:bg-primary-hover text-white rounded-lg font-medium transition-colors"
       >
-        {isCreating ? <Spinner /> : "Create Site"}
+        Create Site
       </button>
     </div>
+  );
+}
+
+type SiteType = "landing" | "full";
+
+interface CreateSiteData {
+  name: string
+  description: string
+  location: string
+  siteType: SiteType
+  autoGenerate: boolean
+}
+
+function CreateSiteModal({
+  open,
+  onOpenChange,
+  onSubmit,
+  isCreating,
+}: {
+  open: boolean
+  onOpenChange: (open: boolean) => void
+  onSubmit: (data: CreateSiteData) => void
+  isCreating: boolean
+}) {
+  const [name, setName] = useState("");
+  const [description, setDescription] = useState("");
+  const [location, setLocation] = useState("");
+  const [siteType, setSiteType] = useState<SiteType>("landing");
+  const [autoGenerate, setAutoGenerate] = useState(true);
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    onSubmit({ name: name || "Untitled Site", description, location, siteType, autoGenerate });
+  };
+
+  const handleOpenChange = (open: boolean) => {
+    if (!open) {
+      setName("");
+      setDescription("");
+      setLocation("");
+      setSiteType("landing");
+      setAutoGenerate(true);
+    }
+    onOpenChange(open);
+  };
+
+  return (
+    <Dialog open={open} onOpenChange={handleOpenChange} title="Create New Site">
+      <form onSubmit={handleSubmit} className="p-5 pt-0 space-y-4">
+        <div>
+          <label className="block text-sm font-medium text-text mb-1">Site Name</label>
+          <input
+            type="text"
+            value={name}
+            onChange={e => setName(e.target.value)}
+            placeholder="My Awesome Site"
+            className="w-full px-3 py-2 rounded-lg border border-border bg-bg focus:ring-2 ring-primary outline-none"
+          />
+        </div>
+        <div>
+          <label className="block text-sm font-medium text-text mb-1">Business Description</label>
+          <textarea
+            value={description}
+            onChange={e => setDescription(e.target.value)}
+            placeholder="Describe your business, products, or services..."
+            rows={3}
+            className="w-full px-3 py-2 rounded-lg border border-border bg-bg focus:ring-2 ring-primary outline-none resize-none"
+          />
+        </div>
+        <div>
+          <label className="block text-sm font-medium text-text mb-1">Location</label>
+          <input
+            type="text"
+            value={location}
+            onChange={e => setLocation(e.target.value)}
+            placeholder="San Francisco, CA"
+            className="w-full px-3 py-2 rounded-lg border border-border bg-bg focus:ring-2 ring-primary outline-none"
+          />
+        </div>
+        <div>
+          <label className="block text-sm font-medium text-text mb-2">Site Type</label>
+          <div className="flex gap-2">
+            <button
+              type="button"
+              onClick={() => setSiteType("landing")}
+              className={`flex-1 px-3 py-2 rounded-lg border text-sm font-medium transition-colors ${
+                siteType === "landing"
+                  ? "border-primary bg-primary/10 text-primary"
+                  : "border-border hover:bg-bg-subtle"
+              }`}
+            >
+              Landing Page
+            </button>
+            <button
+              type="button"
+              onClick={() => setSiteType("full")}
+              className={`flex-1 px-3 py-2 rounded-lg border text-sm font-medium transition-colors ${
+                siteType === "full"
+                  ? "border-primary bg-primary/10 text-primary"
+                  : "border-border hover:bg-bg-subtle"
+              }`}
+            >
+              Full Site
+            </button>
+          </div>
+        </div>
+        <label className="flex items-center gap-2 cursor-pointer">
+          <input
+            type="checkbox"
+            checked={autoGenerate}
+            onChange={e => setAutoGenerate(e.target.checked)}
+            className="w-4 h-4 rounded border-border text-primary focus:ring-primary"
+          />
+          <span className="text-sm text-text">Generate site immediately</span>
+        </label>
+        <div className="flex gap-3 justify-end pt-2">
+          <button
+            type="button"
+            onClick={() => handleOpenChange(false)}
+            className="px-4 py-2 rounded-lg border border-border hover:bg-bg-subtle transition-colors"
+          >
+            Cancel
+          </button>
+          <button
+            type="submit"
+            disabled={isCreating}
+            className="px-4 py-2 rounded-lg bg-primary hover:bg-primary-hover text-white transition-colors disabled:opacity-50 flex items-center gap-2"
+          >
+            {isCreating ? <Spinner /> : "Create Site"}
+          </button>
+        </div>
+      </form>
+    </Dialog>
   );
 }
 
@@ -85,6 +217,7 @@ export function SitesDashboard() {
   const [sites, setSites] = useState<SiteSummary[]>([]);
   const [loading, setLoading] = useState(true);
   const [creating, setCreating] = useState(false);
+  const [showCreateModal, setShowCreateModal] = useState(false);
   const [deletingSite, setDeletingSite] = useState<SiteSummary | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
 
@@ -95,19 +228,25 @@ export function SitesDashboard() {
       .finally(() => setLoading(false));
   }, [authFetch]);
 
-  const handleNewSite = async () => {
+  const handleCreateSite = async (data: CreateSiteData) => {
     setCreating(true);
     try {
       const res = await authFetch("/api/sites", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name: "Untitled Site" }),
+        body: JSON.stringify({
+          name: data.name,
+          description: data.description,
+          location: data.location,
+          siteType: data.siteType,
+        }),
       });
       const site = await res.json();
-      navigate(`/sites/${site.id}`);
+      navigate(`/sites/${site.id}`, { state: { autoGenerate: data.autoGenerate } });
     }
     finally {
       setCreating(false);
+      setShowCreateModal(false);
     }
   };
 
@@ -140,11 +279,10 @@ export function SitesDashboard() {
           <h1 className="text-2xl font-semibold">My Sites</h1>
           {sites.length > 0 && (
             <button
-              onClick={handleNewSite}
-              disabled={creating}
-              className="px-4 py-2 bg-primary hover:bg-primary-hover text-white rounded-lg font-medium transition-colors disabled:opacity-50 flex items-center gap-2"
+              onClick={() => setShowCreateModal(true)}
+              className="px-4 py-2 bg-primary hover:bg-primary-hover text-white rounded-lg font-medium transition-colors flex items-center gap-2"
             >
-              {creating ? <Spinner /> : "New Site"}
+              New Site
             </button>
           )}
         </div>
@@ -157,7 +295,7 @@ export function SitesDashboard() {
           )
           : sites.length === 0
             ? (
-              <EmptyState onCreate={handleNewSite} isCreating={creating} />
+              <EmptyState onCreate={() => setShowCreateModal(true)} />
             )
             : (
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -202,6 +340,13 @@ export function SitesDashboard() {
           </div>
         </div>
       </Dialog>
+
+      <CreateSiteModal
+        open={showCreateModal}
+        onOpenChange={setShowCreateModal}
+        onSubmit={handleCreateSite}
+        isCreating={creating}
+      />
     </div>
   );
 }
