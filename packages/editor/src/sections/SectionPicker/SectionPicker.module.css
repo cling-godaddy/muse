@@ -1,0 +1,57 @@
+.popover {
+  width: 360px;
+  max-height: 480px;
+  overflow-y: auto;
+  background: white;
+  border: 1px solid var(--muse-border);
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  padding: 12px 0;
+  z-index: 1000;
+}
+
+.category {
+  padding: 12px 0 4px;
+}
+
+.category:first-child {
+  padding-top: 4px;
+}
+
+.categoryLabel {
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  color: var(--muse-text-muted);
+  padding: 0 12px;
+  margin-bottom: 4px;
+  letter-spacing: 0.5px;
+}
+
+.presetCard {
+  display: block;
+  width: 100%;
+  padding: 8px 12px;
+  text-align: left;
+  background: none;
+  border: none;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.presetCard:hover {
+  background: var(--muse-bg-subtle);
+}
+
+.presetName {
+  font-weight: 500;
+  color: var(--muse-text);
+  margin-bottom: 2px;
+  font-size: 14px;
+}
+
+.presetDescription {
+  font-size: 13px;
+  color: var(--muse-text-muted);
+  line-height: 1.4;
+}
