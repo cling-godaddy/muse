@@ -13,6 +13,7 @@ import { useSitePersistence } from "./hooks/useSitePersistence";
 import type { RefineUpdate, Message, SiteContext } from "./hooks/useChat";
 import { EditorToolbar } from "./components/EditorToolbar";
 import { PreviewContainer } from "./components/PreviewContainer";
+import { PreviewLinkInterceptor } from "./components/PreviewLinkInterceptor";
 import { SiteTitleInput } from "./components/SiteTitleInput";
 import { ReviewLayout, ReviewDashboard, ReviewEntry, ReviewSessionPage } from "./review";
 import { ProtectedRoute } from "./components/ProtectedRoute";
@@ -52,6 +53,9 @@ function MainApp() {
     commitTransaction,
     enableHistory,
     isGenerationComplete,
+    navbar,
+    setNavbar,
+    updateNavbar,
   } = useSiteWithHistory();
 
   const [messages, setMessages] = useState<Message[]>([]);
@@ -206,11 +210,22 @@ function MainApp() {
       }
     }
 
+    if (pages.length > 1) {
+      setNavbar({
+        id: crypto.randomUUID(),
+        type: "navbar",
+        logo: { text: site.name },
+        items: pages.map(p => ({ label: p.title, href: p.slug })),
+        sticky: true,
+        preset: "navbar-minimal",
+      });
+    }
+
     if (firstPageId) {
       setCurrentPage(firstPageId);
     }
     commitTransaction();
-  }, [clearSite, addNewPage, updatePageSections, setCurrentPage, beginTransaction, commitTransaction]);
+  }, [clearSite, addNewPage, updatePageSections, setCurrentPage, beginTransaction, commitTransaction, setNavbar, site.name]);
 
   const handleRefine = useCallback((updates: RefineUpdate[]) => {
     beginTransaction();
@@ -245,6 +260,14 @@ function MainApp() {
     if (!site.description && !site.location) return void 0;
     return { name: site.name, description: site.description, location: site.location };
   }, [site.name, site.description, site.location]);
+
+  const pageMap = useMemo(() => {
+    const map = new Map<string, string>();
+    for (const [pageId, page] of Object.entries(site.pages)) {
+      map.set(page.slug, pageId);
+    }
+    return map;
+  }, [site.pages]);
 
   return (
     <SiteProvider pageSlugs={pageSlugs} onGeneratePage={handleGeneratePage}>
@@ -289,17 +312,19 @@ function MainApp() {
             {isPreview
               ? (
                 <PreviewContainer device={previewDevice}>
-                  <div style={themeStyle} data-effects={effectsId}>
-                    <EditorModeProvider mode={editorMode}>
-                      <SectionEditor sections={sections} onChange={setSections} pendingImageSections={pendingImageSections} />
-                    </EditorModeProvider>
-                  </div>
+                  <PreviewLinkInterceptor pageMap={pageMap} onNavigate={setCurrentPage}>
+                    <div style={themeStyle} data-effects={effectsId}>
+                      <EditorModeProvider mode={editorMode}>
+                        <SectionEditor sections={sections} onChange={setSections} pendingImageSections={pendingImageSections} navbar={navbar ?? void 0} onNavbarChange={updateNavbar} />
+                      </EditorModeProvider>
+                    </div>
+                  </PreviewLinkInterceptor>
                 </PreviewContainer>
               )
               : (
                 <div className="h-full overflow-y-auto" style={themeStyle} data-effects={effectsId}>
                   <EditorModeProvider mode={editorMode}>
-                    <SectionEditor sections={sections} onChange={setSections} pendingImageSections={pendingImageSections} />
+                    <SectionEditor sections={sections} onChange={setSections} pendingImageSections={pendingImageSections} navbar={navbar ?? void 0} onNavbarChange={updateNavbar} />
                   </EditorModeProvider>
                 </div>
               )}
