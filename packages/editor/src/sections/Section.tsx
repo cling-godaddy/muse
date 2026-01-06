@@ -67,7 +67,7 @@ export function Section({ section, onUpdate, onDelete, onMoveUp, onMoveDown, can
   }, [isSelected, section.id]);
 
   return (
-    <motion.div layout className="muse-section" data-section-type={section.type}>
+    <motion.div layout className="muse-section" data-section-type={section.type} data-section-id={section.id}>
       {isEditable && (
         <div className="muse-section-controls">
           {onMoveUp !== void 0 && (
