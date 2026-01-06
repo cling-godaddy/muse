@@ -80,7 +80,7 @@ export function useSitePersistence({
       // Save messages
       if (currentMessages.length > 0) {
         const storedMessages = currentMessages.map((m, i) => ({
-          id: crypto.randomUUID(),
+          id: m.id,
           siteId: currentSite.id,
           role: m.role,
           content: m.content,

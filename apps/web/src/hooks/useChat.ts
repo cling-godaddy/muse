@@ -1,5 +1,6 @@
 import { useState, useCallback, useRef, useEffect } from "react";
 import { useAuth } from "@clerk/clerk-react";
+import { sumBy } from "lodash-es";
 import type { Section } from "@muse/core";
 import type { Usage } from "@muse/ai";
 import type { ImageSelection } from "@muse/media";
@@ -8,6 +9,7 @@ import { parseStream, type ParseState, type AgentState, type ThemeSelection, typ
 const MESSAGES_URL = "http://localhost:3001/api/messages";
 
 export interface Message {
+  id: string
   role: "user" | "assistant"
   content: string
   agents?: AgentState[]
@@ -117,12 +119,20 @@ export function useChat(options: UseChatOptions = {}): UseChat {
         if (response.ok) {
           const data = await response.json();
           if (data.messages?.length > 0) {
-            setMessages(data.messages.map((m: { role: string, content: string, agents?: AgentState[], usage?: Usage }) => ({
+            const loadedMessages = data.messages.map((m: { id: string, role: string, content: string, agents?: AgentState[], usage?: Usage }) => ({
+              id: m.id,
               role: m.role as "user" | "assistant",
               content: m.content,
               agents: m.agents,
               usage: m.usage,
-            })));
+            }));
+            setMessages(loadedMessages);
+            setSessionUsage({
+              input: sumBy(loadedMessages, (m: Message) => m.usage?.input ?? 0),
+              output: sumBy(loadedMessages, (m: Message) => m.usage?.output ?? 0),
+              cost: sumBy(loadedMessages, (m: Message) => m.usage?.cost ?? 0),
+              model: loadedMessages.at(-1)?.usage?.model ?? "",
+            });
           }
         }
         loadedSiteIdRef.current = options.siteId ?? null;
@@ -144,7 +154,7 @@ export function useChat(options: UseChatOptions = {}): UseChat {
     const content = message ?? input;
     if (!content.trim() || isLoading) return;
 
-    const userMessage: Message = { role: "user", content };
+    const userMessage: Message = { id: crypto.randomUUID(), role: "user", content };
     const newMessages = [...messages, userMessage];
 
     // Refine mode: when sections exist, use refine endpoint
@@ -234,7 +244,7 @@ export function useChat(options: UseChatOptions = {}): UseChat {
 
         // Skip assistant message if there are pending actions (confirmation UI handles it)
         if (!hasPendingActions) {
-          const finalMessages = [...newMessages, { role: "assistant" as const, content: result.message || "Done" }];
+          const finalMessages = [...newMessages, { id: crypto.randomUUID(), role: "assistant" as const, content: result.message || "Done" }];
           setMessages(finalMessages);
         }
       }
@@ -274,8 +284,9 @@ export function useChat(options: UseChatOptions = {}): UseChat {
 
       const decoder = new TextDecoder();
       let accumulated = "";
+      const assistantId = crypto.randomUUID();
 
-      setMessages([...newMessages, { role: "assistant", content: "" }]);
+      setMessages([...newMessages, { id: assistantId, role: "assistant", content: "" }]);
       setAgentsMessageIndex(newMessages.length); // Track which message owns the agents
 
       while (true) {
@@ -335,7 +346,7 @@ export function useChat(options: UseChatOptions = {}): UseChat {
         // update display (clean text without markers)
         setMessages([
           ...newMessages,
-          { role: "assistant", content: result.displayText },
+          { id: assistantId, role: "assistant", content: result.displayText },
         ]);
       }
 
@@ -345,6 +356,7 @@ export function useChat(options: UseChatOptions = {}): UseChat {
       setMessages([
         ...newMessages,
         {
+          id: assistantId,
           role: "assistant",
           content: finalResult.displayText,
           agents: finalAgents,
