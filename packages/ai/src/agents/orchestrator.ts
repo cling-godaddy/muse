@@ -271,6 +271,7 @@ export async function* orchestrate(
 
       images = await config.mediaClient.executePlan(remappedPlan, { minPerSection });
       events?.onImages?.(images);
+      await config.mediaClient.persist();
     }
 
     const imageDuration = Date.now() - imageStart;
@@ -554,6 +555,7 @@ export async function* orchestrateSite(
 
       images = await config.mediaClient.executePlan(imagePlan, { minPerSection });
       events?.onImages?.(images);
+      await config.mediaClient.persist();
     }
 
     const imageDuration = Date.now() - imageStart;
