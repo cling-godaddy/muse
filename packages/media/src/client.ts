@@ -134,7 +134,9 @@ export function createMediaClient(config: MediaClientConfig): MediaClient {
       log.debug("search_results", { query: queryString, count: results.length });
 
       setCache(cacheKey, results);
-      storeInBank(results);
+      if (!cached) {
+        storeInBank(results);
+      }
       return results;
     },
 
@@ -189,7 +191,9 @@ export function createMediaClient(config: MediaClientConfig): MediaClient {
               const batch = await provider.search(queryString, { orientation, count: perRequest });
               log.debug("search_results", { query: queryString, orientation, count: batch.length });
               setCache(cacheKey, batch);
-              storeInBank(batch);
+              if (!cached) {
+                storeInBank(batch);
+              }
               return batch;
             }),
           );
@@ -289,13 +293,16 @@ export function createMediaClient(config: MediaClientConfig): MediaClient {
         shuffled.push(...shuffle(arr));
       }
 
-      if (bank) {
+      return shuffled;
+    },
+
+    async flush() {
+      if (!bank) return;
+      if (pendingStores.length > 0) {
         await Promise.all(pendingStores);
         pendingStores.length = 0;
-        await bank.sync();
       }
-
-      return shuffled;
+      await bank.sync();
     },
   };
 }

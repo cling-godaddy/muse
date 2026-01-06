@@ -57,4 +57,5 @@ export interface ExecutePlanOptions {
 export interface MediaClient {
   search(options: ImageSearchOptions): Promise<ImageSearchResult[]>
   executePlan(plan: ImagePlan[], options?: ExecutePlanOptions): Promise<ImageSelection[]>
+  flush(): Promise<void>
 }

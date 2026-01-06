@@ -11,6 +11,9 @@ const BANK_DATA_KEY = "bank.json";
 const BANK_INDEX_KEY = "bank.index";
 const DEFAULT_MIN_SCORE = 0.88;
 
+// cache analysis results by URL to avoid re-analyzing same images
+const analysisCache = new Map<string, ImageMetadata>();
+
 interface BankData {
   entries: BankEntry[]
 }
@@ -132,13 +135,23 @@ export async function createImageBank(config: BankConfig): Promise<ImageBank> {
 
       // analyze image via URL (no download)
       let metadata: ImageMetadata;
-      try {
-        metadata = await analyze(image.displayUrl);
-        log.debug("bank_analyze_complete", { entryId, caption: metadata.caption.slice(0, 50) });
+
+      // check cache first
+      const cachedMetadata = analysisCache.get(image.displayUrl);
+      if (cachedMetadata) {
+        metadata = cachedMetadata;
+        log.debug("bank_analyze_cache_hit", { entryId, url: image.displayUrl });
       }
-      catch (err) {
-        log.error("bank_analyze_failed", { entryId, error: err instanceof Error ? err.message : String(err) });
-        return;
+      else {
+        try {
+          metadata = await analyze(image.displayUrl);
+          analysisCache.set(image.displayUrl, metadata);
+          log.debug("bank_analyze_complete", { entryId, caption: metadata.caption.slice(0, 50) });
+        }
+        catch (err) {
+          log.error("bank_analyze_failed", { entryId, error: err instanceof Error ? err.message : String(err) });
+          return;
+        }
       }
 
       // embed the caption
