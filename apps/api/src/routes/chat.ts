@@ -1,22 +1,19 @@
 import { Hono } from "hono";
 import { streamText } from "hono/streaming";
-import { createClient, createImageAnalyzer, orchestrateSite, refine, resolveFieldAlias, getValidFields, type Message, type Provider, type ToolCall } from "@muse/ai";
+import { createClient, orchestrateSite, refine, resolveFieldAlias, getValidFields, type Message, type Provider, type ToolCall } from "@muse/ai";
 import { requireAuth } from "../middleware/auth";
-import { embed } from "@muse/ai/rag";
 import { createLogger } from "@muse/logger";
-import { createMediaClient, createImageBank, createQueryNormalizer, getIamJwt, type MediaClient, type ImageBank, type QueryNormalizer } from "@muse/media";
+import { createMediaClient, createQueryNormalizer, getIamJwt, type MediaClient, type QueryNormalizer } from "@muse/media";
 import type { Section } from "@muse/core";
 
 const logger = createLogger();
 let client: Provider | null = null;
 let mediaClient: MediaClient | null = null;
-let imageBank: ImageBank | null = null;
-let imageBankPromise: Promise<ImageBank | null> | null = null;
 let normalizer: QueryNormalizer | null = null;
 
 function getNormalizer(): QueryNormalizer | undefined {
   const openaiKey = process.env.OPENAI_API_KEY;
-  if (!openaiKey) return undefined;
+  if (!openaiKey) return void 0;
 
   if (!normalizer) {
     normalizer = createQueryNormalizer(openaiKey);
@@ -35,61 +32,14 @@ function getClient(): Provider {
   return client;
 }
 
-async function getImageBank(): Promise<ImageBank | null> {
-  if (imageBank) return imageBank;
-  if (imageBankPromise) return imageBankPromise;
-
-  const bucket = process.env.S3_BUCKET;
-  const region = process.env.AWS_REGION;
-  const openaiKey = process.env.OPENAI_API_KEY;
-
-  if (!bucket || !region) {
-    logger.debug("bank_disabled", { reason: "S3_BUCKET or AWS_REGION not set" });
-    return null;
+function getMediaClient(): MediaClient {
+  if (!mediaClient) {
+    mediaClient = createMediaClient({
+      gettyJwt: getIamJwt,
+      normalizer: getNormalizer(),
+      logger: logger.child({ agent: "media" }),
+    });
   }
-
-  if (!openaiKey) {
-    logger.debug("bank_disabled", { reason: "OPENAI_API_KEY not set (needed for vision analysis)" });
-    return null;
-  }
-
-  const analyze = createImageAnalyzer(openaiKey);
-
-  imageBankPromise = createImageBank({
-    bucket,
-    region,
-    embed,
-    analyze,
-    logger: logger.child({ agent: "bank" }),
-  }).then((bank) => {
-    imageBank = bank;
-    return bank;
-  }).catch((err) => {
-    logger.error("bank_init_failed", { error: err instanceof Error ? err.message : String(err) });
-    return null;
-  });
-
-  return imageBankPromise;
-}
-
-async function getMediaClient(): Promise<MediaClient | null> {
-  const unsplashKey = process.env.UNSPLASH_ACCESS_KEY;
-  const pexelsKey = process.env.PEXELS_API_KEY;
-
-  const bank = await getImageBank();
-
-  // Recreate client if bank became available
-  if (mediaClient && !bank) return mediaClient;
-
-  mediaClient = createMediaClient({
-    unsplashKey,
-    pexelsKey,
-    gettyJwt: getIamJwt,
-    bank: bank ?? undefined,
-    normalizer: getNormalizer(),
-    logger: logger.child({ agent: "media" }),
-  });
-
   return mediaClient;
 }
 
@@ -103,7 +53,7 @@ chatRoute.post("/", async (c) => {
     stream?: boolean
   }>();
 
-  const config = { mediaClient: (await getMediaClient()) ?? undefined, logger };
+  const config = { mediaClient: getMediaClient(), logger };
 
   if (stream) {
     return streamText(c, async (textStream) => {
@@ -113,7 +63,6 @@ chatRoute.post("/", async (c) => {
     });
   }
 
-  // non-streaming: collect all chunks
   let content = "";
   for await (const chunk of orchestrateSite({ messages }, getClient(), { config })) {
     content += chunk;
@@ -127,8 +76,6 @@ chatRoute.post("/refine", async (c) => {
     messages: Message[]
   }>();
 
-  // Tool executor with field validation
-  // Actual state mutation happens on the frontend
   const executeTool = async (call: ToolCall) => {
     logger.info("tool_call", { name: call.name, input: call.input });
 
@@ -139,14 +86,12 @@ chatRoute.post("/refine", async (c) => {
         value: unknown
       };
 
-      // Find the section
       const section = sections.find(s => s.id === sectionId);
       if (!section) {
         logger.warn("section_not_found", { sectionId });
         return { id: call.id, result: { error: `Section not found: ${sectionId}` } };
       }
 
-      // Resolve field alias to actual field name
       const resolvedField = resolveFieldAlias(section.type, field);
       if (!resolvedField) {
         const validFields = getValidFields(section.type);
@@ -169,14 +114,12 @@ chatRoute.post("/refine", async (c) => {
 
   const result = await refine({ sections, messages }, getClient(), executeTool);
 
-  // Log detailed errors for debugging
   if (result.failedCalls.length > 0) {
     for (const failed of result.failedCalls) {
       logger.warn("refine_tool_failed", { tool: failed.name, error: failed.error });
     }
   }
 
-  // Transform successful tool calls to frontend format
   const transformedToolCalls = result.toolCalls.map((tc) => {
     if (tc.name === "edit_section" && tc.input.field) {
       const { sectionId, field, value } = tc.input as { sectionId: string, field: string, value: unknown };
@@ -188,14 +131,11 @@ chatRoute.post("/refine", async (c) => {
     return tc;
   });
 
-  // Build user-friendly message
   let message = result.message;
   if (result.failedCalls.length > 0 && result.toolCalls.length === 0) {
-    // All calls failed - add friendly error
     message = "I wasn't able to make that change. Could you try rephrasing your request?";
   }
   else if (result.failedCalls.length > 0) {
-    // Some calls failed - note partial success
     message = `${message} (Some changes couldn't be applied)`;
   }
 

@@ -8,9 +8,7 @@ import { cors } from "hono/cors";
 import { clerkMiddleware } from "@hono/clerk-auth";
 import { chatRoute } from "./routes/chat";
 import { generateRoute } from "./routes/generate";
-import { uploadRoute } from "./routes/upload";
 import { searchRoute } from "./routes/search";
-import { reviewRoute } from "./routes/review";
 import { sitesRoute } from "./routes/sites";
 import { messagesRoute } from "./routes/messages";
 
@@ -23,9 +21,7 @@ app.get("/health", c => c.json({ ok: true }));
 
 app.route("/api/chat", chatRoute);
 app.route("/api/generate", generateRoute);
-app.route("/api/upload", uploadRoute);
 app.route("/api/search", searchRoute);
-app.route("/api/review", reviewRoute);
 app.route("/api/sites", sitesRoute);
 app.route("/api/messages", messagesRoute);
 
