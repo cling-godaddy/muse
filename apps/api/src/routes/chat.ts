@@ -1,10 +1,11 @@
 import { Hono } from "hono";
 import { streamText } from "hono/streaming";
-import { createClient, orchestrate, orchestrateSite, refine, resolveFieldAlias, getValidFields, type Message, type Provider, type ToolCall } from "@muse/ai";
+import { createClient, orchestrate, orchestrateSite, refine, resolveFieldAlias, getValidFields, singleSectionAgent, imageAgent, parseImagePlan, type Message, type Provider, type ToolCall, type BrandBrief, type ImageSelection } from "@muse/ai";
 import { requireAuth } from "../middleware/auth";
 import { createLogger } from "@muse/logger";
 import { createMediaClient, createQueryNormalizer, getIamJwt, type MediaClient, type QueryNormalizer } from "@muse/media";
-import type { Section } from "@muse/core";
+import type { Section, SectionType } from "@muse/core";
+import { sectionNeedsImages } from "@muse/core";
 
 const logger = createLogger();
 let client: Provider | null = null;
@@ -217,5 +218,112 @@ chatRoute.post("/refine", async (c) => {
     toolCalls: transformedToolCalls,
     pendingActions,
     usage: result.usage,
+  });
+});
+
+// helper: extract section summaries for context
+function extractSummaries(sections: Section[]): Array<{ type: string, headline?: string, subheadline?: string }> {
+  return sections.map((s) => {
+    const section = s as unknown as Record<string, unknown>;
+    return {
+      type: s.type,
+      headline: typeof section.headline === "string" ? section.headline : void 0,
+      subheadline: typeof section.subheadline === "string" ? section.subheadline : void 0,
+    };
+  });
+}
+
+// helper: lightweight brief derivation from context
+function deriveBriefFromContext(siteContext?: { name?: string, description?: string, location?: string }): BrandBrief {
+  return {
+    targetAudience: siteContext?.description || "general audience",
+    brandVoice: ["professional", "friendly"],
+    colorDirection: "modern",
+    imageryStyle: "clean, modern",
+    constraints: [],
+  };
+}
+
+chatRoute.post("/generate-section", async (c) => {
+  const { sectionType, preset, siteContext, existingSections, brief } = await c.req.json<{
+    sectionType: string
+    preset: string
+    siteContext?: { name?: string, description?: string, location?: string }
+    existingSections?: Section[]
+    brief?: BrandBrief
+  }>();
+
+  logger.info("generate_section_request", { sectionType, preset });
+
+  // derive brief if not cached
+  const finalBrief = brief ?? deriveBriefFromContext(siteContext);
+
+  // generate section content
+  const sectionResult = await singleSectionAgent.run(
+    {
+      sectionType,
+      preset,
+      siteContext,
+      existingSections: extractSummaries(existingSections ?? []),
+      brief: finalBrief,
+      prompt: `Generate content for this ${sectionType} section`,
+    } as Parameters<typeof singleSectionAgent.run>[0],
+    getClient(),
+  );
+
+  const parsed = JSON.parse(sectionResult.content) as { section: Record<string, unknown> };
+  const section = parsed.section;
+
+  logger.info("section_generated", { sectionId: section.id, sectionType: section.type });
+
+  // generate images if needed
+  let images: ImageSelection[] = [];
+  if (sectionNeedsImages(sectionType as SectionType)) {
+    logger.info("fetching_images", { sectionType });
+
+    try {
+      const imagePlanResult = await imageAgent.run(
+        {
+          prompt: `Image for ${sectionType} section`,
+          brief: finalBrief,
+          structure: {
+            sections: [
+              {
+                id: String(section.id),
+                type: sectionType,
+                preset,
+                purpose: (typeof section.headline === "string" ? section.headline : "Content") as string,
+              },
+            ],
+          },
+          copySections: [
+            {
+              id: String(section.id),
+              headline: (typeof section.headline === "string" ? section.headline : void 0) as string | undefined,
+              subheadline: (typeof section.subheadline === "string" ? section.subheadline : void 0) as string | undefined,
+            },
+          ],
+        },
+        getClient(),
+      );
+
+      const plans = parseImagePlan(imagePlanResult.content);
+      logger.info("image_plans_generated", { count: plans.length });
+
+      if (plans.length > 0) {
+        images = await getMediaClient().executePlan(plans);
+        logger.info("images_fetched", { count: images.length });
+      }
+    }
+    catch (err) {
+      logger.error("image_generation_failed", { error: err });
+      // continue without images - section can still be used
+    }
+  }
+
+  return c.json({
+    section,
+    images,
+    usage: sectionResult.usage,
   });
 });
