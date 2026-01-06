@@ -11,6 +11,11 @@ fi
 
 echo "AWS credentials set"
 
+# Export for child processes (turbo)
+export AWS_ACCESS_KEY_ID
+export AWS_SECRET_ACCESS_KEY
+export AWS_SESSION_TOKEN
+
 # Run all dev servers
 cd "$(dirname "$0")/.."
 turbo dev
