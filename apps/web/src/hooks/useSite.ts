@@ -1,5 +1,5 @@
 import { useState, useCallback, useMemo } from "react";
-import type { Site, Page, Section } from "@muse/core";
+import type { Site, Page, Section, NavbarSection } from "@muse/core";
 import { createSite, createPage, addPage, removePage, getPagesFlattened } from "@muse/core";
 
 export interface UseSite {
@@ -30,6 +30,11 @@ export interface UseSite {
   setSite: (site: Site) => void
   clearSite: () => void
   updateSiteName: (name: string) => void
+
+  // Navbar operations
+  navbar: NavbarSection | null
+  setNavbar: (navbar: NavbarSection | null) => void
+  updateNavbar: (data: Partial<NavbarSection>) => void
 }
 
 export function useSite(initialName = "Untitled Site"): UseSite {
@@ -53,6 +58,8 @@ export function useSite(initialName = "Untitled Site"): UseSite {
   const pageSlugs = useMemo(() => {
     return getPagesFlattened(site).map(fp => fp.path);
   }, [site]);
+
+  const navbar = useMemo(() => site.navbar ?? null, [site.navbar]);
 
   const setCurrentPage = useCallback((pageId: string) => {
     setCurrentPageId(pageId);
@@ -150,14 +157,35 @@ export function useSite(initialName = "Untitled Site"): UseSite {
 
   const addNewPage = useCallback((slug: string, title: string): string => {
     const page = createPage(slug, { title });
-    setSiteState(prev => addPage(prev, page));
+    setSiteState((prev) => {
+      const updated = addPage(prev, page);
+      if (prev.navbar) {
+        return {
+          ...updated,
+          navbar: {
+            ...prev.navbar,
+            items: [...prev.navbar.items, { label: title, href: slug }],
+          },
+        };
+      }
+      return updated;
+    });
     return page.id;
   }, []);
 
   const deletePage = useCallback((pageId: string) => {
     setSiteState((prev) => {
-      const updated = removePage(prev, pageId);
-      // If deleting current page, switch to first available
+      const page = prev.pages[pageId];
+      let updated = removePage(prev, pageId);
+      if (prev.navbar && page) {
+        updated = {
+          ...updated,
+          navbar: {
+            ...prev.navbar,
+            items: prev.navbar.items.filter(item => item.href !== page.slug),
+          },
+        };
+      }
       if (currentPageId === pageId) {
         const remaining = Object.keys(updated.pages);
         setCurrentPageId(remaining[0] ?? null);
@@ -200,6 +228,25 @@ export function useSite(initialName = "Untitled Site"): UseSite {
     }));
   }, []);
 
+  const setNavbar = useCallback((newNavbar: NavbarSection | null) => {
+    setSiteState(prev => ({
+      ...prev,
+      navbar: newNavbar ?? void 0,
+      updatedAt: new Date().toISOString(),
+    }));
+  }, []);
+
+  const updateNavbar = useCallback((data: Partial<NavbarSection>) => {
+    setSiteState((prev) => {
+      if (!prev.navbar) return prev;
+      return {
+        ...prev,
+        navbar: { ...prev.navbar, ...data },
+        updatedAt: new Date().toISOString(),
+      };
+    });
+  }, []);
+
   return {
     site,
     currentPageId,
@@ -218,5 +265,8 @@ export function useSite(initialName = "Untitled Site"): UseSite {
     setSite,
     clearSite,
     updateSiteName,
+    navbar,
+    setNavbar,
+    updateNavbar,
   };
 }

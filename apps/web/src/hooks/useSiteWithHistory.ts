@@ -1,5 +1,5 @@
 import { useState, useCallback, useEffect } from "react";
-import type { Site, Section } from "@muse/core";
+import type { Site, Section, NavbarSection } from "@muse/core";
 import { useSite, type UseSite } from "./useSite";
 import { useHistory } from "./useHistory";
 
@@ -123,6 +123,16 @@ export function useSiteWithHistory(initialName = "Untitled Site"): UseSiteWithHi
     siteHook.updateSiteName(name);
   }, [history, siteHook, historyEnabled]);
 
+  const setNavbar = useCallback((navbar: NavbarSection | null) => {
+    if (historyEnabled) history.push();
+    siteHook.setNavbar(navbar);
+  }, [history, siteHook, historyEnabled]);
+
+  const updateNavbar = useCallback((data: Partial<NavbarSection>) => {
+    if (historyEnabled) history.push();
+    siteHook.updateNavbar(data);
+  }, [history, siteHook, historyEnabled]);
+
   // Theme mutation with history
   const setTheme = useCallback((palette: string, typography: string, effects?: string) => {
     if (historyEnabled) history.push();
@@ -209,6 +219,9 @@ export function useSiteWithHistory(initialName = "Untitled Site"): UseSiteWithHi
     updatePageSections,
     clearSite,
     updateSiteName,
+    navbar: siteHook.navbar,
+    setNavbar,
+    updateNavbar,
 
     // History controls
     undo,
