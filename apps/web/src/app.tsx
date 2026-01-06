@@ -240,12 +240,11 @@ function MainApp() {
     return `Create ${typeLabel} for ${subject}.`;
   }, [locationState?.autoGenerate, site.siteType, urlSiteId, site.id, site.name]);
 
-  // intake context for display in chat (only for auto-generated prompts)
+  // intake context for display in chat (whenever site has description/location)
   const intakeContext = useMemo(() => {
-    if (!locationState?.autoGenerate) return void 0;
     if (!site.description && !site.location) return void 0;
     return { name: site.name, description: site.description, location: site.location };
-  }, [locationState?.autoGenerate, site.name, site.description, site.location]);
+  }, [site.name, site.description, site.location]);
 
   return (
     <SiteProvider pageSlugs={pageSlugs} onGeneratePage={handleGeneratePage}>
