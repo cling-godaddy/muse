@@ -67,3 +67,5 @@ export type {
   GeneratedPage,
   SiteResult,
 } from "./agents";
+
+export { embed, embedBatch } from "./rag";
