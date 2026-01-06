@@ -1,5 +1,6 @@
 import { describe, it, expect } from "vitest";
-import { parseImagePlan } from "./image";
+import { parseImagePlan, buildPlanningPrompt } from "./image";
+import type { BrandBrief, PageStructure } from "./types";
 
 describe("parseImagePlan", () => {
   it("parses valid JSON array", () => {
@@ -165,5 +166,93 @@ describe("parseImagePlan", () => {
     expect(result).toHaveLength(1);
     expect(result[0]).toHaveProperty("count", 10);
     expect(result[0]).toHaveProperty("orientation", "horizontal");
+  });
+});
+
+describe("buildPlanningPrompt", () => {
+  const mockBrief: BrandBrief = {
+    targetAudience: "Food enthusiasts",
+    imageryStyle: "Professional photography",
+    brandVoice: ["friendly", "authentic"],
+  };
+
+  it("uses preset-specific image requirements when preset is specified", () => {
+    const structure: PageStructure = {
+      sections: [
+        {
+          id: "section-1",
+          type: "about",
+          purpose: "Tell the restaurant story",
+          preset: "about-story",
+        },
+      ],
+    };
+
+    const prompt = buildPlanningPrompt(mockBrief, structure);
+
+    // about-story preset should request horizontal, not square (from about-team)
+    expect(prompt).toContain("section-1: 1 ambient image(s), orientation: horizontal");
+    expect(prompt).not.toContain("orientation: square");
+  });
+
+  it("falls back to max requirements when no preset specified", () => {
+    const structure: PageStructure = {
+      sections: [
+        {
+          id: "section-1",
+          type: "about",
+          purpose: "About section without preset",
+        },
+      ],
+    };
+
+    const prompt = buildPlanningPrompt(mockBrief, structure);
+
+    // without preset, should use max requirements (about-team has count: 6, square)
+    expect(prompt).toContain("section-1: 6 people image(s), orientation: square");
+  });
+
+  it("respects preset for hero sections", () => {
+    const structure: PageStructure = {
+      sections: [
+        {
+          id: "section-1",
+          type: "hero",
+          purpose: "Hero section",
+          preset: "hero-centered",
+        },
+      ],
+    };
+
+    const prompt = buildPlanningPrompt(mockBrief, structure);
+
+    // hero-centered should request horizontal
+    expect(prompt).toContain("orientation: horizontal");
+  });
+
+  it("handles multiple sections with different presets", () => {
+    const structure: PageStructure = {
+      sections: [
+        {
+          id: "section-1",
+          type: "about",
+          purpose: "Story",
+          preset: "about-story",
+        },
+        {
+          id: "section-2",
+          type: "about",
+          purpose: "Team",
+          preset: "about-team",
+        },
+      ],
+    };
+
+    const prompt = buildPlanningPrompt(mockBrief, structure);
+
+    // about-story: horizontal, count: 1
+    expect(prompt).toContain("section-1: 1 ambient image(s), orientation: horizontal");
+    // about-team: square, count: 6
+    expect(prompt).toContain("section-2: 6 people image(s), orientation: square");
   });
 });

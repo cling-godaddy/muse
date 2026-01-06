@@ -1,5 +1,5 @@
 import { createLogger } from "@muse/logger";
-import { getMaxImageRequirements, type SectionType } from "@muse/core";
+import { getMaxImageRequirements, getImageRequirements, type SectionType } from "@muse/core";
 import type { Provider, ResponseSchema } from "../types";
 import type { AgentInput, SyncAgent, SyncAgentResult, PageStructure, BrandBrief, ImagePlan, CopySectionContent } from "./types";
 
@@ -33,11 +33,13 @@ const imagePlanSchema: ResponseSchema = {
   },
 };
 
-function buildPlanningPrompt(brief: BrandBrief, structure: PageStructure, copySections?: CopySectionContent[]): string {
+export function buildPlanningPrompt(brief: BrandBrief, structure: PageStructure, copySections?: CopySectionContent[]): string {
   const sectionsWithImages = structure.sections
     .map((s) => {
-      // Use max requirements for section type to support preset switching
-      const req = getMaxImageRequirements(s.type as SectionType);
+      // Use preset-specific requirements if preset is specified, otherwise fall back to max for type
+      const req = s.preset
+        ? getImageRequirements(s.preset) ?? getMaxImageRequirements(s.type as SectionType)
+        : getMaxImageRequirements(s.type as SectionType);
       if (!req) return null;
       return { section: s, req };
     })
@@ -160,6 +162,11 @@ export const imageAgent: SyncAgent = {
       responseSchema: imagePlanSchema,
     });
 
+    log.info("image_plan_raw", {
+      content: response.content.slice(0, 500),
+      model: "gpt-4o-mini",
+    });
+
     return { content: response.content, usage: response.usage };
   },
 };
@@ -191,15 +198,23 @@ export function parseImagePlan(json: string, mixedOrientationSections?: Set<stri
     const plans = items.filter(isImagePlan);
 
     // Mark mixed orientation sections - client.ts handles the parallel fetch
-    if (!mixedOrientationSections || mixedOrientationSections.size === 0) {
-      return plans;
-    }
+    const finalPlans = !mixedOrientationSections || mixedOrientationSections.size === 0
+      ? plans
+      : plans.map((item: ImagePlan) =>
+        mixedOrientationSections.has(item.blockId)
+          ? { ...item, orientation: "mixed" as const }
+          : item,
+      );
 
-    return plans.map((item: ImagePlan) =>
-      mixedOrientationSections.has(item.blockId)
-        ? { ...item, orientation: "mixed" as const }
-        : item,
-    );
+    log.info("image_plan_parsed", {
+      plans: finalPlans.map((p: ImagePlan) => ({
+        blockId: p.blockId,
+        orientation: p.orientation,
+        query: p.searchQuery.slice(0, 50),
+      })),
+    });
+
+    return finalPlans;
   }
   catch (err) {
     log.warn("parse_failed", {
