@@ -158,6 +158,13 @@ function MainApp() {
     }
   }, [addSection]);
 
+  const handleAddSection = useCallback((section: Section, index: number) => {
+    addSection(section, index);
+    if (sectionNeedsImages(section.type as SectionType)) {
+      setPendingImageSections(prev => new Set(prev).add(section.id));
+    }
+  }, [addSection]);
+
   const handleThemeSelected = useCallback((selection: ThemeSelection) => {
     setTheme(selection.palette, selection.typography, selection.effects);
   }, [setTheme]);
@@ -269,6 +276,10 @@ function MainApp() {
     enableHistory();
   }, [enableHistory]);
 
+  const currentPage = useMemo(() => {
+    return currentPageId ? site.pages[currentPageId] : void 0;
+  }, [currentPageId, site.pages]);
+
   const siteContext: SiteContext = useMemo(() => ({
     name: site.name,
     description: site.description,
@@ -345,7 +356,7 @@ function MainApp() {
                   <PreviewLinkInterceptor pageMap={pageMap} onNavigate={setCurrentPage}>
                     <div style={themeStyle} data-effects={effectsId} data-preview-device={previewDevice}>
                       <EditorModeProvider mode={editorMode}>
-                        <SectionEditor sections={sections} onChange={setSections} pendingImageSections={pendingImageSections} navbar={navbar ?? void 0} onNavbarChange={updateNavbar} />
+                        <SectionEditor sections={sections} onChange={setSections} pendingImageSections={pendingImageSections} navbar={navbar ?? void 0} onNavbarChange={updateNavbar} site={site} currentPage={currentPage} onAddSection={handleAddSection} />
                       </EditorModeProvider>
                     </div>
                   </PreviewLinkInterceptor>
@@ -354,7 +365,7 @@ function MainApp() {
               : (
                 <div className="h-full overflow-y-auto" style={themeStyle} data-effects={effectsId}>
                   <EditorModeProvider mode={editorMode}>
-                    <SectionEditor sections={sections} onChange={setSections} pendingImageSections={pendingImageSections} navbar={navbar ?? void 0} onNavbarChange={updateNavbar} />
+                    <SectionEditor sections={sections} onChange={setSections} pendingImageSections={pendingImageSections} navbar={navbar ?? void 0} onNavbarChange={updateNavbar} site={site} currentPage={currentPage} onAddSection={handleAddSection} />
                   </EditorModeProvider>
                 </div>
               )}
