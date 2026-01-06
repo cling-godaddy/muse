@@ -57,6 +57,7 @@ const REFINE_URL = "http://localhost:3001/api/chat/refine";
 const emptyUsage: Usage = { input: 0, output: 0, cost: 0, model: "" };
 
 export function useChat(options: UseChatOptions = {}): UseChat {
+  const { onMessagesChange } = options;
   const { getToken } = useAuth();
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
@@ -105,8 +106,8 @@ export function useChat(options: UseChatOptions = {}): UseChat {
 
   // Notify parent when messages change
   useEffect(() => {
-    options.onMessagesChange?.(messages);
-  }, [messages, options.onMessagesChange]);
+    onMessagesChange?.(messages);
+  }, [messages, onMessagesChange]);
 
   const send = useCallback(async () => {
     if (!input.trim() || isLoading) return;
