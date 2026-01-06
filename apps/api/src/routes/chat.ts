@@ -1,15 +1,16 @@
 import { Hono } from "hono";
 import { streamText } from "hono/streaming";
-import { createClient, orchestrateSite, refine, resolveFieldAlias, getValidFields, type Message, type Provider, type ToolCall } from "@muse/ai";
+import { createClient, orchestrateSite, refine, resolveFieldAlias, getValidFields, createImageAnalyzer, embed, type Message, type Provider, type ToolCall } from "@muse/ai";
 import { requireAuth } from "../middleware/auth";
 import { createLogger } from "@muse/logger";
-import { createMediaClient, createQueryNormalizer, getIamJwt, type MediaClient, type QueryNormalizer } from "@muse/media";
+import { createMediaClient, createQueryNormalizer, createImageBank, getIamJwt, type MediaClient, type QueryNormalizer, type ImageBank, type ImageMetadata } from "@muse/media";
 import type { Section } from "@muse/core";
 
 const logger = createLogger();
 let client: Provider | null = null;
 let mediaClient: MediaClient | null = null;
 let normalizer: QueryNormalizer | null = null;
+let imageBank: ImageBank | null = null;
 
 function getNormalizer(): QueryNormalizer | undefined {
   const openaiKey = process.env.OPENAI_API_KEY;
@@ -19,6 +20,36 @@ function getNormalizer(): QueryNormalizer | undefined {
     normalizer = createQueryNormalizer(openaiKey);
   }
   return normalizer;
+}
+
+async function getImageBank(): Promise<ImageBank | undefined> {
+  const openaiKey = process.env.OPENAI_API_KEY;
+  const bucket = process.env.BANK_S3_BUCKET;
+  const region = process.env.AWS_REGION ?? "us-west-2";
+
+  if (!openaiKey || !bucket) return void 0;
+
+  if (!imageBank) {
+    const analyzer = createImageAnalyzer(openaiKey);
+    imageBank = await createImageBank({
+      bucket,
+      region,
+      logger: logger.child({ agent: "bank" }),
+      embed: async (text: string) => Array.from(await embed(text)),
+      analyze: async (url: string): Promise<ImageMetadata> => {
+        const result = await analyzer(url);
+        return {
+          caption: result.caption,
+          subjects: result.subjects,
+          style: result.style.join(", "),
+          mood: result.mood.join(", "),
+        };
+      },
+    });
+    await imageBank.load();
+    logger.info("image_bank_initialized", { bucket, region });
+  }
+  return imageBank;
 }
 
 function getClient(): Provider {
@@ -32,12 +63,14 @@ function getClient(): Provider {
   return client;
 }
 
-function getMediaClient(): MediaClient {
+async function getMediaClient(): Promise<MediaClient> {
   if (!mediaClient) {
+    const bank = await getImageBank();
     mediaClient = createMediaClient({
       gettyJwt: getIamJwt,
       normalizer: getNormalizer(),
       logger: logger.child({ agent: "media" }),
+      bank,
     });
   }
   return mediaClient;
@@ -53,7 +86,7 @@ chatRoute.post("/", async (c) => {
     stream?: boolean
   }>();
 
-  const config = { mediaClient: getMediaClient(), logger };
+  const config = { mediaClient: await getMediaClient(), logger };
 
   if (stream) {
     return streamText(c, async (textStream) => {
