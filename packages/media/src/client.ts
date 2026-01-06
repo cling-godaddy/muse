@@ -2,6 +2,7 @@ import { sample, shuffle } from "lodash-es";
 import type { Logger } from "@muse/logger";
 import type { MediaClient, ImagePlan, ImageSelection, ImageSearchOptions, ImageSearchResult, ImageCategory } from "./types";
 import type { QueryNormalizer, MediaQueryIntent, NormalizeResult } from "./normalize";
+import type { ImageBank } from "./bank";
 import { createGettyProvider } from "./getty";
 
 export interface MediaClientConfig {
@@ -9,6 +10,7 @@ export interface MediaClientConfig {
   cacheTtlMs?: number
   logger?: Logger
   normalizer?: QueryNormalizer
+  bank?: ImageBank
 }
 
 const noopLogger: Logger = {
@@ -33,9 +35,23 @@ export function createMediaClient(config: MediaClientConfig): MediaClient {
   const cacheTtl = config.cacheTtlMs ?? DEFAULT_CACHE_TTL;
   const log = config.logger ?? noopLogger;
   const normalizer = config.normalizer;
+  const bank = config.bank;
   const provider = createGettyProvider({ getJwt: config.gettyJwt });
 
-  log.info("init", { provider: "getty" });
+  log.info("init", { provider: "getty", bank: !!bank });
+
+  // track pending store operations for sync
+  const pendingStores: Promise<void>[] = [];
+
+  function storeInBank(results: ImageSearchResult[]): void {
+    if (!bank) return;
+    for (const result of results.slice(0, 3)) {
+      const promise = bank.store(result).catch((err) => {
+        log.warn("bank_store_failed", { id: result.id, error: String(err) });
+      });
+      pendingStores.push(promise);
+    }
+  }
 
   function buildCacheKey(
     intent: MediaQueryIntent,
@@ -88,6 +104,18 @@ export function createMediaClient(config: MediaClientConfig): MediaClient {
         });
       }
 
+      // check bank for semantic match first
+      if (bank && options.count) {
+        const bankResult = await bank.search(queryString, {
+          orientation: options.orientation,
+          limit: options.count,
+        });
+        if (bankResult.results.length >= options.count) {
+          log.debug("bank_hit", { query: queryString, count: bankResult.results.length, topScore: bankResult.topScore });
+          return bankResult.results;
+        }
+      }
+
       const cacheKey = normalizeResult
         ? buildCacheKey(normalizeResult.intent, options.orientation)
         : simpleCacheKey(options.query, options.orientation);
@@ -106,6 +134,7 @@ export function createMediaClient(config: MediaClientConfig): MediaClient {
       log.debug("search_results", { query: queryString, count: results.length });
 
       setCache(cacheKey, results);
+      storeInBank(results);
       return results;
     },
 
@@ -160,6 +189,7 @@ export function createMediaClient(config: MediaClientConfig): MediaClient {
               const batch = await provider.search(queryString, { orientation, count: perRequest });
               log.debug("search_results", { query: queryString, orientation, count: batch.length });
               setCache(cacheKey, batch);
+              storeInBank(batch);
               return batch;
             }),
           );
@@ -257,6 +287,12 @@ export function createMediaClient(config: MediaClientConfig): MediaClient {
       const shuffled: ImageSelection[] = [];
       for (const arr of byBlock.values()) {
         shuffled.push(...shuffle(arr));
+      }
+
+      if (bank) {
+        await Promise.all(pendingStores);
+        pendingStores.length = 0;
+        await bank.sync();
       }
 
       return shuffled;
