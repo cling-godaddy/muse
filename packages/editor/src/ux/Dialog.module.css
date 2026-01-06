@@ -2,7 +2,7 @@
   position: fixed;
   inset: 0;
   background: rgba(0, 0, 0, 0.5);
-  z-index: 40;
+  z-index: 1000;
   animation: fadeIn 0.15s ease-out;
 }
 
@@ -11,7 +11,7 @@
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  z-index: 50;
+  z-index: 1001;
   width: 90vw;
   max-width: 600px;
   max-height: 85vh;
@@ -70,4 +70,38 @@
     opacity: 1;
     transform: translate(-50%, -50%) scale(1);
   }
+}
+
+.actions {
+  display: flex;
+  gap: 0.75rem;
+  justify-content: flex-end;
+  margin-top: 1.25rem;
+}
+
+.button {
+  padding: 0.5rem 1rem;
+  border-radius: 0.5rem;
+  border: 1px solid var(--muse-border);
+  background: var(--muse-bg, #fff);
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.button:hover {
+  background: var(--muse-bg-subtle, #f3f4f6);
+}
+
+.buttonDanger {
+  padding: 0.5rem 1rem;
+  border-radius: 0.5rem;
+  border: none;
+  background: #ef4444;
+  color: white;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.buttonDanger:hover {
+  background: #dc2626;
 }

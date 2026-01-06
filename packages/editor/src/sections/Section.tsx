@@ -1,4 +1,5 @@
-import { useMemo, useCallback } from "react";
+import { useMemo, useCallback, useState } from "react";
+import { Trash2 } from "lucide-react";
 import { motion } from "framer-motion";
 import type { Section as SectionType } from "@muse/core";
 import { getSectionComponent, type SectionComponent } from "./registry";
@@ -6,6 +7,8 @@ import { PresetPicker } from "../controls/PresetPicker";
 import { supportsPresets } from "../controls/presets";
 import { useSelection } from "../context/Selection";
 import { useIsEditable } from "../context/EditorMode";
+import { Dialog } from "../ux/Dialog";
+import dialogStyles from "../ux/Dialog.module.css";
 
 interface Props {
   section: SectionType
@@ -52,6 +55,7 @@ export function Section({ section, onUpdate, onDelete, onMoveUp, onMoveDown, can
 
   const isEditable = useIsEditable();
   const { select, isSelected } = useSelection();
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const showPresetPicker = supportsPresets(section.type);
 
   const selectItem = useCallback((itemIndex?: number) => {
@@ -98,13 +102,43 @@ export function Section({ section, onUpdate, onDelete, onMoveUp, onMoveDown, can
           <button
             type="button"
             className="muse-section-delete"
-            onClick={onDelete}
+            onClick={() => setShowDeleteConfirm(true)}
             aria-label="Delete section"
           >
-            ×
+            <Trash2 size={12} />
           </button>
         </div>
       )}
+      <Dialog
+        open={showDeleteConfirm}
+        onOpenChange={setShowDeleteConfirm}
+        title="Delete Section"
+      >
+        <div style={{ padding: "1.25rem 1.5rem 1.5rem" }}>
+          <p style={{ color: "var(--muse-text-muted)", margin: 0 }}>
+            Are you sure you want to delete this
+            {" "}
+            <strong>{section.type}</strong>
+            {" "}
+            section? This cannot be undone.
+          </p>
+          <div className={dialogStyles.actions}>
+            <button type="button" className={dialogStyles.button} onClick={() => setShowDeleteConfirm(false)}>
+              Cancel
+            </button>
+            <button
+              type="button"
+              className={dialogStyles.buttonDanger}
+              onClick={() => {
+                onDelete();
+                setShowDeleteConfirm(false);
+              }}
+            >
+              Delete
+            </button>
+          </div>
+        </div>
+      </Dialog>
       {/* eslint-disable-next-line react-hooks/static-components -- registry lookup, not component creation */}
       <Component
         section={section}
