@@ -45,7 +45,7 @@ export function createMediaClient(config: MediaClientConfig): MediaClient {
 
   function storeInBank(results: ImageSearchResult[]): void {
     if (!bank) return;
-    for (const result of results.slice(0, 3)) {
+    for (const result of results.slice(0, 1)) {
       const promise = bank.store(result).catch((err) => {
         log.warn("bank_store_failed", { id: result.id, error: String(err) });
       });
