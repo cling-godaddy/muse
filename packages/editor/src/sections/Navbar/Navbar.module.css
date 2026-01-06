@@ -169,6 +169,7 @@
 
 /* Mobile drawer overlay */
 .drawerOverlay {
+  display: none;
   position: fixed;
   inset: 0;
   background: rgba(0, 0, 0, 0.5);
@@ -185,6 +186,7 @@
 
 /* Mobile drawer panel */
 .drawer {
+  display: none;
   position: fixed;
   top: 0;
   right: 0;
@@ -193,7 +195,6 @@
   max-width: 80%;
   background: var(--muse-theme-bg, #0f172a);
   z-index: 200;
-  display: flex;
   flex-direction: column;
   padding: 1rem 1.5rem;
   transform: translateX(100%);
@@ -250,6 +251,14 @@
 :global([data-preview-device="tablet"]) .hamburger {
   display: flex;
 }
+:global([data-preview-device="mobile"]) .drawerOverlay,
+:global([data-preview-device="mobile-landscape"]) .drawerOverlay,
+:global([data-preview-device="tablet"]) .drawerOverlay,
+:global([data-preview-device="mobile"]) .drawer,
+:global([data-preview-device="mobile-landscape"]) .drawer,
+:global([data-preview-device="tablet"]) .drawer {
+  display: flex;
+}
 
 /* Mobile responsive - actual viewport (production) */
 @media (max-width: 767px) {
@@ -257,6 +266,10 @@
     display: none;
   }
   .hamburger {
+    display: flex;
+  }
+  .drawerOverlay,
+  .drawer {
     display: flex;
   }
 }
