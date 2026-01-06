@@ -257,6 +257,12 @@ function MainApp() {
     commitTransaction();
   }, [sections, setSections, beginTransaction, commitTransaction]);
 
+  const handleDelete = useCallback((sectionId: string) => {
+    beginTransaction();
+    setSections(sections.filter(s => s.id !== sectionId));
+    commitTransaction();
+  }, [sections, setSections, beginTransaction, commitTransaction]);
+
   const handleGenerationComplete = useCallback(() => {
     enableHistory();
   }, [enableHistory]);
@@ -328,7 +334,7 @@ function MainApp() {
         )}
         <main className="flex-1 flex gap-6 p-6 overflow-hidden">
           <div className={`w-[400px] shrink-0 ${isPreview ? "hidden" : ""}`}>
-            <Chat siteId={site.id} siteContext={siteContext} sections={sections} autoSendPrompt={autoSendPrompt} intakeContext={intakeContext} onSectionParsed={handleSectionParsed} onThemeSelected={handleThemeSelected} onImages={handleImages} onPages={handlePages} onRefine={handleRefine} onMove={handleMove} onGenerationComplete={handleGenerationComplete} onMessagesChange={setMessages} />
+            <Chat siteId={site.id} siteContext={siteContext} sections={sections} autoSendPrompt={autoSendPrompt} intakeContext={intakeContext} onSectionParsed={handleSectionParsed} onThemeSelected={handleThemeSelected} onImages={handleImages} onPages={handlePages} onRefine={handleRefine} onMove={handleMove} onDelete={handleDelete} onGenerationComplete={handleGenerationComplete} onMessagesChange={setMessages} />
           </div>
           <div className="flex-1 min-w-0 overflow-hidden">
             {isPreview

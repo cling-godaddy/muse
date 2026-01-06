@@ -24,6 +24,12 @@ export interface MoveUpdate {
   direction: "up" | "down"
 }
 
+export interface PendingAction {
+  type: string
+  payload: Record<string, unknown>
+  message: string
+}
+
 export interface SiteContext {
   name?: string
   description?: string
@@ -47,6 +53,8 @@ export interface UseChatOptions {
   onRefine?: (updates: RefineUpdate[]) => void
   /** Called when refine returns move operations to apply */
   onMove?: (moves: MoveUpdate[]) => void
+  /** Called when user confirms a pending delete action */
+  onDelete?: (sectionId: string) => void
   /** Called after generation completes */
   onGenerationComplete?: () => void
   /** Called when messages change (for persistence) */
@@ -65,6 +73,12 @@ export interface UseChat {
   agents: AgentState[]
   /** Index of the message that owns the agents timeline */
   agentsMessageIndex: number | null
+  /** Pending action awaiting user confirmation */
+  pendingAction: PendingAction | null
+  /** Confirm and execute the pending action */
+  confirmPendingAction: () => void
+  /** Cancel the pending action */
+  cancelPendingAction: () => void
 }
 
 const API_URL = "http://localhost:3001/api/chat";
@@ -83,6 +97,7 @@ export function useChat(options: UseChatOptions = {}): UseChat {
   const [lastUsage, setLastUsage] = useState<Usage | undefined>();
   const [agents, setAgents] = useState<AgentState[]>([]);
   const [agentsMessageIndex, setAgentsMessageIndex] = useState<number | null>(null);
+  const [pendingAction, setPendingAction] = useState<PendingAction | null>(null);
   const parseStateRef = useRef<ParseState>({ sections: [], pages: [], agents: new Map(), images: [] });
   const usageProcessedRef = useRef(false);
   const themeProcessedRef = useRef(false);
@@ -199,6 +214,12 @@ export function useChat(options: UseChatOptions = {}): UseChat {
           }
         }
 
+        // Handle pending actions (e.g., delete confirmation)
+        const hasPendingActions = result.pendingActions?.length > 0;
+        if (hasPendingActions) {
+          setPendingAction(result.pendingActions[0]);
+        }
+
         // Track usage
         if (result.usage) {
           const usage = { ...result.usage, cost: result.usage.cost ?? 0, model: result.usage.model ?? "unknown" };
@@ -211,8 +232,11 @@ export function useChat(options: UseChatOptions = {}): UseChat {
           }));
         }
 
-        const finalMessages = [...newMessages, { role: "assistant" as const, content: result.message || "Done" }];
-        setMessages(finalMessages);
+        // Skip assistant message if there are pending actions (confirmation UI handles it)
+        if (!hasPendingActions) {
+          const finalMessages = [...newMessages, { role: "assistant" as const, content: result.message || "Done" }];
+          setMessages(finalMessages);
+        }
       }
       catch (err) {
         const message = err instanceof Error ? err.message : "Unknown error";
@@ -340,5 +364,17 @@ export function useChat(options: UseChatOptions = {}): UseChat {
     }
   }, [input, messages, isLoading, options, getToken]);
 
-  return { messages, input, setInput, isLoading, error, send, sessionUsage, lastUsage, agents, agentsMessageIndex };
+  const confirmPendingAction = useCallback(() => {
+    if (!pendingAction) return;
+    if (pendingAction.type === "delete_section") {
+      options.onDelete?.(pendingAction.payload.sectionId as string);
+    }
+    setPendingAction(null);
+  }, [pendingAction, options]);
+
+  const cancelPendingAction = useCallback(() => {
+    setPendingAction(null);
+  }, []);
+
+  return { messages, input, setInput, isLoading, error, send, sessionUsage, lastUsage, agents, agentsMessageIndex, pendingAction, confirmPendingAction, cancelPendingAction };
 }

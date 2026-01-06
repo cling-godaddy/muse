@@ -108,11 +108,19 @@ chatRoute.post("/", async (c) => {
   return c.json({ content });
 });
 
+interface PendingAction {
+  type: string
+  payload: Record<string, unknown>
+  message: string
+}
+
 chatRoute.post("/refine", async (c) => {
   const { sections, messages } = await c.req.json<{
     sections: Section[]
     messages: Message[]
   }>();
+
+  const pendingActions: PendingAction[] = [];
 
   const executeTool = async (call: ToolCall) => {
     logger.info("tool_call", { name: call.name, input: call.input });
@@ -171,6 +179,37 @@ chatRoute.post("/refine", async (c) => {
       };
     }
 
+    if (call.name === "delete_section") {
+      const { sectionId } = call.input as { sectionId: string };
+      const section = sections.find(s => s.id === sectionId);
+
+      if (!section) {
+        logger.warn("section_not_found", { sectionId });
+        return { id: call.id, result: { error: `Section not found: ${sectionId}` } };
+      }
+
+      if (section.type === "navbar") {
+        logger.warn("cannot_delete_navbar", { sectionId });
+        return { id: call.id, result: { error: "Cannot delete navbar" } };
+      }
+
+      if (section.type === "footer") {
+        logger.warn("cannot_delete_footer", { sectionId });
+        return { id: call.id, result: { error: "Cannot delete footer" } };
+      }
+
+      logger.info("delete_section_pending", { sectionId, sectionType: section.type });
+      pendingActions.push({
+        type: "delete_section",
+        payload: { sectionId },
+        message: `Delete the ${section.type} section?`,
+      });
+      return {
+        id: call.id,
+        result: { needsConfirmation: true },
+      };
+    }
+
     return { id: call.id, result: { success: true } };
   };
 
@@ -182,19 +221,24 @@ chatRoute.post("/refine", async (c) => {
     }
   }
 
-  const transformedToolCalls = result.toolCalls.map((tc) => {
-    if (tc.name === "edit_section" && tc.input.field) {
-      const { sectionId, field, value } = tc.input as { sectionId: string, field: string, value: unknown };
-      return {
-        name: tc.name,
-        input: { sectionId, updates: { [field]: value } },
-      };
-    }
-    return tc;
-  });
+  const transformedToolCalls = result.toolCalls
+    .filter(tc => tc.name !== "delete_section") // delete calls go to pendingActions
+    .map((tc) => {
+      if (tc.name === "edit_section" && tc.input.field) {
+        const { sectionId, field, value } = tc.input as { sectionId: string, field: string, value: unknown };
+        return {
+          name: tc.name,
+          input: { sectionId, updates: { [field]: value } },
+        };
+      }
+      return tc;
+    });
 
   let message = result.message;
-  if (result.failedCalls.length > 0 && result.toolCalls.length === 0) {
+  if (pendingActions.length > 0) {
+    message = ""; // confirmation UI will display the prompt
+  }
+  else if (result.failedCalls.length > 0 && result.toolCalls.length === 0) {
     message = "I wasn't able to make that change. Could you try rephrasing your request?";
   }
   else if (result.failedCalls.length > 0) {
@@ -204,6 +248,7 @@ chatRoute.post("/refine", async (c) => {
   return c.json({
     message,
     toolCalls: transformedToolCalls,
+    pendingActions,
     usage: result.usage,
   });
 });

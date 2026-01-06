@@ -1,7 +1,7 @@
 import type { Section } from "@muse/core";
 import { sectionFieldRegistry, getEditableFields } from "@muse/core";
 import type { Message, Provider, ToolCall, ToolResult } from "../types";
-import { editSectionTool, moveSectionTool } from "../tools";
+import { editSectionTool, moveSectionTool, deleteSectionTool } from "../tools";
 
 interface RefineInput {
   messages: Message[] // Conversation history (user/assistant, no system)
@@ -63,6 +63,11 @@ TOOLS:
    - sectionId: The ID of the section to move
    - direction: "up" (towards top) or "down" (towards bottom)
 
+3. delete_section: Remove a section entirely
+   - sectionId: The ID of the section to delete
+   - Cannot delete navbar or footer sections
+   - Only use when user explicitly asks to remove/delete a section
+
 Make the requested changes, then briefly confirm what you did.`;
 }
 
@@ -79,7 +84,7 @@ export async function refine(
 
   const response = await provider.chat({
     messages,
-    tools: [editSectionTool, moveSectionTool],
+    tools: [editSectionTool, moveSectionTool, deleteSectionTool],
   });
 
   const usage = response.usage ?? { input: 0, output: 0 };

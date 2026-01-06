@@ -33,6 +33,8 @@ interface ChatProps {
   onRefine?: (updates: RefineUpdate[]) => void
   /** Called when AI moves sections */
   onMove?: (moves: MoveUpdate[]) => void
+  /** Called when user confirms delete action */
+  onDelete?: (sectionId: string) => void
   /** Called when generation (not refine) completes */
   onGenerationComplete?: () => void
   /** Called when messages change (for persistence) */
@@ -45,9 +47,9 @@ function formatTokens(n: number): string {
   return `${(n / 1_000_000).toFixed(1)}M`;
 }
 
-export function Chat({ siteId, siteContext, sections, autoSendPrompt, intakeContext, onSectionParsed, onThemeSelected, onImages, onPages, onRefine, onMove, onGenerationComplete, onMessagesChange }: ChatProps) {
-  const options = useMemo(() => ({ siteId, siteContext, sections, onSectionParsed, onThemeSelected, onImages, onPages, onRefine, onMove, onGenerationComplete, onMessagesChange }), [siteId, siteContext, sections, onSectionParsed, onThemeSelected, onImages, onPages, onRefine, onMove, onGenerationComplete, onMessagesChange]);
-  const { messages, input, setInput, isLoading, error, send, sessionUsage, lastUsage, agents, agentsMessageIndex } = useChat(options);
+export function Chat({ siteId, siteContext, sections, autoSendPrompt, intakeContext, onSectionParsed, onThemeSelected, onImages, onPages, onRefine, onMove, onDelete, onGenerationComplete, onMessagesChange }: ChatProps) {
+  const options = useMemo(() => ({ siteId, siteContext, sections, onSectionParsed, onThemeSelected, onImages, onPages, onRefine, onMove, onDelete, onGenerationComplete, onMessagesChange }), [siteId, siteContext, sections, onSectionParsed, onThemeSelected, onImages, onPages, onRefine, onMove, onDelete, onGenerationComplete, onMessagesChange]);
+  const { messages, input, setInput, isLoading, error, send, sessionUsage, lastUsage, agents, agentsMessageIndex, pendingAction, confirmPendingAction, cancelPendingAction } = useChat(options);
   const isRefineMode = sections && sections.length > 0;
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const autoSendTriggeredRef = useRef(false);
@@ -125,6 +127,25 @@ export function Chat({ siteId, siteContext, sections, autoSendPrompt, intakeCont
         )}
         <div ref={messagesEndRef} />
       </div>
+      {pendingAction && (
+        <div className="mx-3 mb-3 p-3 rounded-lg border border-amber-300 bg-amber-50">
+          <p className="text-sm mb-3 text-amber-900">{pendingAction.message}</p>
+          <div className="flex gap-2 justify-end">
+            <button
+              className="px-3 py-1.5 text-sm border border-border rounded hover:bg-bg-subtle cursor-pointer"
+              onClick={cancelPendingAction}
+            >
+              Cancel
+            </button>
+            <button
+              className="px-3 py-1.5 text-sm bg-red-500 text-white rounded hover:bg-red-600 cursor-pointer"
+              onClick={confirmPendingAction}
+            >
+              Confirm Delete
+            </button>
+          </div>
+        </div>
+      )}
       <div className="p-3 border-t border-border flex gap-2">
         <textarea
           className="flex-1 p-2 border border-border rounded resize-none font-sans text-sm focus:outline-none focus:border-primary"
