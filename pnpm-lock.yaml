@@ -357,6 +357,9 @@ importers:
 
   packages/media:
     dependencies:
+      '@aws-sdk/client-s3':
+        specifier: ^3.700.0
+        version: 3.962.0
       '@aws-sdk/credential-provider-env':
         specifier: ^3.957.0
         version: 3.957.0
@@ -366,6 +369,9 @@ importers:
       '@muse/logger':
         specifier: workspace:*
         version: link:../logger
+      faiss-node:
+        specifier: ^0.5.1
+        version: 0.5.1
       gd-auth-client:
         specifier: ^2.1.1
         version: 2.1.1
