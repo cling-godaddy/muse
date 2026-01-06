@@ -18,7 +18,7 @@ const imagePlanSchema: ResponseSchema = {
           properties: {
             blockId: { type: "string", description: "Section ID to attach image to" },
             category: { type: "string", enum: ["ambient", "subject", "people"], description: "Image category: ambient (backgrounds/textures), subject (main content), people (portraits/teams)" },
-            provider: { type: "string", enum: ["unsplash", "pexels"], description: "Image provider" },
+            provider: { type: "string", enum: ["getty"], description: "Image provider" },
             searchQuery: { type: "string", description: "Search query for the image" },
             orientation: { type: "string", enum: ["horizontal", "vertical", "square"], description: "Image orientation" },
             count: { type: "number", description: "Number of images needed (default 1)" },
@@ -73,7 +73,7 @@ RULES:
 - Use the exact category, count, and orientation specified
 - Do NOT split sections into multiple plan items
 - Search queries should be specific and evocative, using the headline/copy context when available
-- Provider: "unsplash" for editorial/lifestyle, "pexels" for objects/products
+- Provider: always use "getty"
 
 Return empty items array if no images needed.`;
 }

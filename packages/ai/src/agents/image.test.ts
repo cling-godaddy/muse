@@ -7,7 +7,7 @@ describe("parseImagePlan", () => {
       {
         blockId: "hero_1",
         category: "ambient",
-        provider: "unsplash",
+        provider: "getty",
         searchQuery: "mountain landscape",
         orientation: "horizontal",
       },
@@ -19,7 +19,7 @@ describe("parseImagePlan", () => {
     expect(result[0]).toEqual({
       blockId: "hero_1",
       category: "ambient",
-      provider: "unsplash",
+      provider: "getty",
       searchQuery: "mountain landscape",
       orientation: "horizontal",
     });
@@ -51,8 +51,8 @@ describe("parseImagePlan", () => {
   it("parses {items: [...]} structured output format", () => {
     const input = JSON.stringify({
       items: [
-        { blockId: "hero_1", category: "ambient", provider: "unsplash", searchQuery: "sunset", orientation: "horizontal" },
-        { blockId: "gallery_1", category: "subject", provider: "pexels", searchQuery: "food", orientation: "square" },
+        { blockId: "hero_1", category: "ambient", provider: "getty", searchQuery: "sunset", orientation: "horizontal" },
+        { blockId: "gallery_1", category: "subject", provider: "getty", searchQuery: "food", orientation: "square" },
       ],
     });
 
@@ -66,7 +66,7 @@ describe("parseImagePlan", () => {
   it("parses {plan: [...]} wrapped format", () => {
     const input = JSON.stringify({
       plan: [
-        { blockId: "hero_1", category: "ambient", provider: "unsplash", searchQuery: "mountain", orientation: "horizontal" },
+        { blockId: "hero_1", category: "ambient", provider: "getty", searchQuery: "mountain", orientation: "horizontal" },
       ],
     });
 
@@ -80,7 +80,7 @@ describe("parseImagePlan", () => {
     const input = JSON.stringify({
       blockId: "hero_1",
       category: "ambient",
-      provider: "unsplash",
+      provider: "getty",
       searchQuery: "ocean waves",
       orientation: "horizontal",
     });
@@ -93,10 +93,10 @@ describe("parseImagePlan", () => {
 
   it("filters out items with missing required fields", () => {
     const input = JSON.stringify([
-      { blockId: "valid", category: "ambient", provider: "unsplash", searchQuery: "test", orientation: "horizontal" },
-      { blockId: "missing_category", provider: "unsplash", searchQuery: "test", orientation: "horizontal" },
-      { category: "ambient", provider: "unsplash", searchQuery: "test", orientation: "horizontal" },
-      { blockId: "missing_query", category: "ambient", provider: "unsplash", orientation: "horizontal" },
+      { blockId: "valid", category: "ambient", provider: "getty", searchQuery: "test", orientation: "horizontal" },
+      { blockId: "missing_category", provider: "getty", searchQuery: "test", orientation: "horizontal" },
+      { category: "ambient", provider: "getty", searchQuery: "test", orientation: "horizontal" },
+      { blockId: "missing_query", category: "ambient", provider: "getty", orientation: "horizontal" },
     ]);
 
     const result = parseImagePlan(input);
@@ -107,8 +107,8 @@ describe("parseImagePlan", () => {
 
   it("handles multiple valid items", () => {
     const input = JSON.stringify([
-      { blockId: "hero_1", category: "ambient", provider: "unsplash", searchQuery: "nature", orientation: "horizontal" },
-      { blockId: "features_1", category: "subject", provider: "pexels", searchQuery: "icon", orientation: "square" },
+      { blockId: "hero_1", category: "ambient", provider: "getty", searchQuery: "nature", orientation: "horizontal" },
+      { blockId: "features_1", category: "subject", provider: "getty", searchQuery: "icon", orientation: "square" },
     ]);
 
     const result = parseImagePlan(input);
@@ -118,7 +118,7 @@ describe("parseImagePlan", () => {
 
   it("preserves count field when present", () => {
     const input = JSON.stringify([
-      { blockId: "gallery_1", category: "subject", provider: "unsplash", searchQuery: "food", orientation: "square", count: 4 },
+      { blockId: "gallery_1", category: "subject", provider: "getty", searchQuery: "food", orientation: "square", count: 4 },
     ]);
 
     const result = parseImagePlan(input);
@@ -129,7 +129,7 @@ describe("parseImagePlan", () => {
 
   it("marks mixed orientation blocks with orientation='mixed'", () => {
     const input = JSON.stringify([
-      { blockId: "gallery_1", category: "subject", provider: "unsplash", searchQuery: "wedding", orientation: "horizontal", count: 10 },
+      { blockId: "gallery_1", category: "subject", provider: "getty", searchQuery: "wedding", orientation: "horizontal", count: 10 },
     ]);
     const mixedBlocks = new Set(["gallery_1"]);
 
@@ -143,8 +143,8 @@ describe("parseImagePlan", () => {
 
   it("does not mark blocks not in mixedOrientationBlocks", () => {
     const input = JSON.stringify([
-      { blockId: "hero_1", category: "ambient", provider: "unsplash", searchQuery: "sunset", orientation: "horizontal", count: 1 },
-      { blockId: "gallery_1", category: "subject", provider: "unsplash", searchQuery: "wedding", orientation: "horizontal", count: 10 },
+      { blockId: "hero_1", category: "ambient", provider: "getty", searchQuery: "sunset", orientation: "horizontal", count: 1 },
+      { blockId: "gallery_1", category: "subject", provider: "getty", searchQuery: "wedding", orientation: "horizontal", count: 10 },
     ]);
     const mixedBlocks = new Set(["gallery_1"]);
 
@@ -157,7 +157,7 @@ describe("parseImagePlan", () => {
 
   it("handles empty mixedOrientationBlocks set", () => {
     const input = JSON.stringify([
-      { blockId: "gallery_1", category: "subject", provider: "unsplash", searchQuery: "food", orientation: "horizontal", count: 10 },
+      { blockId: "gallery_1", category: "subject", provider: "getty", searchQuery: "food", orientation: "horizontal", count: 10 },
     ]);
 
     const result = parseImagePlan(input, new Set());
