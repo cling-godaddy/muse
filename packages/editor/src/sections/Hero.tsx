@@ -1,5 +1,5 @@
 import { type HeroSection as HeroSectionType, type RichContent } from "@muse/core";
-import { EditableText, EditableLink, ImageLoader } from "../ux";
+import { EditableText, EditableLink, ImageLoader, Skeleton } from "../ux";
 import styles from "./Hero.module.css";
 
 interface Props {
@@ -8,7 +8,24 @@ interface Props {
   isPending?: boolean
 }
 
-function HeroContent({ section, onUpdate }: Omit<Props, "isPending">) {
+function HeroSkeleton() {
+  return (
+    <>
+      <Skeleton variant="text" height="3em" width="80%" className={styles.headline} />
+      <Skeleton variant="text" height="1.5em" width="60%" className={styles.subheadline} />
+      <div className={styles.ctas}>
+        <Skeleton variant="rect" height="48px" width="140px" />
+        <Skeleton variant="rect" height="48px" width="140px" />
+      </div>
+    </>
+  );
+}
+
+function HeroContent({ section, onUpdate, isPending }: Props) {
+  if (isPending) {
+    return <HeroSkeleton />;
+  }
+
   return (
     <>
       <EditableText
@@ -61,7 +78,7 @@ export function Hero({ section, onUpdate, isPending }: Props) {
     return (
       <div className={`${styles.section} ${styles.split} ${imageFirst ? styles.splitRight : ""}`}>
         <div className={styles.splitContent}>
-          <HeroContent section={section} onUpdate={onUpdate} />
+          <HeroContent section={section} onUpdate={onUpdate} isPending={isPending} />
         </div>
         <div className={styles.splitImage}>
           <ImageLoader
@@ -90,7 +107,7 @@ export function Hero({ section, onUpdate, isPending }: Props) {
           className={styles.overlayBg}
           style={{ backgroundColor: `rgba(0, 0, 0, ${overlayOpacity})` }}
         />
-        <HeroContent section={section} onUpdate={onUpdate} />
+        <HeroContent section={section} onUpdate={onUpdate} isPending={isPending} />
       </div>
     );
   }
@@ -98,7 +115,7 @@ export function Hero({ section, onUpdate, isPending }: Props) {
   // Centered layout: default
   return (
     <div className={styles.section}>
-      <HeroContent section={section} onUpdate={onUpdate} />
+      <HeroContent section={section} onUpdate={onUpdate} isPending={isPending} />
     </div>
   );
 }

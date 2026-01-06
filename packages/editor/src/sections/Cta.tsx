@@ -1,17 +1,28 @@
 import type { CtaSection as CtaSectionType, RichContent } from "@muse/core";
-import { EditableText, EditableLink } from "../ux";
+import { EditableText, EditableLink, Skeleton } from "../ux";
 import { useIsEditable } from "../context/EditorMode";
 import styles from "./Cta.module.css";
 
 interface Props {
   section: CtaSectionType
   onUpdate: (data: Partial<CtaSectionType>) => void
+  isPending?: boolean
 }
 
-export function Cta({ section, onUpdate }: Props) {
+export function Cta({ section, onUpdate, isPending }: Props) {
   const isEditable = useIsEditable();
   const variant = section.variant ?? "primary";
   const variantClass = variant === "primary" ? styles.primary : styles.secondary;
+
+  if (isPending) {
+    return (
+      <div className={`${styles.section} ${variantClass}`}>
+        <Skeleton variant="text" height="2.5em" width="60%" className={styles.headline} />
+        <Skeleton variant="text" height="1.2em" width="80%" className={styles.description} />
+        <Skeleton variant="rect" height="48px" width="180px" />
+      </div>
+    );
+  }
 
   return (
     <div className={`${styles.section} ${variantClass}`}>
