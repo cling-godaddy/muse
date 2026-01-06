@@ -7,9 +7,11 @@ import styles from "./Numbered.module.css";
 interface Props {
   section: FeaturesSectionType
   onUpdate: (data: Partial<FeaturesSectionType>) => void
+  isPending?: boolean
 }
 
-export function Numbered({ section, onUpdate }: Props) {
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+export function Numbered({ section, onUpdate, isPending }: Props) {
   const isEditable = useIsEditable();
 
   const updateItem = (index: number, data: Partial<FeatureItem>) => {
