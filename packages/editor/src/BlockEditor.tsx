@@ -1,4 +1,4 @@
-import { useMemo } from "react";
+import { useMemo, useCallback } from "react";
 import type { Section, NavbarSection } from "@muse/core";
 import { Section as SectionWrapper } from "./sections";
 import { SelectionProvider } from "./context/Selection";
@@ -34,10 +34,21 @@ export function SectionEditor({ sections, onChange, pendingImageSections, navbar
   };
 
   const deleteSection = (id: string) => {
-    // Don't allow deleting navbar for now
     if (navbar && id === navbar.id) return;
     onChange(sections.filter(s => s.id !== id));
   };
+
+  const moveSection = useCallback((fromIndex: number, toIndex: number) => {
+    if (toIndex < 0 || toIndex >= sections.length) return;
+    const next = [...sections];
+    const [moved] = next.splice(fromIndex, 1);
+    if (!moved) return;
+    next.splice(toIndex, 0, moved);
+    onChange(next);
+  }, [sections, onChange]);
+
+  const lastIsFooter = sections.length > 0 && sections.at(-1)?.type === "footer";
+  const lastMoveableIndex = lastIsFooter ? sections.length - 2 : sections.length - 1;
 
   return (
     <SelectionProvider>
@@ -47,15 +58,26 @@ export function SectionEditor({ sections, onChange, pendingImageSections, navbar
             No sections yet. Use AI to generate content.
           </div>
         )}
-        {allSections.map(section => (
-          <SectionWrapper
-            key={section.id}
-            section={section}
-            onUpdate={data => updateSection(section.id, data)}
-            onDelete={() => deleteSection(section.id)}
-            isPending={pendingImageSections?.has(section.id) ?? false}
-          />
-        ))}
+        {allSections.map((section) => {
+          const isNavbar = navbar && section.id === navbar.id;
+          const isFooter = section.type === "footer";
+          const sectionIndex = isNavbar ? -1 : sections.findIndex(s => s.id === section.id);
+          const showMoveControls = !isNavbar && !isFooter;
+
+          return (
+            <SectionWrapper
+              key={section.id}
+              section={section}
+              onUpdate={data => updateSection(section.id, data)}
+              onDelete={() => deleteSection(section.id)}
+              isPending={pendingImageSections?.has(section.id) ?? false}
+              onMoveUp={showMoveControls ? () => moveSection(sectionIndex, sectionIndex - 1) : void 0}
+              onMoveDown={showMoveControls ? () => moveSection(sectionIndex, sectionIndex + 1) : void 0}
+              canMoveUp={showMoveControls && sectionIndex > 0}
+              canMoveDown={showMoveControls && sectionIndex < lastMoveableIndex}
+            />
+          );
+        })}
       </div>
     </SelectionProvider>
   );

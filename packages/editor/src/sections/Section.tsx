@@ -10,7 +10,27 @@ interface Props {
   section: SectionType
   onUpdate: (data: Partial<SectionType>) => void
   onDelete: () => void
+  onMoveUp?: () => void
+  onMoveDown?: () => void
+  canMoveUp?: boolean
+  canMoveDown?: boolean
   isPending?: boolean
+}
+
+function ChevronUpIcon() {
+  return (
+    <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+      <path d="M9 7.5L6 4.5L3 7.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  );
+}
+
+function ChevronDownIcon() {
+  return (
+    <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+      <path d="M3 4.5L6 7.5L9 4.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  );
 }
 
 function UnknownSection({ section }: { section: SectionType }) {
@@ -23,7 +43,7 @@ function UnknownSection({ section }: { section: SectionType }) {
   );
 }
 
-export function Section({ section, onUpdate, onDelete, isPending }: Props) {
+export function Section({ section, onUpdate, onDelete, onMoveUp, onMoveDown, canMoveUp, canMoveDown, isPending }: Props) {
   const Component = useMemo<SectionComponent>(
     () => getSectionComponent(section.type) ?? UnknownSection,
     [section.type],
@@ -45,6 +65,28 @@ export function Section({ section, onUpdate, onDelete, isPending }: Props) {
     <div className="muse-section" data-section-type={section.type}>
       {isEditable && (
         <div className="muse-section-controls">
+          {onMoveUp !== void 0 && (
+            <>
+              <button
+                type="button"
+                className="muse-section-move"
+                onClick={onMoveUp}
+                disabled={!canMoveUp}
+                aria-label="Move section up"
+              >
+                <ChevronUpIcon />
+              </button>
+              <button
+                type="button"
+                className="muse-section-move"
+                onClick={onMoveDown}
+                disabled={!canMoveDown}
+                aria-label="Move section down"
+              >
+                <ChevronDownIcon />
+              </button>
+            </>
+          )}
           {showPresetPicker && (
             <PresetPicker
               sectionType={section.type}
