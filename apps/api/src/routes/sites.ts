@@ -26,9 +26,19 @@ sitesRoute.get("/", async (c) => {
 sitesRoute.post("/", async (c) => {
   const sites = await getSites();
   const userId = c.get("userId");
-  const { name } = await c.req.json() as { name?: string };
+  const { name, description, location, siteType } = await c.req.json() as {
+    name?: string
+    description?: string
+    location?: string
+    siteType?: "landing" | "full"
+  };
 
-  let site = createSite(name ?? "Untitled Site");
+  let site = createSite({
+    name: name ?? "Untitled Site",
+    description,
+    location,
+    siteType: siteType ?? "landing",
+  });
   const page = createPage("/", { title: "Home" });
   site = addPage(site, page);
 

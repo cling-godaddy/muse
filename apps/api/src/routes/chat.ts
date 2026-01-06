@@ -1,6 +1,6 @@
 import { Hono } from "hono";
 import { streamText } from "hono/streaming";
-import { createClient, orchestrateSite, refine, resolveFieldAlias, getValidFields, createImageAnalyzer, embed, type Message, type Provider, type ToolCall } from "@muse/ai";
+import { createClient, orchestrate, orchestrateSite, refine, resolveFieldAlias, getValidFields, createImageAnalyzer, embed, type Message, type Provider, type ToolCall } from "@muse/ai";
 import { requireAuth } from "../middleware/auth";
 import { createLogger } from "@muse/logger";
 import { createMediaClient, createQueryNormalizer, createImageBank, getIamJwt, type MediaClient, type QueryNormalizer, type ImageBank, type ImageMetadata } from "@muse/media";
@@ -81,23 +81,28 @@ export const chatRoute = new Hono();
 chatRoute.use("/*", requireAuth);
 
 chatRoute.post("/", async (c) => {
-  const { messages, stream } = await c.req.json<{
+  const { messages, stream, siteContext } = await c.req.json<{
     messages: Message[]
     stream?: boolean
+    siteContext?: { name?: string, description?: string, location?: string, siteType?: "landing" | "full" }
   }>();
 
   const config = { mediaClient: await getMediaClient(), logger };
+  const input = { messages, siteContext };
+
+  // use single-page orchestrator for landing pages, multi-page for full sites
+  const generator = siteContext?.siteType === "full" ? orchestrateSite : orchestrate;
 
   if (stream) {
     return streamText(c, async (textStream) => {
-      for await (const chunk of orchestrateSite({ messages }, getClient(), { config })) {
+      for await (const chunk of generator(input, getClient(), { config })) {
         await textStream.write(chunk);
       }
     });
   }
 
   let content = "";
-  for await (const chunk of orchestrateSite({ messages }, getClient(), { config })) {
+  for await (const chunk of generator(input, getClient(), { config })) {
     content += chunk;
   }
   return c.json({ content });
