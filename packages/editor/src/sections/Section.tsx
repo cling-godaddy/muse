@@ -1,4 +1,5 @@
 import { useMemo, useCallback } from "react";
+import { motion } from "framer-motion";
 import type { Section as SectionType } from "@muse/core";
 import { getSectionComponent, type SectionComponent } from "./registry";
 import { PresetPicker } from "../controls/PresetPicker";
@@ -62,7 +63,7 @@ export function Section({ section, onUpdate, onDelete, onMoveUp, onMoveDown, can
   }, [isSelected, section.id]);
 
   return (
-    <div className="muse-section" data-section-type={section.type}>
+    <motion.div layout className="muse-section" data-section-type={section.type}>
       {isEditable && (
         <div className="muse-section-controls">
           {onMoveUp !== void 0 && (
@@ -112,6 +113,6 @@ export function Section({ section, onUpdate, onDelete, onMoveUp, onMoveDown, can
         selectItem={selectItem}
         isItemSelected={isItemSelected}
       />
-    </div>
+    </motion.div>
   );
 }

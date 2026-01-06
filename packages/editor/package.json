@@ -28,6 +28,7 @@
     "@radix-ui/react-dialog": "^1.1.14",
     "@radix-ui/react-popover": "^1.1.15",
     "@radix-ui/react-select": "^2.2.6",
+    "framer-motion": "^12.24.0",
     "lexical": "^0.39.0",
     "lucide-react": "^0.562.0",
     "simple-icons": "^16.3.0"
