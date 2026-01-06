@@ -11,9 +11,14 @@ export interface SiteTheme {
   typography: string
 }
 
+export type SiteType = "landing" | "full";
+
 export interface Site {
   id: string
   name: string
+  description?: string
+  location?: string
+  siteType?: SiteType
   pages: Record<string, Page>
   tree: SiteNode[]
   theme: SiteTheme
@@ -21,14 +26,27 @@ export interface Site {
   updatedAt: string
 }
 
+export interface CreateSiteOptions {
+  name: string
+  description?: string
+  location?: string
+  siteType?: SiteType
+}
+
 export function createSite(
-  name: string,
+  nameOrOptions: string | CreateSiteOptions,
   initialPage?: Page,
 ): Site {
+  const opts = typeof nameOrOptions === "string"
+    ? { name: nameOrOptions }
+    : nameOrOptions;
   const now = new Date().toISOString();
   const site: Site = {
     id: crypto.randomUUID(),
-    name,
+    name: opts.name,
+    description: opts.description,
+    location: opts.location,
+    siteType: opts.siteType,
     pages: {},
     tree: [],
     theme: { palette: "slate", typography: "inter" },

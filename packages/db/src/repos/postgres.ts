@@ -6,6 +6,9 @@ interface SiteRow {
   id: string
   user_id: string
   name: string
+  description: string | null
+  location: string | null
+  site_type: string | null
   theme: SiteTheme
   tree: SiteNode[]
   domain: string | null
@@ -45,10 +48,13 @@ export function createPostgresSitesTable(): SitesTable {
 
       try {
         await sql`
-          INSERT INTO sites (id, user_id, name, theme, tree, created_at, updated_at)
-          VALUES (${site.id}, ${userId}, ${site.name}, ${JSON.stringify(site.theme)}, ${JSON.stringify(site.tree)}, ${site.createdAt}, ${now})
+          INSERT INTO sites (id, user_id, name, description, location, site_type, theme, tree, created_at, updated_at)
+          VALUES (${site.id}, ${userId}, ${site.name}, ${site.description ?? null}, ${site.location ?? null}, ${site.siteType ?? "landing"}, ${JSON.stringify(site.theme)}, ${JSON.stringify(site.tree)}, ${site.createdAt}, ${now})
           ON CONFLICT (id) DO UPDATE SET
             name = EXCLUDED.name,
+            description = EXCLUDED.description,
+            location = EXCLUDED.location,
+            site_type = EXCLUDED.site_type,
             theme = EXCLUDED.theme,
             tree = EXCLUDED.tree,
             updated_at = EXCLUDED.updated_at
@@ -147,6 +153,9 @@ export function createPostgresSitesTable(): SitesTable {
       return {
         id: siteRow.id,
         name: siteRow.name,
+        description: siteRow.description ?? void 0,
+        location: siteRow.location ?? void 0,
+        siteType: (siteRow.site_type as "landing" | "full") ?? void 0,
         theme: siteRow.theme,
         tree: siteRow.tree,
         pages,
@@ -195,6 +204,9 @@ export function createPostgresSitesTable(): SitesTable {
       return {
         id: siteRow.id,
         name: siteRow.name,
+        description: siteRow.description ?? void 0,
+        location: siteRow.location ?? void 0,
+        siteType: (siteRow.site_type as "landing" | "full") ?? void 0,
         theme: siteRow.theme,
         tree: siteRow.tree,
         pages,
