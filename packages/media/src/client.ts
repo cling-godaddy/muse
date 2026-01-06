@@ -187,6 +187,19 @@ export function createMediaClient(config: MediaClientConfig): MediaClient {
                 return cached;
               }
 
+              // check bank for semantic matches before hitting Getty
+              if (bank) {
+                const bankResult = await bank.search(queryString, { orientation, limit: perRequest });
+                if (bankResult.results.length >= perRequest && bankResult.topScore >= 0.88) {
+                  log.debug("bank_hit", { query: queryString, blockId: item.blockId, orientation, count: bankResult.results.length, topScore: bankResult.topScore });
+                  setCache(cacheKey, bankResult.results);
+                  return bankResult.results;
+                }
+                if (bankResult.results.length > 0) {
+                  log.debug("bank_partial", { query: queryString, blockId: item.blockId, orientation, count: bankResult.results.length, topScore: bankResult.topScore, needed: perRequest });
+                }
+              }
+
               log.debug("search", { query: queryString, blockId: item.blockId, orientation });
               const batch = await provider.search(queryString, { orientation, count: perRequest });
               log.debug("search_results", { query: queryString, orientation, count: batch.length });
