@@ -43,10 +43,10 @@ export function createMediaClient(config: MediaClientConfig): MediaClient {
   // track pending store operations for sync
   const pendingStores: Promise<void>[] = [];
 
-  function storeInBank(results: ImageSearchResult[]): void {
+  function storeInBank(results: ImageSearchResult[], query: string): void {
     if (!bank) return;
     for (const result of results.slice(0, 1)) {
-      const promise = bank.store(result).catch((err) => {
+      const promise = bank.store(result, query).catch((err) => {
         log.warn("bank_store_failed", { id: result.id, error: String(err) });
       });
       pendingStores.push(promise);
@@ -106,12 +106,13 @@ export function createMediaClient(config: MediaClientConfig): MediaClient {
 
       // check bank for semantic match first
       if (bank && options.count) {
-        const bankResult = await bank.search(queryString, {
+        const bankQuery = normalizeResult?.intent.phrases.join(" ") ?? queryString;
+        const bankResult = await bank.search(bankQuery, {
           orientation: options.orientation,
           limit: options.count,
         });
         if (bankResult.results.length >= options.count) {
-          log.debug("bank_hit", { query: queryString, count: bankResult.results.length, topScore: bankResult.topScore });
+          log.debug("bank_hit", { query: bankQuery, count: bankResult.results.length, topScore: bankResult.topScore });
           return bankResult.results;
         }
       }
@@ -135,7 +136,8 @@ export function createMediaClient(config: MediaClientConfig): MediaClient {
 
       setCache(cacheKey, results);
       if (!cached) {
-        storeInBank(results);
+        const normalizedQuery = normalizeResult?.intent.phrases.join(" ") ?? options.query;
+        storeInBank(results, normalizedQuery);
       }
       return results;
     },
@@ -187,25 +189,13 @@ export function createMediaClient(config: MediaClientConfig): MediaClient {
                 return cached;
               }
 
-              // check bank for semantic matches before hitting Getty
-              if (bank) {
-                const bankResult = await bank.search(queryString, { orientation, limit: perRequest });
-                if (bankResult.results.length >= perRequest && bankResult.topScore >= 0.88) {
-                  log.debug("bank_hit", { query: queryString, blockId: item.blockId, orientation, count: bankResult.results.length, topScore: bankResult.topScore });
-                  setCache(cacheKey, bankResult.results);
-                  return bankResult.results;
-                }
-                if (bankResult.results.length > 0) {
-                  log.debug("bank_partial", { query: queryString, blockId: item.blockId, orientation, count: bankResult.results.length, topScore: bankResult.topScore, needed: perRequest });
-                }
-              }
-
               log.debug("search", { query: queryString, blockId: item.blockId, orientation });
               const batch = await provider.search(queryString, { orientation, count: perRequest });
               log.debug("search_results", { query: queryString, orientation, count: batch.length });
               setCache(cacheKey, batch);
               if (!cached) {
-                storeInBank(batch);
+                const normalizedQuery = normalizeResult?.intent.phrases.join(" ") ?? item.searchQuery;
+                storeInBank(batch, normalizedQuery);
               }
               return batch;
             }),
@@ -309,7 +299,7 @@ export function createMediaClient(config: MediaClientConfig): MediaClient {
       return shuffled;
     },
 
-    async flush() {
+    async persist() {
       if (!bank) return;
       if (pendingStores.length > 0) {
         await Promise.all(pendingStores);
