@@ -1,5 +1,5 @@
 import type { FeaturesSection as FeaturesSectionType, FeatureItem, RichContent } from "@muse/core";
-import { EditableText, ImageLoader } from "../../ux";
+import { EditableText, ImageLoader, Skeleton } from "../../ux";
 import { useIsEditable } from "../../context/EditorMode";
 import { FeatureIcon } from "./icons";
 import styles from "./Bento.module.css";
@@ -80,6 +80,27 @@ export function Bento({ section, onUpdate, isPending }: Props) {
   const isEditable = useIsEditable();
   const layoutClassName = layoutClasses[section.preset ?? "features-bento"] ?? "bentoHero";
   const layoutClass = (styles as Record<string, string>)[layoutClassName] ?? "";
+
+  // Show section-level skeleton when empty array during generation
+  if (isPending && section.items.length === 0) {
+    return (
+      <div className={styles.section}>
+        <Skeleton variant="text" height="2em" width="50%" className={styles.headline} />
+        <div className={`${styles.bento} ${layoutClass}`}>
+          {[0, 1, 2, 3].map(i => (
+            <div key={i} className={styles.item}>
+              <Skeleton variant="rect" height={i === 0 ? "64px" : "48px"} width={i === 0 ? "64px" : "48px"} className={styles.itemIcon} />
+              <div className={styles.itemContent}>
+                <Skeleton variant="text" height="1.5em" width="70%" className={styles.itemTitle} />
+                <Skeleton variant="text" height="1em" width="100%" className={styles.itemDescription} />
+                <Skeleton variant="text" height="1em" width="90%" />
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    );
+  }
 
   const updateItem = (index: number, data: Partial<FeatureItem>) => {
     const items = section.items.map((item, i) =>

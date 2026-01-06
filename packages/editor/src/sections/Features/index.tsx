@@ -19,7 +19,7 @@ export function Features({ section, onUpdate, isPending }: Props) {
     case "features-bento-split":
       return <Bento section={section} onUpdate={onUpdate} isPending={isPending} />;
     case "features-numbered":
-      return <Numbered section={section} onUpdate={onUpdate} />;
+      return <Numbered section={section} onUpdate={onUpdate} isPending={isPending} />;
     case "features-grid":
     case "features-grid-images":
     default:
