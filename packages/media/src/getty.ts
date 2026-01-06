@@ -13,10 +13,24 @@ interface GettyImageResult {
   id: string
   url: string
   display_sizes: GettyDisplaySize[]
+  max_dimensions?: {
+    width: number
+    height: number
+  }
 }
 
 export interface GettyProviderConfig {
   getJwt: () => Promise<string>
+}
+
+type Orientation = "horizontal" | "vertical" | "square";
+
+function calculateOrientation(width: number, height: number): Orientation {
+  if (width === 0 || height === 0) return "square"; // fallback for missing dimensions
+  const ratio = width / height;
+  if (ratio > 1.1) return "horizontal";
+  if (ratio < 0.9) return "vertical";
+  return "square";
 }
 
 export function createGettyProvider(config: GettyProviderConfig): MediaProvider {
@@ -41,6 +55,12 @@ export function createGettyProvider(config: GettyProviderConfig): MediaProvider 
         params.append("orientations", options.orientation);
       }
 
+      console.log("GETTY_REQUEST", {
+        query,
+        orientation: options.orientation,
+        fullUrl: `${GETTY_PROXY_URL}/v1/search?${params.toString()}`,
+      });
+
       const response = await fetch(`${GETTY_PROXY_URL}/v1/search?${params}`, {
         headers: {
           "Authorization": `sso-jwt ${jwt}`,
@@ -56,22 +76,48 @@ export function createGettyProvider(config: GettyProviderConfig): MediaProvider 
 
       const results: GettyImageResult[] = await response.json();
 
-      return results.map((image): ImageSearchResult => {
+      const mapped = results.map((image): ImageSearchResult => {
         // prefer media.gettyimages.com URLs from display_sizes (public, no auth)
         // fall back to isteam URL (requires auth, may fail for vision)
         const gettyUrl = image.display_sizes
           ?.find(d => d.uri.includes("media.gettyimages.com"))?.uri;
+
+        const width = image.max_dimensions?.width ?? 0;
+        const height = image.max_dimensions?.height ?? 0;
 
         return {
           id: image.id,
           title: `Getty Image ${image.id}`,
           previewUrl: gettyUrl ?? image.url,
           displayUrl: gettyUrl ?? image.url,
-          width: 0,
-          height: 0,
+          width,
+          height,
           provider: "getty",
         };
       });
+
+      // client-side orientation filtering to ensure Getty API results match request
+      const filtered = options.orientation
+        ? mapped.filter((img) => {
+          const actual = calculateOrientation(img.width, img.height);
+          return actual === options.orientation;
+        })
+        : mapped;
+
+      console.log("GETTY_RESPONSE", {
+        query,
+        requestedOrientation: options.orientation,
+        totalResults: mapped.length,
+        filteredResults: filtered.length,
+        dimensions: filtered.slice(0, 3).map(r => ({
+          id: r.id,
+          width: r.width,
+          height: r.height,
+          orientation: calculateOrientation(r.width, r.height),
+        })),
+      });
+
+      return filtered;
     },
   };
 }

@@ -2,15 +2,39 @@ import { sample, shuffle } from "lodash-es";
 import type { Logger } from "@muse/logger";
 import type { MediaClient, ImagePlan, ImageSelection, ImageSearchOptions, ImageSearchResult, ImageCategory } from "./types";
 import type { QueryNormalizer, MediaQueryIntent, NormalizeResult } from "./normalize";
-import type { ImageBank } from "./bank";
 import { createGettyProvider } from "./getty";
+
+// TODO: Image Bank - Semantic Search Cache (removed 2026-01-06)
+//
+// We previously had an S3-backed image bank using FAISS for semantic similarity search.
+// It allowed queries like "elegant sushi" to match cached results from "refined sushi presentation".
+//
+// Removed because:
+// - executePlan (main flow) bypassed bank, going straight to Getty API
+// - Getty API has no cost/rate limit concerns
+// - In-memory cache (15min) provides sufficient same-session deduplication
+// - Semantic matching rarely provided value for unique per-site queries
+// - Added complexity: S3, FAISS, embeddings, sync, orientation metadata
+//
+// When to add it back:
+// - Getty API becomes expensive/rate-limited
+// - We need semantic search across sessions (e.g., "sushi chef" finds "Japanese chef preparing sushi")
+// - We need persistent cross-session caching (S3-backed)
+// - Multiple sites generate within minutes with similar queries
+//
+// Implementation notes if re-adding:
+// - Bank must be checked in BOTH search() AND executePlan()
+// - Must store orientation metadata with each entry
+// - Must filter bank results by requested orientation
+// - Embedding model: OpenAI text-embedding-3-small (1536 dims)
+// - Similarity threshold: 0.88 (cosine via FAISS IndexFlatIP)
+// - See git history for: bank/store.ts, bank/types.ts
 
 export interface MediaClientConfig {
   gettyJwt: () => Promise<string>
   cacheTtlMs?: number
   logger?: Logger
   normalizer?: QueryNormalizer
-  bank?: ImageBank
 }
 
 const noopLogger: Logger = {
@@ -35,23 +59,9 @@ export function createMediaClient(config: MediaClientConfig): MediaClient {
   const cacheTtl = config.cacheTtlMs ?? DEFAULT_CACHE_TTL;
   const log = config.logger ?? noopLogger;
   const normalizer = config.normalizer;
-  const bank = config.bank;
   const provider = createGettyProvider({ getJwt: config.gettyJwt });
 
-  log.info("init", { provider: "getty", bank: !!bank });
-
-  // track pending store operations for sync
-  const pendingStores: Promise<void>[] = [];
-
-  function storeInBank(results: ImageSearchResult[], query: string): void {
-    if (!bank) return;
-    for (const result of results.slice(0, 1)) {
-      const promise = bank.store(result, query).catch((err) => {
-        log.warn("bank_store_failed", { id: result.id, error: String(err) });
-      });
-      pendingStores.push(promise);
-    }
-  }
+  log.info("init", { provider: "getty" });
 
   function buildCacheKey(
     intent: MediaQueryIntent,
@@ -104,19 +114,6 @@ export function createMediaClient(config: MediaClientConfig): MediaClient {
         });
       }
 
-      // check bank for semantic match first
-      if (bank && options.count) {
-        const bankQuery = normalizeResult?.intent.phrases.join(" ") ?? queryString;
-        const bankResult = await bank.search(bankQuery, {
-          orientation: options.orientation,
-          limit: options.count,
-        });
-        if (bankResult.results.length >= options.count) {
-          log.debug("bank_hit", { query: bankQuery, count: bankResult.results.length, topScore: bankResult.topScore });
-          return bankResult.results;
-        }
-      }
-
       const cacheKey = normalizeResult
         ? buildCacheKey(normalizeResult.intent, options.orientation)
         : simpleCacheKey(options.query, options.orientation);
@@ -135,10 +132,6 @@ export function createMediaClient(config: MediaClientConfig): MediaClient {
       log.debug("search_results", { query: queryString, count: results.length });
 
       setCache(cacheKey, results);
-      if (!cached) {
-        const normalizedQuery = normalizeResult?.intent.phrases.join(" ") ?? options.query;
-        storeInBank(results, normalizedQuery);
-      }
       return results;
     },
 
@@ -177,6 +170,14 @@ export function createMediaClient(config: MediaClientConfig): MediaClient {
 
           const perRequest = Math.ceil(count / orientations.length) + DEDUP_BUFFER;
 
+          log.info("execute_plan_item", {
+            blockId: item.blockId,
+            requestedOrientation: item.orientation,
+            orientations: Array.from(orientations),
+            perRequest,
+            query: item.searchQuery.slice(0, 50),
+          });
+
           const batches = await Promise.all(
             orientations.map(async (orientation) => {
               const cacheKey = normalizeResult
@@ -193,10 +194,6 @@ export function createMediaClient(config: MediaClientConfig): MediaClient {
               const batch = await provider.search(queryString, { orientation, count: perRequest });
               log.debug("search_results", { query: queryString, orientation, count: batch.length });
               setCache(cacheKey, batch);
-              if (!cached) {
-                const normalizedQuery = normalizeResult?.intent.phrases.join(" ") ?? item.searchQuery;
-                storeInBank(batch, normalizedQuery);
-              }
               return batch;
             }),
           );
@@ -297,15 +294,6 @@ export function createMediaClient(config: MediaClientConfig): MediaClient {
       }
 
       return shuffled;
-    },
-
-    async persist() {
-      if (!bank) return;
-      if (pendingStores.length > 0) {
-        await Promise.all(pendingStores);
-        pendingStores.length = 0;
-      }
-      await bank.sync();
     },
   };
 }

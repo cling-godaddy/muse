@@ -315,7 +315,7 @@ export function useChat(options: UseChatOptions = {}): UseChat {
           options.onPages?.(result.newPages, result.theme);
         }
 
-        // emit images with sections from current parse result (not stale ref)
+        // emit images with sections from current parse result
         if (result.newImages.length > 0) {
           const allSections = result.state.pages.flatMap(p => p.sections);
           options.onImages?.(result.newImages, allSections);

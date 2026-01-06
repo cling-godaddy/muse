@@ -169,7 +169,9 @@ function MainApp() {
     for (const [sectionId, sectionImages] of Object.entries(bySection)) {
       const imgSources = sectionImages.map(s => s.image);
       const section = sections.find(s => s.id === sectionId);
-      if (!section) continue;
+      if (!section) {
+        continue;
+      }
 
       // Get injection config from preset or fallback to section type default
       const injection = section.preset
