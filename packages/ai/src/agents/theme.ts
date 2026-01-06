@@ -50,12 +50,18 @@ export const themeAgent: SyncAgent = {
   },
 };
 
+function normalizeId(value: string): string {
+  // handle "Category:name" format → "name"
+  const parts = value.split(":");
+  return (parts.length > 1 ? parts[1] ?? value : value).toLowerCase().trim();
+}
+
 export function parseThemeSelection(json: string): ThemeSelection {
   try {
     const parsed = JSON.parse(json) as ThemeSelection;
     return {
-      palette: parsed.palette || "slate",
-      typography: parsed.typography || "inter",
+      palette: normalizeId(parsed.palette || "slate"),
+      typography: normalizeId(parsed.typography || "inter"),
     };
   }
   catch (err) {
