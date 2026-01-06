@@ -1,9 +1,9 @@
 import { Hono } from "hono";
 import { streamText } from "hono/streaming";
-import { createClient, orchestrate, orchestrateSite, refine, resolveFieldAlias, getValidFields, createImageAnalyzer, embed, type Message, type Provider, type ToolCall } from "@muse/ai";
+import { createClient, orchestrate, orchestrateSite, refine, resolveFieldAlias, getValidFields, embed, type Message, type Provider, type ToolCall } from "@muse/ai";
 import { requireAuth } from "../middleware/auth";
 import { createLogger } from "@muse/logger";
-import { createMediaClient, createQueryNormalizer, createImageBank, getIamJwt, type MediaClient, type QueryNormalizer, type ImageBank, type ImageMetadata } from "@muse/media";
+import { createMediaClient, createQueryNormalizer, createImageBank, getIamJwt, type MediaClient, type QueryNormalizer, type ImageBank } from "@muse/media";
 import type { Section } from "@muse/core";
 
 const logger = createLogger();
@@ -30,21 +30,11 @@ async function getImageBank(): Promise<ImageBank | undefined> {
   if (!openaiKey || !bucket) return void 0;
 
   if (!imageBank) {
-    const analyzer = createImageAnalyzer(openaiKey);
     imageBank = await createImageBank({
       bucket,
       region,
       logger: logger.child({ agent: "bank" }),
       embed: async (text: string) => Array.from(await embed(text)),
-      analyze: async (url: string): Promise<ImageMetadata> => {
-        const result = await analyzer(url);
-        return {
-          caption: result.caption,
-          subjects: result.subjects,
-          style: result.style.join(", "),
-          mood: result.mood.join(", "),
-        };
-      },
     });
     await imageBank.load();
     logger.info("image_bank_initialized", { bucket, region });
