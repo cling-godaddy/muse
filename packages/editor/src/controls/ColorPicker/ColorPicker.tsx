@@ -14,6 +14,8 @@ export interface ColorPickerProps {
   ariaLabel?: string
   /** Which side the popover opens on. Default: "bottom" */
   side?: "top" | "right" | "bottom" | "left"
+  /** Show only the color swatch, no hex value or chevron. Default: false */
+  compact?: boolean
 }
 
 export function ColorPicker({
@@ -22,6 +24,7 @@ export function ColorPicker({
   disabled,
   ariaLabel,
   side = "bottom",
+  compact = false,
 }: ColorPickerProps) {
   const [open, setOpen] = useState(false);
   const [hsv, setHsv] = useState<HSV>(() => hexToHsv(value));
@@ -66,15 +69,19 @@ export function ColorPicker({
       <Popover.Trigger asChild>
         <button
           type="button"
-          className={styles.trigger}
+          className={compact ? styles.triggerCompact : styles.trigger}
           disabled={disabled}
           aria-label={ariaLabel ?? `Color picker, current color: ${value}`}
           aria-expanded={open}
           aria-haspopup="dialog"
         >
-          <ColorSwatch color={value} size="sm" />
-          <span className={styles.triggerValue}>{value}</span>
-          <ChevronIcon />
+          <ColorSwatch color={value} size={compact ? "xs" : "sm"} />
+          {!compact && (
+            <>
+              <span className={styles.triggerValue}>{value}</span>
+              <ChevronIcon />
+            </>
+          )}
         </button>
       </Popover.Trigger>
 

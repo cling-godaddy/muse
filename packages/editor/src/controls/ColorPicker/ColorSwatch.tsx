@@ -4,7 +4,7 @@ interface ColorSwatchProps {
   color: string
   selected?: boolean
   onClick?: () => void
-  size?: "sm" | "md" | "lg"
+  size?: "xs" | "sm" | "md" | "lg"
   ariaLabel?: string
   title?: string
 }
