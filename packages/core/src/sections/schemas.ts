@@ -14,6 +14,7 @@ const sectionBase = z.object({
   id: z.string().uuid(),
   version: z.number().optional(),
   preset: z.string().optional(),
+  backgroundColor: z.string().optional(),
 });
 
 export const imageSourceSchema = z.object({

@@ -101,6 +101,7 @@ export interface SectionBase {
   type: string
   version?: number
   preset?: string
+  backgroundColor?: string
 }
 
 export interface ImageSource {
