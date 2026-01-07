@@ -1,4 +1,4 @@
-import type { Section } from "@muse/core";
+import type { Section, Site } from "@muse/core";
 import type { ComponentType } from "react";
 
 export interface SectionComponentProps<T extends Section = Section> {
@@ -9,6 +9,10 @@ export interface SectionComponentProps<T extends Section = Section> {
   selectItem?: (itemIndex?: number) => void
   /** Check if an item is currently selected */
   isItemSelected?: (itemIndex?: number) => boolean
+  /** Site context for AI generation */
+  site?: Site
+  /** Get auth token for API calls */
+  getToken?: () => Promise<string | null>
 }
 
 export type SectionComponent<T extends Section = Section>

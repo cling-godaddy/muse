@@ -16,6 +16,7 @@ interface SectionEditorProps {
   site?: Site
   currentPage?: Page
   onAddSection?: (section: Section, index: number, generateWithAI?: boolean) => void
+  getToken?: () => Promise<string | null>
 }
 
 export function SectionEditor({
@@ -27,6 +28,7 @@ export function SectionEditor({
   site,
   currentPage,
   onAddSection,
+  getToken,
 }: SectionEditorProps) {
   const isEditable = useIsEditable();
 
@@ -118,6 +120,8 @@ export function SectionEditor({
                 onMoveDown={showMoveControls ? () => moveSection(sectionIndex, sectionIndex + 1) : void 0}
                 canMoveUp={showMoveControls && sectionIndex > 0}
                 canMoveDown={showMoveControls && sectionIndex < lastMoveableIndex}
+                site={site}
+                getToken={getToken}
               />
               {canAddSections && !isNavbar && (
                 <SectionGap

@@ -1,7 +1,7 @@
 import { useMemo, useCallback, useState } from "react";
 import { Trash2 } from "lucide-react";
 import { motion } from "framer-motion";
-import type { Section as SectionType } from "@muse/core";
+import type { Section as SectionType, Site } from "@muse/core";
 import { getSectionComponent, type SectionComponent } from "./registry";
 import { PresetPicker } from "../controls/PresetPicker";
 import { supportsPresets } from "../controls/presets";
@@ -19,6 +19,8 @@ interface Props {
   canMoveUp?: boolean
   canMoveDown?: boolean
   isPending?: boolean
+  site?: Site
+  getToken?: () => Promise<string | null>
 }
 
 function ChevronUpIcon() {
@@ -47,7 +49,7 @@ function UnknownSection({ section }: { section: SectionType }) {
   );
 }
 
-export function Section({ section, onUpdate, onDelete, onMoveUp, onMoveDown, canMoveUp, canMoveDown, isPending }: Props) {
+export function Section({ section, onUpdate, onDelete, onMoveUp, onMoveDown, canMoveUp, canMoveDown, isPending, site, getToken }: Props) {
   const Component = useMemo<SectionComponent>(
     () => getSectionComponent(section.type) ?? UnknownSection,
     [section.type],
@@ -146,6 +148,8 @@ export function Section({ section, onUpdate, onDelete, onMoveUp, onMoveDown, can
         isPending={isPending}
         selectItem={selectItem}
         isItemSelected={isItemSelected}
+        site={site}
+        getToken={getToken}
       />
     </motion.div>
   );
