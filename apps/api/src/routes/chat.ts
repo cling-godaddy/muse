@@ -5,7 +5,7 @@ import { requireAuth } from "../middleware/auth";
 import { createLogger } from "@muse/logger";
 import { createMediaClient, createQueryNormalizer, getIamJwt, type MediaClient, type QueryNormalizer } from "@muse/media";
 import type { Section, SectionType, FeatureItem, Quote, TeamMember, StatItem, FaqItem } from "@muse/core";
-import { sectionNeedsImages, getPreset } from "@muse/core";
+import { sectionNeedsImages, getPreset, getPresetsForType } from "@muse/core";
 
 const logger = createLogger();
 let client: Provider | null = null;
@@ -78,8 +78,14 @@ chatRoute.post("/", async (c) => {
 
 interface PendingAction {
   type: string
+  step?: string
   payload: Record<string, unknown>
   message: string
+  options?: Array<{
+    id: string
+    label: string
+    description?: string
+  }>
 }
 
 chatRoute.post("/refine", async (c) => {
@@ -205,6 +211,96 @@ chatRoute.post("/refine", async (c) => {
         type: "delete_section",
         payload: { sectionId },
         message: `Delete the ${section.type} section?`,
+      });
+      return {
+        id: call.id,
+        result: { needsConfirmation: true },
+      };
+    }
+
+    if (call.name === "add_section") {
+      const { sectionType, preset, index } = call.input as {
+        sectionType?: string
+        preset?: string
+        index?: number
+      };
+
+      // Step 1: Need section type
+      if (!sectionType) {
+        const sectionTypes = [
+          { id: "hero", label: "Hero", description: "Large header with headline and call-to-action" },
+          { id: "features", label: "Features", description: "Showcase product features in a grid or list" },
+          { id: "cta", label: "Call to Action", description: "Drive users to take action" },
+          { id: "testimonials", label: "Testimonials", description: "Customer reviews and quotes" },
+          { id: "pricing", label: "Pricing", description: "Pricing tables and plans" },
+          { id: "faq", label: "FAQ", description: "Frequently asked questions" },
+          { id: "gallery", label: "Gallery", description: "Image gallery or portfolio" },
+          { id: "stats", label: "Stats", description: "Key metrics and statistics" },
+          { id: "contact", label: "Contact", description: "Contact form and information" },
+          { id: "about", label: "About", description: "About us or company story" },
+          { id: "logos", label: "Logos", description: "Client or partner logos" },
+          { id: "subscribe", label: "Subscribe", description: "Newsletter signup form" },
+        ];
+
+        logger.info("add_section_select_type", { availableTypes: sectionTypes.length });
+        pendingActions.push({
+          type: "add_section",
+          step: "select_type",
+          payload: { index },
+          message: "What type of section would you like to add?",
+          options: sectionTypes,
+        });
+        return {
+          id: call.id,
+          result: { needsConfirmation: true },
+        };
+      }
+
+      // Step 2: Need preset
+      if (!preset) {
+        const presets = getPresetsForType(sectionType as SectionType);
+        if (presets.length === 0) {
+          logger.warn("invalid_section_type", { sectionType });
+          return {
+            id: call.id,
+            result: { error: `Invalid section type: ${sectionType}` },
+          };
+        }
+
+        logger.info("add_section_select_preset", { sectionType, availablePresets: presets.length });
+        pendingActions.push({
+          type: "add_section",
+          step: "select_preset",
+          payload: { sectionType, index },
+          message: `Choose a ${sectionType} layout:`,
+          options: presets.map(p => ({
+            id: p.id,
+            label: p.name,
+            description: p.description,
+          })),
+        });
+        return {
+          id: call.id,
+          result: { needsConfirmation: true },
+        };
+      }
+
+      // Step 3: All params collected, validate preset
+      const presetDef = getPreset(preset);
+      if (!presetDef) {
+        logger.warn("invalid_preset", { preset, sectionType });
+        return {
+          id: call.id,
+          result: { error: `Invalid preset: ${preset}` },
+        };
+      }
+
+      // Final confirmation
+      logger.info("add_section_pending", { sectionType, preset, index });
+      pendingActions.push({
+        type: "add_section",
+        payload: { sectionType, preset, index },
+        message: `Add a ${sectionType} section (${presetDef.name})?`,
       });
       return {
         id: call.id,
