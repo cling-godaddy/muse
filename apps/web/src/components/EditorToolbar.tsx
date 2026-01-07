@@ -218,19 +218,22 @@ export function EditorToolbar({
         {onSave && isGenerationComplete && (
           <div className="flex items-center gap-3 ml-2">
             {/* Status indicator */}
-            <div className="flex items-center gap-1.5 text-xs transition-opacity">
-              {(isSyncing || isSaving) && (
-                <>
-                  <Loader2 size={14} className="animate-spin text-blue-500" />
-                  <span className="text-text-muted">Saving...</span>
-                </>
-              )}
-              {!(isSyncing || isSaving) && !hasUnsavedChanges && (
-                <>
-                  <Check size={14} className="text-green-500" />
-                  <span className="text-text-muted">Saved</span>
-                </>
-              )}
+            <div className="flex items-center gap-1.5 text-xs min-w-[70px]">
+              {(isSyncing || isSaving)
+                ? (
+                  <>
+                    <Loader2 size={14} className="animate-spin text-blue-500" />
+                    <span className="text-text-muted">Saving...</span>
+                  </>
+                )
+                : !hasUnsavedChanges
+                  ? (
+                    <>
+                      <Check size={14} className="text-green-500" />
+                      <span className="text-text-muted">Saved</span>
+                    </>
+                  )
+                  : null}
             </div>
 
             {/* Save button */}
