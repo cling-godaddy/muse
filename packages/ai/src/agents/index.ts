@@ -3,6 +3,7 @@ export { structureAgent, parseStructure } from "./structure";
 export { themeAgent } from "./theme";
 export { copyAgent } from "./copy";
 export { singleSectionAgent } from "./single-section";
+export { generateItemAgent } from "./item";
 export { imageAgent, parseImagePlan } from "./image";
 export { sitemapAgent, parseSitemap } from "./sitemap";
 export {

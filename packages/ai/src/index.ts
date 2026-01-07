@@ -19,6 +19,7 @@ export {
   structureAgent,
   copyAgent,
   singleSectionAgent,
+  generateItemAgent,
   imageAgent,
   sitemapAgent,
   parseBrief,
