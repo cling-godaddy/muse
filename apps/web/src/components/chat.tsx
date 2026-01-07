@@ -41,6 +41,8 @@ interface ChatProps {
   onMove?: (moves: MoveUpdate[]) => void
   /** Called when user confirms delete action */
   onDelete?: (sectionId: string) => void
+  /** Called when user confirms adding a section */
+  onAddSection?: (sectionType: string, preset: string, index?: number) => void
   /** Called when generation (not refine) completes */
   onGenerationComplete?: () => void
   /** Called when messages change (for persistence) */
@@ -57,9 +59,9 @@ function formatTokens(n: number): string {
   return `${(n / 1_000_000).toFixed(1)}M`;
 }
 
-export function Chat({ siteId, siteContext, sections, siteCosts, autoSendPrompt, intakeContext, onSectionParsed, onThemeSelected, onImages, onPages, onRefine, onSectionsUpdated, onMove, onDelete, onGenerationComplete, onMessagesChange, onUsage, onTrackUsageReady }: ChatProps) {
-  const options = useMemo(() => ({ siteId, siteContext, sections, siteCosts, onSectionParsed, onThemeSelected, onImages, onPages, onRefine, onSectionsUpdated, onMove, onDelete, onGenerationComplete, onMessagesChange, onUsage }), [siteId, siteContext, sections, siteCosts, onSectionParsed, onThemeSelected, onImages, onPages, onRefine, onSectionsUpdated, onMove, onDelete, onGenerationComplete, onMessagesChange, onUsage]);
-  const { messages, input, setInput, isLoading, error, send, sessionUsage, lastUsage, agents, agentsMessageIndex, pendingAction, confirmPendingAction, cancelPendingAction, trackUsage } = useChat(options);
+export function Chat({ siteId, siteContext, sections, siteCosts, autoSendPrompt, intakeContext, onSectionParsed, onThemeSelected, onImages, onPages, onRefine, onSectionsUpdated, onMove, onDelete, onAddSection, onGenerationComplete, onMessagesChange, onUsage, onTrackUsageReady }: ChatProps) {
+  const options = useMemo(() => ({ siteId, siteContext, sections, siteCosts, onSectionParsed, onThemeSelected, onImages, onPages, onRefine, onSectionsUpdated, onMove, onDelete, onAddSection, onGenerationComplete, onMessagesChange, onUsage }), [siteId, siteContext, sections, siteCosts, onSectionParsed, onThemeSelected, onImages, onPages, onRefine, onSectionsUpdated, onMove, onDelete, onAddSection, onGenerationComplete, onMessagesChange, onUsage]);
+  const { messages, input, setInput, isLoading, error, send, sessionUsage, lastUsage, agents, agentsMessageIndex, pendingAction, confirmPendingAction, cancelPendingAction, selectOption, trackUsage } = useChat(options);
   const isRefineMode = sections && sections.length > 0;
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const autoSendTriggeredRef = useRef(false);
@@ -148,20 +150,45 @@ export function Chat({ siteId, siteContext, sections, siteCosts, autoSendPrompt,
       {pendingAction && (
         <div className="mx-3 mb-3 p-3 rounded-lg border border-amber-300 bg-amber-50">
           <p className="text-sm mb-3 text-amber-900">{pendingAction.message}</p>
-          <div className="flex gap-2 justify-end">
-            <button
-              className="px-3 py-1.5 text-sm border border-border rounded hover:bg-bg-subtle cursor-pointer"
-              onClick={cancelPendingAction}
-            >
-              Cancel
-            </button>
-            <button
-              className="px-3 py-1.5 text-sm bg-red-500 text-white rounded hover:bg-red-600 cursor-pointer"
-              onClick={confirmPendingAction}
-            >
-              Confirm Delete
-            </button>
-          </div>
+          {pendingAction.options && pendingAction.options.length > 0
+            ? (
+              <div className="space-y-2">
+                {pendingAction.options.map(option => (
+                  <button
+                    key={option.id}
+                    className="w-full p-2 text-left border border-border rounded hover:bg-bg-subtle cursor-pointer"
+                    onClick={() => selectOption(option.id)}
+                  >
+                    <div className="font-medium text-sm text-text">{option.label}</div>
+                    {option.description && (
+                      <div className="text-xs text-text-muted mt-0.5">{option.description}</div>
+                    )}
+                  </button>
+                ))}
+                <button
+                  className="w-full px-3 py-1.5 text-sm border border-border rounded hover:bg-bg-subtle cursor-pointer mt-2"
+                  onClick={cancelPendingAction}
+                >
+                  Cancel
+                </button>
+              </div>
+            )
+            : (
+              <div className="flex gap-2 justify-end">
+                <button
+                  className="px-3 py-1.5 text-sm border border-border rounded hover:bg-bg-subtle cursor-pointer"
+                  onClick={cancelPendingAction}
+                >
+                  Cancel
+                </button>
+                <button
+                  className="px-3 py-1.5 text-sm bg-red-500 text-white rounded hover:bg-red-600 cursor-pointer"
+                  onClick={confirmPendingAction}
+                >
+                  {pendingAction.type === "delete_section" ? "Confirm Delete" : "Confirm"}
+                </button>
+              </div>
+            )}
         </div>
       )}
       <div className="p-3 border-t border-border flex gap-2">

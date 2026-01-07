@@ -28,8 +28,14 @@ export interface MoveUpdate {
 
 export interface PendingAction {
   type: string
+  step?: string
   payload: Record<string, unknown>
   message: string
+  options?: Array<{
+    id: string
+    label: string
+    description?: string
+  }>
 }
 
 export interface SiteContext {
@@ -61,6 +67,8 @@ export interface UseChatOptions {
   onSectionsUpdated?: (sections: Section[]) => void
   /** Called when user confirms a pending delete action */
   onDelete?: (sectionId: string) => void
+  /** Called when user confirms adding a section */
+  onAddSection?: (sectionType: string, preset: string, index?: number) => void
   /** Called after generation completes */
   onGenerationComplete?: () => void
   /** Called when messages change (for persistence) */
@@ -85,6 +93,8 @@ export interface UseChat {
   confirmPendingAction: () => void
   /** Cancel the pending action */
   cancelPendingAction: () => void
+  /** Select an option from a multi-step pending action */
+  selectOption: (optionId: string) => Promise<void>
   /** Track usage from section/item generation */
   trackUsage: (usage: Usage) => void
 }
@@ -373,15 +383,52 @@ export function useChat(options: UseChatOptions = {}): UseChat {
 
   const confirmPendingAction = useCallback(() => {
     if (!pendingAction) return;
+
     if (pendingAction.type === "delete_section") {
       options.onDelete?.(pendingAction.payload.sectionId as string);
     }
+
+    if (pendingAction.type === "add_section" && !pendingAction.step) {
+      // Final confirmation step - has all params
+      const { sectionType, preset, index } = pendingAction.payload;
+      options.onAddSection?.(
+        sectionType as string,
+        preset as string,
+        index as number | undefined,
+      );
+    }
+
     setPendingAction(null);
   }, [pendingAction, options]);
 
   const cancelPendingAction = useCallback(() => {
     setPendingAction(null);
   }, []);
+
+  const selectOption = useCallback(async (optionId: string) => {
+    if (!pendingAction || !pendingAction.options) return;
+
+    if (pendingAction.step === "select_type") {
+      // User selected section type, trigger next step
+      const message = `Add a ${optionId} section`;
+      setPendingAction(null);
+      setInput(message);
+      await send(message);
+    }
+    else if (pendingAction.step === "select_preset") {
+      // User selected preset, trigger final confirmation
+      const { sectionType } = pendingAction.payload;
+      const message = `Add ${sectionType} with ${optionId} preset`;
+      setPendingAction(null);
+      setInput(message);
+      await send(message);
+    }
+    else {
+      // Simple option selection (not multi-step)
+      // Just confirm with the selected option
+      confirmPendingAction();
+    }
+  }, [pendingAction, send, confirmPendingAction]);
 
   const trackUsage = useCallback((usage: Usage) => {
     setLastUsage(usage);
@@ -391,5 +438,5 @@ export function useChat(options: UseChatOptions = {}): UseChat {
     options.onUsage?.(usage);
   }, [options]);
 
-  return { messages, input, setInput, isLoading, error, send, sessionUsage, lastUsage, agents, agentsMessageIndex, pendingAction, confirmPendingAction, cancelPendingAction, trackUsage };
+  return { messages, input, setInput, isLoading, error, send, sessionUsage, lastUsage, agents, agentsMessageIndex, pendingAction, confirmPendingAction, cancelPendingAction, selectOption, trackUsage };
 }
