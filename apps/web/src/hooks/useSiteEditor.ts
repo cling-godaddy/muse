@@ -255,6 +255,11 @@ export function useSiteEditor(siteId: string | undefined) {
     }
   }, [updateSection]);
 
+  const handleSectionsUpdated = useCallback((updatedSections: Section[]) => {
+    // Replace sections for current page with updated sections from backend
+    setSections(updatedSections);
+  }, [setSections]);
+
   const handleMove = useCallback((moves: MoveUpdate[]) => {
     const currentSections = [...sections];
     for (const { sectionId, direction } of moves) {
@@ -316,6 +321,7 @@ export function useSiteEditor(siteId: string | undefined) {
     handleAddSection,
     handlePages,
     handleRefine,
+    handleSectionsUpdated,
     handleMove,
     handleDelete,
     handleGenerationComplete,

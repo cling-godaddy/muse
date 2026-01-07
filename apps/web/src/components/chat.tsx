@@ -34,6 +34,8 @@ interface ChatProps {
   onPages?: (pages: PageInfo[]) => void
   /** Called when AI refines sections */
   onRefine?: (updates: RefineUpdate[]) => void
+  /** Called when backend returns updated sections from refine */
+  onSectionsUpdated?: (sections: Section[]) => void
   /** Called when AI moves sections */
   onMove?: (moves: MoveUpdate[]) => void
   /** Called when user confirms delete action */
@@ -54,8 +56,8 @@ function formatTokens(n: number): string {
   return `${(n / 1_000_000).toFixed(1)}M`;
 }
 
-export function Chat({ siteId, siteContext, sections, siteCosts, autoSendPrompt, intakeContext, onSectionParsed, onThemeSelected, onImages, onPages, onRefine, onMove, onDelete, onGenerationComplete, onMessagesChange, onUsage, onTrackUsageReady }: ChatProps) {
-  const options = useMemo(() => ({ siteId, siteContext, sections, siteCosts, onSectionParsed, onThemeSelected, onImages, onPages, onRefine, onMove, onDelete, onGenerationComplete, onMessagesChange, onUsage }), [siteId, siteContext, sections, siteCosts, onSectionParsed, onThemeSelected, onImages, onPages, onRefine, onMove, onDelete, onGenerationComplete, onMessagesChange, onUsage]);
+export function Chat({ siteId, siteContext, sections, siteCosts, autoSendPrompt, intakeContext, onSectionParsed, onThemeSelected, onImages, onPages, onRefine, onSectionsUpdated, onMove, onDelete, onGenerationComplete, onMessagesChange, onUsage, onTrackUsageReady }: ChatProps) {
+  const options = useMemo(() => ({ siteId, siteContext, sections, siteCosts, onSectionParsed, onThemeSelected, onImages, onPages, onRefine, onSectionsUpdated, onMove, onDelete, onGenerationComplete, onMessagesChange, onUsage }), [siteId, siteContext, sections, siteCosts, onSectionParsed, onThemeSelected, onImages, onPages, onRefine, onSectionsUpdated, onMove, onDelete, onGenerationComplete, onMessagesChange, onUsage]);
   const { messages, input, setInput, isLoading, error, send, sessionUsage, lastUsage, agents, agentsMessageIndex, pendingAction, confirmPendingAction, cancelPendingAction, trackUsage } = useChat(options);
   const isRefineMode = sections && sections.length > 0;
   const messagesEndRef = useRef<HTMLDivElement>(null);
