@@ -84,6 +84,7 @@ export function useSaveSite() {
 
 export function usePatchSection() {
   const { getToken } = useAuth();
+  const queryClient = useQueryClient();
 
   return useMutation({
     mutationFn: async ({ siteId, sectionId, updates }: { siteId: string, sectionId: string, updates: Partial<Section> }) => {
@@ -102,7 +103,31 @@ export function usePatchSection() {
         throw new Error(data.error ?? "Failed to update section");
       }
 
-      return res.json() as Promise<{ section: Section, pageId: string }>;
+      const result = await res.json() as { section: Section, pageId: string };
+      return { ...result, siteId };
+    },
+    onSuccess: ({ section, pageId, siteId }) => {
+      // Update the query cache so serverSite stays fresh
+      queryClient.setQueryData<Site>(["site", siteId], (oldSite) => {
+        if (!oldSite) return oldSite;
+
+        const page = oldSite.pages[pageId];
+        if (!page) return oldSite;
+
+        return {
+          ...oldSite,
+          pages: {
+            ...oldSite.pages,
+            [pageId]: {
+              ...page,
+              sections: page.sections.map(s =>
+                s.id === section.id ? section : s,
+              ),
+            },
+          },
+          updatedAt: new Date().toISOString(),
+        };
+      });
     },
   });
 }

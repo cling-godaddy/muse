@@ -57,12 +57,12 @@ export function useSiteEditor(siteId: string | undefined) {
   const [pendingImageSections, setPendingImageSections] = useState<Set<string>>(new Set());
   const trackUsageRef = useRef<((usage: Usage) => void) | null>(null);
 
-  // Hydrate draft when server site loads (only if not dirty)
+  // Hydrate draft on initial load only (not on every serverSite change)
   useEffect(() => {
-    if (serverSite && !dirty) {
+    if (serverSite && !draft) {
       hydrateDraft(serverSite);
     }
-  }, [serverSite, dirty, hydrateDraft]);
+  }, [serverSite, draft, hydrateDraft]);
 
   // Derive computed values from draft
   const site = draft ?? serverSite ?? createSite("Untitled Site");

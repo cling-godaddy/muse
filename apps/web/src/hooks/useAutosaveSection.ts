@@ -12,6 +12,13 @@ export function useAutosaveSection(siteId: string) {
   const timerRef = useRef<NodeJS.Timeout | undefined>(undefined);
   const prevDraftRef = useRef(draft);
 
+  // Initialize prevDraftRef when draft first loads
+  useEffect(() => {
+    if (draft && !prevDraftRef.current) {
+      prevDraftRef.current = draft;
+    }
+  }, [draft]);
+
   useEffect(() => {
     if (!dirty || !draft) return;
 
@@ -21,7 +28,10 @@ export function useAutosaveSection(siteId: string) {
     // Debounce: wait 500ms after last change
     timerRef.current = setTimeout(async () => {
       const prev = prevDraftRef.current;
-      if (!prev) return;
+      if (!prev) {
+        prevDraftRef.current = draft;
+        return;
+      }
 
       // Find changed sections by comparing prev vs current
       const changedSections: Array<{ sectionId: string, pageId: string, updates: Section }> = [];
@@ -45,21 +55,25 @@ export function useAutosaveSection(siteId: string) {
         }
       }
 
-      // Send PATCH for each changed section
-      for (const { sectionId, updates } of changedSections) {
-        try {
-          await patchSection.mutateAsync({ siteId, sectionId, updates });
-        }
-        catch (err) {
-          console.error(`Failed to patch section ${sectionId}:`, err);
-          // TODO: Show error to user, add retry logic
-        }
-      }
-
-      // Mark as synced after all PATCHes succeed
-      if (changedSections.length > 0 && !patchSection.isError) {
-        markSynced();
+      if (changedSections.length > 0) {
+        // Update baseline IMMEDIATELY before async PATCH to prevent race condition
         prevDraftRef.current = draft;
+
+        // Send PATCH for each changed section
+        for (const { sectionId, updates } of changedSections) {
+          try {
+            await patchSection.mutateAsync({ siteId, sectionId, updates });
+          }
+          catch (err) {
+            console.error(`Failed to patch section ${sectionId}:`, err);
+            // TODO: Show error to user, add retry logic
+          }
+        }
+
+        // Mark as synced after all PATCHes succeed
+        if (!patchSection.isError) {
+          markSynced();
+        }
       }
     }, 500);
 
