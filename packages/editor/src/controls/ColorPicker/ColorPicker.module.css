@@ -1,0 +1,243 @@
+/* Trigger */
+.trigger {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 8px;
+  background: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 13px;
+  font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, monospace;
+  color: #374151;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+
+.trigger:hover,
+.trigger[data-state="open"] {
+  border-color: #6366f1;
+}
+
+.trigger:focus-visible {
+  outline: none;
+  border-color: #6366f1;
+  box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.15);
+}
+
+.trigger:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.triggerValue {
+  min-width: 60px;
+}
+
+.chevron {
+  opacity: 0.5;
+  transition: transform 0.15s;
+}
+
+.trigger[data-state="open"] .chevron {
+  transform: rotate(180deg);
+}
+
+/* Popover content */
+.content {
+  background: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  padding: 12px;
+  min-width: 240px;
+  z-index: 50;
+  animation: slideDown 0.15s ease-out;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.arrow {
+  fill: white;
+}
+
+/* Color area (saturation/brightness) */
+.colorArea {
+  position: relative;
+  width: 100%;
+  height: 150px;
+  border-radius: 4px;
+  overflow: hidden;
+  cursor: crosshair;
+  margin-bottom: 12px;
+}
+
+.colorArea:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.3);
+}
+
+.colorAreaCanvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.colorAreaIndicator {
+  position: absolute;
+  width: 14px;
+  height: 14px;
+  border: 2px solid white;
+  border-radius: 50%;
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.3), 0 2px 4px rgba(0, 0, 0, 0.2);
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+}
+
+/* Hue slider */
+.hueSlider {
+  height: 14px;
+  border-radius: 7px;
+  overflow: hidden;
+  margin-bottom: 12px;
+}
+
+.hueSliderInput {
+  width: 100%;
+  height: 100%;
+  -webkit-appearance: none;
+  appearance: none;
+  cursor: pointer;
+  border-radius: 7px;
+  background: linear-gradient(
+    to right,
+    #ff0000 0%,
+    #ffff00 17%,
+    #00ff00 33%,
+    #00ffff 50%,
+    #0000ff 67%,
+    #ff00ff 83%,
+    #ff0000 100%
+  );
+}
+
+.hueSliderInput::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: white;
+  border: 2px solid white;
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.2), 0 2px 4px rgba(0, 0, 0, 0.15);
+  cursor: grab;
+}
+
+.hueSliderInput::-webkit-slider-thumb:active {
+  cursor: grabbing;
+}
+
+.hueSliderInput::-moz-range-thumb {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: white;
+  border: 2px solid white;
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.2), 0 2px 4px rgba(0, 0, 0, 0.15);
+  cursor: grab;
+}
+
+.hueSliderInput:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.3);
+}
+
+/* Input row */
+.inputRow {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.hexInput {
+  flex: 1;
+  padding: 6px 8px;
+  font-size: 13px;
+  font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, monospace;
+  border: 1px solid #e5e7eb;
+  border-radius: 6px;
+  color: #374151;
+}
+
+.hexInput:focus {
+  outline: none;
+  border-color: #6366f1;
+  box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.15);
+}
+
+.preview {
+  flex-shrink: 0;
+}
+
+/* Swatch */
+.swatch {
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: transform 0.1s, box-shadow 0.1s;
+  /* checkerboard for transparency */
+  background-image:
+    linear-gradient(45deg, #ccc 25%, transparent 25%),
+    linear-gradient(-45deg, #ccc 25%, transparent 25%),
+    linear-gradient(45deg, transparent 75%, #ccc 75%),
+    linear-gradient(-45deg, transparent 75%, #ccc 75%);
+  background-size: 8px 8px;
+  background-position: 0 0, 0 4px, 4px -4px, -4px 0;
+  position: relative;
+}
+
+/* color overlay on top of checkerboard */
+.swatch::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background-color: inherit;
+}
+
+.swatch_sm {
+  width: 20px;
+  height: 20px;
+}
+
+.swatch_md {
+  width: 28px;
+  height: 28px;
+}
+
+.swatch_lg {
+  width: 36px;
+  height: 36px;
+}
+
+button.swatch:hover {
+  transform: scale(1.1);
+  z-index: 1;
+}
+
+button.swatch:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 2px white, 0 0 0 4px #6366f1;
+}
+
+.swatchSelected {
+  box-shadow: 0 0 0 2px white, 0 0 0 4px #6366f1;
+}
