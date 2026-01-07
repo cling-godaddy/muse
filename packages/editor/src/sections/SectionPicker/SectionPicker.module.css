@@ -6,7 +6,7 @@
   border: 1px solid var(--muse-border);
   border-radius: 8px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-  padding: 12px 0;
+  padding: 0 0 12px 0;
   z-index: 1000;
 }
 
@@ -60,4 +60,100 @@
   font-size: 13px;
   color: var(--muse-text-muted);
   line-height: 1.4;
+}
+
+.header {
+  position: sticky;
+  top: 0;
+  background: white;
+  z-index: 1;
+  border-bottom: 1px solid var(--muse-border);
+  padding: 12px;
+  margin-bottom: 8px;
+}
+
+.aiToggle {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  cursor: pointer;
+  user-select: none;
+}
+
+.aiToggleLabel {
+  font-size: 13px;
+  color: var(--muse-text);
+  font-weight: 500;
+}
+
+/* hidden checkbox for semantic HTML */
+.aiToggle input[type="checkbox"] {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* toggle switch track */
+.toggleTrack {
+  position: relative;
+  width: 36px;
+  height: 20px;
+  background: #e5e7eb;
+  border-radius: 10px;
+  transition: background-color 0.2s ease-out;
+  flex-shrink: 0;
+}
+
+/* track when checked */
+.aiToggle input[type="checkbox"]:checked + .toggleTrack {
+  background: var(--muse-theme-primary, #6366f1);
+}
+
+/* sliding circle */
+.toggleCircle {
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 16px;
+  height: 16px;
+  background: white;
+  border-radius: 50%;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+  transition: transform 0.2s ease-out;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* circle when checked - slides right */
+.aiToggle input[type="checkbox"]:checked + .toggleTrack .toggleCircle {
+  transform: translateX(16px);
+}
+
+/* sparkle icon inside circle */
+.toggleIcon {
+  opacity: 0;
+  transition: opacity 0.15s ease-out;
+  color: var(--muse-theme-primary, #6366f1);
+}
+
+/* sparkle visible when checked */
+.aiToggle input[type="checkbox"]:checked + .toggleTrack .toggleIcon {
+  opacity: 1;
+}
+
+/* hover state - slightly brighten track */
+.aiToggle:hover .toggleTrack {
+  background: #d1d5db;
+}
+
+.aiToggle:hover input[type="checkbox"]:checked + .toggleTrack {
+  background: #5558e3;
+}
+
+/* focus state for accessibility */
+.aiToggle input[type="checkbox"]:focus + .toggleTrack {
+  outline: 2px solid var(--muse-theme-primary, #6366f1);
+  outline-offset: 2px;
 }

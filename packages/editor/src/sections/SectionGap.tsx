@@ -8,14 +8,14 @@ interface SectionGapProps {
   index: number
   site: Site
   currentPage: Page
-  onAdd: (index: number, presetId: string) => void
+  onAdd: (index: number, presetId: string, generateWithAI: boolean) => void
 }
 
 export function SectionGap({ index, site, currentPage, onAdd }: SectionGapProps) {
   const [open, setOpen] = useState(false);
 
-  const handlePresetSelect = (presetId: string) => {
-    onAdd(index, presetId);
+  const handlePresetSelect = (presetId: string, generateWithAI: boolean) => {
+    onAdd(index, presetId, generateWithAI);
   };
 
   return (

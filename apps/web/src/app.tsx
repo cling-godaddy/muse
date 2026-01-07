@@ -197,8 +197,15 @@ function MainApp() {
     }
   }, [updateSectionById]);
 
-  const handleAddSection = useCallback(async (section: Section, index: number) => {
+  const handleAddSection = useCallback(async (section: Section, index: number, generateWithAI = false) => {
     addSection(section, index);
+
+    // early return if AI disabled
+    if (!generateWithAI) {
+      return;
+    }
+
+    // mark pending for image sections (only when AI enabled)
     if (sectionNeedsImages(section.type as SectionType)) {
       setPendingImageSections(prev => new Set(prev).add(section.id));
     }

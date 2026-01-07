@@ -15,7 +15,7 @@ interface SectionEditorProps {
   onNavbarChange?: (navbar: NavbarSection) => void
   site?: Site
   currentPage?: Page
-  onAddSection?: (section: Section, index: number) => void
+  onAddSection?: (section: Section, index: number, generateWithAI?: boolean) => void
 }
 
 export function SectionEditor({
@@ -62,14 +62,14 @@ export function SectionEditor({
     onChange(next);
   }, [sections, onChange]);
 
-  const handleAddSection = useCallback((index: number, presetId: string) => {
+  const handleAddSection = useCallback((index: number, presetId: string, generateWithAI: boolean) => {
     const preset = getPreset(presetId);
     if (!preset) return;
 
     const section = createSectionFromPreset(preset);
 
     if (onAddSection) {
-      onAddSection(section, index);
+      onAddSection(section, index, generateWithAI);
     }
     else {
       // fallback: insert directly into sections
