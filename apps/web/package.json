@@ -8,7 +8,8 @@
     "build": "tsc -b && vite build",
     "preview": "vite preview",
     "lint": "eslint src",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run"
   },
   "dependencies": {
     "@clerk/clerk-react": "^5.59.2",
@@ -30,12 +31,16 @@
   "devDependencies": {
     "@tailwindcss/vite": "^4.1.18",
     "@tanstack/react-query-devtools": "^5.91.2",
+    "@testing-library/jest-dom": "^6.9.1",
+    "@testing-library/react": "^16.3.1",
     "@types/chroma-js": "^3.1.2",
     "@types/lodash-es": "^4.17.12",
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "@vitejs/plugin-react": "^4",
+    "jsdom": "^27.4.0",
     "tailwindcss": "^4.1.18",
-    "vite": "^6"
+    "vite": "^6",
+    "vitest": "^4.0.16"
   }
 }

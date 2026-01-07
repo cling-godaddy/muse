@@ -324,17 +324,18 @@ function MainApp() {
     commitTransaction();
   }, [clearSite, addNewPage, updatePageSections, setCurrentPage, beginTransaction, commitTransaction, setNavbar, site.name, setTheme]);
 
-  const handleSectionsUpdated = useCallback((updatedSections: Section[]) => {
-    if (!currentPageId) return;
+  // TEMP: Commented out for Phase 2 - will be replaced in Phase 3 with store-based approach
+  // const handleSectionsUpdated = useCallback((updatedSections: Section[]) => {
+  //   if (!currentPageId) return;
 
-    // Replace updated sections in the current page
-    const newSections = sections.map((section) => {
-      const updated = updatedSections.find(u => u.id === section.id);
-      return updated ?? section;
-    });
+  //   // Replace updated sections in the current page
+  //   const newSections = sections.map((section) => {
+  //     const updated = updatedSections.find(u => u.id === section.id);
+  //     return updated ?? section;
+  //   });
 
-    setSections(newSections);
-  }, [currentPageId, sections, setSections]);
+  //   setSections(newSections);
+  // }, [currentPageId, sections, setSections]);
 
   const handleRefine = useCallback((updates: RefineUpdate[]) => {
     beginTransaction();
@@ -442,7 +443,7 @@ function MainApp() {
         )}
         <main className="flex-1 flex gap-6 p-6 overflow-hidden">
           <div className={`w-[400px] shrink-0 ${isPreview ? "hidden" : ""}`}>
-            <Chat siteId={site.id} siteContext={siteContext} sections={sections} siteCosts={site.costs} autoSendPrompt={autoSendPrompt} intakeContext={intakeContext} onSectionParsed={handleSectionParsed} onThemeSelected={handleThemeSelected} onImages={handleImages} onPages={handlePages} onSectionsUpdated={handleSectionsUpdated} onRefine={handleRefine} onMove={handleMove} onDelete={handleDelete} onGenerationComplete={handleGenerationComplete} onMessagesChange={setMessages} onUsage={handleUsage} onTrackUsageReady={handleTrackUsageReady} />
+            <Chat siteId={site.id} siteContext={siteContext} sections={sections} siteCosts={site.costs} autoSendPrompt={autoSendPrompt} intakeContext={intakeContext} onSectionParsed={handleSectionParsed} onThemeSelected={handleThemeSelected} onImages={handleImages} onPages={handlePages} onRefine={handleRefine} onMove={handleMove} onDelete={handleDelete} onGenerationComplete={handleGenerationComplete} onMessagesChange={setMessages} onUsage={handleUsage} onTrackUsageReady={handleTrackUsageReady} />
           </div>
           <div className="flex-1 min-w-0 overflow-hidden">
             {isPreview
