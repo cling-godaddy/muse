@@ -30,6 +30,9 @@ export function useSiteEditor(siteId: string | undefined) {
   // Autosave section edits
   const { isSyncing: isSyncingSections } = useAutosaveSection(siteId ?? "");
 
+  // Aggregate all syncing states
+  const isSyncing = isSyncingSections || patchPageSections.isPending || deleteSectionMutation.isPending;
+
   // Client state from store
   const draft = useSiteStore(state => state.draft);
   const currentPageId = useSiteStore(state => state.currentPageId);
@@ -375,7 +378,7 @@ export function useSiteEditor(siteId: string | undefined) {
     isGenerationComplete,
     hasUnsavedChanges,
     isSaving,
-    isSyncing: isSyncingSections,
+    isSyncing,
     isLoading,
     messages,
     pendingImageSections,
