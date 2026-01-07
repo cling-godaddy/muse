@@ -253,13 +253,11 @@ function MainApp() {
             canRedo={canRedo}
             editorMode={editorMode}
             onEditorModeChange={handleEditorModeChange}
-            isGenerationComplete={isGenerationComplete}
             previewDevice={previewDevice}
             onPreviewDeviceChange={setPreviewDevice}
             onSave={handleSave}
             isSaving={isSaving}
             isSyncing={isSyncing}
-            hasUnsavedChanges={hasUnsavedChanges}
           />
         )}
         <main className="flex-1 flex gap-6 p-6 overflow-hidden">

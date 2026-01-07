@@ -40,13 +40,11 @@ interface EditorToolbarProps {
   canRedo?: boolean
   editorMode?: EditorMode
   onEditorModeChange?: (mode: EditorMode) => void
-  isGenerationComplete?: boolean
   previewDevice?: PreviewDevice
   onPreviewDeviceChange?: (device: PreviewDevice) => void
   onSave?: () => void
   isSaving?: boolean
   isSyncing?: boolean
-  hasUnsavedChanges?: boolean
 }
 
 export function EditorToolbar({
@@ -61,15 +59,17 @@ export function EditorToolbar({
   canRedo,
   editorMode = "edit",
   onEditorModeChange,
-  isGenerationComplete = true,
   previewDevice = "desktop",
   onPreviewDeviceChange,
   onSave,
   isSaving,
   isSyncing,
-  hasUnsavedChanges,
 }: EditorToolbarProps) {
   const isLoadingImages = useSiteStore(state => state.pendingImageSections.size > 0);
+  const isGenerationComplete = useSiteStore(state =>
+    state.draft?.pages ? Object.values(state.draft.pages).some(p => p.sections.length > 0) : false,
+  );
+  const hasUnsavedChanges = useSiteStore(state => state.dirty);
   const isPreview = editorMode === "preview";
   const canPreview = isGenerationComplete;
   const flattenedPages = useMemo(() => getPagesFlattened(site), [site]);

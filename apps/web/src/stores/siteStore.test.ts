@@ -226,4 +226,80 @@ describe("siteStore", () => {
       expect(state.pendingImageSections.size).toBe(0);
     });
   });
+
+  describe("derived selectors", () => {
+    it("isGenerationComplete should be false when no pages have sections", () => {
+      const site = createSite("Test Site");
+      const pageId = crypto.randomUUID();
+      site.pages[pageId] = {
+        id: pageId,
+        slug: "/",
+        parentId: null,
+        order: 0,
+        sections: [],
+        meta: { title: "Home" },
+      };
+
+      useSiteStore.getState().hydrateDraft(site);
+
+      const state = useSiteStore.getState();
+      const isGenerationComplete = state.draft?.pages
+        ? Object.values(state.draft.pages).some(p => p.sections.length > 0)
+        : false;
+      expect(isGenerationComplete).toBe(false);
+    });
+
+    it("isGenerationComplete should be true when any page has sections", () => {
+      const site = createSite("Test Site");
+      const pageId = crypto.randomUUID();
+      site.pages[pageId] = {
+        id: pageId,
+        slug: "/",
+        parentId: null,
+        order: 0,
+        sections: [{ id: "s1", type: "hero", preset: "hero-default", headline: "Welcome" }],
+        meta: { title: "Home" },
+      };
+
+      useSiteStore.getState().hydrateDraft(site);
+
+      const state = useSiteStore.getState();
+      const isGenerationComplete = state.draft?.pages
+        ? Object.values(state.draft.pages).some(p => p.sections.length > 0)
+        : false;
+      expect(isGenerationComplete).toBe(true);
+    });
+
+    it("isLoadingImages should reflect pending image sections", () => {
+      const state1 = useSiteStore.getState();
+      expect(state1.pendingImageSections.size > 0).toBe(false);
+
+      useSiteStore.getState().addPendingImageSection("section-1");
+
+      const state2 = useSiteStore.getState();
+      expect(state2.pendingImageSections.size > 0).toBe(true);
+    });
+
+    it("hasUnsavedChanges should reflect dirty flag", () => {
+      const site = createSite("Test Site");
+      const pageId = crypto.randomUUID();
+      site.pages[pageId] = {
+        id: pageId,
+        slug: "/",
+        parentId: null,
+        order: 0,
+        sections: [],
+        meta: { title: "Home" },
+      };
+
+      useSiteStore.getState().hydrateDraft(site);
+      expect(useSiteStore.getState().dirty).toBe(false);
+
+      useSiteStore.getState().updateSiteName("New Name");
+      expect(useSiteStore.getState().dirty).toBe(true);
+
+      useSiteStore.getState().markSynced();
+      expect(useSiteStore.getState().dirty).toBe(false);
+    });
+  });
 });
