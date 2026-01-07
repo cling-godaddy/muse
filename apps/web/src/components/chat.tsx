@@ -6,6 +6,7 @@ import { Spinner } from "@muse/editor";
 import { Building2, MapPin } from "lucide-react";
 import { getPalette } from "@muse/themes";
 import { useChat, type Message, type RefineUpdate, type MoveUpdate, type SiteContext } from "../hooks/useChat";
+import { useAutosaveMessages } from "../hooks/useAutosaveMessages";
 import type { AgentState, ThemeSelection, PageInfo } from "../utils/streamParser";
 import { TimelineModal } from "./modals/timeline";
 
@@ -62,6 +63,9 @@ export function Chat({ siteId, siteContext, sections, siteCosts, autoSendPrompt,
   const isRefineMode = sections && sections.length > 0;
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const autoSendTriggeredRef = useRef(false);
+
+  // Autosave messages after each conversation turn completes
+  useAutosaveMessages(siteId, messages, isLoading);
 
   // expose trackUsage function to parent
   useEffect(() => {

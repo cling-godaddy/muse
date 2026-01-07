@@ -82,6 +82,42 @@ export function useSaveSite() {
   });
 }
 
+export function useSaveMessages() {
+  const { getToken } = useAuth();
+
+  return useMutation({
+    mutationFn: async ({ siteId, messages }: { siteId: string, messages: Message[] }) => {
+      const token = await getToken();
+
+      const storedMessages = messages.map((m, i) => ({
+        id: m.id,
+        siteId,
+        role: m.role,
+        content: m.content,
+        createdAt: new Date(Date.now() + i).toISOString(),
+        agents: m.agents,
+        usage: m.usage,
+      }));
+
+      const res = await fetch(`${API_URL}/api/messages/${siteId}`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${token}`,
+        },
+        body: JSON.stringify({ messages: storedMessages }),
+      });
+
+      if (!res.ok) {
+        const data = await res.json();
+        throw new Error(data.error ?? "Failed to save messages");
+      }
+
+      return res.json();
+    },
+  });
+}
+
 export function usePatchSection() {
   const { getToken } = useAuth();
   const queryClient = useQueryClient();
