@@ -131,15 +131,7 @@ export function useChat(options: UseChatOptions = {}): UseChat {
               usage: m.usage,
             }));
             setMessages(loadedMessages);
-            setSessionUsage({
-              input: sumBy(loadedMessages, (m: Message) => m.usage?.input ?? 0)
-                + sumBy(options.siteCosts ?? [], c => c.input),
-              output: sumBy(loadedMessages, (m: Message) => m.usage?.output ?? 0)
-                + sumBy(options.siteCosts ?? [], c => c.output),
-              cost: sumBy(loadedMessages, (m: Message) => m.usage?.cost ?? 0)
-                + sumBy(options.siteCosts ?? [], c => c.cost),
-              model: loadedMessages.at(-1)?.usage?.model ?? "",
-            });
+            // Don't set sessionUsage here - let the useEffect below be the single source of truth
           }
         }
         loadedSiteIdRef.current = options.siteId ?? null;
@@ -152,20 +144,17 @@ export function useChat(options: UseChatOptions = {}): UseChat {
     loadMessages();
   }, [options.siteId, getToken]);
 
-  // Recalculate sessionUsage when siteCosts changes (from auto-save/reload)
+  // Single source of truth: sessionUsage = sum(site.costs)
+  // message.usage is kept for debugging but not counted
   useEffect(() => {
-    if (!options.siteCosts) return;
-
+    const costs = options.siteCosts ?? [];
     setSessionUsage({
-      input: sumBy(messages, (m: Message) => m.usage?.input ?? 0)
-        + sumBy(options.siteCosts, c => c.input),
-      output: sumBy(messages, (m: Message) => m.usage?.output ?? 0)
-        + sumBy(options.siteCosts, c => c.output),
-      cost: sumBy(messages, (m: Message) => m.usage?.cost ?? 0)
-        + sumBy(options.siteCosts, c => c.cost),
-      model: messages.at(-1)?.usage?.model ?? options.siteCosts.at(-1)?.model ?? "",
+      input: sumBy(costs, c => c.input),
+      output: sumBy(costs, c => c.output),
+      cost: sumBy(costs, c => c.cost),
+      model: costs.at(-1)?.model ?? "",
     });
-  }, [options.siteCosts, messages]);
+  }, [options.siteCosts]);
 
   // Notify parent when messages change
   useEffect(() => {
@@ -252,21 +241,27 @@ export function useChat(options: UseChatOptions = {}): UseChat {
           setPendingAction(result.pendingActions[0]);
         }
 
-        // Track usage
-        if (result.usage) {
-          const usage = { ...result.usage, cost: result.usage.cost ?? 0, model: result.usage.model ?? "unknown" };
+        // Track usage - add to site.costs (single source of truth)
+        const usage = result.usage
+          ? { ...result.usage, cost: result.usage.cost ?? 0, model: result.usage.model ?? "unknown" }
+          : undefined;
+
+        if (usage) {
           setLastUsage(usage);
-          setSessionUsage(prev => ({
-            input: prev.input + usage.input,
-            output: prev.output + usage.output,
-            cost: prev.cost + usage.cost,
-            model: usage.model,
-          }));
+          options.onUsage?.(usage);
         }
 
         // Skip assistant message if there are pending actions (confirmation UI handles it)
         if (!hasPendingActions) {
-          const finalMessages = [...newMessages, { id: crypto.randomUUID(), role: "assistant" as const, content: result.message || "Done" }];
+          const finalMessages = [
+            ...newMessages,
+            {
+              id: crypto.randomUUID(),
+              role: "assistant" as const,
+              content: result.message || "Done",
+              usage,
+            },
+          ];
           setMessages(finalMessages);
         }
       }
@@ -349,17 +344,11 @@ export function useChat(options: UseChatOptions = {}): UseChat {
         }
 
         // track usage (only once per response)
+        // Add to site.costs for session total (single source of truth)
         if (result.usage && !usageProcessedRef.current) {
           usageProcessedRef.current = true;
-          const usage = result.usage;
-          setLastUsage(usage);
-          setSessionUsage(prev => ({
-            input: prev.input + usage.input,
-            output: prev.output + usage.output,
-            cost: prev.cost + usage.cost,
-            model: usage.model,
-          }));
-          options.onUsage?.(usage);
+          setLastUsage(result.usage);
+          options.onUsage?.(result.usage);
         }
 
         // update parse state
@@ -412,12 +401,9 @@ export function useChat(options: UseChatOptions = {}): UseChat {
 
   const trackUsage = useCallback((usage: Usage) => {
     setLastUsage(usage);
-    setSessionUsage(prev => ({
-      input: prev.input + usage.input,
-      output: prev.output + usage.output,
-      cost: prev.cost + usage.cost,
-      model: usage.model,
-    }));
+    // Don't update sessionUsage directly - let useEffect recalculate from siteCosts
+    // to avoid double counting (this usage gets added to site.costs via onUsage,
+    // then useEffect adds siteCosts to sessionUsage)
     options.onUsage?.(usage);
   }, [options]);
 
