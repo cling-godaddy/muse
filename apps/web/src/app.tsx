@@ -228,7 +228,7 @@ function MainApp() {
                   <PreviewLinkInterceptor pageMap={pageMap} onNavigate={setCurrentPage}>
                     <div style={themeStyle} data-effects={effectsId} data-preview-device={previewDevice}>
                       <EditorModeProvider mode={editorMode}>
-                        <SectionEditor sections={sections} onChange={setSections} pendingImageSections={pendingImageSections} navbar={navbar ?? void 0} onNavbarChange={updateNavbar} site={site} currentPage={currentPage} onAddSection={handleAddSection} onMoveSection={handleMoveSection} getToken={getToken} trackUsage={trackUsage ?? undefined} />
+                        <SectionEditor sections={sections} onChange={setSections} pendingImageSections={pendingImageSections} navbar={navbar ?? void 0} onNavbarChange={updateNavbar} site={site} currentPage={currentPage} onAddSection={handleAddSection} onMoveSection={handleMoveSection} onDeleteSection={handleDelete} getToken={getToken} trackUsage={trackUsage ?? undefined} />
                       </EditorModeProvider>
                     </div>
                   </PreviewLinkInterceptor>

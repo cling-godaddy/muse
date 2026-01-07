@@ -17,6 +17,7 @@ interface SectionEditorProps {
   currentPage?: Page
   onAddSection?: (section: Section, index: number, generateWithAI?: boolean) => void
   onMoveSection?: (sectionId: string, direction: "up" | "down") => void
+  onDeleteSection?: (sectionId: string) => void
   getToken?: () => Promise<string | null>
   trackUsage?: (usage: Usage) => void
 }
@@ -31,6 +32,7 @@ export function SectionEditor({
   currentPage,
   onAddSection,
   onMoveSection,
+  onDeleteSection,
   getToken,
   trackUsage,
 }: SectionEditorProps) {
@@ -56,7 +58,15 @@ export function SectionEditor({
 
   const deleteSection = (id: string) => {
     if (navbar && id === navbar.id) return;
-    onChange(sections.filter(s => s.id !== id));
+
+    // Call parent's delete handler if provided (triggers API call)
+    if (onDeleteSection) {
+      onDeleteSection(id);
+    }
+    else {
+      // Fallback: update local state only
+      onChange(sections.filter(s => s.id !== id));
+    }
   };
 
   const moveSection = useCallback((fromIndex: number, toIndex: number) => {
