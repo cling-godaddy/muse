@@ -11,8 +11,8 @@ interface Props {
 function HeroSkeleton() {
   return (
     <>
-      <Skeleton variant="text" height="3em" width="80%" className={styles.headline} />
-      <Skeleton variant="text" height="1.5em" width="60%" className={styles.subheadline} />
+      <Skeleton variant="text" height="3em" width="80%" />
+      <Skeleton variant="text" height="1.5em" width="60%" />
       <div className={styles.ctas}>
         <Skeleton variant="rect" height="48px" width="140px" />
         <Skeleton variant="rect" height="48px" width="140px" />
