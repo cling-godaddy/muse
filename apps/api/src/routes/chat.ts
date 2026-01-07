@@ -365,8 +365,9 @@ chatRoute.post("/generate-item", async (c) => {
 
   // Check if this preset requires images
   const preset = sectionContext?.preset ? getPreset(sectionContext.preset) : undefined;
+  logger.info("preset_check", { preset: preset?.id, hasImageRequirements: !!preset?.imageRequirements });
   if (preset?.imageRequirements) {
-    logger.info("fetching_image_for_item", { preset: preset.id });
+    logger.info("fetching_image_for_item", { preset: preset.id, imageInjection: preset.imageInjection });
 
     try {
       const imagePlanResult = await imageAgent.run(
@@ -402,9 +403,15 @@ chatRoute.post("/generate-item", async (c) => {
         logger.info("images_fetched", { count: images.length });
 
         // Apply image to item
-        if (images.length > 0 && preset.imageInjection) {
+        if (images.length > 0 && preset.imageInjection && images[0]?.image) {
+          logger.info("applying_image", {
+            field: preset.imageInjection.field,
+            hasImage: true,
+            imageUrl: images[0].image.url,
+          });
           if (preset.imageInjection.field === "image") {
-            finalItem = { ...finalItem, image: images[0] };
+            finalItem = { ...finalItem, image: images[0].image };
+            logger.info("image_applied", { hasImageInFinalItem: !!finalItem.image });
           }
         }
       }
@@ -415,6 +422,12 @@ chatRoute.post("/generate-item", async (c) => {
     }
   }
 
+  // Remove null image field so frontend falls back to icon
+  if (!finalItem.image) {
+    delete finalItem.image;
+  }
+
+  logger.info("returning_item", { hasImage: !!finalItem.image, keys: Object.keys(finalItem) });
   return c.json({
     item: finalItem,
     usage: itemResult.usage,
