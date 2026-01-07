@@ -1,6 +1,6 @@
 import { Hono } from "hono";
 import { streamText } from "hono/streaming";
-import { createClient, orchestrate, orchestrateSite, refine, resolveFieldAlias, getValidFields, singleSectionAgent, generateItemAgent, imageAgent, parseImagePlan, calculateCost, type Message, type Provider, type ToolCall, type BrandBrief, type ImageSelection } from "@muse/ai";
+import { createClient, orchestrate, orchestrateSite, refine, resolveFieldAlias, getValidFields, executeEditSection, singleSectionAgent, generateItemAgent, imageAgent, parseImagePlan, calculateCost, type Message, type Provider, type ToolCall, type BrandBrief, type ImageSelection } from "@muse/ai";
 import { requireAuth } from "../middleware/auth";
 import { createLogger } from "@muse/logger";
 import { createMediaClient, createQueryNormalizer, getIamJwt, type MediaClient, type QueryNormalizer } from "@muse/media";
@@ -83,12 +83,14 @@ interface PendingAction {
 }
 
 chatRoute.post("/refine", async (c) => {
-  const { sections, messages } = await c.req.json<{
+  const { siteId, sections, messages } = await c.req.json<{
+    siteId: string
     sections: Section[]
     messages: Message[]
   }>();
 
   const pendingActions: PendingAction[] = [];
+  const updatedSections: Section[] = [];
 
   const executeTool = async (call: ToolCall) => {
     logger.info("tool_call", { name: call.name, input: call.input });
@@ -117,10 +119,38 @@ chatRoute.post("/refine", async (c) => {
       }
 
       logger.info("field_resolved", { input: field, resolved: resolvedField });
-      return {
-        id: call.id,
-        result: { success: true, field: resolvedField, value },
-      };
+
+      // Call the PATCH API endpoint to persist the update
+      try {
+        const token = c.req.header("Authorization")?.replace("Bearer ", "");
+        if (!token) {
+          logger.error("missing_auth_token");
+          return { id: call.id, result: { error: "Missing auth token" } };
+        }
+
+        const { section: updatedSection } = await executeEditSection({
+          siteId,
+          sectionId,
+          field: resolvedField,
+          value,
+          authToken: token,
+        });
+
+        updatedSections.push(updatedSection);
+        logger.info("section_updated", { sectionId, field: resolvedField });
+
+        return {
+          id: call.id,
+          result: { success: true, section: updatedSection },
+        };
+      }
+      catch (err) {
+        logger.error("edit_section_failed", { error: err });
+        return {
+          id: call.id,
+          result: { error: err instanceof Error ? err.message : "Unknown error" },
+        };
+      }
     }
 
     if (call.name === "move_section") {
@@ -199,19 +229,6 @@ chatRoute.post("/refine", async (c) => {
     }
   }
 
-  const transformedToolCalls = result.toolCalls
-    .filter(tc => tc.name !== "delete_section") // delete calls go to pendingActions
-    .map((tc) => {
-      if (tc.name === "edit_section" && tc.input.field) {
-        const { sectionId, field, value } = tc.input as { sectionId: string, field: string, value: unknown };
-        return {
-          name: tc.name,
-          input: { sectionId, updates: { [field]: value } },
-        };
-      }
-      return tc;
-    });
-
   let message = result.message;
   if (pendingActions.length > 0) {
     message = ""; // confirmation UI will display the prompt
@@ -225,7 +242,7 @@ chatRoute.post("/refine", async (c) => {
 
   return c.json({
     message,
-    toolCalls: transformedToolCalls,
+    updatedSections,
     pendingActions,
     usage: completeUsage,
   });

@@ -3,6 +3,7 @@ export {
   getValidFields,
   resolveFieldAlias,
   getFieldAliases,
+  executeEditSection,
 } from "./edit-section";
 
 export { moveSectionTool } from "./move-section";

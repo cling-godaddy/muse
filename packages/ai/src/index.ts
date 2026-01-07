@@ -35,6 +35,7 @@ export {
   getValidFields,
   resolveFieldAlias,
   getFieldAliases,
+  executeEditSection,
 } from "./tools";
 
 export type {
