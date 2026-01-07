@@ -101,7 +101,7 @@ ITEM TO GENERATE:
 ${itemTypeGuidance[input.itemType]}
 
 Return ONLY valid JSON matching the schema for this item type.
-DO NOT include icon/image fields - they are added automatically.`;
+DO NOT populate the image field - images are fetched automatically based on the section preset.`;
 }
 
 // Define schemas for each item type
@@ -118,6 +118,7 @@ function getItemSchema(itemType: string): ResponseSchema {
               icon: { type: ["string", "null"] },
               title: { type: "string" },
               description: { type: "string" },
+              image: { type: ["object", "null"] },
             },
             required: ["icon", "title", "description"],
             additionalProperties: false,
