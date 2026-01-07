@@ -1,7 +1,7 @@
 import type { Section } from "@muse/core";
 import { sectionFieldRegistry, getEditableFields } from "@muse/core";
 import type { Message, Provider, ToolCall, ToolResult } from "../types";
-import { editSectionTool, moveSectionTool, deleteSectionTool } from "../tools";
+import { editSectionTool, moveSectionTool, deleteSectionTool, addSectionTool } from "../tools";
 
 interface RefineInput {
   messages: Message[] // Conversation history (user/assistant, no system)
@@ -68,6 +68,12 @@ TOOLS:
    - Cannot delete navbar or footer sections
    - Only use when user explicitly asks to remove/delete a section
 
+4. add_section: Add a new section to the page
+   - sectionType: Type of section (e.g., hero, features, cta, testimonials)
+   - preset: Preset ID for the section layout
+   - index: Position to insert (0 = top). Omit to append at bottom.
+   - **IMPORTANT**: When the user says "add a section" without specifying details, call this tool with NO parameters. The system will present the user with visual options to select from. Do NOT ask follow-up questions via text - just call the tool.
+
 Make the requested changes, then briefly confirm what you did.`;
 }
 
@@ -84,7 +90,7 @@ export async function refine(
 
   const response = await provider.chat({
     messages,
-    tools: [editSectionTool, moveSectionTool, deleteSectionTool],
+    tools: [editSectionTool, moveSectionTool, deleteSectionTool, addSectionTool],
   });
 
   const usage = response.usage ?? { input: 0, output: 0 };
