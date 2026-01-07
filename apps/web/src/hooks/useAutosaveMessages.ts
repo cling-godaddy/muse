@@ -6,11 +6,26 @@ export function useAutosaveMessages(siteId: string | undefined, messages: Messag
   const saveMessages = useSaveMessages();
   const prevIsLoadingRef = useRef(isLoading);
   const lastSavedCountRef = useRef(0);
+  const isFirstRenderRef = useRef(true);
 
   useEffect(() => {
+    // On first render, capture baseline (handles mounting mid-stream or with existing messages)
+    if (isFirstRenderRef.current) {
+      isFirstRenderRef.current = false;
+      if (messages.length > 0 || isLoading) {
+        lastSavedCountRef.current = messages.length;
+      }
+    }
+
     // Detect when streaming completes (isLoading: true → false)
     const wasLoading = prevIsLoadingRef.current;
     const justFinished = wasLoading && !isLoading;
+
+    // Continuously update baseline when not loading (tracks current state)
+    // This captures the count BEFORE user starts next interaction
+    if (!isLoading && !justFinished) {
+      lastSavedCountRef.current = messages.length;
+    }
 
     if (justFinished && siteId && messages.length > lastSavedCountRef.current) {
       // Save new messages since last save

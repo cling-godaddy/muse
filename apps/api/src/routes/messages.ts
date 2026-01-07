@@ -38,7 +38,7 @@ messagesRoute.post("/:siteId", async (c) => {
   }));
 
   await table.saveBatch(messagesToSave);
-  return c.json({ success: true });
+  return c.json({ success: true }, 201);
 });
 
 // For testing: reset the cached messages table
