@@ -64,18 +64,29 @@ export const useSiteStore = create<SiteState>()(
       redoStack: [],
       dirty: false,
 
-      hydrateDraft: site => set({
-        draft: site,
-        currentPageId: Object.keys(site.pages)[0] ?? null,
-        theme: {
-          palette: site.theme.palette,
-          typography: site.theme.typography,
-          effects: "neutral", // derive from palette
-        },
-        undoStack: [],
-        redoStack: [],
-        dirty: false,
-      }),
+      hydrateDraft: (site) => {
+        // Rebuild tree from pages if tree is empty (migration for old sites)
+        const tree = site.tree.length > 0
+          ? site.tree
+          : Object.values(site.pages).map(page => ({
+            pageId: page.id,
+            slug: page.slug,
+            children: [],
+          }));
+
+        set({
+          draft: { ...site, tree },
+          currentPageId: Object.keys(site.pages)[0] ?? null,
+          theme: {
+            palette: site.theme.palette,
+            typography: site.theme.typography,
+            effects: "neutral", // derive from palette
+          },
+          undoStack: [],
+          redoStack: [],
+          dirty: false,
+        });
+      },
 
       applyDraftOp: recipe => set((state) => {
         if (!state.draft) return state;
@@ -233,6 +244,8 @@ export const useSiteStore = create<SiteState>()(
             sections: [],
             meta: { title },
           };
+          // Also add to tree so getPagesFlattened works
+          draft.tree.push({ pageId, slug, children: [] });
           draft.updatedAt = new Date().toISOString();
         });
 
@@ -246,6 +259,8 @@ export const useSiteStore = create<SiteState>()(
           draft.pages = Object.fromEntries(
             Object.entries(draft.pages).filter(([id]) => id !== pageId),
           );
+          // Also remove from tree
+          draft.tree = draft.tree.filter(node => node.pageId !== pageId);
           draft.updatedAt = new Date().toISOString();
         });
 
