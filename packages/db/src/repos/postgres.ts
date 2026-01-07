@@ -1,4 +1,4 @@
-import type { Site, SiteTheme, SiteNode, Page, Section, NavbarSection } from "@muse/core";
+import type { Site, SiteTheme, Page, Section, NavbarSection } from "@muse/core";
 import type { SitesTable, SiteSummary, MessagesTable, StoredMessage, StoredUsage, StoredAgentState } from "./types";
 import { getDb } from "../db";
 
@@ -10,7 +10,6 @@ interface SiteRow {
   location: string | null
   site_type: string | null
   theme: SiteTheme
-  tree: SiteNode[]
   navbar: NavbarSection | null
   costs: Array<{ input: number, output: number, cost: number, model: string }> | null
   domain: string | null
@@ -23,6 +22,8 @@ interface PageRow {
   id: string
   site_id: string
   slug: string
+  parent_id: string | null
+  page_order: number
   meta: { title: string, description?: string, ogImage?: string }
   created_at: string
   updated_at: string
@@ -50,15 +51,14 @@ export function createPostgresSitesTable(): SitesTable {
 
       try {
         await sql`
-          INSERT INTO sites (id, user_id, name, description, location, site_type, theme, tree, navbar, costs, created_at, updated_at)
-          VALUES (${site.id}, ${userId}, ${site.name}, ${site.description ?? null}, ${site.location ?? null}, ${site.siteType ?? "landing"}, ${JSON.stringify(site.theme)}, ${JSON.stringify(site.tree)}, ${site.navbar ? JSON.stringify(site.navbar) : null}, ${site.costs ? JSON.stringify(site.costs) : null}, ${site.createdAt}, ${now})
+          INSERT INTO sites (id, user_id, name, description, location, site_type, theme, navbar, costs, created_at, updated_at)
+          VALUES (${site.id}, ${userId}, ${site.name}, ${site.description ?? null}, ${site.location ?? null}, ${site.siteType ?? "landing"}, ${JSON.stringify(site.theme)}, ${site.navbar ? JSON.stringify(site.navbar) : null}, ${site.costs ? JSON.stringify(site.costs) : null}, ${site.createdAt}, ${now})
           ON CONFLICT (id) DO UPDATE SET
             name = EXCLUDED.name,
             description = EXCLUDED.description,
             location = EXCLUDED.location,
             site_type = EXCLUDED.site_type,
             theme = EXCLUDED.theme,
-            tree = EXCLUDED.tree,
             navbar = EXCLUDED.navbar,
             costs = EXCLUDED.costs,
             updated_at = EXCLUDED.updated_at
@@ -76,10 +76,12 @@ export function createPostgresSitesTable(): SitesTable {
 
         for (const page of Object.values(site.pages)) {
           await sql`
-            INSERT INTO pages (id, site_id, slug, meta, created_at, updated_at)
-            VALUES (${page.id}, ${site.id}, ${page.slug}, ${JSON.stringify(page.meta)}, ${page.createdAt ?? now}, ${now})
+            INSERT INTO pages (id, site_id, slug, parent_id, page_order, meta, created_at, updated_at)
+            VALUES (${page.id}, ${site.id}, ${page.slug}, ${page.parentId ?? null}, ${page.order ?? 0}, ${JSON.stringify(page.meta)}, ${page.createdAt ?? now}, ${now})
             ON CONFLICT (id) DO UPDATE SET
               slug = EXCLUDED.slug,
+              parent_id = EXCLUDED.parent_id,
+              page_order = EXCLUDED.page_order,
               meta = EXCLUDED.meta,
               updated_at = EXCLUDED.updated_at
           `;
@@ -122,7 +124,7 @@ export function createPostgresSitesTable(): SitesTable {
       const sites = await sql`SELECT * FROM sites WHERE id = ${id}` as SiteRow[];
       const siteRow = sites[0];
       if (!siteRow) return null;
-      const pageRows = await sql`SELECT * FROM pages WHERE site_id = ${id} ORDER BY created_at` as PageRow[];
+      const pageRows = await sql`SELECT * FROM pages WHERE site_id = ${id} ORDER BY page_order, created_at` as PageRow[];
       const pageIds = pageRows.map(p => p.id);
       const sectionRows: SectionRow[] = pageIds.length > 0
         ? await sql`SELECT * FROM sections WHERE page_id = ANY(${pageIds}) ORDER BY position` as SectionRow[]
@@ -147,6 +149,8 @@ export function createPostgresSitesTable(): SitesTable {
         pages[row.id] = {
           id: row.id,
           slug: row.slug,
+          parentId: row.parent_id,
+          order: row.page_order,
           meta: row.meta,
           sections: sectionsByPage.get(row.id) ?? [],
           createdAt: row.created_at,
@@ -161,7 +165,6 @@ export function createPostgresSitesTable(): SitesTable {
         location: siteRow.location ?? void 0,
         siteType: (siteRow.site_type as "landing" | "full") ?? void 0,
         theme: siteRow.theme,
-        tree: siteRow.tree,
         navbar: siteRow.navbar ?? void 0,
         costs: siteRow.costs ?? void 0,
         pages,
@@ -175,7 +178,7 @@ export function createPostgresSitesTable(): SitesTable {
       const siteRow = sites[0];
       if (!siteRow) return null;
 
-      const pageRows = await sql`SELECT * FROM pages WHERE site_id = ${id} ORDER BY created_at` as PageRow[];
+      const pageRows = await sql`SELECT * FROM pages WHERE site_id = ${id} ORDER BY page_order, created_at` as PageRow[];
       const pageIds = pageRows.map(p => p.id);
       const sectionRows: SectionRow[] = pageIds.length > 0
         ? await sql`SELECT * FROM sections WHERE page_id = ANY(${pageIds}) ORDER BY position` as SectionRow[]
@@ -200,6 +203,8 @@ export function createPostgresSitesTable(): SitesTable {
         pages[row.id] = {
           id: row.id,
           slug: row.slug,
+          parentId: row.parent_id,
+          order: row.page_order,
           meta: row.meta,
           sections: sectionsByPage.get(row.id) ?? [],
           createdAt: row.created_at,
@@ -214,7 +219,6 @@ export function createPostgresSitesTable(): SitesTable {
         location: siteRow.location ?? void 0,
         siteType: (siteRow.site_type as "landing" | "full") ?? void 0,
         theme: siteRow.theme,
-        tree: siteRow.tree,
         navbar: siteRow.navbar ?? void 0,
         costs: siteRow.costs ?? void 0,
         pages,
