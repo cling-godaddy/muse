@@ -1,7 +1,9 @@
+import { useState, useCallback } from "react";
 import type { FeaturesSection as FeaturesSectionType, FeatureItem, RichContent, Site } from "@muse/core";
 import { EditableText, ImageLoader, Skeleton } from "../../ux";
 import { useIsEditable } from "../../context/EditorMode";
 import { FeatureIcon } from "./icons";
+import { AddItemPopover } from "../../controls/AddItemPopover";
 import styles from "./Bento.module.css";
 
 interface Props {
@@ -78,10 +80,80 @@ const layoutClasses: Record<string, string> = {
   "features-bento-split": "bentoSplit",
 };
 
-export function Bento({ section, onUpdate, isPending }: Props) {
+export function Bento({ section, onUpdate, isPending, site, getToken }: Props) {
   const isEditable = useIsEditable();
+  const [isGenerating, setIsGenerating] = useState(false);
   const layoutClassName = layoutClasses[section.preset ?? "features-bento"] ?? "bentoHero";
   const layoutClass = (styles as Record<string, string>)[layoutClassName] ?? "";
+
+  const updateItem = (index: number, data: Partial<FeatureItem>) => {
+    const items = section.items.map((item, i) =>
+      i === index ? { ...item, ...data } : item,
+    );
+    onUpdate({ items });
+  };
+
+  const addItem = useCallback(async (useAI: boolean) => {
+    if (useAI && getToken && site) {
+      setIsGenerating(true);
+      try {
+        const token = await getToken();
+        const response = await fetch("/api/chat/generate-item", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${token}`,
+          },
+          body: JSON.stringify({
+            itemType: "feature",
+            siteContext: {
+              name: site.name,
+              description: site.description,
+              location: site.location,
+            },
+            sectionContext: {
+              preset: section.preset,
+              existingItems: section.items.map(item => ({
+                title: item.title,
+                description: typeof item.description === "string" ? item.description : "",
+              })),
+            },
+          }),
+        });
+
+        if (!response.ok) {
+          throw new Error("Failed to generate item");
+        }
+
+        const data = await response.json();
+        onUpdate({
+          items: [...section.items, data.item],
+        });
+      }
+      catch (err) {
+        console.error("Failed to generate feature:", err);
+        // Fallback to blank item
+        onUpdate({
+          items: [...section.items, { title: "", description: "" }],
+        });
+      }
+      finally {
+        setIsGenerating(false);
+      }
+    }
+    else {
+      // Add blank item
+      onUpdate({
+        items: [...section.items, { title: "", description: "" }],
+      });
+    }
+  }, [getToken, site, section.items, section.preset, onUpdate]);
+
+  const removeItem = (index: number) => {
+    onUpdate({
+      items: section.items.filter((_, i) => i !== index),
+    });
+  };
 
   // Show section-level skeleton when empty array during generation
   if (isPending && section.items.length === 0) {
@@ -102,25 +174,6 @@ export function Bento({ section, onUpdate, isPending }: Props) {
         </div>
       </div>
     );
-  }
-
-  const updateItem = (index: number, data: Partial<FeatureItem>) => {
-    const items = section.items.map((item, i) =>
-      i === index ? { ...item, ...data } : item,
-    );
-    onUpdate({ items });
-  };
-
-  const addItem = () => {
-    onUpdate({
-      items: [...section.items, { title: "", description: "" }],
-    });
-  };
-
-  const removeItem = (index: number) => {
-    onUpdate({
-      items: section.items.filter((_, i) => i !== index),
-    });
   };
 
   return (
@@ -143,15 +196,22 @@ export function Bento({ section, onUpdate, isPending }: Props) {
             isLarge={i === 0}
           />
         ))}
+        {isGenerating && (
+          <BentoCard
+            item={{ title: "", description: "" }}
+            onUpdate={() => {}}
+            onRemove={() => {}}
+            isPending
+            isLarge={section.items.length === 0}
+          />
+        )}
       </div>
       {isEditable && (
-        <button
-          type="button"
-          onClick={addItem}
-          className={styles.addButton}
-        >
-          Add Feature
-        </button>
+        <AddItemPopover
+          itemType="Feature"
+          onAdd={addItem}
+          disabled={isGenerating}
+        />
       )}
     </div>
   );

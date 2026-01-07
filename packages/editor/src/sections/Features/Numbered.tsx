@@ -1,7 +1,9 @@
+import { useState, useCallback } from "react";
 import type { FeaturesSection as FeaturesSectionType, FeatureItem, RichContent, Site } from "@muse/core";
-import { EditableText } from "../../ux";
+import { EditableText, Skeleton } from "../../ux";
 import { useIsEditable } from "../../context/EditorMode";
 import { FeatureIcon } from "./icons";
+import { AddItemPopover } from "../../controls/AddItemPopover";
 import styles from "./Numbered.module.css";
 
 interface Props {
@@ -12,9 +14,9 @@ interface Props {
   getToken?: () => Promise<string | null>
 }
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-export function Numbered({ section, onUpdate, isPending }: Props) {
+export function Numbered({ section, onUpdate, site, getToken }: Props) {
   const isEditable = useIsEditable();
+  const [isGenerating, setIsGenerating] = useState(false);
 
   const updateItem = (index: number, data: Partial<FeatureItem>) => {
     const items = section.items.map((item, i) =>
@@ -23,11 +25,61 @@ export function Numbered({ section, onUpdate, isPending }: Props) {
     onUpdate({ items });
   };
 
-  const addItem = () => {
-    onUpdate({
-      items: [...section.items, { title: "", description: "" }],
-    });
-  };
+  const addItem = useCallback(async (useAI: boolean) => {
+    if (useAI && getToken && site) {
+      setIsGenerating(true);
+      try {
+        const token = await getToken();
+        const response = await fetch("/api/chat/generate-item", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${token}`,
+          },
+          body: JSON.stringify({
+            itemType: "feature",
+            siteContext: {
+              name: site.name,
+              description: site.description,
+              location: site.location,
+            },
+            sectionContext: {
+              preset: section.preset,
+              existingItems: section.items.map(item => ({
+                title: item.title,
+                description: typeof item.description === "string" ? item.description : "",
+              })),
+            },
+          }),
+        });
+
+        if (!response.ok) {
+          throw new Error("Failed to generate item");
+        }
+
+        const data = await response.json();
+        onUpdate({
+          items: [...section.items, data.item],
+        });
+      }
+      catch (err) {
+        console.error("Failed to generate feature:", err);
+        // Fallback to blank item
+        onUpdate({
+          items: [...section.items, { title: "", description: "" }],
+        });
+      }
+      finally {
+        setIsGenerating(false);
+      }
+    }
+    else {
+      // Add blank item
+      onUpdate({
+        items: [...section.items, { title: "", description: "" }],
+      });
+    }
+  }, [getToken, site, section.items, section.preset, onUpdate]);
 
   const removeItem = (index: number) => {
     onUpdate({
@@ -92,12 +144,27 @@ export function Numbered({ section, onUpdate, isPending }: Props) {
             </div>
           </div>
         ))}
+        {isGenerating && (
+          <div className={styles.step}>
+            <div className={styles.number}>{section.items.length + 1}</div>
+            <div className={styles.content}>
+              <div className={styles.header}>
+                <Skeleton variant="rect" height="24px" width="24px" className={styles.icon} />
+                <Skeleton variant="text" height="1.5em" width="60%" className={styles.title} />
+              </div>
+              <Skeleton variant="text" height="1em" width="100%" className={styles.description} />
+              <Skeleton variant="text" height="1em" width="90%" className={styles.description} />
+            </div>
+          </div>
+        )}
       </div>
 
       {isEditable && (
-        <button type="button" onClick={addItem} className={styles.addButton}>
-          Add Step
-        </button>
+        <AddItemPopover
+          itemType="Step"
+          onAdd={addItem}
+          disabled={isGenerating}
+        />
       )}
     </section>
   );
