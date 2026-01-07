@@ -14,6 +14,29 @@ interface SiteSummary {
   pageCount: number
 }
 
+interface CoverageItem {
+  type: string
+  count: number
+  mapsTo?: string
+}
+
+interface Coverage {
+  supported: CoverageItem[]
+  unsupported: CoverageItem[]
+  supportedPages: number
+  totalPages: number
+  coveragePercent: number
+}
+
+interface ImportAnalysis {
+  baseUrl: string
+  pageCount: number
+  pageTypes: Record<string, number>
+  coverage: Coverage
+  crawlDuration?: number
+  crawledAt?: string
+}
+
 function formatRelativeTime(dateStr: string): string {
   const date = new Date(dateStr);
   const now = new Date();
@@ -224,8 +247,10 @@ export function SitesDashboard() {
   const [isDeleting, setIsDeleting] = useState(false);
   const [importing, setImporting] = useState(false);
   const [importError, setImportError] = useState<string | null>(null);
-  const [importSuccess, setImportSuccess] = useState<string | null>(null);
+  const [importAnalysis, setImportAnalysis] = useState<ImportAnalysis | null>(null);
+  const [isDragging, setIsDragging] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const dragCountRef = useRef(0);
 
   useEffect(() => {
     authFetch("/api/sites")
@@ -269,10 +294,7 @@ export function SitesDashboard() {
     }
   };
 
-  const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-
+  const processFile = async (file: File) => {
     // Client-side validation
     if (!file.type.includes("json") && !file.name.endsWith(".json")) {
       setImportError("Please select a JSON file");
@@ -285,7 +307,7 @@ export function SitesDashboard() {
 
     setImporting(true);
     setImportError(null);
-    setImportSuccess(null);
+    setImportAnalysis(null);
 
     try {
       const text = await file.text();
@@ -303,12 +325,12 @@ export function SitesDashboard() {
       }
 
       const result = await res.json();
-      setImportSuccess(result.message);
-      setTimeout(() => setImportSuccess(null), 5000);
+      setImportAnalysis(result.analysis);
     }
     catch (err) {
       if (err instanceof SyntaxError) {
-        setImportError("Invalid JSON file");
+        console.error("[import] JSON parse error:", err.message);
+        setImportError(`Invalid JSON: ${err.message}`);
       }
       else {
         setImportError(err instanceof Error ? err.message : "Import failed");
@@ -317,7 +339,45 @@ export function SitesDashboard() {
     }
     finally {
       setImporting(false);
+    }
+  };
+
+  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      processFile(file);
       e.target.value = "";
+    }
+  };
+
+  const handleDragEnter = (e: React.DragEvent) => {
+    e.preventDefault();
+    dragCountRef.current++;
+    if (e.dataTransfer.types.includes("Files")) {
+      setIsDragging(true);
+    }
+  };
+
+  const handleDragLeave = (e: React.DragEvent) => {
+    e.preventDefault();
+    dragCountRef.current--;
+    if (dragCountRef.current === 0) {
+      setIsDragging(false);
+    }
+  };
+
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+  };
+
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    dragCountRef.current = 0;
+    setIsDragging(false);
+
+    const file = e.dataTransfer.files[0];
+    if (file) {
+      processFile(file);
     }
   };
 
@@ -367,11 +427,92 @@ export function SitesDashboard() {
             {importError}
           </div>
         )}
-        {importSuccess && (
-          <div className="mb-4 p-3 bg-green-500/10 border border-green-500/20 rounded-lg text-green-500 text-sm">
-            {importSuccess}
+        {importAnalysis && (
+          <div className="mb-4 p-4 bg-bg-muted rounded-lg">
+            <div className="flex items-center justify-between mb-3">
+              <h3 className="font-medium">{importAnalysis.baseUrl}</h3>
+              <button
+                onClick={() => setImportAnalysis(null)}
+                className="text-text-muted hover:text-text text-sm"
+              >
+                Dismiss
+              </button>
+            </div>
+            <p className="text-sm text-text-muted mb-3">
+              {importAnalysis.pageCount}
+              {" "}
+              pages crawled
+              {importAnalysis.crawlDuration && ` in ${(importAnalysis.crawlDuration / 1000).toFixed(1)}s`}
+            </p>
+
+            {/* Coverage Report */}
+            <div className="pt-3 border-t border-border">
+              <p className="text-sm font-medium mb-2">
+                Coverage:
+                {" "}
+                {importAnalysis.coverage.coveragePercent}
+                % (
+                {importAnalysis.coverage.supportedPages}
+                /
+                {importAnalysis.coverage.totalPages}
+                {" "}
+                pages)
+              </p>
+
+              {importAnalysis.coverage.supported.length > 0 && (
+                <div className="flex flex-wrap gap-2 mb-2">
+                  {importAnalysis.coverage.supported.map(({ type, count, mapsTo }) => (
+                    <span key={type} className="px-2 py-1 bg-green-500/10 text-green-600 rounded text-xs">
+                      {type}
+                      {" "}
+                      →
+                      {mapsTo}
+                      {" "}
+                      (
+                      {count}
+                      )
+                    </span>
+                  ))}
+                </div>
+              )}
+
+              {importAnalysis.coverage.unsupported.length > 0 && (
+                <div className="flex flex-wrap gap-2">
+                  {importAnalysis.coverage.unsupported.map(({ type, count }) => (
+                    <span key={type} className="px-2 py-1 bg-amber-500/10 text-amber-600 rounded text-xs">
+                      ⚠
+                      {" "}
+                      {type}
+                      {" "}
+                      (
+                      {count}
+                      ) - no section
+                    </span>
+                  ))}
+                </div>
+              )}
+            </div>
           </div>
         )}
+
+        <div
+          className={`mb-6 p-6 border-2 border-dashed rounded-lg transition-colors ${
+            isDragging
+              ? "border-primary bg-primary/5"
+              : "border-border hover:border-text-muted"
+          }`}
+          onDragEnter={handleDragEnter}
+          onDragLeave={handleDragLeave}
+          onDragOver={handleDragOver}
+          onDrop={handleDrop}
+        >
+          <div className="flex flex-col items-center gap-2 text-center">
+            <Upload className={isDragging ? "text-primary" : "text-text-muted"} size={24} />
+            <p className={isDragging ? "text-primary font-medium" : "text-text-muted"}>
+              {isDragging ? "Drop to import" : "Drag JSON file here to import"}
+            </p>
+          </div>
+        </div>
 
         {loading
           ? (

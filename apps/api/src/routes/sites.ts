@@ -48,6 +48,67 @@ sitesRoute.post("/", async (c) => {
 
 const MAX_IMPORT_SIZE = 10 * 1024 * 1024; // 10MB
 
+// Mapping from atlas page types to Muse section types
+const PAGE_TYPE_TO_SECTION: Record<string, string | null> = {
+  about: "about",
+  contact: "contact",
+  product: "products",
+  home: "hero",
+  faq: "faq",
+  pricing: "pricing",
+  testimonials: "testimonials",
+  gallery: "gallery",
+  // Unsupported types
+  legal: null,
+  unknown: null,
+};
+
+interface AtlasPage {
+  classification?: { type: string }
+}
+
+function countPagesByType(pages: AtlasPage[]): Record<string, number> {
+  return pages.reduce((acc, page) => {
+    const type = page.classification?.type || "unknown";
+    acc[type] = (acc[type] || 0) + 1;
+    return acc;
+  }, {} as Record<string, number>);
+}
+
+interface CoverageItem {
+  type: string
+  count: number
+  mapsTo?: string
+}
+
+function calculateCoverage(pageTypes: Record<string, number>) {
+  const supported: CoverageItem[] = [];
+  const unsupported: CoverageItem[] = [];
+  let supportedPages = 0;
+  let totalPages = 0;
+
+  for (const [type, count] of Object.entries(pageTypes)) {
+    totalPages += count;
+    const mapsTo = PAGE_TYPE_TO_SECTION[type];
+
+    if (mapsTo) {
+      supported.push({ type, count, mapsTo });
+      supportedPages += count;
+    }
+    else {
+      unsupported.push({ type, count });
+    }
+  }
+
+  return {
+    supported,
+    unsupported,
+    supportedPages,
+    totalPages,
+    coveragePercent: totalPages > 0 ? Math.round((supportedPages / totalPages) * 100) : 0,
+  };
+}
+
 sitesRoute.post("/import", async (c) => {
   const contentLength = parseInt(c.req.header("content-length") || "0");
   if (contentLength > MAX_IMPORT_SIZE) {
@@ -60,12 +121,21 @@ sitesRoute.post("/import", async (c) => {
     return c.json({ error: "Invalid format: expected atlas JSON with baseUrl and pages" }, 400);
   }
 
-  console.log(`[import] Received atlas data for ${body.baseUrl} with ${body.pages.length} pages`);
+  const pageTypes = countPagesByType(body.pages);
+  const coverage = calculateCoverage(pageTypes);
 
-  return c.json({
-    success: true,
-    message: `Received ${body.pages.length} pages from ${body.baseUrl}`,
-  });
+  const analysis = {
+    baseUrl: body.baseUrl as string,
+    pageCount: body.pages.length,
+    pageTypes,
+    coverage,
+    crawlDuration: body.duration as number | undefined,
+    crawledAt: body.completedAt as string | undefined,
+  };
+
+  console.log(`[import] Analyzed ${analysis.baseUrl}: ${analysis.pageCount} pages, ${coverage.coveragePercent}% coverage`);
+
+  return c.json({ success: true, analysis });
 });
 
 sitesRoute.get("/:id", async (c) => {
