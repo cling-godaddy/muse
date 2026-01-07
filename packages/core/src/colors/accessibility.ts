@@ -187,13 +187,18 @@ export function getNearestAccessibleColor(
 }
 
 /**
- * Get multiple nearest accessible color suggestions.
+ * Get multiple accessible color suggestions.
+ *
+ * @param spread - Step size in saturation units when sampling the curve:
+ *   - 0 (default): Clustered mode, returns N closest points to original color
+ *   - N: Sample every N saturation points along the curve (higher = more distinct colors)
  */
 export function getNearestAccessibleColors(
   foreground: string,
   background: string,
   count: number,
   threshold = CONTRAST_AA_NORMAL,
+  spread = 0,
 ): string[] {
   if (meetsContrastThreshold(foreground, background, threshold)) {
     return [foreground];
@@ -211,14 +216,47 @@ export function getNearestAccessibleColors(
     return [isBackgroundLight ? "#000000" : "#ffffff"];
   }
 
-  // calculate distances for all curve points
+  // Find the nearest point on the curve
+  let nearestIdx = 0;
+  let nearestDist = hsvDistance(satPercent, valPercent, 0, curve[0] as number);
+  for (let s = 1; s < curve.length; s++) {
+    const dist = hsvDistance(satPercent, valPercent, s, curve[s] as number);
+    if (dist < nearestDist) {
+      nearestDist = dist;
+      nearestIdx = s;
+    }
+  }
+
+  if (spread > 0 && curve.length > 1) {
+    // Sample at intervals of `spread` saturation points, starting from nearest
+    const sampled = new Set<number>([nearestIdx]);
+
+    // Sample outward from nearest in both directions
+    for (let offset = spread; sampled.size < count; offset += spread) {
+      const lower = nearestIdx - offset;
+      const upper = nearestIdx + offset;
+      const addedAny = lower >= 0 || upper < curve.length;
+
+      if (lower >= 0) sampled.add(lower);
+      if (upper < curve.length) sampled.add(upper);
+
+      // Stop if we've gone beyond the curve in both directions
+      if (!addedAny) break;
+    }
+
+    // Sort by saturation, convert to hex
+    const sorted = [...sampled].sort((a, b) => a - b).slice(0, count);
+    return sorted.map(s =>
+      chroma.hsv(normalizedHue, s / 100, (curve[s] as number) / 100).hex(),
+    );
+  }
+
+  // Clustered mode: return N closest points
   const distances = curve.map((v, s) => ({
     saturation: s,
     value: v,
     distance: hsvDistance(satPercent, valPercent, s, v),
   }));
-
-  // sort by distance and take top N
   distances.sort((a, b) => a.distance - b.distance);
 
   return distances

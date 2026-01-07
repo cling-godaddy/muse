@@ -6,6 +6,7 @@ import {
   getContrastRatio,
   meetsContrastThreshold,
   getNearestAccessibleColor,
+  getNearestAccessibleColors,
   getAccessibilityCurve,
   CONTRAST_AA_NORMAL,
   CONTRAST_AA_LARGE,
@@ -23,15 +24,19 @@ export default meta;
 function ContrastDemo() {
   const [foreground, setForeground] = useState("#6366f1");
   const [background, setBackground] = useState("#ffffff");
+  const [threshold, setThreshold] = useState(CONTRAST_AA_NORMAL);
+  const [count, setCount] = useState(5);
+  const [spread, setSpread] = useState(10);
 
   const ratio = getContrastRatio(foreground, background);
   const passesNormal = meetsContrastThreshold(foreground, background, CONTRAST_AA_NORMAL);
   const passesLarge = meetsContrastThreshold(foreground, background, CONTRAST_AA_LARGE);
-  const suggestion = getNearestAccessibleColor(foreground, background);
+  const nearest = getNearestAccessibleColor(foreground, background, threshold);
+  const alternatives = getNearestAccessibleColors(foreground, background, count, threshold, spread);
 
   return (
     <div style={{ display: "flex", gap: 32, alignItems: "flex-start" }}>
-      {/* Left: Color pickers */}
+      {/* Left: Color pickers + controls */}
       <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
         <div>
           <div style={{ fontSize: 12, color: "#6b7280", marginBottom: 4 }}>Foreground</div>
@@ -41,10 +46,60 @@ function ContrastDemo() {
           <div style={{ fontSize: 12, color: "#6b7280", marginBottom: 4 }}>Background</div>
           <ColorPicker value={background} onChange={setBackground} side="left" />
         </div>
+        <div>
+          <div style={{ fontSize: 12, color: "#6b7280", marginBottom: 4 }}>Threshold</div>
+          <select
+            value={threshold}
+            onChange={e => setThreshold(Number(e.target.value))}
+            style={{
+              padding: "8px 12px",
+              borderRadius: 6,
+              border: "1px solid #e5e7eb",
+              fontSize: 14,
+              width: "100%",
+            }}
+          >
+            <option value={CONTRAST_AA_LARGE}>3:1 (Large text)</option>
+            <option value={CONTRAST_AA_NORMAL}>4.5:1 (Normal text)</option>
+            <option value={7}>7:1 (AAA)</option>
+          </select>
+        </div>
+        <div>
+          <div style={{ fontSize: 12, color: "#6b7280", marginBottom: 4 }}>
+            Count:
+            {" "}
+            {count}
+          </div>
+          <input
+            type="range"
+            min={2}
+            max={10}
+            value={count}
+            onChange={e => setCount(Number(e.target.value))}
+            style={{ width: "100%" }}
+          />
+        </div>
+        <div>
+          <div style={{ fontSize: 12, color: "#6b7280", marginBottom: 4 }}>
+            Spread:
+            {" "}
+            {spread}
+            {" "}
+            {spread === 0 ? "(clustered)" : `(${spread} sat jump)`}
+          </div>
+          <input
+            type="range"
+            min={0}
+            max={25}
+            value={spread}
+            onChange={e => setSpread(Number(e.target.value))}
+            style={{ width: "100%" }}
+          />
+        </div>
       </div>
 
       {/* Right: Content */}
-      <div style={{ display: "flex", flexDirection: "column", gap: 16, minWidth: 280 }}>
+      <div style={{ display: "flex", flexDirection: "column", gap: 16, minWidth: 320 }}>
         <div
           style={{
             padding: 24,
@@ -95,54 +150,66 @@ function ContrastDemo() {
           </div>
         </div>
 
-        <div
-          style={{
-            padding: 16,
-            background: "#fef3c7",
-            borderRadius: 8,
-            border: "1px solid #f59e0b",
-            visibility: suggestion ? "visible" : "hidden",
-          }}
-        >
-          <div style={{ fontSize: 12, color: "#92400e", marginBottom: 8 }}>
-            Suggested accessible color:
-          </div>
-          <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-            <div
-              style={{
-                width: 40,
-                height: 40,
-                backgroundColor: suggestion ?? "transparent",
-                borderRadius: 6,
-                border: "1px solid #e5e7eb",
-              }}
-            />
-            <div>
-              <code style={{ fontSize: 14, fontWeight: 600 }}>{suggestion ?? "#000000"}</code>
-              <div style={{ fontSize: 12, color: "#6b7280" }}>
-                Ratio:
-                {" "}
-                {suggestion ? getContrastRatio(suggestion, background).toFixed(2) : "0.00"}
-                :1
-              </div>
+        {/* Accessible alternatives */}
+        {nearest && (
+          <div
+            style={{
+              padding: 12,
+              background: "#fef3c7",
+              borderRadius: 8,
+              border: "1px solid #f59e0b",
+              width: 320,
+              minHeight: 100,
+              boxSizing: "border-box",
+            }}
+          >
+            <div style={{ fontSize: 11, color: "#92400e", marginBottom: 8 }}>
+              Accessible alternatives (click to apply):
             </div>
-            <button
-              onClick={() => suggestion && setForeground(suggestion)}
-              style={{
-                marginLeft: "auto",
-                padding: "6px 12px",
-                fontSize: 13,
-                background: "#f59e0b",
-                color: "white",
-                border: "none",
-                borderRadius: 6,
-                cursor: "pointer",
-              }}
-            >
-              Apply
-            </button>
+            <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
+              {alternatives.map((color) => {
+                const colorRatio = getContrastRatio(color, background);
+                const isNearest = color === nearest;
+                return (
+                  <button
+                    key={color}
+                    onClick={() => setForeground(color)}
+                    style={{
+                      display: "flex",
+                      flexDirection: "column",
+                      alignItems: "center",
+                      gap: 2,
+                      padding: 4,
+                      background: "white",
+                      border: isNearest ? "2px solid #f59e0b" : "1px solid #e5e7eb",
+                      borderRadius: 6,
+                      cursor: "pointer",
+                    }}
+                    title={isNearest ? "Nearest (minimal change)" : "Click to apply"}
+                  >
+                    <div
+                      style={{
+                        width: 28,
+                        height: 28,
+                        backgroundColor: color,
+                        borderRadius: 3,
+                        border: "1px solid rgba(0,0,0,0.1)",
+                      }}
+                    />
+                    <code style={{ fontSize: 9, color: "#374151" }}>{color}</code>
+                    <div style={{ fontSize: 9, color: "#6b7280" }}>
+                      {colorRatio.toFixed(1)}
+                      :1
+                    </div>
+                    {isNearest && (
+                      <div style={{ fontSize: 8, color: "#f59e0b", fontWeight: 600 }}>nearest</div>
+                    )}
+                  </button>
+                );
+              })}
+            </div>
           </div>
-        </div>
+        )}
       </div>
     </div>
   );
