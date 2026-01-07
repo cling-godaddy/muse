@@ -55,12 +55,6 @@ export function createGettyProvider(config: GettyProviderConfig): MediaProvider 
         params.append("orientations", options.orientation);
       }
 
-      console.log("GETTY_REQUEST", {
-        query,
-        orientation: options.orientation,
-        fullUrl: `${GETTY_PROXY_URL}/v1/search?${params.toString()}`,
-      });
-
       const response = await fetch(`${GETTY_PROXY_URL}/v1/search?${params}`, {
         headers: {
           "Authorization": `sso-jwt ${jwt}`,
@@ -103,19 +97,6 @@ export function createGettyProvider(config: GettyProviderConfig): MediaProvider 
           return actual === options.orientation;
         })
         : mapped;
-
-      console.log("GETTY_RESPONSE", {
-        query,
-        requestedOrientation: options.orientation,
-        totalResults: mapped.length,
-        filteredResults: filtered.length,
-        dimensions: filtered.slice(0, 3).map(r => ({
-          id: r.id,
-          width: r.width,
-          height: r.height,
-          orientation: calculateOrientation(r.width, r.height),
-        })),
-      });
 
       return filtered;
     },
