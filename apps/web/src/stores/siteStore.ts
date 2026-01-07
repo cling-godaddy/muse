@@ -42,7 +42,7 @@ interface SiteState {
   setNavbar: (navbar: NavbarSection | null) => void
   clearSite: () => void
   updateSiteName: (name: string) => void
-  addNewPage: (slug: string, title: string) => string
+  addNewPage: (slug: string, title: string, parentId?: string | null) => string
   deletePage: (pageId: string) => void
 
   // History actions
@@ -65,17 +65,20 @@ export const useSiteStore = create<SiteState>()(
       dirty: false,
 
       hydrateDraft: (site) => {
-        // Rebuild tree from pages if tree is empty (migration for old sites)
-        const tree = site.tree.length > 0
-          ? site.tree
-          : Object.values(site.pages).map(page => ({
-            pageId: page.id,
-            slug: page.slug,
-            children: [],
-          }));
+        // Migration: ensure all pages have parentId and order
+        const migratedPages = Object.fromEntries(
+          Object.entries(site.pages).map(([id, page], index) => [
+            id,
+            {
+              ...page,
+              parentId: page.parentId ?? null,
+              order: page.order ?? index,
+            },
+          ]),
+        );
 
         set({
-          draft: { ...site, tree },
+          draft: { ...site, pages: migratedPages },
           currentPageId: Object.keys(site.pages)[0] ?? null,
           theme: {
             palette: site.theme.palette,
@@ -218,7 +221,6 @@ export const useSiteStore = create<SiteState>()(
         applyDraftOp((draft) => {
           // Clear pages but preserve site metadata
           draft.pages = {};
-          draft.tree = [];
           draft.navbar = undefined;
           draft.updatedAt = new Date().toISOString();
         });
@@ -233,19 +235,23 @@ export const useSiteStore = create<SiteState>()(
         });
       },
 
-      addNewPage: (slug, title) => {
+      addNewPage: (slug, title, parentId = null) => {
         const { applyDraftOp } = get();
         const pageId = crypto.randomUUID();
 
         applyDraftOp((draft) => {
+          // Compute order (append to end of siblings)
+          const siblings = Object.values(draft.pages).filter(p => p.parentId === parentId);
+          const maxOrder = siblings.length > 0 ? Math.max(...siblings.map(s => s.order)) : -1;
+
           draft.pages[pageId] = {
             id: pageId,
             slug,
+            parentId,
+            order: maxOrder + 1,
             sections: [],
             meta: { title },
           };
-          // Also add to tree so getPagesFlattened works
-          draft.tree.push({ pageId, slug, children: [] });
           draft.updatedAt = new Date().toISOString();
         });
 
@@ -256,11 +262,16 @@ export const useSiteStore = create<SiteState>()(
         const { applyDraftOp, currentPageId } = get();
 
         applyDraftOp((draft) => {
+          // Find all descendants (cascade delete)
+          function getDescendants(id: string): string[] {
+            const children = Object.values(draft.pages).filter(p => p.parentId === id);
+            return children.flatMap(c => [c.id, ...getDescendants(c.id)]);
+          }
+          const toDelete = new Set([pageId, ...getDescendants(pageId)]);
+
           draft.pages = Object.fromEntries(
-            Object.entries(draft.pages).filter(([id]) => id !== pageId),
+            Object.entries(draft.pages).filter(([id]) => !toDelete.has(id)),
           );
-          // Also remove from tree
-          draft.tree = draft.tree.filter(node => node.pageId !== pageId);
           draft.updatedAt = new Date().toISOString();
         });
 

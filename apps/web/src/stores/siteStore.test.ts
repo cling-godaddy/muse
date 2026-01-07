@@ -22,6 +22,8 @@ describe("siteStore", () => {
       site.pages[pageId] = {
         id: pageId,
         slug: "/",
+        parentId: null,
+        order: 0,
         sections: [],
         meta: { title: "Home" },
       };
@@ -43,6 +45,8 @@ describe("siteStore", () => {
       site.pages[pageId] = {
         id: pageId,
         slug: "/",
+        parentId: null,
+        order: 0,
         sections: [],
         meta: { title: "Home" },
       };
@@ -62,6 +66,8 @@ describe("siteStore", () => {
       site.pages[pageId] = {
         id: pageId,
         slug: "/",
+        parentId: null,
+        order: 0,
         sections: [],
         meta: { title: "Home" },
       };
@@ -82,6 +88,8 @@ describe("siteStore", () => {
       site.pages[pageId] = {
         id: pageId,
         slug: "/",
+        parentId: null,
+        order: 0,
         sections: [],
         meta: { title: "Home" },
       };
@@ -103,6 +111,8 @@ describe("siteStore", () => {
       site.pages[pageId] = {
         id: pageId,
         slug: "/",
+        parentId: null,
+        order: 0,
         sections: [],
         meta: { title: "Home" },
       };
@@ -127,6 +137,8 @@ describe("siteStore", () => {
       site.pages[pageId] = {
         id: pageId,
         slug: "/",
+        parentId: null,
+        order: 0,
         sections: [
           {
             id: sectionId,
@@ -158,6 +170,8 @@ describe("siteStore", () => {
       site.pages[pageId] = {
         id: pageId,
         slug: "/",
+        parentId: null,
+        order: 0,
         sections: [],
         meta: { title: "Home" },
       };
