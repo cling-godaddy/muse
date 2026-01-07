@@ -197,6 +197,14 @@ export function Grid({ section, onUpdate, isPending, site, getToken }: Props) {
             isPending={isPending}
           />
         ))}
+        {isGenerating && (
+          <FeatureCard
+            item={{ title: "", description: "" }}
+            onUpdate={() => {}}
+            onRemove={() => {}}
+            isPending
+          />
+        )}
       </div>
       {isEditable && (
         <AddItemPopover
