@@ -48,8 +48,6 @@ interface SiteState {
   // History actions
   undo: () => void
   redo: () => void
-  canUndo: boolean
-  canRedo: boolean
 
   // Save coordination
   markSaved: (savedSite: Site) => void
@@ -288,14 +286,6 @@ export const useSiteStore = create<SiteState>()(
           dirty: true,
         };
       }),
-
-      get canUndo() {
-        return (get()?.undoStack.length ?? 0) > 0;
-      },
-
-      get canRedo() {
-        return (get()?.redoStack.length ?? 0) > 0;
-      },
 
       markSaved: savedSite => set({
         draft: savedSite,

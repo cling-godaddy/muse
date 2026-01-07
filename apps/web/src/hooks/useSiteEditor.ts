@@ -57,8 +57,8 @@ export function useSiteEditor(siteId: string | undefined) {
   const updatePageSections = useSiteStore(state => state.updatePageSections);
   const undo = useSiteStore(state => state.undo);
   const redo = useSiteStore(state => state.redo);
-  const canUndo = useSiteStore(state => state.canUndo);
-  const canRedo = useSiteStore(state => state.canRedo);
+  const canUndo = useSiteStore(state => state.undoStack.length > 0);
+  const canRedo = useSiteStore(state => state.redoStack.length > 0);
 
   const [messages, setMessages] = useState<Message[]>([]);
   const [pendingImageSections, setPendingImageSections] = useState<Set<string>>(new Set());
