@@ -2,6 +2,7 @@ import { useMemo } from "react";
 import { Undo2, Redo2, Eye, PenLine, Smartphone, Tablet, Monitor, RotateCcw, Save, Loader2, Check } from "lucide-react";
 import type { Site, PreviewDevice } from "@muse/core";
 import { getPagesFlattened } from "@muse/core";
+import { useSiteStore } from "../stores/siteStore";
 
 type EditorMode = "edit" | "preview";
 
@@ -68,6 +69,7 @@ export function EditorToolbar({
   isSyncing,
   hasUnsavedChanges,
 }: EditorToolbarProps) {
+  const isLoadingImages = useSiteStore(state => state.pendingImageSections.size > 0);
   const isPreview = editorMode === "preview";
   const canPreview = isGenerationComplete;
   const flattenedPages = useMemo(() => getPagesFlattened(site), [site]);
@@ -215,31 +217,45 @@ export function EditorToolbar({
             {isPreview ? <PenLine size={16} /> : <Eye size={16} />}
           </button>
         )}
-        {onSave && isGenerationComplete && (
+        {onSave && (
           <div className="flex items-center gap-3 ml-2">
             {/* Status indicator */}
             <div className="flex items-center gap-1.5 text-xs min-w-[70px]">
-              {(isSyncing || isSaving)
+              {!isGenerationComplete
                 ? (
                   <>
-                    <Loader2 size={14} className="animate-spin text-blue-500" />
-                    <span className="text-text-muted">Saving...</span>
+                    <Loader2 size={14} className="animate-spin text-text-muted" />
+                    <span className="text-text-muted">Generating...</span>
                   </>
                 )
-                : !hasUnsavedChanges
+                : isLoadingImages
                   ? (
                     <>
-                      <Check size={14} className="text-green-500" />
-                      <span className="text-text-muted">Saved</span>
+                      <Loader2 size={14} className="animate-spin text-text-muted" />
+                      <span className="text-text-muted">Loading images...</span>
                     </>
                   )
-                  : null}
+                  : (isSyncing || isSaving)
+                    ? (
+                      <>
+                        <Loader2 size={14} className="animate-spin text-blue-500" />
+                        <span className="text-text-muted">Saving...</span>
+                      </>
+                    )
+                    : !hasUnsavedChanges
+                      ? (
+                        <>
+                          <Check size={14} className="text-green-500" />
+                          <span className="text-text-muted">Saved</span>
+                        </>
+                      )
+                      : null}
             </div>
 
             {/* Save button */}
             <button
               onClick={onSave}
-              disabled={isSaving || !hasUnsavedChanges}
+              disabled={!isGenerationComplete || isLoadingImages || isSaving || !hasUnsavedChanges}
               className="flex items-center justify-center gap-1 px-2 h-7 text-xs text-text-muted hover:text-text hover:bg-border rounded transition-colors disabled:opacity-30 disabled:pointer-events-none"
               title={hasUnsavedChanges ? "Save (⌘S)" : "Saved"}
             >

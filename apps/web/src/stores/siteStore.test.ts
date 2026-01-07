@@ -12,6 +12,7 @@ describe("siteStore", () => {
       undoStack: [],
       redoStack: [],
       dirty: false,
+      pendingImageSections: new Set(),
     });
   });
 
@@ -189,6 +190,40 @@ describe("siteStore", () => {
       expect(state.dirty).toBe(false);
       expect(state.undoStack).toHaveLength(0);
       expect(state.redoStack).toHaveLength(0);
+    });
+  });
+
+  describe("pendingImageSections", () => {
+    it("should add section to pending set", () => {
+      useSiteStore.getState().addPendingImageSection("section-1");
+      useSiteStore.getState().addPendingImageSection("section-2");
+
+      const state = useSiteStore.getState();
+      expect(state.pendingImageSections.size).toBe(2);
+      expect(state.pendingImageSections.has("section-1")).toBe(true);
+      expect(state.pendingImageSections.has("section-2")).toBe(true);
+    });
+
+    it("should remove sections from pending set", () => {
+      useSiteStore.getState().addPendingImageSection("section-1");
+      useSiteStore.getState().addPendingImageSection("section-2");
+      useSiteStore.getState().addPendingImageSection("section-3");
+
+      useSiteStore.getState().removePendingImageSections(["section-1", "section-3"]);
+
+      const state = useSiteStore.getState();
+      expect(state.pendingImageSections.size).toBe(1);
+      expect(state.pendingImageSections.has("section-2")).toBe(true);
+    });
+
+    it("should clear all pending sections", () => {
+      useSiteStore.getState().addPendingImageSection("section-1");
+      useSiteStore.getState().addPendingImageSection("section-2");
+
+      useSiteStore.getState().clearPendingImageSections();
+
+      const state = useSiteStore.getState();
+      expect(state.pendingImageSections.size).toBe(0);
     });
   });
 });

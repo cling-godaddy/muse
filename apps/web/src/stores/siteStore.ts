@@ -28,6 +28,9 @@ interface SiteState {
   redoStack: HistoryEntry[]
   dirty: boolean
 
+  // Image loading state
+  pendingImageSections: Set<string>
+
   // Actions
   hydrateDraft: (site: Site) => void
   applyDraftOp: (recipe: (draft: Site) => void) => void
@@ -52,6 +55,11 @@ interface SiteState {
   // Save coordination
   markSaved: (savedSite: Site) => void
   markSynced: () => void
+
+  // Image loading actions
+  addPendingImageSection: (id: string) => void
+  removePendingImageSections: (ids: string[]) => void
+  clearPendingImageSections: () => void
 }
 
 export const useSiteStore = create<SiteState>()(
@@ -63,6 +71,7 @@ export const useSiteStore = create<SiteState>()(
       undoStack: [],
       redoStack: [],
       dirty: false,
+      pendingImageSections: new Set(),
 
       hydrateDraft: (site) => {
         // Migration: ensure all pages have parentId and order
@@ -322,6 +331,20 @@ export const useSiteStore = create<SiteState>()(
 
       markSynced: () => set({
         dirty: false,
+      }),
+
+      addPendingImageSection: id => set(state => ({
+        pendingImageSections: new Set(state.pendingImageSections).add(id),
+      })),
+
+      removePendingImageSections: ids => set((state) => {
+        const next = new Set(state.pendingImageSections);
+        for (const id of ids) next.delete(id);
+        return { pendingImageSections: next };
+      }),
+
+      clearPendingImageSections: () => set({
+        pendingImageSections: new Set(),
       }),
     }),
     { name: "site-store" },

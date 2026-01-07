@@ -59,9 +59,11 @@ export function useSiteEditor(siteId: string | undefined) {
   const redo = useSiteStore(state => state.redo);
   const canUndo = useSiteStore(state => state.undoStack.length > 0);
   const canRedo = useSiteStore(state => state.redoStack.length > 0);
+  const pendingImageSections = useSiteStore(state => state.pendingImageSections);
+  const addPendingImageSection = useSiteStore(state => state.addPendingImageSection);
+  const removePendingImageSections = useSiteStore(state => state.removePendingImageSections);
 
   const [messages, setMessages] = useState<Message[]>([]);
-  const [pendingImageSections, setPendingImageSections] = useState<Set<string>>(new Set());
   const trackUsageRef = useRef<((usage: Usage) => void) | null>(null);
   const lastAddedSectionIdRef = useRef<string | null>(null);
   const prevSiteIdRef = useRef<string | undefined>(siteId);
@@ -75,6 +77,7 @@ export function useSiteEditor(siteId: string | undefined) {
         undoStack: [],
         redoStack: [],
         dirty: false,
+        pendingImageSections: new Set(),
       });
       prevSiteIdRef.current = siteId;
     }
@@ -135,9 +138,9 @@ export function useSiteEditor(siteId: string | undefined) {
   const handleSectionParsed = useCallback((section: Section) => {
     addSection(section);
     if (sectionNeedsImages(section.type as SectionType)) {
-      setPendingImageSections(prev => new Set(prev).add(section.id));
+      addPendingImageSection(section.id);
     }
-  }, [addSection]);
+  }, [addSection, addPendingImageSection]);
 
   const handleThemeSelected = useCallback((selection: ThemeSelection) => {
     setTheme(selection.palette, selection.typography, selection.effects);
@@ -169,13 +172,9 @@ export function useSiteEditor(siteId: string | undefined) {
     }
 
     if (resolvedSectionIds.length > 0) {
-      setPendingImageSections((prev) => {
-        const next = new Set(prev);
-        for (const id of resolvedSectionIds) next.delete(id);
-        return next;
-      });
+      removePendingImageSections(resolvedSectionIds);
     }
-  }, [updateSection]);
+  }, [updateSection, removePendingImageSections]);
 
   const handleAddSection = useCallback(async (section: Section, index: number, generateWithAI = false) => {
     // Store section ID for scrolling
@@ -208,7 +207,7 @@ export function useSiteEditor(siteId: string | undefined) {
 
     // mark pending for image sections (only when AI enabled)
     if (sectionNeedsImages(section.type as SectionType)) {
-      setPendingImageSections(prev => new Set(prev).add(section.id));
+      addPendingImageSection(section.id);
     }
 
     try {
@@ -246,21 +245,13 @@ export function useSiteEditor(siteId: string | undefined) {
         handleImages(images, [populated]);
       }
 
-      setPendingImageSections((prev) => {
-        const next = new Set(prev);
-        next.delete(section.id);
-        return next;
-      });
+      removePendingImageSections([section.id]);
     }
     catch (err) {
       console.error("Failed to generate content:", err);
-      setPendingImageSections((prev) => {
-        const next = new Set(prev);
-        next.delete(section.id);
-        return next;
-      });
+      removePendingImageSections([section.id]);
     }
-  }, [addSection, siteId, currentPageId, createSectionMutation, markSynced, getToken, site, sections, updateSection, handleImages]);
+  }, [addSection, siteId, currentPageId, createSectionMutation, markSynced, getToken, site, sections, updateSection, handleImages, addPendingImageSection, removePendingImageSections]);
 
   const handlePages = useCallback((pages: PageInfo[], themeOverride?: ThemeSelection) => {
     // Ensure draft is initialized before making changes
@@ -286,7 +277,7 @@ export function useSiteEditor(siteId: string | undefined) {
         updatePageSections(pageId, pageInfo.sections);
         for (const section of pageInfo.sections) {
           if (sectionNeedsImages(section.type as SectionType)) {
-            setPendingImageSections(prev => new Set(prev).add(section.id));
+            addPendingImageSection(section.id);
           }
         }
       }
@@ -306,7 +297,7 @@ export function useSiteEditor(siteId: string | undefined) {
         setCurrentPage(firstPageId);
       }
     });
-  }, [clearSite, addNewPage, updatePageSections, setCurrentPage, setNavbar, site, setTheme, hydrateDraft]);
+  }, [clearSite, addNewPage, updatePageSections, setCurrentPage, setNavbar, site, setTheme, hydrateDraft, addPendingImageSection]);
 
   const handleRefine = useCallback((updates: RefineUpdate[]) => {
     for (const { sectionId, updates: sectionUpdates } of updates) {
