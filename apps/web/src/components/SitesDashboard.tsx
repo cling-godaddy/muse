@@ -1,9 +1,11 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { UserButton } from "@clerk/clerk-react";
-import { Trash2 } from "lucide-react";
+import { Trash2, Upload } from "lucide-react";
 import { useAuthFetch } from "../hooks/useAuthFetch";
 import { Dialog, Spinner } from "@muse/editor";
+
+const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
 
 interface SiteSummary {
   id: string
@@ -220,6 +222,10 @@ export function SitesDashboard() {
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [deletingSite, setDeletingSite] = useState<SiteSummary | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [importing, setImporting] = useState(false);
+  const [importError, setImportError] = useState<string | null>(null);
+  const [importSuccess, setImportSuccess] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     authFetch("/api/sites")
@@ -263,6 +269,58 @@ export function SitesDashboard() {
     }
   };
 
+  const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    // Client-side validation
+    if (!file.type.includes("json") && !file.name.endsWith(".json")) {
+      setImportError("Please select a JSON file");
+      return;
+    }
+    if (file.size > MAX_FILE_SIZE) {
+      setImportError("File too large (max 10MB)");
+      return;
+    }
+
+    setImporting(true);
+    setImportError(null);
+    setImportSuccess(null);
+
+    try {
+      const text = await file.text();
+      const json = JSON.parse(text);
+
+      const res = await authFetch("/api/sites/import", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(json),
+      });
+
+      if (!res.ok) {
+        const err = await res.json();
+        throw new Error(err.error || "Import failed");
+      }
+
+      const result = await res.json();
+      setImportSuccess(result.message);
+      setTimeout(() => setImportSuccess(null), 5000);
+    }
+    catch (err) {
+      if (err instanceof SyntaxError) {
+        setImportError("Invalid JSON file");
+      }
+      else {
+        setImportError(err instanceof Error ? err.message : "Import failed");
+      }
+      setTimeout(() => setImportError(null), 5000);
+    }
+    finally {
+      setImporting(false);
+      e.target.value = "";
+    }
+  };
+
   return (
     <div className="min-h-screen bg-bg text-text">
       <header className="px-6 py-3 border-b border-border bg-bg flex items-center gap-4">
@@ -278,14 +336,42 @@ export function SitesDashboard() {
         <div className="flex items-center justify-between mb-8">
           <h1 className="text-2xl font-semibold">My Sites</h1>
           {sites.length > 0 && (
-            <button
-              onClick={() => setShowCreateModal(true)}
-              className="px-4 py-2 bg-primary hover:bg-primary-hover text-white rounded-lg font-medium transition-colors flex items-center gap-2"
-            >
-              New Site
-            </button>
+            <div className="flex items-center gap-2">
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept=".json,application/json"
+                className="hidden"
+                onChange={handleFileSelect}
+              />
+              <button
+                onClick={() => fileInputRef.current?.click()}
+                disabled={importing}
+                className="px-4 py-2 border border-border hover:bg-bg-subtle rounded-lg font-medium transition-colors flex items-center gap-2 disabled:opacity-50"
+              >
+                {importing ? <Spinner /> : <Upload size={16} />}
+                Import
+              </button>
+              <button
+                onClick={() => setShowCreateModal(true)}
+                className="px-4 py-2 bg-primary hover:bg-primary-hover text-white rounded-lg font-medium transition-colors flex items-center gap-2"
+              >
+                New Site
+              </button>
+            </div>
           )}
         </div>
+
+        {importError && (
+          <div className="mb-4 p-3 bg-red-500/10 border border-red-500/20 rounded-lg text-red-500 text-sm">
+            {importError}
+          </div>
+        )}
+        {importSuccess && (
+          <div className="mb-4 p-3 bg-green-500/10 border border-green-500/20 rounded-lg text-green-500 text-sm">
+            {importSuccess}
+          </div>
+        )}
 
         {loading
           ? (

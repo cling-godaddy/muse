@@ -46,6 +46,28 @@ sitesRoute.post("/", async (c) => {
   return c.json(site, 201);
 });
 
+const MAX_IMPORT_SIZE = 10 * 1024 * 1024; // 10MB
+
+sitesRoute.post("/import", async (c) => {
+  const contentLength = parseInt(c.req.header("content-length") || "0");
+  if (contentLength > MAX_IMPORT_SIZE) {
+    return c.json({ error: "File too large (max 10MB)" }, 413);
+  }
+
+  const body = await c.req.json();
+
+  if (!body.baseUrl || !Array.isArray(body.pages)) {
+    return c.json({ error: "Invalid format: expected atlas JSON with baseUrl and pages" }, 400);
+  }
+
+  console.log(`[import] Received atlas data for ${body.baseUrl} with ${body.pages.length} pages`);
+
+  return c.json({
+    success: true,
+    message: `Received ${body.pages.length} pages from ${body.baseUrl}`,
+  });
+});
+
 sitesRoute.get("/:id", async (c) => {
   const sites = await getSites();
   const userId = c.get("userId");
