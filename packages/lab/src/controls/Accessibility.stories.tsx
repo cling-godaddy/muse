@@ -35,11 +35,11 @@ function ContrastDemo() {
       <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
         <div>
           <div style={{ fontSize: 12, color: "#6b7280", marginBottom: 4 }}>Foreground</div>
-          <ColorPicker value={foreground} onChange={setForeground} />
+          <ColorPicker value={foreground} onChange={setForeground} side="left" />
         </div>
         <div>
           <div style={{ fontSize: 12, color: "#6b7280", marginBottom: 4 }}>Background</div>
-          <ColorPicker value={background} onChange={setBackground} />
+          <ColorPicker value={background} onChange={setBackground} side="left" />
         </div>
       </div>
 
@@ -277,19 +277,7 @@ function CurveVisualizerDemo() {
 
   return (
     <div style={{ display: "flex", gap: 32, alignItems: "flex-start" }}>
-      {/* Left: Color pickers */}
-      <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
-        <div>
-          <div style={{ fontSize: 12, color: "#6b7280", marginBottom: 4 }}>Foreground</div>
-          <ColorPicker value={foreground} onChange={setForeground} />
-        </div>
-        <div>
-          <div style={{ fontSize: 12, color: "#6b7280", marginBottom: 4 }}>Background</div>
-          <ColorPicker value={background} onChange={setBackground} />
-        </div>
-      </div>
-
-      {/* Center: Curve visualization */}
+      {/* Left: Curve visualization */}
       <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
         <AccessibilityCurveCanvas
           hue={normalizedHue}
@@ -297,7 +285,7 @@ function CurveVisualizerDemo() {
           threshold={threshold}
           foregroundSat={sat * 100}
           foregroundVal={val * 100}
-          size={280}
+          size={320}
         />
         <div style={{ fontSize: 12, color: "#6b7280", textAlign: "center" }}>
           Hue:
@@ -307,26 +295,33 @@ function CurveVisualizerDemo() {
         </div>
       </div>
 
-      {/* Right: Threshold and ratio */}
+      {/* Right: Controls */}
       <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+        <div>
+          <div style={{ fontSize: 12, color: "#6b7280", marginBottom: 4 }}>Foreground</div>
+          <ColorPicker value={foreground} onChange={setForeground} side="right" />
+        </div>
+        <div>
+          <div style={{ fontSize: 12, color: "#6b7280", marginBottom: 4 }}>Background</div>
+          <ColorPicker value={background} onChange={setBackground} side="right" />
+        </div>
         <div>
           <div style={{ fontSize: 12, color: "#6b7280", marginBottom: 4 }}>Threshold</div>
           <select
             value={threshold}
             onChange={e => setThreshold(Number(e.target.value))}
             style={{
-              padding: "6px 12px",
+              padding: "8px 12px",
               borderRadius: 6,
               border: "1px solid #e5e7eb",
               fontSize: 14,
             }}
           >
-            <option value={CONTRAST_AA_NORMAL}>4.5:1 (Normal text)</option>
-            <option value={CONTRAST_AA_LARGE}>3:1 (Large text)</option>
+            <option value={CONTRAST_AA_NORMAL}>4.5:1 (Normal)</option>
+            <option value={CONTRAST_AA_LARGE}>3:1 (Large)</option>
             <option value={7}>7:1 (AAA)</option>
           </select>
         </div>
-
         <div
           style={{
             padding: 12,

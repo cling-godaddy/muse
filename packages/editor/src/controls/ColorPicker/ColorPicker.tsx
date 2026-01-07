@@ -12,6 +12,8 @@ export interface ColorPickerProps {
   onChange: (color: string) => void
   disabled?: boolean
   ariaLabel?: string
+  /** Which side the popover opens on. Default: "bottom" */
+  side?: "top" | "right" | "bottom" | "left"
 }
 
 export function ColorPicker({
@@ -19,6 +21,7 @@ export function ColorPicker({
   onChange,
   disabled,
   ariaLabel,
+  side = "bottom",
 }: ColorPickerProps) {
   const [open, setOpen] = useState(false);
   const [hsv, setHsv] = useState<HSV>(() => hexToHsv(value));
@@ -78,6 +81,7 @@ export function ColorPicker({
       <Popover.Portal>
         <Popover.Content
           className={styles.content}
+          side={side}
           sideOffset={4}
           align="start"
           role="dialog"
