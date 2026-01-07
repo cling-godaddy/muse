@@ -20,9 +20,11 @@
     "@storybook/addon-a11y": "^10.1.11",
     "@storybook/addon-vitest": "^10.1.11",
     "@storybook/react-vite": "^10.1.11",
+    "@types/chroma-js": "^3.1.2",
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "@vitest/browser-playwright": "^4.0.16",
+    "chroma-js": "^3.2.0",
     "eslint-plugin-storybook": "10.1.11",
     "storybook": "^10.1.11"
   }
