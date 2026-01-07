@@ -5,7 +5,7 @@ import { requireAuth } from "../middleware/auth";
 import { createLogger } from "@muse/logger";
 import { createMediaClient, createQueryNormalizer, getIamJwt, type MediaClient, type QueryNormalizer } from "@muse/media";
 import type { Section, SectionType } from "@muse/core";
-import { sectionNeedsImages } from "@muse/core";
+import { sectionNeedsImages, getPreset } from "@muse/core";
 
 const logger = createLogger();
 let client: Provider | null = null;
@@ -360,10 +360,63 @@ chatRoute.post("/generate-item", async (c) => {
   );
 
   const parsed = JSON.parse(itemResult.content) as { item: Record<string, unknown> };
+  let finalItem = parsed.item;
   logger.info("item_generated", { itemType });
 
+  // Check if this preset requires images
+  const preset = sectionContext?.preset ? getPreset(sectionContext.preset) : undefined;
+  if (preset?.imageRequirements) {
+    logger.info("fetching_image_for_item", { preset: preset.id });
+
+    try {
+      const imagePlanResult = await imageAgent.run(
+        {
+          prompt: `Image for ${itemType} item`,
+          brief: finalBrief,
+          structure: {
+            sections: [
+              {
+                id: crypto.randomUUID(),
+                type: "features",
+                preset: preset.id,
+                purpose: String(finalItem.title || "Feature"),
+              },
+            ],
+          },
+          copySections: [
+            {
+              id: crypto.randomUUID(),
+              headline: String(finalItem.title || undefined),
+              subheadline: typeof finalItem.description === "string" ? finalItem.description : undefined,
+            },
+          ],
+        },
+        getClient(),
+      );
+
+      const plans = parseImagePlan(imagePlanResult.content);
+      logger.info("image_plans_generated", { count: plans.length });
+
+      if (plans.length > 0) {
+        const images = await getMediaClient().executePlan(plans);
+        logger.info("images_fetched", { count: images.length });
+
+        // Apply image to item
+        if (images.length > 0 && preset.imageInjection) {
+          if (preset.imageInjection.field === "image") {
+            finalItem = { ...finalItem, image: images[0] };
+          }
+        }
+      }
+    }
+    catch (err) {
+      logger.error("image_generation_failed", { error: err });
+      // Continue without image - item can still be used
+    }
+  }
+
   return c.json({
-    item: parsed.item,
+    item: finalItem,
     usage: itemResult.usage,
   });
 });
