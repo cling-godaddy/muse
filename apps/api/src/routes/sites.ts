@@ -83,7 +83,7 @@ sitesRoute.put("/:id", async (c) => {
   }
 
   await sites.save(site, userId);
-  return c.json({ success: true });
+  return c.json(site);
 });
 
 sitesRoute.delete("/:id", async (c) => {
