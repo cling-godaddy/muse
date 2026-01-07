@@ -7,8 +7,8 @@ vi.mock("../middleware/auth", () => ({
   requireAuth: vi.fn(async (_c, next) => await next()),
 }));
 
-// Mock AI client
-const mockChatResponse = {
+// Mock AI client - agents return incomplete usage (input/output only)
+const mockItemResponse = {
   content: JSON.stringify({
     item: {
       icon: "sparkles",
@@ -17,7 +17,19 @@ const mockChatResponse = {
       image: null,
     },
   }),
-  usage: { inputTokens: 100, outputTokens: 50, totalCost: 0.01 },
+  usage: { input: 100, output: 50 }, // Agents return incomplete usage
+};
+
+const mockSectionResponse = {
+  content: JSON.stringify({
+    section: {
+      type: "hero",
+      preset: "hero-centered",
+      headline: "Test Headline",
+      subheadline: "Test subheadline",
+    },
+  }),
+  usage: { input: 200, output: 100 }, // Agents return incomplete usage
 };
 
 vi.mock("@muse/ai", async () => {
@@ -25,10 +37,15 @@ vi.mock("@muse/ai", async () => {
   return {
     ...actual,
     createClient: () => ({
-      chat: vi.fn(async () => mockChatResponse),
+      chat: vi.fn(async () => mockItemResponse),
     }),
     generateItemAgent: {
-      run: vi.fn(async () => mockChatResponse),
+      config: { model: "gpt-4o-mini" },
+      run: vi.fn(async () => mockItemResponse),
+    },
+    singleSectionAgent: {
+      config: { model: "gpt-4o-mini" },
+      run: vi.fn(async () => mockSectionResponse),
     },
     imageAgent: {
       run: vi.fn(async () => ({
@@ -44,7 +61,7 @@ vi.mock("@muse/ai", async () => {
             },
           ],
         }),
-        usage: { inputTokens: 50, outputTokens: 25, totalCost: 0.005 },
+        usage: { input: 50, output: 25 },
       })),
     },
   };
@@ -170,6 +187,99 @@ describe("chat routes", () => {
       expect(data.item.image.category).toBeUndefined();
 
       expect(data.usage).toBeDefined();
+    });
+
+    it("returns complete Usage object with all required fields", async () => {
+      const res = await app.request("/api/chat/generate-item", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": "Bearer mock-token",
+        },
+        body: JSON.stringify({
+          itemType: "feature",
+          siteContext: {
+            name: "Test Site",
+            description: "A test site",
+          },
+          sectionContext: {
+            preset: "features-grid",
+            existingItems: [],
+          },
+        }),
+      });
+
+      expect(res.status).toBe(200);
+      const data = await res.json();
+
+      // Verify complete Usage object (would have caught Issue 1)
+      expect(data.usage).toBeDefined();
+      expect(data.usage).toHaveProperty("input");
+      expect(data.usage).toHaveProperty("output");
+      expect(data.usage).toHaveProperty("cost");
+      expect(data.usage).toHaveProperty("model");
+
+      // Verify types
+      expect(typeof data.usage.input).toBe("number");
+      expect(typeof data.usage.output).toBe("number");
+      expect(typeof data.usage.cost).toBe("number");
+      expect(typeof data.usage.model).toBe("string");
+
+      // Verify values from mock
+      expect(data.usage.input).toBe(100);
+      expect(data.usage.output).toBe(50);
+      expect(data.usage.model).toBe("gpt-4o-mini");
+      // Cost should be calculated: (100 * 0.15 + 50 * 0.6) / 1M
+      expect(data.usage.cost).toBeCloseTo(0.000045, 8);
+    });
+  });
+
+  describe("POST /api/chat/generate-section", () => {
+    it("returns complete Usage object with cost and model", async () => {
+      const res = await app.request("/api/chat/generate-section", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": "Bearer mock-token",
+        },
+        body: JSON.stringify({
+          sectionType: "hero",
+          preset: "hero-centered",
+          siteContext: {
+            name: "Test Site",
+            description: "A test site",
+          },
+          existingSections: [],
+        }),
+      });
+
+      expect(res.status).toBe(200);
+      const data = await res.json();
+
+      // Verify section was generated
+      expect(data.section).toBeDefined();
+      expect(data.section.type).toBe("hero");
+      expect(data.section.headline).toBe("Test Headline");
+
+      // Verify complete Usage object (would have caught Issue 1)
+      expect(data.usage).toBeDefined();
+      expect(data.usage).toHaveProperty("input");
+      expect(data.usage).toHaveProperty("output");
+      expect(data.usage).toHaveProperty("cost");
+      expect(data.usage).toHaveProperty("model");
+
+      // Verify types
+      expect(typeof data.usage.input).toBe("number");
+      expect(typeof data.usage.output).toBe("number");
+      expect(typeof data.usage.cost).toBe("number");
+      expect(typeof data.usage.model).toBe("string");
+
+      // Verify values from mock
+      expect(data.usage.input).toBe(200);
+      expect(data.usage.output).toBe(100);
+      expect(data.usage.model).toBe("gpt-4o-mini");
+      // Cost should be calculated: (200 * 0.15 + 100 * 0.6) / 1M
+      expect(data.usage.cost).toBeCloseTo(0.00009, 8);
     });
   });
 });
