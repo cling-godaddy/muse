@@ -21,12 +21,6 @@ function ColorPickerDemo(props: React.ComponentProps<typeof ColorPicker>) {
   const [color, setColor] = useState(props.value);
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
-      <ColorPicker {...props} value={color} onChange={setColor} />
-      <div style={{ fontSize: 14, color: "#6b7280" }}>
-        Selected:
-        {" "}
-        <code style={{ background: "#f3f4f6", padding: "2px 6px", borderRadius: 4 }}>{color}</code>
-      </div>
       <div
         style={{
           width: 200,
@@ -36,6 +30,12 @@ function ColorPickerDemo(props: React.ComponentProps<typeof ColorPicker>) {
           border: "1px solid #e5e7eb",
         }}
       />
+      <div style={{ fontSize: 14, color: "#6b7280" }}>
+        Selected:
+        {" "}
+        <code style={{ background: "#f3f4f6", padding: "2px 6px", borderRadius: 4 }}>{color}</code>
+      </div>
+      <ColorPicker {...props} value={color} onChange={setColor} />
     </div>
   );
 }
