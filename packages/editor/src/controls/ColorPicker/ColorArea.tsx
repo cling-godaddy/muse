@@ -1,5 +1,5 @@
 import { useRef, useEffect, useCallback } from "react";
-import { hsvToHex } from "./utils";
+import { hsvToHex } from "@muse/core";
 import styles from "./ColorPicker.module.css";
 
 interface ColorAreaProps {

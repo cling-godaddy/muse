@@ -231,9 +231,16 @@ importers:
 
   packages/core:
     dependencies:
+      chroma-js:
+        specifier: ^3.1.2
+        version: 3.2.0
       zod:
         specifier: ^4.2.1
         version: 4.3.4
+    devDependencies:
+      '@types/chroma-js':
+        specifier: ^3.1.0
+        version: 3.1.2
 
   packages/db:
     dependencies:
@@ -274,9 +281,6 @@ importers:
       '@muse/core':
         specifier: workspace:*
         version: link:../core
-      '@muse/themes':
-        specifier: workspace:*
-        version: link:../themes
       '@radix-ui/react-dialog':
         specifier: ^1.1.14
         version: 1.1.15(@types/react-dom@19.2.3(@types/react@19.2.7))(@types/react@19.2.7)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)

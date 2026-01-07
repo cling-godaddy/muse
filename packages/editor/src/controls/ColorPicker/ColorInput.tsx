@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { isValidHex, normalizeHex } from "./utils";
+import { isValidHex, normalizeHex } from "@muse/core";
 import styles from "./ColorPicker.module.css";
 
 interface ColorInputProps {

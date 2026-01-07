@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from "react";
 import * as Popover from "@radix-ui/react-popover";
-import { hexToHsv, hsvToHex, type HSV } from "./utils";
+import { hexToHsv, hsvToHex, type HSV } from "@muse/core";
 import { ColorSwatch } from "./ColorSwatch";
 import { ColorArea } from "./ColorArea";
 import { HueSlider } from "./HueSlider";
