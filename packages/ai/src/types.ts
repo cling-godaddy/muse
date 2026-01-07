@@ -5,11 +5,16 @@ export interface Message {
   content: string
 }
 
+export type UsageAction = "generate_site" | "generate_section" | "generate_item" | "refine";
+
 export interface Usage {
   input: number
   output: number
   cost: number
   model: string
+  action?: UsageAction
+  detail?: string
+  timestamp?: string
 }
 
 export interface ResponseSchema {

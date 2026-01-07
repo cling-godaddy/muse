@@ -314,12 +314,16 @@ chatRoute.post("/refine", async (c) => {
   const result = await refine({ sections, messages }, getClient(), executeTool);
 
   // Complete the usage object with cost and model
+  const toolNames = [...new Set(result.toolCalls.map(tc => tc.name))].join(",");
   const completeUsage = result.usage
     ? {
       input: result.usage.input,
       output: result.usage.output,
       cost: calculateCost("gpt-4o-mini", result.usage.input, result.usage.output),
       model: "gpt-4o-mini",
+      action: "refine" as const,
+      detail: toolNames || undefined,
+      timestamp: new Date().toISOString(),
     }
     : undefined;
 
@@ -464,6 +468,9 @@ chatRoute.post("/generate-section", async (c) => {
         sectionResult.usage.output,
       ),
       model: modelName,
+      action: "generate_section" as const,
+      detail: sectionType,
+      timestamp: new Date().toISOString(),
     }
     : undefined;
 
@@ -594,6 +601,9 @@ chatRoute.post("/generate-item", async (c) => {
         itemResult.usage.output,
       ),
       model: modelName,
+      action: "generate_item" as const,
+      detail: itemType,
+      timestamp: new Date().toISOString(),
     }
     : undefined;
 
