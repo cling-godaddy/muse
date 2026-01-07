@@ -32,39 +32,72 @@ function hsvDistance(s1: number, v1: number, s2: number, v2: number): number {
 }
 
 /**
- * For a given saturation, find the value (brightness) where contrast crosses the threshold.
- * Searches from initialValue upward.
+ * For a given saturation, find the brightness boundary where contrast crosses the threshold.
+ * Uses binary search since contrast is monotonic with brightness.
+ *
+ * For light backgrounds: returns max brightness that still meets threshold
+ * For dark backgrounds: returns min brightness that meets threshold
  */
 function findThreshold(
   background: string,
   hue: number,
   saturation: number,
-  initialValue: number,
   threshold: number,
   isBackgroundLight: boolean,
 ): number | null {
-  for (let value = initialValue; value <= 100; value++) {
-    const testColor = chroma.hsv(hue, saturation / 100, value / 100).hex();
-    const ratio = chroma.contrast(background, testColor);
+  const getContrast = (v: number) => {
+    const color = chroma.hsv(hue, saturation / 100, v / 100).hex();
+    return chroma.contrast(background, color);
+  };
 
-    if (isBackgroundLight) {
-      // on light backgrounds, we need dark colors (low value won't meet threshold)
-      // as value increases from 0, contrast decreases
-      // we're looking for where it drops below threshold
-      if (ratio < threshold) {
-        return value > 0 ? value - 1 : null;
+  if (isBackgroundLight) {
+    // Need dark colors for contrast on light backgrounds
+    // Contrast decreases as brightness increases
+    // Find the highest brightness that still meets threshold
+    if (getContrast(0) < threshold) {
+      return null; // even black doesn't meet threshold
+    }
+    if (getContrast(100) >= threshold) {
+      return 100; // even white meets threshold
+    }
+
+    let low = 0;
+    let high = 100;
+    while (high - low > 1) {
+      const mid = Math.floor((low + high) / 2);
+      if (getContrast(mid) >= threshold) {
+        low = mid;
+      }
+      else {
+        high = mid;
       }
     }
-    else {
-      // on dark backgrounds, we need light colors (high value)
-      // as value increases from 0, contrast increases
-      // we're looking for where it meets threshold
-      if (ratio >= threshold) {
-        return value;
-      }
-    }
+    return low;
   }
-  return null;
+  else {
+    // Need light colors for contrast on dark backgrounds
+    // Contrast increases as brightness increases
+    // Find the lowest brightness that meets threshold
+    if (getContrast(100) < threshold) {
+      return null; // even white doesn't meet threshold
+    }
+    if (getContrast(0) >= threshold) {
+      return 0; // even black meets threshold
+    }
+
+    let low = 0;
+    let high = 100;
+    while (high - low > 1) {
+      const mid = Math.floor((low + high) / 2);
+      if (getContrast(mid) >= threshold) {
+        high = mid;
+      }
+      else {
+        low = mid;
+      }
+    }
+    return high;
+  }
 }
 
 /**
@@ -80,39 +113,21 @@ export function getAccessibilityCurve(
   hue: number,
   threshold: number,
 ): number[] {
-  const cacheKey = `${background}-${hue}-${threshold}`;
+  // quantize hue to integers for better cache hits
+  const quantizedHue = Math.round(hue) % 360;
+  const cacheKey = `${background}-${quantizedHue}-${threshold}`;
   const cached = curveCache.get(cacheKey);
   if (cached) return cached;
 
   const curve: number[] = [];
   const isBackgroundLight = chroma(background).luminance() > 0.5;
 
-  // find initial threshold at saturation = 0
-  const initialThreshold = findThreshold(
-    background,
-    hue,
-    0,
-    isBackgroundLight ? 0 : 0, // search from 0 upward in both cases
-    threshold,
-    isBackgroundLight,
-  );
-
-  if (initialThreshold === null) {
-    // no accessible colors exist for this hue
-    curveCache.set(cacheKey, []);
-    return [];
-  }
-
-  curve.push(initialThreshold);
-
-  // build the rest of the curve, using previous value as starting point
-  for (let saturation = 1; saturation <= 100; saturation++) {
-    const prevValue = curve[saturation - 1] ?? 0;
+  // build curve for each saturation level
+  for (let saturation = 0; saturation <= 100; saturation++) {
     const curveValue = findThreshold(
       background,
-      hue,
+      quantizedHue,
       saturation,
-      Math.max(0, prevValue - 5), // search slightly before previous to catch curve direction changes
       threshold,
       isBackgroundLight,
     );
