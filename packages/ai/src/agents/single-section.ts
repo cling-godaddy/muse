@@ -88,6 +88,7 @@ export const singleSectionAgent: SyncAgent = {
   config: {
     name: "single-section",
     description: "Generates content for a single section",
+    model: "gpt-4o-mini",
   },
 
   async run(input: SingleSectionInput, provider: Provider): Promise<SyncAgentResult> {

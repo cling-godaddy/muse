@@ -237,6 +237,7 @@ export const generateItemAgent: SyncAgent = {
   config: {
     name: "generate-item",
     description: "Generates a single item for a section (feature, testimonial, team member, etc.)",
+    model: "gpt-4o-mini",
   },
 
   async run(input: ItemGenerationInput, provider: Provider): Promise<SyncAgentResult> {
