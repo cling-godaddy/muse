@@ -4,7 +4,7 @@ import { createClient, orchestrate, orchestrateSite, refine, resolveFieldAlias, 
 import { requireAuth } from "../middleware/auth";
 import { createLogger } from "@muse/logger";
 import { createMediaClient, createQueryNormalizer, getIamJwt, type MediaClient, type QueryNormalizer } from "@muse/media";
-import type { Section, SectionType } from "@muse/core";
+import type { Section, SectionType, FeatureItem, Quote, TeamMember, StatItem, FaqItem } from "@muse/core";
 import { sectionNeedsImages, getPreset } from "@muse/core";
 
 const logger = createLogger();
@@ -331,9 +331,21 @@ chatRoute.post("/generate-section", async (c) => {
   });
 });
 
+// Map item types to their corresponding interfaces
+type ItemTypeMap = {
+  "feature": FeatureItem
+  "testimonial": Quote
+  "team-member": TeamMember
+  "stat": StatItem
+  "faq": FaqItem
+};
+
+type ItemType = keyof ItemTypeMap;
+type GeneratedItem = ItemTypeMap[ItemType];
+
 chatRoute.post("/generate-item", async (c) => {
   const { itemType, sectionContext, siteContext, brief } = await c.req.json<{
-    itemType: "feature" | "testimonial" | "team-member" | "stat" | "faq"
+    itemType: ItemType
     sectionContext?: {
       preset?: string
       existingItems?: Array<Record<string, unknown>>
@@ -359,75 +371,81 @@ chatRoute.post("/generate-item", async (c) => {
     getClient(),
   );
 
-  const parsed = JSON.parse(itemResult.content) as { item: Record<string, unknown> };
-  let finalItem = parsed.item;
+  const parsed = JSON.parse(itemResult.content) as { item: GeneratedItem };
+  let finalItem: GeneratedItem = parsed.item;
   logger.info("item_generated", { itemType });
 
-  // Check if this preset requires images
-  const preset = sectionContext?.preset ? getPreset(sectionContext.preset) : undefined;
-  logger.info("preset_check", { preset: preset?.id, hasImageRequirements: !!preset?.imageRequirements });
-  if (preset?.imageRequirements) {
-    logger.info("fetching_image_for_item", { preset: preset.id, imageInjection: preset.imageInjection });
+  // Check if this preset requires images (only for feature items)
+  if (itemType === "feature") {
+    // Type guard: finalItem is FeatureItem within this block
+    const featureItem = finalItem as FeatureItem;
+    const preset = sectionContext?.preset ? getPreset(sectionContext.preset) : undefined;
+    logger.info("preset_check", { preset: preset?.id, hasImageRequirements: !!preset?.imageRequirements });
 
-    try {
-      const imagePlanResult = await imageAgent.run(
-        {
-          prompt: `Image for ${itemType} item`,
-          brief: finalBrief,
-          structure: {
-            sections: [
+    if (preset?.imageRequirements) {
+      logger.info("fetching_image_for_item", { preset: preset.id, imageInjection: preset.imageInjection });
+
+      try {
+        const imagePlanResult = await imageAgent.run(
+          {
+            prompt: `Image for ${itemType} item`,
+            brief: finalBrief,
+            structure: {
+              sections: [
+                {
+                  id: crypto.randomUUID(),
+                  type: "features",
+                  preset: preset.id,
+                  purpose: String(featureItem.title || "Feature"),
+                },
+              ],
+            },
+            copySections: [
               {
                 id: crypto.randomUUID(),
-                type: "features",
-                preset: preset.id,
-                purpose: String(finalItem.title || "Feature"),
+                headline: String(featureItem.title || undefined),
+                subheadline: typeof featureItem.description === "string" ? featureItem.description : undefined,
               },
             ],
           },
-          copySections: [
-            {
-              id: crypto.randomUUID(),
-              headline: String(finalItem.title || undefined),
-              subheadline: typeof finalItem.description === "string" ? finalItem.description : undefined,
-            },
-          ],
-        },
-        getClient(),
-      );
+          getClient(),
+        );
 
-      const plans = parseImagePlan(imagePlanResult.content);
-      logger.info("image_plans_generated", { count: plans.length });
+        const plans = parseImagePlan(imagePlanResult.content);
+        logger.info("image_plans_generated", { count: plans.length });
 
-      if (plans.length > 0) {
-        const images = await getMediaClient().executePlan(plans);
-        logger.info("images_fetched", { count: images.length });
+        if (plans.length > 0) {
+          const images = await getMediaClient().executePlan(plans);
+          logger.info("images_fetched", { count: images.length });
 
-        // Apply image to item
-        if (images.length > 0 && preset.imageInjection && images[0]?.image) {
-          logger.info("applying_image", {
-            field: preset.imageInjection.field,
-            hasImage: true,
-            imageUrl: images[0].image.url,
-          });
-          if (preset.imageInjection.field === "image") {
-            finalItem = { ...finalItem, image: images[0].image };
-            logger.info("image_applied", { hasImageInFinalItem: !!finalItem.image });
+          // Apply image to item
+          if (images.length > 0 && preset.imageInjection && images[0]?.image) {
+            logger.info("applying_image", {
+              field: preset.imageInjection.field,
+              hasImage: true,
+              imageUrl: images[0].image.url,
+            });
+            if (preset.imageInjection.field === "image") {
+              featureItem.image = images[0].image;
+              logger.info("image_applied", { hasImageInFinalItem: !!featureItem.image });
+            }
           }
         }
       }
+      catch (err) {
+        logger.error("image_generation_failed", { error: err });
+        // Continue without image - item can still be used
+      }
     }
-    catch (err) {
-      logger.error("image_generation_failed", { error: err });
-      // Continue without image - item can still be used
+
+    // Remove null image field so frontend falls back to icon
+    if (!featureItem.image) {
+      delete featureItem.image;
     }
-  }
 
-  // Remove null image field so frontend falls back to icon
-  if (!finalItem.image) {
-    delete finalItem.image;
+    logger.info("returning_item", { hasImage: !!featureItem.image, keys: Object.keys(featureItem) });
+    finalItem = featureItem;
   }
-
-  logger.info("returning_item", { hasImage: !!finalItem.image, keys: Object.keys(finalItem) });
   return c.json({
     item: finalItem,
     usage: itemResult.usage,
