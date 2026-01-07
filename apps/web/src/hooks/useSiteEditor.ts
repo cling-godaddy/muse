@@ -63,6 +63,7 @@ export function useSiteEditor(siteId: string | undefined) {
   const [messages, setMessages] = useState<Message[]>([]);
   const [pendingImageSections, setPendingImageSections] = useState<Set<string>>(new Set());
   const trackUsageRef = useRef<((usage: Usage) => void) | null>(null);
+  const lastAddedSectionIdRef = useRef<string | null>(null);
 
   // Hydrate draft on initial load only (not on every serverSite change)
   useEffect(() => {
@@ -112,6 +113,10 @@ export function useSiteEditor(siteId: string | undefined) {
     trackUsageRef.current = trackUsage;
   }, []);
 
+  const clearLastAddedSection = useCallback(() => {
+    lastAddedSectionIdRef.current = null;
+  }, []);
+
   const handleSectionParsed = useCallback((section: Section) => {
     addSection(section);
     if (sectionNeedsImages(section.type as SectionType)) {
@@ -158,6 +163,9 @@ export function useSiteEditor(siteId: string | undefined) {
   }, [updateSection]);
 
   const handleAddSection = useCallback(async (section: Section, index: number, generateWithAI = false) => {
+    // Store section ID for scrolling
+    lastAddedSectionIdRef.current = section.id;
+
     // Add to local state (optimistic update)
     addSection(section, index);
 
@@ -431,5 +439,7 @@ export function useSiteEditor(siteId: string | undefined) {
     handleGenerationComplete,
     getToken: getToken as () => Promise<string | null>,
     trackUsage: trackUsageRef.current,
+    lastAddedSectionId: lastAddedSectionIdRef.current,
+    clearLastAddedSection,
   };
 }

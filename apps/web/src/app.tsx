@@ -69,6 +69,8 @@ function MainApp() {
     handleGenerationComplete,
     getToken,
     trackUsage,
+    lastAddedSectionId,
+    clearLastAddedSection,
   } = useSiteEditor(urlSiteId);
 
   // Handle 404 - redirect to dashboard if site not found
@@ -113,6 +115,22 @@ function MainApp() {
     window.addEventListener("keydown", handler);
     return () => window.removeEventListener("keydown", handler);
   }, [undo, redo, isGenerationComplete, hasUnsavedChanges, isSaving, handleSave]);
+
+  // Scroll to newly added section
+  useEffect(() => {
+    if (!lastAddedSectionId) return;
+
+    // Wait for next tick to ensure DOM is updated
+    const timeout = setTimeout(() => {
+      const element = document.querySelector(`[data-section-id="${lastAddedSectionId}"]`);
+      if (element) {
+        element.scrollIntoView({ behavior: "smooth", block: "center" });
+      }
+      clearLastAddedSection();
+    }, 100); // Small delay to ensure render complete
+
+    return () => clearTimeout(timeout);
+  }, [lastAddedSectionId, clearLastAddedSection]);
 
   const [editorMode, setEditorMode] = useState<"edit" | "preview">("edit");
   const [previewDevice, setPreviewDevice] = useState<PreviewDevice>("desktop");
