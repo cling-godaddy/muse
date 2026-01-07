@@ -380,10 +380,9 @@ chatRoute.post("/generate-item", async (c) => {
     // Type guard: finalItem is FeatureItem within this block
     const featureItem = finalItem as FeatureItem;
     const preset = sectionContext?.preset ? getPreset(sectionContext.preset) : undefined;
-    logger.info("preset_check", { preset: preset?.id, hasImageRequirements: !!preset?.imageRequirements });
 
     if (preset?.imageRequirements) {
-      logger.info("fetching_image_for_item", { preset: preset.id, imageInjection: preset.imageInjection });
+      logger.info("fetching_image_for_item", { preset: preset.id });
 
       try {
         const imagePlanResult = await imageAgent.run(
@@ -420,14 +419,8 @@ chatRoute.post("/generate-item", async (c) => {
 
           // Apply image to item
           if (images.length > 0 && preset.imageInjection && images[0]?.image) {
-            logger.info("applying_image", {
-              field: preset.imageInjection.field,
-              hasImage: true,
-              imageUrl: images[0].image.url,
-            });
             if (preset.imageInjection.field === "image") {
               featureItem.image = images[0].image;
-              logger.info("image_applied", { hasImageInFinalItem: !!featureItem.image });
             }
           }
         }
@@ -443,7 +436,6 @@ chatRoute.post("/generate-item", async (c) => {
       delete featureItem.image;
     }
 
-    logger.info("returning_item", { hasImage: !!featureItem.image, keys: Object.keys(featureItem) });
     finalItem = featureItem;
   }
   return c.json({
