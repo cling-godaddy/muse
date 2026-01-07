@@ -181,6 +181,60 @@ sitesRoute.patch("/:siteId/pages/:pageId", async (c) => {
   return c.json({ page: site.pages[pageId] });
 });
 
+// DELETE /sites/:siteId/pages/:pageId/sections/:sectionId - Delete a section
+sitesRoute.delete("/:siteId/pages/:pageId/sections/:sectionId", async (c) => {
+  const sites = await getSites();
+  const userId = c.get("userId");
+  const siteId = c.req.param("siteId");
+  const pageId = c.req.param("pageId");
+  const sectionId = c.req.param("sectionId");
+
+  // Get site and verify ownership
+  const site = await sites.getByIdForUser(siteId, userId);
+  if (!site) {
+    return c.json({ error: "Site not found" }, 404);
+  }
+
+  // Verify page exists
+  const page = site.pages[pageId];
+  if (!page) {
+    return c.json({ error: "Page not found" }, 404);
+  }
+
+  // Find section
+  const sectionIndex = page.sections.findIndex(s => s.id === sectionId);
+  if (sectionIndex === -1) {
+    return c.json({ error: "Section not found" }, 404);
+  }
+
+  // Prevent deletion of navbar and footer
+  const section = page.sections[sectionIndex];
+  if (!section) {
+    return c.json({ error: "Section not found" }, 404);
+  }
+
+  if (section.type === "navbar") {
+    return c.json({ error: "Cannot delete navbar" }, 400);
+  }
+
+  if (section.type === "footer") {
+    return c.json({ error: "Cannot delete footer" }, 400);
+  }
+
+  // Remove section
+  const updatedSections = page.sections.filter(s => s.id !== sectionId);
+  site.pages[pageId] = {
+    ...page,
+    sections: updatedSections,
+  };
+
+  // Save updated site
+  site.updatedAt = new Date().toISOString();
+  await sites.save(site, userId);
+
+  return c.json({ page: site.pages[pageId] });
+});
+
 // For testing: reset the cached sites table
 export function resetSitesRoute(): void {
   sitesTable = null;
