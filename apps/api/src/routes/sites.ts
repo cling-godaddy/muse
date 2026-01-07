@@ -181,6 +181,51 @@ sitesRoute.patch("/:siteId/pages/:pageId", async (c) => {
   return c.json({ page: site.pages[pageId] });
 });
 
+// POST /sites/:siteId/pages/:pageId/sections - Add a section
+sitesRoute.post("/:siteId/pages/:pageId/sections", async (c) => {
+  const sites = await getSites();
+  const userId = c.get("userId");
+  const siteId = c.req.param("siteId");
+  const pageId = c.req.param("pageId");
+  const { section, index } = await c.req.json() as { section: Section, index?: number };
+
+  if (!section) {
+    return c.json({ error: "section is required" }, 400);
+  }
+
+  // Get site and verify ownership
+  const site = await sites.getByIdForUser(siteId, userId);
+  if (!site) {
+    return c.json({ error: "Site not found" }, 404);
+  }
+
+  // Verify page exists
+  const page = site.pages[pageId];
+  if (!page) {
+    return c.json({ error: "Page not found" }, 404);
+  }
+
+  // Add section at specified index or append
+  const updatedSections = [...page.sections];
+  if (index !== undefined && index >= 0 && index <= updatedSections.length) {
+    updatedSections.splice(index, 0, section);
+  }
+  else {
+    updatedSections.push(section);
+  }
+
+  site.pages[pageId] = {
+    ...page,
+    sections: updatedSections,
+  };
+
+  // Save updated site
+  site.updatedAt = new Date().toISOString();
+  await sites.save(site, userId);
+
+  return c.json({ page: site.pages[pageId] });
+});
+
 // DELETE /sites/:siteId/pages/:pageId/sections/:sectionId - Delete a section
 sitesRoute.delete("/:siteId/pages/:pageId/sections/:sectionId", async (c) => {
   const sites = await getSites();
