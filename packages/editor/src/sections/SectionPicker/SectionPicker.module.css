@@ -29,7 +29,8 @@
 }
 
 .presetCard {
-  display: block;
+  display: flex;
+  align-items: flex-start;
   width: 100%;
   padding: 8px 12px;
   text-align: left;
@@ -41,6 +42,11 @@
 
 .presetCard:hover {
   background: var(--muse-bg-subtle);
+}
+
+.presetContent {
+  flex: 1;
+  min-width: 0;
 }
 
 .presetName {
