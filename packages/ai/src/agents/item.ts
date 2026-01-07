@@ -118,7 +118,22 @@ function getItemSchema(itemType: string): ResponseSchema {
               icon: { type: ["string", "null"] },
               title: { type: "string" },
               description: { type: "string" },
-              image: { type: ["object", "null"] },
+              image: {
+                anyOf: [
+                  {
+                    type: "object",
+                    properties: {
+                      url: { type: "string" },
+                      alt: { type: "string" },
+                      provider: { type: "string" },
+                      providerId: { type: "string" },
+                    },
+                    required: ["url", "alt"],
+                    additionalProperties: false,
+                  },
+                  { type: "null" },
+                ],
+              },
             },
             required: ["icon", "title", "description"],
             additionalProperties: false,
