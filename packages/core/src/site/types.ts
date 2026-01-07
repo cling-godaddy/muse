@@ -14,12 +14,6 @@ export interface Usage {
   timestamp?: string
 }
 
-export interface SiteNode {
-  pageId: string
-  slug: string
-  children: SiteNode[]
-}
-
 export interface SiteTheme {
   palette: string
   typography: string
@@ -34,7 +28,6 @@ export interface Site {
   location?: string
   siteType?: SiteType
   pages: Record<string, Page>
-  tree: SiteNode[]
   theme: SiteTheme
   navbar?: NavbarSection
   costs?: Usage[]
@@ -64,7 +57,6 @@ export function createSite(
     location: opts.location,
     siteType: opts.siteType,
     pages: {},
-    tree: [],
     theme: { palette: "slate", typography: "inter" },
     createdAt: now,
     updatedAt: now,
@@ -72,11 +64,6 @@ export function createSite(
 
   if (initialPage) {
     site.pages[initialPage.id] = initialPage;
-    site.tree.push({
-      pageId: initialPage.id,
-      slug: initialPage.slug,
-      children: [],
-    });
   }
 
   return site;

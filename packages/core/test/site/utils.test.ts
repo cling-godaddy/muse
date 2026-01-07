@@ -3,6 +3,7 @@ import {
   getPagePath,
   getPageByPath,
   getPagesFlattened,
+  getPageDescendants,
   pathExists,
   addPage,
   removePage,
@@ -10,15 +11,24 @@ import {
 } from "../../src/site/utils";
 import { createSite } from "../../src/site/types";
 import { createPage } from "../../src/page/types";
+import type { Site } from "../../src/site/types";
+
+interface PageIds {
+  home: string
+  about: string
+  services: string
+  webDesign: string
+  contact: string
+}
 
 function createTestSite() {
-  const home = createPage("/", { title: "Home" });
-  const about = createPage("about", { title: "About" });
-  const services = createPage("services", { title: "Services" });
-  const webDesign = createPage("web-design", { title: "Web Design" });
-  const contact = createPage("contact", { title: "Contact" });
+  const home = createPage({ slug: "/", meta: { title: "Home" }, parentId: null, order: 0 });
+  const about = createPage({ slug: "about", meta: { title: "About" }, parentId: null, order: 1 });
+  const services = createPage({ slug: "services", meta: { title: "Services" }, parentId: null, order: 2 });
+  const webDesign = createPage({ slug: "web-design", meta: { title: "Web Design" }, parentId: services.id, order: 0 });
+  const contact = createPage({ slug: "contact", meta: { title: "Contact" }, parentId: null, order: 3 });
 
-  return {
+  const site: Site & { _pageIds: PageIds } = {
     id: "site-1",
     name: "Test Site",
     pages: {
@@ -28,24 +38,13 @@ function createTestSite() {
       [webDesign.id]: webDesign,
       [contact.id]: contact,
     },
-    tree: [
-      { pageId: home.id, slug: "/", children: [] },
-      { pageId: about.id, slug: "about", children: [] },
-      {
-        pageId: services.id,
-        slug: "services",
-        children: [
-          { pageId: webDesign.id, slug: "web-design", children: [] },
-        ],
-      },
-      { pageId: contact.id, slug: "contact", children: [] },
-    ],
     theme: { palette: "slate", typography: "inter" },
-    navbar: {},
     createdAt: "2024-01-01T00:00:00Z",
     updatedAt: "2024-01-01T00:00:00Z",
     _pageIds: { home: home.id, about: about.id, services: services.id, webDesign: webDesign.id, contact: contact.id },
   };
+
+  return site;
 }
 
 describe("site utils", () => {
@@ -127,6 +126,22 @@ describe("site utils", () => {
     });
   });
 
+  describe("getPageDescendants", () => {
+    it("returns all descendants of a page", () => {
+      const site = createTestSite();
+      const descendants = getPageDescendants(site, site._pageIds.services);
+
+      expect(descendants).toHaveLength(1);
+      expect(descendants[0]?.meta.title).toBe("Web Design");
+    });
+
+    it("returns empty array for page with no children", () => {
+      const site = createTestSite();
+      const descendants = getPageDescendants(site, site._pageIds.about);
+      expect(descendants).toEqual([]);
+    });
+  });
+
   describe("pathExists", () => {
     it("returns true for existing paths", () => {
       const site = createTestSite();
@@ -143,39 +158,29 @@ describe("site utils", () => {
   });
 
   describe("addPage", () => {
-    it("adds page to root level", () => {
+    it("adds page to site", () => {
       const site = createTestSite();
-      const blog = createPage("blog", { title: "Blog" });
+      const blog = createPage({ slug: "blog", meta: { title: "Blog" }, parentId: null, order: 4 });
 
       const updated = addPage(site, blog);
 
       expect(updated.pages[blog.id]).toBeDefined();
-      expect(updated.tree).toHaveLength(5);
       expect(getPagePath(updated, blog.id)).toBe("/blog");
     });
 
-    it("adds page as child of existing page", () => {
+    it("adds nested page", () => {
       const site = createTestSite();
-      const seo = createPage("seo", { title: "SEO" });
+      const seo = createPage({ slug: "seo", meta: { title: "SEO" }, parentId: site._pageIds.services, order: 1 });
 
-      const updated = addPage(site, seo, "/services");
+      const updated = addPage(site, seo);
 
       expect(updated.pages[seo.id]).toBeDefined();
       expect(getPagePath(updated, seo.id)).toBe("/services/seo");
     });
 
-    it("adds to root if parent path not found", () => {
-      const site = createTestSite();
-      const orphan = createPage("orphan", { title: "Orphan" });
-
-      const updated = addPage(site, orphan, "/non-existent");
-
-      expect(getPagePath(updated, orphan.id)).toBe("/orphan");
-    });
-
     it("updates updatedAt timestamp", () => {
       const site = createTestSite();
-      const blog = createPage("blog", { title: "Blog" });
+      const blog = createPage({ slug: "blog", meta: { title: "Blog" }, parentId: null, order: 4 });
 
       const updated = addPage(site, blog);
 
@@ -184,7 +189,7 @@ describe("site utils", () => {
   });
 
   describe("removePage", () => {
-    it("removes page from tree and pages record", () => {
+    it("removes page from pages record", () => {
       const site = createTestSite();
       const aboutId = site._pageIds.about;
 
@@ -192,19 +197,19 @@ describe("site utils", () => {
 
       expect(updated.pages[aboutId]).toBeUndefined();
       expect(pathExists(updated, "/about")).toBe(false);
-      expect(updated.tree).toHaveLength(3);
     });
 
-    it("removes nested page", () => {
+    it("cascade deletes children", () => {
       const site = createTestSite();
+      const servicesId = site._pageIds.services;
       const webDesignId = site._pageIds.webDesign;
 
-      const updated = removePage(site, webDesignId);
+      const updated = removePage(site, servicesId);
 
+      expect(updated.pages[servicesId]).toBeUndefined();
       expect(updated.pages[webDesignId]).toBeUndefined();
+      expect(pathExists(updated, "/services")).toBe(false);
       expect(pathExists(updated, "/services/web-design")).toBe(false);
-      // Services should still exist
-      expect(pathExists(updated, "/services")).toBe(true);
     });
 
     it("handles non-existent page gracefully", () => {
@@ -220,23 +225,26 @@ describe("site utils", () => {
       const site = createTestSite();
       const webDesignId = site._pageIds.webDesign;
 
-      const updated = movePage(site, webDesignId, undefined);
+      const updated = movePage(site, webDesignId, null);
 
       expect(getPagePath(updated, webDesignId)).toBe("/web-design");
+      expect(updated.pages[webDesignId]?.parentId).toBeNull();
     });
 
     it("moves page under different parent", () => {
       const site = createTestSite();
       const contactId = site._pageIds.contact;
+      const aboutId = site._pageIds.about;
 
-      const updated = movePage(site, contactId, "/about");
+      const updated = movePage(site, contactId, aboutId);
 
       expect(getPagePath(updated, contactId)).toBe("/about/contact");
+      expect(updated.pages[contactId]?.parentId).toBe(aboutId);
     });
 
     it("handles non-existent page gracefully", () => {
       const site = createTestSite();
-      const updated = movePage(site, "non-existent", "/about");
+      const updated = movePage(site, "non-existent", site._pageIds.about);
 
       expect(updated).toEqual(site);
     });
@@ -248,17 +256,14 @@ describe("site utils", () => {
 
       expect(site.name).toBe("My Site");
       expect(site.pages).toEqual({});
-      expect(site.tree).toEqual([]);
       expect(site.id).toBeDefined();
     });
 
     it("creates site with initial page", () => {
-      const home = createPage("/", { title: "Home" });
+      const home = createPage({ slug: "/", meta: { title: "Home" }, parentId: null, order: 0 });
       const site = createSite("My Site", home);
 
       expect(site.pages[home.id]).toBe(home);
-      expect(site.tree).toHaveLength(1);
-      expect(site.tree[0].pageId).toBe(home.id);
     });
   });
 });

@@ -10,6 +10,8 @@ export const pageMetaSchema = z.object({
 export const pageSchema = z.object({
   id: z.string().uuid(),
   slug: z.string(),
+  parentId: z.string().uuid().nullable(),
+  order: z.number(),
   meta: pageMetaSchema,
   sections: z.array(sectionSchema),
   createdAt: z.string().optional(),

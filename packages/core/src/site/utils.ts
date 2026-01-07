@@ -1,5 +1,5 @@
 import type { Page } from "../page/types";
-import type { Site, SiteNode } from "./types";
+import type { Site } from "./types";
 
 export interface FlattenedPage {
   page: Page
@@ -7,75 +7,68 @@ export interface FlattenedPage {
   depth: number
 }
 
-// Find a node by pageId in the tree (recursive)
-function findNodeById(nodes: SiteNode[], pageId: string): { node: SiteNode, path: string[] } | null {
-  for (const node of nodes) {
-    if (node.pageId === pageId) {
-      return { node, path: [node.slug] };
-    }
-    const found = findNodeById(node.children, pageId);
-    if (found) {
-      return { node: found.node, path: [node.slug, ...found.path] };
-    }
-  }
-  return null;
-}
-
-// Compute full path for a page by traversing the tree
+// Compute full path for a page by walking up parentId chain
 export function getPagePath(site: Site, pageId: string): string | null {
-  const result = findNodeById(site.tree, pageId);
-  if (!result) return null;
+  const page = site.pages[pageId];
+  if (!page) return null;
 
-  const segments = result.path;
-  // Root page (slug "/") should return "/"
-  if (segments.length === 1 && segments[0] === "/") {
-    return "/";
+  if (!page.parentId) {
+    return page.slug === "/" ? "/" : `/${page.slug}`;
   }
-  // Build path from segments, handling root
-  return "/" + segments.filter(s => s !== "/").join("/");
+
+  const parentPath = getPagePath(site, page.parentId);
+  if (!parentPath) return `/${page.slug}`;
+
+  return parentPath === "/" ? `/${page.slug}` : `${parentPath}/${page.slug}`;
 }
 
 // Find a page by its full path (e.g., "/services/web-design")
 export function getPageByPath(site: Site, path: string): Page | null {
   const normalized = path === "/" ? "/" : path.replace(/\/$/, "");
-  const segments = normalized === "/" ? ["/"] : normalized.split("/").filter(Boolean);
 
-  let nodes = site.tree;
-  let currentNode: SiteNode | null = null;
-
-  for (let i = 0; i < segments.length; i++) {
-    const segment = i === 0 && normalized === "/" ? "/" : segments[i];
-    const found = nodes.find(n => n.slug === segment);
-    if (!found) return null;
-    currentNode = found;
-    nodes = found.children;
+  for (const page of Object.values(site.pages)) {
+    if (getPagePath(site, page.id) === normalized) {
+      return page;
+    }
   }
 
-  if (!currentNode) return null;
-  return site.pages[currentNode.pageId] ?? null;
+  return null;
 }
 
 // Get all pages flattened in tree order with depth info
 export function getPagesFlattened(site: Site): FlattenedPage[] {
+  const pages = Object.values(site.pages);
   const result: FlattenedPage[] = [];
 
-  function traverse(nodes: SiteNode[], parentPath: string, depth: number) {
-    for (const node of nodes) {
-      const page = site.pages[node.pageId];
-      if (!page) continue;
+  function traverse(parentId: string | null, depth: number) {
+    const children = pages
+      .filter(p => p.parentId === parentId)
+      .sort((a, b) => a.order - b.order);
 
-      const path = node.slug === "/"
-        ? "/"
-        : parentPath === "/"
-          ? `/${node.slug}`
-          : `${parentPath}/${node.slug}`;
-
+    for (const page of children) {
+      const path = getPagePath(site, page.id) ?? `/${page.slug}`;
       result.push({ page, path, depth });
-      traverse(node.children, path, depth + 1);
+      traverse(page.id, depth + 1);
     }
   }
 
-  traverse(site.tree, "", 0);
+  traverse(null, 0);
+  return result;
+}
+
+// Get all descendants of a page (for cascade delete confirmation)
+export function getPageDescendants(site: Site, pageId: string): Page[] {
+  const result: Page[] = [];
+
+  function collect(id: string) {
+    const children = Object.values(site.pages).filter(p => p.parentId === id);
+    for (const child of children) {
+      result.push(child);
+      collect(child.id);
+    }
+  }
+
+  collect(pageId);
   return result;
 }
 
@@ -84,70 +77,30 @@ export function pathExists(site: Site, path: string): boolean {
   return getPageByPath(site, path) !== null;
 }
 
-// Add a page to the site at a given parent path
+// Add a page to the site
 export function addPage(
   site: Site,
   page: Page,
-  parentPath?: string,
 ): Site {
-  const updatedSite = {
+  return {
     ...site,
     pages: { ...site.pages, [page.id]: page },
-    tree: [...site.tree],
     updatedAt: new Date().toISOString(),
   };
-
-  const newNode: SiteNode = {
-    pageId: page.id,
-    slug: page.slug,
-    children: [],
-  };
-
-  if (!parentPath || parentPath === "/") {
-    // Add to root level
-    updatedSite.tree.push(newNode);
-  }
-  else {
-    // Find parent and add as child
-    const insertIntoTree = (nodes: SiteNode[], targetPath: string): boolean => {
-      for (const node of nodes) {
-        const nodePath = getPagePath(updatedSite, node.pageId);
-        if (nodePath === targetPath) {
-          node.children = [...node.children, newNode];
-          return true;
-        }
-        if (insertIntoTree(node.children, targetPath)) {
-          return true;
-        }
-      }
-      return false;
-    };
-
-    if (!insertIntoTree(updatedSite.tree, parentPath)) {
-      // Parent not found, add to root
-      updatedSite.tree.push(newNode);
-    }
-  }
-
-  return updatedSite;
 }
 
-// Remove a page from the site
+// Remove a page and all its descendants from the site
 export function removePage(site: Site, pageId: string): Site {
-  const removeFromTree = (nodes: SiteNode[]): SiteNode[] => {
-    return nodes
-      .filter(n => n.pageId !== pageId)
-      .map(n => ({ ...n, children: removeFromTree(n.children) }));
-  };
+  const descendants = getPageDescendants(site, pageId);
+  const toRemove = new Set([pageId, ...descendants.map(d => d.id)]);
 
   const remainingPages = Object.fromEntries(
-    Object.entries(site.pages).filter(([id]) => id !== pageId),
+    Object.entries(site.pages).filter(([id]) => !toRemove.has(id)),
   );
 
   return {
     ...site,
     pages: remainingPages,
-    tree: removeFromTree(site.tree),
     updatedAt: new Date().toISOString(),
   };
 }
@@ -156,21 +109,21 @@ export function removePage(site: Site, pageId: string): Site {
 export function movePage(
   site: Site,
   pageId: string,
-  newParentPath?: string,
+  newParentId: string | null,
 ): Site {
-  const result = findNodeById(site.tree, pageId);
-  if (!result) return site;
-
-  // Remove from current location
-  const withoutPage = removePage(site, pageId);
-
-  // Re-add at new location (keeping the page data)
   const page = site.pages[pageId];
   if (!page) return site;
 
-  return addPage(
-    { ...withoutPage, pages: { ...withoutPage.pages, [pageId]: page } },
-    page,
-    newParentPath,
-  );
+  // Compute new order (append to end of new parent's children)
+  const siblings = Object.values(site.pages).filter(p => p.parentId === newParentId);
+  const maxOrder = siblings.length > 0 ? Math.max(...siblings.map(s => s.order)) : -1;
+
+  return {
+    ...site,
+    pages: {
+      ...site.pages,
+      [pageId]: { ...page, parentId: newParentId, order: maxOrder + 1 },
+    },
+    updatedAt: new Date().toISOString(),
+  };
 }

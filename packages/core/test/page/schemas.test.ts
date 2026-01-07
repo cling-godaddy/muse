@@ -12,6 +12,8 @@ describe("page schemas", () => {
       const result = pageSchema.safeParse({
         id: uuid,
         slug: "home",
+        parentId: null,
+        order: 0,
         meta: { title: "Home" },
         sections: [],
       });
@@ -22,6 +24,8 @@ describe("page schemas", () => {
       const result = pageSchema.safeParse({
         id: uuid,
         slug: "home",
+        parentId: null,
+        order: 0,
         meta: { title: "Home", description: "Welcome" },
         sections: [
           { id: uuid2, type: "hero", headline: "Welcome" },
@@ -35,6 +39,8 @@ describe("page schemas", () => {
       const result = pageSchema.safeParse({
         id: "550e8400-e29b-41d4-a716-446655440000",
         slug: "home",
+        parentId: null,
+        order: 0,
         meta: { title: "Home" },
         sections: [{ id: "1", type: "invalid" }],
       });
@@ -45,6 +51,8 @@ describe("page schemas", () => {
       const result = pageSchema.safeParse({
         id: "550e8400-e29b-41d4-a716-446655440000",
         slug: "home",
+        parentId: null,
+        order: 0,
         meta: {},
         sections: [],
       });
@@ -55,6 +63,8 @@ describe("page schemas", () => {
       const result = pageSchema.safeParse({
         id: "not-a-uuid",
         slug: "home",
+        parentId: null,
+        order: 0,
         meta: { title: "Home" },
         sections: [],
       });
@@ -67,6 +77,8 @@ describe("page schemas", () => {
       const result = validatePage({
         id: "550e8400-e29b-41d4-a716-446655440000",
         slug: "about",
+        parentId: null,
+        order: 0,
         meta: { title: "About Us" },
         sections: [],
       });
@@ -86,6 +98,8 @@ describe("page schemas", () => {
       expect(page.meta.title).toBe("Home");
       expect(page.sections).toEqual([]);
       expect(page.id).toBeDefined();
+      expect(page.parentId).toBeNull();
+      expect(page.order).toBe(0);
     });
 
     it("creates page with sections", () => {
