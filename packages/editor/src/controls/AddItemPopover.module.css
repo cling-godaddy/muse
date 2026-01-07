@@ -1,0 +1,83 @@
+.addButton {
+  padding: 8px 16px;
+  background: var(--muse-bg-subtle);
+  border: 1px dashed var(--muse-border);
+  border-radius: 6px;
+  color: var(--muse-text);
+  cursor: pointer;
+  transition: background 0.15s;
+  font-size: 14px;
+}
+
+.addButton:hover:not(:disabled) {
+  background: var(--muse-bg-alt);
+}
+
+.addButton:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.popover {
+  width: 260px;
+  background: white;
+  border: 1px solid var(--muse-border);
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  padding: 8px;
+  z-index: 1000;
+}
+
+.header {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--muse-text);
+  padding: 8px 12px;
+  border-bottom: 1px solid var(--muse-border);
+  margin-bottom: 4px;
+}
+
+.option {
+  display: flex;
+  align-items: flex-start;
+  width: 100%;
+  padding: 10px 12px;
+  background: none;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  text-align: left;
+  transition: background 0.15s;
+  gap: 10px;
+}
+
+.option:hover {
+  background: var(--muse-bg-subtle);
+}
+
+.optionIcon {
+  flex-shrink: 0;
+  width: 18px;
+  height: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--muse-text-muted);
+}
+
+.optionContent {
+  flex: 1;
+}
+
+.optionLabel {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--muse-text);
+  margin-bottom: 2px;
+}
+
+.optionDescription {
+  font-size: 12px;
+  color: var(--muse-text-muted);
+  line-height: 1.4;
+}
