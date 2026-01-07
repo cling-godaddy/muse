@@ -1,5 +1,5 @@
 import { useMemo } from "react";
-import { Undo2, Redo2, Eye, PenLine, Smartphone, Tablet, Monitor, RotateCcw, Save, Loader2 } from "lucide-react";
+import { Undo2, Redo2, Eye, PenLine, Smartphone, Tablet, Monitor, RotateCcw, Save, Loader2, Check } from "lucide-react";
 import type { Site, PreviewDevice } from "@muse/core";
 import { getPagesFlattened } from "@muse/core";
 
@@ -44,6 +44,7 @@ interface EditorToolbarProps {
   onPreviewDeviceChange?: (device: PreviewDevice) => void
   onSave?: () => void
   isSaving?: boolean
+  isSyncing?: boolean
   hasUnsavedChanges?: boolean
 }
 
@@ -64,6 +65,7 @@ export function EditorToolbar({
   onPreviewDeviceChange,
   onSave,
   isSaving,
+  isSyncing,
   hasUnsavedChanges,
 }: EditorToolbarProps) {
   const isPreview = editorMode === "preview";
@@ -214,15 +216,34 @@ export function EditorToolbar({
           </button>
         )}
         {onSave && isGenerationComplete && (
-          <button
-            onClick={onSave}
-            disabled={isSaving || !hasUnsavedChanges}
-            className="flex items-center justify-center gap-1 px-2 h-7 text-xs text-text-muted hover:text-text hover:bg-border rounded transition-colors disabled:opacity-30 disabled:pointer-events-none ml-2"
-            title={hasUnsavedChanges ? "Save (⌘S)" : "Saved"}
-          >
-            {isSaving ? <Loader2 size={14} className="animate-spin" /> : <Save size={14} />}
-            <span>{isSaving ? "Saving..." : hasUnsavedChanges ? "Save" : "Saved"}</span>
-          </button>
+          <div className="flex items-center gap-3 ml-2">
+            {/* Status indicator */}
+            <div className="flex items-center gap-1.5 text-xs transition-opacity">
+              {(isSyncing || isSaving) && (
+                <>
+                  <Loader2 size={14} className="animate-spin text-blue-500" />
+                  <span className="text-text-muted">Saving...</span>
+                </>
+              )}
+              {!(isSyncing || isSaving) && !hasUnsavedChanges && (
+                <>
+                  <Check size={14} className="text-green-500" />
+                  <span className="text-text-muted">Saved</span>
+                </>
+              )}
+            </div>
+
+            {/* Save button */}
+            <button
+              onClick={onSave}
+              disabled={isSaving || !hasUnsavedChanges}
+              className="flex items-center justify-center gap-1 px-2 h-7 text-xs text-text-muted hover:text-text hover:bg-border rounded transition-colors disabled:opacity-30 disabled:pointer-events-none"
+              title={hasUnsavedChanges ? "Save (⌘S)" : "Saved"}
+            >
+              <Save size={14} />
+              <span>Save</span>
+            </button>
+          </div>
         )}
       </div>
     </div>

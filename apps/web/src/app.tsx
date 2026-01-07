@@ -38,6 +38,7 @@ function MainApp() {
     isGenerationComplete,
     hasUnsavedChanges,
     isSaving,
+    isSyncing,
     isLoading,
     pendingImageSections,
     canUndo,
@@ -212,6 +213,7 @@ function MainApp() {
             onPreviewDeviceChange={setPreviewDevice}
             onSave={handleSave}
             isSaving={isSaving}
+            isSyncing={isSyncing}
             hasUnsavedChanges={hasUnsavedChanges}
           />
         )}

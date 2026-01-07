@@ -27,7 +27,7 @@ export function useSiteEditor(siteId: string | undefined) {
   const patchPageSections = usePatchPageSections();
 
   // Autosave section edits
-  useAutosaveSection(siteId ?? "");
+  const { isSyncing: isSyncingSections } = useAutosaveSection(siteId ?? "");
 
   // Client state from store
   const draft = useSiteStore(state => state.draft);
@@ -357,6 +357,7 @@ export function useSiteEditor(siteId: string | undefined) {
     isGenerationComplete,
     hasUnsavedChanges,
     isSaving,
+    isSyncing: isSyncingSections,
     isLoading,
     messages,
     pendingImageSections,
