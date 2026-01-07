@@ -11,6 +11,8 @@ export const MODEL_PRICING: Record<string, { input: number, output: number }> = 
   "claude-3-5-sonnet-20241022": { input: 3, output: 15 },
   "claude-3-opus-20240229": { input: 15, output: 75 },
   "claude-3-haiku-20240307": { input: 0.25, output: 1.25 },
+  // unknown model - no pricing data available
+  "unknown": { input: 0, output: 0 },
 };
 
 const DEFAULT_PRICING = { input: 3, output: 15 };

@@ -1,4 +1,5 @@
 import { useState, useMemo, useCallback, useEffect, useRef } from "react";
+import { flushSync } from "react-dom";
 import { BrowserRouter, Routes, Route, useParams, useNavigate, useLocation, Link } from "react-router-dom";
 import { UserButton, useAuth } from "@clerk/clerk-react";
 import { groupBy } from "lodash-es";
@@ -6,6 +7,7 @@ import { SectionEditor, SiteProvider, EditorModeProvider } from "@muse/editor";
 import type { Section, SectionType, PreviewDevice } from "@muse/core";
 import { sectionNeedsImages, getPresetImageInjection, getImageInjection, applyImageInjection } from "@muse/core";
 import type { ImageSelection } from "@muse/media";
+import type { Usage } from "@muse/ai";
 import { resolveThemeWithEffects, themeToCssVars, getTypography, loadFonts } from "@muse/themes";
 import { Chat } from "./components/chat";
 import { useSiteWithHistory } from "./hooks/useSiteWithHistory";
@@ -61,6 +63,24 @@ function MainApp() {
 
   const [messages, setMessages] = useState<Message[]>([]);
   const persistence = useSitePersistence({ site, setSite, messages });
+  const trackUsageRef = useRef<((usage: Usage) => void) | null>(null);
+  const siteRef = useRef(site);
+  siteRef.current = site;
+
+  // Persist usage costs to site
+  const handleUsage = useCallback((usage: Usage) => {
+    const currentSite = siteRef.current;
+    setSite({
+      ...currentSite,
+      costs: [...(currentSite.costs ?? []), usage],
+      updatedAt: new Date().toISOString(),
+    });
+  }, [setSite]);
+
+  // Store trackUsage function from Chat
+  const handleTrackUsageReady = useCallback((trackUsage: (usage: Usage) => void) => {
+    trackUsageRef.current = trackUsage;
+  }, []);
 
   // Load site from URL on mount (only if URL id differs from current site)
   const loadedRef = useRef<string | null>(null);
@@ -232,7 +252,12 @@ function MainApp() {
 
       if (!response.ok) throw new Error("Generation failed");
 
-      const { section: populated, images } = await response.json();
+      const { section: populated, images, usage } = await response.json();
+
+      // Track usage cost
+      if (usage && trackUsageRef.current) {
+        trackUsageRef.current(usage);
+      }
 
       updateSectionById(section.id, populated);
 
@@ -258,39 +283,44 @@ function MainApp() {
 
   const handlePages = useCallback((pages: PageInfo[], themeOverride?: ThemeSelection) => {
     beginTransaction();
-    clearSite();
 
-    // apply theme after clearSite (avoids stale closure issue)
-    if (themeOverride) {
-      setTheme(themeOverride.palette, themeOverride.typography, themeOverride.effects);
-    }
+    // Use flushSync to ensure all state updates happen synchronously before React renders
+    flushSync(() => {
+      clearSite();
 
-    let firstPageId: string | null = null;
-    for (const pageInfo of pages) {
-      const pageId = addNewPage(pageInfo.slug, pageInfo.title);
-      if (!firstPageId) firstPageId = pageId;
-      updatePageSections(pageId, pageInfo.sections);
-      for (const section of pageInfo.sections) {
-        if (sectionNeedsImages(section.type as SectionType)) {
-          setPendingImageSections(prev => new Set(prev).add(section.id));
+      // apply theme after clearSite (avoids stale closure issue)
+      if (themeOverride) {
+        setTheme(themeOverride.palette, themeOverride.typography, themeOverride.effects);
+      }
+
+      let firstPageId: string | null = null;
+      for (const pageInfo of pages) {
+        const pageId = addNewPage(pageInfo.slug, pageInfo.title);
+        if (!firstPageId) firstPageId = pageId;
+        updatePageSections(pageId, pageInfo.sections);
+        for (const section of pageInfo.sections) {
+          if (sectionNeedsImages(section.type as SectionType)) {
+            setPendingImageSections(prev => new Set(prev).add(section.id));
+          }
         }
       }
-    }
 
-    if (pages.length > 1) {
-      setNavbar({
-        id: crypto.randomUUID(),
-        type: "navbar",
-        logo: { text: site.name },
-        items: pages.map(p => ({ label: p.title, href: p.slug })),
-        sticky: true,
-        preset: "navbar-minimal",
-      });
-    }
+      if (pages.length > 1) {
+        setNavbar({
+          id: crypto.randomUUID(),
+          type: "navbar",
+          logo: { text: site.name },
+          items: pages.map(p => ({ label: p.title, href: p.slug })),
+          sticky: true,
+          preset: "navbar-minimal",
+        });
+      }
 
-    if (firstPageId) {
-      setCurrentPage(firstPageId);
-    }
+      if (firstPageId) {
+        setCurrentPage(firstPageId);
+      }
+    });
+
     commitTransaction();
   }, [clearSite, addNewPage, updatePageSections, setCurrentPage, beginTransaction, commitTransaction, setNavbar, site.name, setTheme]);
 
@@ -400,7 +430,7 @@ function MainApp() {
         )}
         <main className="flex-1 flex gap-6 p-6 overflow-hidden">
           <div className={`w-[400px] shrink-0 ${isPreview ? "hidden" : ""}`}>
-            <Chat siteId={site.id} siteContext={siteContext} sections={sections} autoSendPrompt={autoSendPrompt} intakeContext={intakeContext} onSectionParsed={handleSectionParsed} onThemeSelected={handleThemeSelected} onImages={handleImages} onPages={handlePages} onRefine={handleRefine} onMove={handleMove} onDelete={handleDelete} onGenerationComplete={handleGenerationComplete} onMessagesChange={setMessages} />
+            <Chat siteId={site.id} siteContext={siteContext} sections={sections} siteCosts={site.costs} autoSendPrompt={autoSendPrompt} intakeContext={intakeContext} onSectionParsed={handleSectionParsed} onThemeSelected={handleThemeSelected} onImages={handleImages} onPages={handlePages} onRefine={handleRefine} onMove={handleMove} onDelete={handleDelete} onGenerationComplete={handleGenerationComplete} onMessagesChange={setMessages} onUsage={handleUsage} onTrackUsageReady={handleTrackUsageReady} />
           </div>
           <div className="flex-1 min-w-0 overflow-hidden">
             {isPreview
@@ -409,7 +439,7 @@ function MainApp() {
                   <PreviewLinkInterceptor pageMap={pageMap} onNavigate={setCurrentPage}>
                     <div style={themeStyle} data-effects={effectsId} data-preview-device={previewDevice}>
                       <EditorModeProvider mode={editorMode}>
-                        <SectionEditor sections={sections} onChange={setSections} pendingImageSections={pendingImageSections} navbar={navbar ?? void 0} onNavbarChange={updateNavbar} site={site} currentPage={currentPage} onAddSection={handleAddSection} getToken={getToken} />
+                        <SectionEditor sections={sections} onChange={setSections} pendingImageSections={pendingImageSections} navbar={navbar ?? void 0} onNavbarChange={updateNavbar} site={site} currentPage={currentPage} onAddSection={handleAddSection} getToken={getToken} trackUsage={trackUsageRef.current ?? undefined} />
                       </EditorModeProvider>
                     </div>
                   </PreviewLinkInterceptor>
@@ -418,7 +448,7 @@ function MainApp() {
               : (
                 <div className="h-full overflow-y-auto" style={themeStyle} data-effects={effectsId}>
                   <EditorModeProvider mode={editorMode}>
-                    <SectionEditor sections={sections} onChange={setSections} pendingImageSections={pendingImageSections} navbar={navbar ?? void 0} onNavbarChange={updateNavbar} site={site} currentPage={currentPage} onAddSection={handleAddSection} getToken={getToken} />
+                    <SectionEditor sections={sections} onChange={setSections} pendingImageSections={pendingImageSections} navbar={navbar ?? void 0} onNavbarChange={updateNavbar} site={site} currentPage={currentPage} onAddSection={handleAddSection} getToken={getToken} trackUsage={trackUsageRef.current ?? undefined} />
                   </EditorModeProvider>
                 </div>
               )}

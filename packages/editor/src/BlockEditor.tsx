@@ -1,5 +1,5 @@
 import { useMemo, useCallback, Fragment } from "react";
-import type { Section, NavbarSection, Site, Page } from "@muse/core";
+import type { Section, NavbarSection, Site, Page, Usage } from "@muse/core";
 import { getPreset } from "@muse/core";
 import { Section as SectionWrapper } from "./sections";
 import { SectionGap } from "./sections/SectionGap";
@@ -17,6 +17,7 @@ interface SectionEditorProps {
   currentPage?: Page
   onAddSection?: (section: Section, index: number, generateWithAI?: boolean) => void
   getToken?: () => Promise<string | null>
+  trackUsage?: (usage: Usage) => void
 }
 
 export function SectionEditor({
@@ -29,6 +30,7 @@ export function SectionEditor({
   currentPage,
   onAddSection,
   getToken,
+  trackUsage,
 }: SectionEditorProps) {
   const isEditable = useIsEditable();
 
@@ -122,6 +124,7 @@ export function SectionEditor({
                 canMoveDown={showMoveControls && sectionIndex < lastMoveableIndex}
                 site={site}
                 getToken={getToken}
+                trackUsage={trackUsage}
               />
               {canAddSections && !isNavbar && (
                 <SectionGap

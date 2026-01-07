@@ -12,6 +12,7 @@ interface SiteRow {
   theme: SiteTheme
   tree: SiteNode[]
   navbar: NavbarSection | null
+  costs: Array<{ input: number, output: number, cost: number, model: string }> | null
   domain: string | null
   published_at: string | null
   created_at: string
@@ -49,8 +50,8 @@ export function createPostgresSitesTable(): SitesTable {
 
       try {
         await sql`
-          INSERT INTO sites (id, user_id, name, description, location, site_type, theme, tree, navbar, created_at, updated_at)
-          VALUES (${site.id}, ${userId}, ${site.name}, ${site.description ?? null}, ${site.location ?? null}, ${site.siteType ?? "landing"}, ${JSON.stringify(site.theme)}, ${JSON.stringify(site.tree)}, ${site.navbar ? JSON.stringify(site.navbar) : null}, ${site.createdAt}, ${now})
+          INSERT INTO sites (id, user_id, name, description, location, site_type, theme, tree, navbar, costs, created_at, updated_at)
+          VALUES (${site.id}, ${userId}, ${site.name}, ${site.description ?? null}, ${site.location ?? null}, ${site.siteType ?? "landing"}, ${JSON.stringify(site.theme)}, ${JSON.stringify(site.tree)}, ${site.navbar ? JSON.stringify(site.navbar) : null}, ${site.costs ? JSON.stringify(site.costs) : null}, ${site.createdAt}, ${now})
           ON CONFLICT (id) DO UPDATE SET
             name = EXCLUDED.name,
             description = EXCLUDED.description,
@@ -59,6 +60,7 @@ export function createPostgresSitesTable(): SitesTable {
             theme = EXCLUDED.theme,
             tree = EXCLUDED.tree,
             navbar = EXCLUDED.navbar,
+            costs = EXCLUDED.costs,
             updated_at = EXCLUDED.updated_at
         `;
 
@@ -161,6 +163,7 @@ export function createPostgresSitesTable(): SitesTable {
         theme: siteRow.theme,
         tree: siteRow.tree,
         navbar: siteRow.navbar ?? void 0,
+        costs: siteRow.costs ?? void 0,
         pages,
         createdAt: siteRow.created_at,
         updatedAt: siteRow.updated_at,
@@ -213,6 +216,7 @@ export function createPostgresSitesTable(): SitesTable {
         theme: siteRow.theme,
         tree: siteRow.tree,
         navbar: siteRow.navbar ?? void 0,
+        costs: siteRow.costs ?? void 0,
         pages,
         createdAt: siteRow.created_at,
         updatedAt: siteRow.updated_at,

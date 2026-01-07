@@ -1,6 +1,7 @@
 import { useRef, useEffect, useMemo } from "react";
 import type { Section } from "@muse/core";
 import type { ImageSelection } from "@muse/media";
+import type { Usage } from "@muse/ai";
 import { Spinner } from "@muse/editor";
 import { Building2, MapPin } from "lucide-react";
 import { getPalette } from "@muse/themes";
@@ -21,6 +22,8 @@ interface ChatProps {
   siteContext?: SiteContext
   /** Current sections - enables refine mode when provided */
   sections?: Section[]
+  /** Existing costs from site for session tracking */
+  siteCosts?: Usage[]
   /** Initial prompt to auto-send on mount (only if no existing messages/sections) */
   autoSendPrompt?: string
   /** Intake form data to display in chat */
@@ -39,6 +42,10 @@ interface ChatProps {
   onGenerationComplete?: () => void
   /** Called when messages change (for persistence) */
   onMessagesChange?: (messages: Message[]) => void
+  /** Called when usage is tracked (for cost persistence) */
+  onUsage?: (usage: Usage) => void
+  /** Called with trackUsage function when chat is ready */
+  onTrackUsageReady?: (trackUsage: (usage: Usage) => void) => void
 }
 
 function formatTokens(n: number): string {
@@ -47,12 +54,17 @@ function formatTokens(n: number): string {
   return `${(n / 1_000_000).toFixed(1)}M`;
 }
 
-export function Chat({ siteId, siteContext, sections, autoSendPrompt, intakeContext, onSectionParsed, onThemeSelected, onImages, onPages, onRefine, onMove, onDelete, onGenerationComplete, onMessagesChange }: ChatProps) {
-  const options = useMemo(() => ({ siteId, siteContext, sections, onSectionParsed, onThemeSelected, onImages, onPages, onRefine, onMove, onDelete, onGenerationComplete, onMessagesChange }), [siteId, siteContext, sections, onSectionParsed, onThemeSelected, onImages, onPages, onRefine, onMove, onDelete, onGenerationComplete, onMessagesChange]);
-  const { messages, input, setInput, isLoading, error, send, sessionUsage, lastUsage, agents, agentsMessageIndex, pendingAction, confirmPendingAction, cancelPendingAction } = useChat(options);
+export function Chat({ siteId, siteContext, sections, siteCosts, autoSendPrompt, intakeContext, onSectionParsed, onThemeSelected, onImages, onPages, onRefine, onMove, onDelete, onGenerationComplete, onMessagesChange, onUsage, onTrackUsageReady }: ChatProps) {
+  const options = useMemo(() => ({ siteId, siteContext, sections, siteCosts, onSectionParsed, onThemeSelected, onImages, onPages, onRefine, onMove, onDelete, onGenerationComplete, onMessagesChange, onUsage }), [siteId, siteContext, sections, siteCosts, onSectionParsed, onThemeSelected, onImages, onPages, onRefine, onMove, onDelete, onGenerationComplete, onMessagesChange, onUsage]);
+  const { messages, input, setInput, isLoading, error, send, sessionUsage, lastUsage, agents, agentsMessageIndex, pendingAction, confirmPendingAction, cancelPendingAction, trackUsage } = useChat(options);
   const isRefineMode = sections && sections.length > 0;
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const autoSendTriggeredRef = useRef(false);
+
+  // expose trackUsage function to parent
+  useEffect(() => {
+    onTrackUsageReady?.(trackUsage);
+  }, [onTrackUsageReady, trackUsage]);
 
   // auto-send initial prompt if provided and no existing content
   useEffect(() => {

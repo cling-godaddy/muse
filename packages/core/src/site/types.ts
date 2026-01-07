@@ -1,6 +1,14 @@
 import type { Page } from "../page/types";
 import type { NavbarSection } from "../sections/types";
 
+// AI usage tracking (duplicated from @muse/ai to avoid circular dependency)
+export interface Usage {
+  input: number
+  output: number
+  cost: number
+  model: string
+}
+
 export interface SiteNode {
   pageId: string
   slug: string
@@ -24,6 +32,7 @@ export interface Site {
   tree: SiteNode[]
   theme: SiteTheme
   navbar?: NavbarSection
+  costs?: Usage[]
   createdAt: string
   updatedAt: string
 }

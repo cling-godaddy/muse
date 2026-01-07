@@ -1,6 +1,6 @@
 import { Hono } from "hono";
 import { streamText } from "hono/streaming";
-import { createClient, orchestrate, orchestrateSite, refine, resolveFieldAlias, getValidFields, singleSectionAgent, generateItemAgent, imageAgent, parseImagePlan, type Message, type Provider, type ToolCall, type BrandBrief, type ImageSelection } from "@muse/ai";
+import { createClient, orchestrate, orchestrateSite, refine, resolveFieldAlias, getValidFields, singleSectionAgent, generateItemAgent, imageAgent, parseImagePlan, calculateCost, type Message, type Provider, type ToolCall, type BrandBrief, type ImageSelection } from "@muse/ai";
 import { requireAuth } from "../middleware/auth";
 import { createLogger } from "@muse/logger";
 import { createMediaClient, createQueryNormalizer, getIamJwt, type MediaClient, type QueryNormalizer } from "@muse/media";
@@ -324,10 +324,25 @@ chatRoute.post("/generate-section", async (c) => {
     }
   }
 
+  // Complete the usage object with cost and model
+  const modelName = singleSectionAgent.config.model ?? "unknown";
+  const completeUsage = sectionResult.usage
+    ? {
+      input: sectionResult.usage.input,
+      output: sectionResult.usage.output,
+      cost: calculateCost(
+        modelName,
+        sectionResult.usage.input,
+        sectionResult.usage.output,
+      ),
+      model: modelName,
+    }
+    : undefined;
+
   return c.json({
     section: sectionWithUUID,
     images,
-    usage: sectionResult.usage,
+    usage: completeUsage,
   });
 });
 
@@ -438,8 +453,24 @@ chatRoute.post("/generate-item", async (c) => {
 
     finalItem = featureItem;
   }
+
+  // Complete the usage object with cost and model
+  const modelName = generateItemAgent.config.model ?? "unknown";
+  const completeUsage = itemResult.usage
+    ? {
+      input: itemResult.usage.input,
+      output: itemResult.usage.output,
+      cost: calculateCost(
+        modelName,
+        itemResult.usage.input,
+        itemResult.usage.output,
+      ),
+      model: modelName,
+    }
+    : undefined;
+
   return c.json({
     item: finalItem,
-    usage: itemResult.usage,
+    usage: completeUsage,
   });
 });

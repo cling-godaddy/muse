@@ -1,5 +1,5 @@
 import { useState, useCallback } from "react";
-import type { FeaturesSection as FeaturesSectionType, FeatureItem, RichContent, Site } from "@muse/core";
+import type { FeaturesSection as FeaturesSectionType, FeatureItem, RichContent, Site, Usage } from "@muse/core";
 import { EditableText, ImageLoader, Skeleton } from "../../ux";
 import { useIsEditable } from "../../context/EditorMode";
 import { FeatureIcon } from "./icons";
@@ -12,6 +12,7 @@ interface Props {
   isPending?: boolean
   site?: Site
   getToken?: () => Promise<string | null>
+  trackUsage?: (usage: Usage) => void
 }
 
 interface FeatureCardProps {
@@ -82,7 +83,7 @@ function FeatureCard({ item, onUpdate, onRemove, isPending }: FeatureCardProps) 
   );
 }
 
-export function Grid({ section, onUpdate, isPending, site, getToken }: Props) {
+export function Grid({ section, onUpdate, isPending, site, getToken, trackUsage }: Props) {
   const isEditable = useIsEditable();
   const [isGenerating, setIsGenerating] = useState(false);
 
@@ -126,6 +127,12 @@ export function Grid({ section, onUpdate, isPending, site, getToken }: Props) {
         }
 
         const data = await response.json();
+
+        // Track usage cost
+        if (data.usage && trackUsage) {
+          trackUsage(data.usage);
+        }
+
         onUpdate({
           items: [...section.items, data.item],
         });
@@ -147,7 +154,7 @@ export function Grid({ section, onUpdate, isPending, site, getToken }: Props) {
         items: [...section.items, { title: "", description: "" }],
       });
     }
-  }, [getToken, site, section.items, section.preset, onUpdate]);
+  }, [getToken, site, section.items, section.preset, onUpdate, trackUsage]);
 
   const removeItem = (index: number) => {
     onUpdate({

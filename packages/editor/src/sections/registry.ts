@@ -1,4 +1,4 @@
-import type { Section, Site } from "@muse/core";
+import type { Section, Site, Usage } from "@muse/core";
 import type { ComponentType } from "react";
 
 export interface SectionComponentProps<T extends Section = Section> {
@@ -13,6 +13,8 @@ export interface SectionComponentProps<T extends Section = Section> {
   site?: Site
   /** Get auth token for API calls */
   getToken?: () => Promise<string | null>
+  /** Track AI usage costs */
+  trackUsage?: (usage: Usage) => void
 }
 
 export type SectionComponent<T extends Section = Section>

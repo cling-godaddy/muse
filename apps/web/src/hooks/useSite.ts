@@ -216,6 +216,8 @@ export function useSite(initialName = "Untitled Site"): UseSite {
       description: prev.description,
       location: prev.location,
       siteType: prev.siteType,
+      costs: prev.costs,
+      navbar: prev.navbar,
     }));
     setCurrentPageId(null);
   }, []);

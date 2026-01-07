@@ -1,5 +1,5 @@
 import { useState, useCallback } from "react";
-import type { FeaturesSection as FeaturesSectionType, FeatureItem, RichContent, Site } from "@muse/core";
+import type { FeaturesSection as FeaturesSectionType, FeatureItem, RichContent, Site, Usage } from "@muse/core";
 import { EditableText, Skeleton } from "../../ux";
 import { useIsEditable } from "../../context/EditorMode";
 import { FeatureIcon } from "./icons";
@@ -12,9 +12,10 @@ interface Props {
   isPending?: boolean
   site?: Site
   getToken?: () => Promise<string | null>
+  trackUsage?: (usage: Usage) => void
 }
 
-export function Numbered({ section, onUpdate, site, getToken }: Props) {
+export function Numbered({ section, onUpdate, site, getToken, trackUsage }: Props) {
   const isEditable = useIsEditable();
   const [isGenerating, setIsGenerating] = useState(false);
 
@@ -58,6 +59,12 @@ export function Numbered({ section, onUpdate, site, getToken }: Props) {
         }
 
         const data = await response.json();
+
+        // Track usage cost
+        if (data.usage && trackUsage) {
+          trackUsage(data.usage);
+        }
+
         onUpdate({
           items: [...section.items, data.item],
         });
@@ -79,7 +86,7 @@ export function Numbered({ section, onUpdate, site, getToken }: Props) {
         items: [...section.items, { title: "", description: "" }],
       });
     }
-  }, [getToken, site, section.items, section.preset, onUpdate]);
+  }, [getToken, site, section.items, section.preset, onUpdate, trackUsage]);
 
   const removeItem = (index: number) => {
     onUpdate({

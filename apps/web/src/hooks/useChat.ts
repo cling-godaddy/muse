@@ -46,6 +46,8 @@ export interface UseChatOptions {
   siteContext?: SiteContext
   /** Current sections - when provided, chat switches to refine mode */
   sections?: Section[]
+  /** Existing costs from site for session tracking */
+  siteCosts?: Usage[]
   onSectionParsed?: (section: Section) => void
   onThemeSelected?: (theme: ThemeSelection) => void
   onImages?: (images: ImageSelection[], sections: Section[]) => void
@@ -81,6 +83,8 @@ export interface UseChat {
   confirmPendingAction: () => void
   /** Cancel the pending action */
   cancelPendingAction: () => void
+  /** Track usage from section/item generation */
+  trackUsage: (usage: Usage) => void
 }
 
 const API_URL = "http://localhost:3001/api/chat";
@@ -128,9 +132,12 @@ export function useChat(options: UseChatOptions = {}): UseChat {
             }));
             setMessages(loadedMessages);
             setSessionUsage({
-              input: sumBy(loadedMessages, (m: Message) => m.usage?.input ?? 0),
-              output: sumBy(loadedMessages, (m: Message) => m.usage?.output ?? 0),
-              cost: sumBy(loadedMessages, (m: Message) => m.usage?.cost ?? 0),
+              input: sumBy(loadedMessages, (m: Message) => m.usage?.input ?? 0)
+                + sumBy(options.siteCosts ?? [], c => c.input),
+              output: sumBy(loadedMessages, (m: Message) => m.usage?.output ?? 0)
+                + sumBy(options.siteCosts ?? [], c => c.output),
+              cost: sumBy(loadedMessages, (m: Message) => m.usage?.cost ?? 0)
+                + sumBy(options.siteCosts ?? [], c => c.cost),
               model: loadedMessages.at(-1)?.usage?.model ?? "",
             });
           }
@@ -144,6 +151,21 @@ export function useChat(options: UseChatOptions = {}): UseChat {
 
     loadMessages();
   }, [options.siteId, getToken]);
+
+  // Recalculate sessionUsage when siteCosts changes (from auto-save/reload)
+  useEffect(() => {
+    if (!options.siteCosts) return;
+
+    setSessionUsage({
+      input: sumBy(messages, (m: Message) => m.usage?.input ?? 0)
+        + sumBy(options.siteCosts, c => c.input),
+      output: sumBy(messages, (m: Message) => m.usage?.output ?? 0)
+        + sumBy(options.siteCosts, c => c.output),
+      cost: sumBy(messages, (m: Message) => m.usage?.cost ?? 0)
+        + sumBy(options.siteCosts, c => c.cost),
+      model: messages.at(-1)?.usage?.model ?? options.siteCosts.at(-1)?.model ?? "",
+    });
+  }, [options.siteCosts, messages]);
 
   // Notify parent when messages change
   useEffect(() => {
@@ -388,5 +410,16 @@ export function useChat(options: UseChatOptions = {}): UseChat {
     setPendingAction(null);
   }, []);
 
-  return { messages, input, setInput, isLoading, error, send, sessionUsage, lastUsage, agents, agentsMessageIndex, pendingAction, confirmPendingAction, cancelPendingAction };
+  const trackUsage = useCallback((usage: Usage) => {
+    setLastUsage(usage);
+    setSessionUsage(prev => ({
+      input: prev.input + usage.input,
+      output: prev.output + usage.output,
+      cost: prev.cost + usage.cost,
+      model: usage.model,
+    }));
+    options.onUsage?.(usage);
+  }, [options]);
+
+  return { messages, input, setInput, isLoading, error, send, sessionUsage, lastUsage, agents, agentsMessageIndex, pendingAction, confirmPendingAction, cancelPendingAction, trackUsage };
 }
