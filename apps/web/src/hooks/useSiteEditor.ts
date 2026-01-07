@@ -7,7 +7,7 @@ import { sectionNeedsImages, getPresetImageInjection, getImageInjection, applyIm
 import type { ImageSelection } from "@muse/media";
 import type { Usage } from "@muse/ai";
 import { useSiteStore } from "../stores/siteStore";
-import { useSite, useSaveSite, usePatchPageSections } from "../queries/siteQueries";
+import { useSite, useSaveSite, usePatchPageSections, useDeleteSection } from "../queries/siteQueries";
 import { useAutosaveSection } from "./useAutosaveSection";
 import type { ThemeSelection, PageInfo } from "../utils/streamParser";
 import type { RefineUpdate, MoveUpdate, Message } from "./useChat";
@@ -25,6 +25,7 @@ export function useSiteEditor(siteId: string | undefined) {
   const { data: serverSite, isLoading } = useSite(siteId);
   const { mutate: saveSite, isPending: isSaving } = useSaveSite();
   const patchPageSections = usePatchPageSections();
+  const deleteSectionMutation = useDeleteSection();
 
   // Autosave section edits
   const { isSyncing: isSyncingSections } = useAutosaveSection(siteId ?? "");
@@ -300,9 +301,26 @@ export function useSiteEditor(siteId: string | undefined) {
     }
   }, [sections, setSections, siteId, currentPageId, patchPageSections, markSynced]);
 
-  const handleDelete = useCallback((sectionId: string) => {
+  const handleDelete = useCallback(async (sectionId: string) => {
+    if (!siteId || !currentPageId) return;
+
+    // Delete from local state (optimistic update)
     deleteSection(sectionId);
-  }, [deleteSection]);
+
+    // Immediately sync to backend
+    try {
+      await deleteSectionMutation.mutateAsync({
+        siteId,
+        pageId: currentPageId,
+        sectionId,
+      });
+      markSynced(); // Clear dirty flag after successful sync
+    }
+    catch (err) {
+      console.error("Failed to delete section:", err);
+      // TODO: Show error to user, add retry logic
+    }
+  }, [siteId, currentPageId, deleteSection, deleteSectionMutation, markSynced]);
 
   const handleMoveSection = useCallback(async (sectionId: string, direction: "up" | "down") => {
     if (!siteId || !currentPageId) return;
