@@ -2,16 +2,18 @@ import { useState, useMemo, useCallback, useEffect, useRef } from "react";
 import { flushSync } from "react-dom";
 import { BrowserRouter, Routes, Route, useParams, useNavigate, useLocation, Link } from "react-router-dom";
 import { UserButton, useAuth } from "@clerk/clerk-react";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import { groupBy } from "lodash-es";
 import { SectionEditor, SiteProvider, EditorModeProvider } from "@muse/editor";
-import type { Section, SectionType, PreviewDevice } from "@muse/core";
+import type { Section, SectionType, PreviewDevice, Site } from "@muse/core";
 import { sectionNeedsImages, getPresetImageInjection, getImageInjection, applyImageInjection } from "@muse/core";
 import type { ImageSelection } from "@muse/media";
 import type { Usage } from "@muse/ai";
 import { resolveThemeWithEffects, themeToCssVars, getTypography, loadFonts } from "@muse/themes";
 import { Chat } from "./components/chat";
-import { useSiteWithHistory } from "./hooks/useSiteWithHistory";
-import { useSitePersistence } from "./hooks/useSitePersistence";
+import { useSiteStore } from "./stores/siteStore";
+import { useSite, useSaveSite } from "./queries/siteQueries";
 import type { RefineUpdate, MoveUpdate, Message, SiteContext } from "./hooks/useChat";
 import { EditorToolbar } from "./components/EditorToolbar";
 import { PreviewContainer } from "./components/PreviewContainer";
@@ -24,6 +26,8 @@ import { SignUpPage } from "./pages/sign-up";
 import { SitesDashboard } from "./components/SitesDashboard";
 import type { ThemeSelection, PageInfo } from "./utils/streamParser";
 
+const queryClient = new QueryClient();
+
 function MainApp() {
   const { siteId: urlSiteId } = useParams<{ siteId?: string }>();
   const navigate = useNavigate();
@@ -31,72 +35,75 @@ function MainApp() {
   const locationState = location.state as { autoGenerate?: boolean } | null;
   const { getToken } = useAuth();
 
-  const {
-    site,
-    setSite,
-    currentPageId,
-    pageSlugs,
-    setCurrentPage,
-    sections,
-    addSection,
-    updateSectionById,
-    setSections,
-    addNewPage,
-    deletePage,
-    updatePageSections,
-    clearSite,
-    updateSiteName,
-    theme,
-    setTheme,
-    undo,
-    redo,
-    canUndo,
-    canRedo,
-    beginTransaction,
-    commitTransaction,
-    enableHistory,
-    isGenerationComplete,
-    navbar,
-    setNavbar,
-    updateNavbar,
-  } = useSiteWithHistory();
+  // Server state
+  const { data: serverSite, isLoading } = useSite(urlSiteId);
+  const { mutate: saveSite, isPending: isSaving } = useSaveSite();
+
+  // Client state from store
+  const draft = useSiteStore(state => state.draft);
+  const currentPageId = useSiteStore(state => state.currentPageId);
+  const theme = useSiteStore(state => state.theme);
+  const dirty = useSiteStore(state => state.dirty);
+  const hydrateDraft = useSiteStore(state => state.hydrateDraft);
+  const markSaved = useSiteStore(state => state.markSaved);
+  const updateSection = useSiteStore(state => state.updateSection);
+  const addSection = useSiteStore(state => state.addSection);
+  const deleteSection = useSiteStore(state => state.deleteSection);
+  const setSections = useSiteStore(state => state.setSections);
+  const setCurrentPage = useSiteStore(state => state.setCurrentPage);
+  const setTheme = useSiteStore(state => state.setTheme);
+  const updateNavbar = useSiteStore(state => state.updateNavbar);
+  const setNavbar = useSiteStore(state => state.setNavbar);
+  const clearSite = useSiteStore(state => state.clearSite);
+  const updateSiteName = useSiteStore(state => state.updateSiteName);
+  const addNewPage = useSiteStore(state => state.addNewPage);
+  const deletePage = useSiteStore(state => state.deletePage);
+  const updatePageSections = useSiteStore(state => state.updatePageSections);
+  const undo = useSiteStore(state => state.undo);
+  const redo = useSiteStore(state => state.redo);
+  const canUndo = useSiteStore(state => state.canUndo);
+  const canRedo = useSiteStore(state => state.canRedo);
 
   const [messages, setMessages] = useState<Message[]>([]);
-  const persistence = useSitePersistence({ site, setSite, messages });
   const trackUsageRef = useRef<((usage: Usage) => void) | null>(null);
-  const siteRef = useRef(site);
-  siteRef.current = site;
+
+  // Hydrate draft when server site loads (only if not dirty)
+  useEffect(() => {
+    if (serverSite && !dirty) {
+      hydrateDraft(serverSite);
+    }
+  }, [serverSite, dirty, hydrateDraft]);
+
+  // Derive computed values from draft
+  const site = (draft ?? serverSite) as Site;
+  const sections = currentPageId && site?.pages?.[currentPageId] ? site.pages[currentPageId].sections : [];
+  const navbar = draft?.navbar ?? null;
+  const pageSlugs = useMemo(() => site?.pages ? Object.values(site.pages).map(p => p.slug) : [], [site?.pages]);
+  const currentPage = currentPageId && site?.pages?.[currentPageId] ? site.pages[currentPageId] : undefined;
+  const isGenerationComplete = site?.pages ? Object.values(site.pages).some(p => p.sections.length > 0) : false;
+  const hasUnsavedChanges = dirty;
 
   // Persist usage costs to site
   const handleUsage = useCallback((usage: Usage) => {
-    const currentSite = siteRef.current;
-    setSite({
-      ...currentSite,
-      costs: [...(currentSite.costs ?? []), usage],
-      updatedAt: new Date().toISOString(),
+    if (!draft) return;
+    // Update costs directly in draft via applyDraftOp
+    useSiteStore.getState().applyDraftOp((d) => {
+      d.costs = [...(d.costs ?? []), usage];
+      d.updatedAt = new Date().toISOString();
     });
-  }, [setSite]);
+  }, [draft]);
 
   // Store trackUsage function from Chat
   const handleTrackUsageReady = useCallback((trackUsage: (usage: Usage) => void) => {
     trackUsageRef.current = trackUsage;
   }, []);
 
-  // Load site from URL on mount (only if URL id differs from current site)
-  const loadedRef = useRef<string | null>(null);
+  // Handle 404 - redirect to dashboard if site not found
   useEffect(() => {
-    if (urlSiteId && urlSiteId !== site.id && urlSiteId !== loadedRef.current) {
-      loadedRef.current = urlSiteId;
-      persistence.load(urlSiteId).then((found) => {
-        if (found) {
-          enableHistory();
-        }
-        else {
-          navigate("/", { replace: true });
-        }
-      });
+    if (urlSiteId && !isLoading && !serverSite) {
+      navigate("/", { replace: true });
     }
-  }, [urlSiteId, site.id, persistence, navigate, enableHistory]);
+  }, [urlSiteId, isLoading, serverSite, navigate]);
 
   // Update URL when generation completes
   useEffect(() => {
@@ -105,14 +112,28 @@ function MainApp() {
     }
   }, [isGenerationComplete, urlSiteId, site.id, navigate]);
 
+  // Save handler
+  const handleSave = useCallback(() => {
+    if (!draft || !dirty) return;
+
+    saveSite(
+      { site: draft, messages },
+      {
+        onSuccess: (savedSite) => {
+          markSaved(savedSite);
+        },
+      },
+    );
+  }, [draft, dirty, messages, saveSite, markSaved]);
+
   // Global keyboard shortcuts (undo/redo/save)
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
       // Cmd+S to save
       if ((e.metaKey || e.ctrlKey) && e.key === "s") {
         e.preventDefault();
-        if (isGenerationComplete && persistence.hasUnsavedChanges && !persistence.isSaving) {
-          persistence.save();
+        if (isGenerationComplete && hasUnsavedChanges && !isSaving) {
+          handleSave();
         }
         return;
       }
@@ -132,7 +153,7 @@ function MainApp() {
     };
     window.addEventListener("keydown", handler);
     return () => window.removeEventListener("keydown", handler);
-  }, [undo, redo, isGenerationComplete, persistence]);
+  }, [undo, redo, isGenerationComplete, hasUnsavedChanges, isSaving, handleSave]);
   const [pendingImageSections, setPendingImageSections] = useState<Set<string>>(new Set());
   const [editorMode, setEditorMode] = useState<"edit" | "preview">("edit");
   const [previewDevice, setPreviewDevice] = useState<PreviewDevice>("desktop");
@@ -202,7 +223,7 @@ function MainApp() {
       if (injection) {
         const updates = applyImageInjection(section, imgSources, injection);
         if (Object.keys(updates).length > 0) {
-          updateSectionById(sectionId, updates);
+          updateSection(sectionId, updates);
           resolvedSectionIds.push(sectionId);
         }
       }
@@ -215,7 +236,7 @@ function MainApp() {
         return next;
       });
     }
-  }, [updateSectionById]);
+  }, [updateSection]);
 
   const handleAddSection = useCallback(async (section: Section, index: number, generateWithAI = false) => {
     addSection(section, index);
@@ -259,7 +280,7 @@ function MainApp() {
         trackUsageRef.current(usage);
       }
 
-      updateSectionById(section.id, populated);
+      updateSection(section.id, populated);
 
       if (images.length > 0) {
         handleImages(images, [populated]);
@@ -279,11 +300,9 @@ function MainApp() {
         return next;
       });
     }
-  }, [addSection, getToken, site, sections, updateSectionById, handleImages]);
+  }, [addSection, getToken, site, sections, updateSection, handleImages]);
 
   const handlePages = useCallback((pages: PageInfo[], themeOverride?: ThemeSelection) => {
-    beginTransaction();
-
     // Use flushSync to ensure all state updates happen synchronously before React renders
     flushSync(() => {
       clearSite();
@@ -320,33 +339,15 @@ function MainApp() {
         setCurrentPage(firstPageId);
       }
     });
-
-    commitTransaction();
-  }, [clearSite, addNewPage, updatePageSections, setCurrentPage, beginTransaction, commitTransaction, setNavbar, site.name, setTheme]);
-
-  // TEMP: Commented out for Phase 2 - will be replaced in Phase 3 with store-based approach
-  // const handleSectionsUpdated = useCallback((updatedSections: Section[]) => {
-  //   if (!currentPageId) return;
-
-  //   // Replace updated sections in the current page
-  //   const newSections = sections.map((section) => {
-  //     const updated = updatedSections.find(u => u.id === section.id);
-  //     return updated ?? section;
-  //   });
-
-  //   setSections(newSections);
-  // }, [currentPageId, sections, setSections]);
+  }, [clearSite, addNewPage, updatePageSections, setCurrentPage, setNavbar, site.name, setTheme]);
 
   const handleRefine = useCallback((updates: RefineUpdate[]) => {
-    beginTransaction();
     for (const { sectionId, updates: sectionUpdates } of updates) {
-      updateSectionById(sectionId, sectionUpdates);
+      updateSection(sectionId, sectionUpdates);
     }
-    commitTransaction();
-  }, [updateSectionById, beginTransaction, commitTransaction]);
+  }, [updateSection]);
 
   const handleMove = useCallback((moves: MoveUpdate[]) => {
-    beginTransaction();
     const currentSections = [...sections];
     for (const { sectionId, direction } of moves) {
       const index = currentSections.findIndex(s => s.id === sectionId);
@@ -359,22 +360,15 @@ function MainApp() {
       if (moved) currentSections.splice(newIndex, 0, moved);
     }
     setSections(currentSections);
-    commitTransaction();
-  }, [sections, setSections, beginTransaction, commitTransaction]);
+  }, [sections, setSections]);
 
   const handleDelete = useCallback((sectionId: string) => {
-    beginTransaction();
-    setSections(sections.filter(s => s.id !== sectionId));
-    commitTransaction();
-  }, [sections, setSections, beginTransaction, commitTransaction]);
+    deleteSection(sectionId);
+  }, [deleteSection]);
 
   const handleGenerationComplete = useCallback(() => {
-    enableHistory();
-  }, [enableHistory]);
-
-  const currentPage = useMemo(() => {
-    return currentPageId ? site.pages[currentPageId] : void 0;
-  }, [currentPageId, site.pages]);
+    // No-op: history is always enabled with the new store
+  }, []);
 
   const siteContext: SiteContext = useMemo(() => ({
     name: site.name,
@@ -436,9 +430,9 @@ function MainApp() {
             isGenerationComplete={isGenerationComplete}
             previewDevice={previewDevice}
             onPreviewDeviceChange={setPreviewDevice}
-            onSave={persistence.save}
-            isSaving={persistence.isSaving}
-            hasUnsavedChanges={persistence.hasUnsavedChanges}
+            onSave={handleSave}
+            isSaving={isSaving}
+            hasUnsavedChanges={hasUnsavedChanges}
           />
         )}
         <main className="flex-1 flex gap-6 p-6 overflow-hidden">
@@ -474,18 +468,21 @@ function MainApp() {
 
 export function App() {
   return (
-    <BrowserRouter>
-      <Routes>
-        <Route path="/sign-in/*" element={<SignInPage />} />
-        <Route path="/sign-up/*" element={<SignUpPage />} />
-        <Route path="/" element={<ProtectedRoute><SitesDashboard /></ProtectedRoute>} />
-        <Route path="/sites/:siteId" element={<ProtectedRoute><MainApp /></ProtectedRoute>} />
-        <Route path="/review" element={<ProtectedRoute><ReviewLayout /></ProtectedRoute>}>
-          <Route index element={<ReviewDashboard />} />
-          <Route path="session" element={<ReviewSessionPage />} />
-          <Route path="entries/:id" element={<ReviewEntry />} />
-        </Route>
-      </Routes>
-    </BrowserRouter>
+    <QueryClientProvider client={queryClient}>
+      <BrowserRouter>
+        <Routes>
+          <Route path="/sign-in/*" element={<SignInPage />} />
+          <Route path="/sign-up/*" element={<SignUpPage />} />
+          <Route path="/" element={<ProtectedRoute><SitesDashboard /></ProtectedRoute>} />
+          <Route path="/sites/:siteId" element={<ProtectedRoute><MainApp /></ProtectedRoute>} />
+          <Route path="/review" element={<ProtectedRoute><ReviewLayout /></ProtectedRoute>}>
+            <Route index element={<ReviewDashboard />} />
+            <Route path="session" element={<ReviewSessionPage />} />
+            <Route path="entries/:id" element={<ReviewEntry />} />
+          </Route>
+        </Routes>
+      </BrowserRouter>
+      <ReactQueryDevtools initialIsOpen={false} />
+    </QueryClientProvider>
   );
 }
