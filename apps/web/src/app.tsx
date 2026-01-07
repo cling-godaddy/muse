@@ -87,6 +87,14 @@ function MainApp() {
     }
   }, [isGenerationComplete, urlSiteId, site?.id, navigate]);
 
+  // Clear autoGenerate flag from location state after generation starts
+  // This prevents re-triggering on page refresh
+  useEffect(() => {
+    if (locationState?.autoGenerate && isGenerationComplete) {
+      navigate(location.pathname, { replace: true, state: null });
+    }
+  }, [locationState?.autoGenerate, isGenerationComplete, navigate, location.pathname]);
+
   // Global keyboard shortcuts (undo/redo/save)
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
@@ -191,13 +199,18 @@ function MainApp() {
   }), [site.name, site.description, site.location, site.siteType]);
 
   // generate auto-send prompt if navigated with autoGenerate flag (wait for site to load)
+  // Only auto-generate for NEW sites (no existing sections)
   const autoSendPrompt = useMemo(() => {
     if (!locationState?.autoGenerate) return void 0;
+    // Wait for site to load before deciding whether to auto-generate
+    if (isLoading) return void 0;
     if (urlSiteId && site.id !== urlSiteId) return void 0;
+    // Don't auto-generate if site already has sections (e.g., page refresh)
+    if (Object.values(site.pages).some(p => p.sections.length > 0)) return void 0;
     const typeLabel = site.siteType === "full" ? "a full website" : "a landing page";
     const subject = site.name && site.name !== "Untitled Site" ? site.name : "this business";
     return `Create ${typeLabel} for ${subject}.`;
-  }, [locationState?.autoGenerate, site.siteType, urlSiteId, site.id, site.name]);
+  }, [locationState?.autoGenerate, isLoading, site.siteType, urlSiteId, site.id, site.name, site.pages]);
 
   // intake context for display in chat (whenever site has description/location)
   const intakeContext = useMemo(() => {
