@@ -1,6 +1,6 @@
 import { Hono } from "hono";
 import { streamText } from "hono/streaming";
-import { createClient, orchestrate, orchestrateSite, refine, resolveFieldAlias, getValidFields, singleSectionAgent, imageAgent, parseImagePlan, type Message, type Provider, type ToolCall, type BrandBrief, type ImageSelection } from "@muse/ai";
+import { createClient, orchestrate, orchestrateSite, refine, resolveFieldAlias, getValidFields, singleSectionAgent, generateItemAgent, imageAgent, parseImagePlan, type Message, type Provider, type ToolCall, type BrandBrief, type ImageSelection } from "@muse/ai";
 import { requireAuth } from "../middleware/auth";
 import { createLogger } from "@muse/logger";
 import { createMediaClient, createQueryNormalizer, getIamJwt, type MediaClient, type QueryNormalizer } from "@muse/media";
@@ -328,5 +328,42 @@ chatRoute.post("/generate-section", async (c) => {
     section: sectionWithUUID,
     images,
     usage: sectionResult.usage,
+  });
+});
+
+chatRoute.post("/generate-item", async (c) => {
+  const { itemType, sectionContext, siteContext, brief } = await c.req.json<{
+    itemType: "feature" | "testimonial" | "team-member" | "stat" | "faq"
+    sectionContext?: {
+      preset?: string
+      existingItems?: Array<Record<string, unknown>>
+    }
+    siteContext?: { name?: string, description?: string, location?: string }
+    brief?: BrandBrief
+  }>();
+
+  logger.info("generate_item_request", { itemType });
+
+  // derive brief if not provided
+  const finalBrief = brief ?? deriveBriefFromContext(siteContext);
+
+  // generate item content
+  const itemResult = await generateItemAgent.run(
+    {
+      itemType,
+      sectionContext,
+      siteContext,
+      brief: finalBrief,
+      prompt: `Generate a ${itemType} item`,
+    } as Parameters<typeof generateItemAgent.run>[0],
+    getClient(),
+  );
+
+  const parsed = JSON.parse(itemResult.content) as { item: Record<string, unknown> };
+  logger.info("item_generated", { itemType });
+
+  return c.json({
+    item: parsed.item,
+    usage: itemResult.usage,
   });
 });
