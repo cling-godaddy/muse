@@ -1,9 +1,10 @@
-import { useMemo, useCallback, useState } from "react";
+import { useMemo, useCallback, useState, useEffect, useRef } from "react";
 import { Trash2 } from "lucide-react";
 import { motion } from "framer-motion";
 import type { Section as SectionType, Site, Usage } from "@muse/core";
 import { getSectionComponent, type SectionComponent } from "./registry";
 import { PresetPicker } from "../controls/PresetPicker";
+import { ColorPicker } from "../controls/ColorPicker";
 import { supportsPresets } from "../controls/presets";
 import { useSelection } from "../context/Selection";
 import { useIsEditable } from "../context/EditorMode";
@@ -61,6 +62,27 @@ export function Section({ section, onUpdate, onDelete, onMoveUp, onMoveDown, can
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const showPresetPicker = supportsPresets(section.type);
 
+  // Local pending color for immediate UI feedback, debounced to store
+  const [pendingColor, setPendingColor] = useState<string | null>(null);
+  const debounceRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
+
+  const propColor = section.backgroundColor ?? "#ffffff";
+  const displayColor = pendingColor ?? propColor;
+
+  const handleColorChange = useCallback((color: string) => {
+    setPendingColor(color);
+    clearTimeout(debounceRef.current);
+    debounceRef.current = setTimeout(() => {
+      onUpdate({ backgroundColor: color });
+      setPendingColor(null);
+    }, 300);
+  }, [onUpdate]);
+
+  // Cleanup timeout on unmount
+  useEffect(() => {
+    return () => clearTimeout(debounceRef.current);
+  }, []);
+
   const selectItem = useCallback((itemIndex?: number) => {
     select(section.id, itemIndex);
   }, [select, section.id]);
@@ -70,7 +92,14 @@ export function Section({ section, onUpdate, onDelete, onMoveUp, onMoveDown, can
   }, [isSelected, section.id]);
 
   return (
-    <motion.div layout className="muse-section" data-section-type={section.type} data-section-id={section.id}>
+    <motion.div
+      layout
+      className="muse-section"
+      data-section-type={section.type}
+      data-section-id={section.id}
+      data-has-bg-override={displayColor !== "#ffffff" ? "true" : undefined}
+      style={{ "--muse-section-bg": displayColor } as React.CSSProperties}
+    >
       {isEditable && (
         <div className="muse-section-controls">
           {onMoveUp !== void 0 && (
@@ -102,6 +131,12 @@ export function Section({ section, onUpdate, onDelete, onMoveUp, onMoveDown, can
               onChange={preset => onUpdate({ preset })}
             />
           )}
+          <ColorPicker
+            value={displayColor}
+            onChange={handleColorChange}
+            ariaLabel="Section background color"
+            compact
+          />
           <button
             type="button"
             className="muse-section-delete"
