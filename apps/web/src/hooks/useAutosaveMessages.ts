@@ -7,6 +7,16 @@ export function useAutosaveMessages(siteId: string | undefined, messages: Messag
   const prevIsLoadingRef = useRef(isLoading);
   const lastSavedCountRef = useRef(0);
   const isFirstRenderRef = useRef(true);
+  const prevSiteIdRef = useRef<string | undefined>(siteId);
+
+  // Reset refs when siteId changes to prevent stale state
+  useEffect(() => {
+    if (siteId !== prevSiteIdRef.current) {
+      lastSavedCountRef.current = 0;
+      isFirstRenderRef.current = true;
+      prevSiteIdRef.current = siteId;
+    }
+  }, [siteId]);
 
   useEffect(() => {
     // On first render, capture baseline (handles mounting mid-stream or with existing messages)
