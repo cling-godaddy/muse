@@ -19,6 +19,14 @@ export function useAutosaveSection(siteId: string) {
     }
   }, [draft]);
 
+  // Reset baseline when dirty becomes false (after save completes)
+  // This ensures new sections from generation become the baseline for future edits
+  useEffect(() => {
+    if (!dirty && draft) {
+      prevDraftRef.current = draft;
+    }
+  }, [dirty, draft]);
+
   useEffect(() => {
     if (!dirty || !draft) return;
 

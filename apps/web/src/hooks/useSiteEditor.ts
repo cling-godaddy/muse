@@ -397,8 +397,23 @@ export function useSiteEditor(siteId: string | undefined) {
   }, [siteId, currentPageId, sections, setSections, patchPageSections, markSynced]);
 
   const handleGenerationComplete = useCallback(() => {
-    // No-op: history is always enabled with the new store
-  }, []);
+    // Read current state directly to avoid stale closure issues
+    const currentState = useSiteStore.getState();
+    const currentDraft = currentState.draft;
+    const currentDirty = currentState.dirty;
+
+    if (currentDraft && currentDirty) {
+      // Save site structure - messages are saved separately via useAutosaveMessages
+      saveSite(
+        { site: currentDraft, messages: [] },
+        {
+          onSuccess: (savedSite) => {
+            markSaved(savedSite);
+          },
+        },
+      );
+    }
+  }, [saveSite, markSaved]);
 
   return {
     // State
