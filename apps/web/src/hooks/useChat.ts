@@ -57,6 +57,8 @@ export interface UseChatOptions {
   onRefine?: (updates: RefineUpdate[]) => void
   /** Called when refine returns move operations to apply */
   onMove?: (moves: MoveUpdate[]) => void
+  /** Called when refine returns updated sections from backend */
+  onSectionsUpdated?: (sections: Section[]) => void
   /** Called when user confirms a pending delete action */
   onDelete?: (sectionId: string) => void
   /** Called after generation completes */
@@ -195,6 +197,7 @@ export function useChat(options: UseChatOptions = {}): UseChat {
             "Authorization": `Bearer ${token}`,
           },
           body: JSON.stringify({
+            siteId: options.siteId,
             sections: options.sections,
             messages: newMessages, // Send full conversation history
           }),
@@ -206,33 +209,9 @@ export function useChat(options: UseChatOptions = {}): UseChat {
 
         const result = await response.json();
 
-        // Apply updates via callbacks
-        if (result.toolCalls?.length) {
-          // Handle edit_section calls
-          if (options.onRefine) {
-            const updates: RefineUpdate[] = result.toolCalls
-              .filter((tc: { name: string }) => tc.name === "edit_section")
-              .map((tc: { input: { sectionId: string, updates: Partial<Section> } }) => ({
-                sectionId: tc.input.sectionId,
-                updates: tc.input.updates,
-              }));
-            if (updates.length > 0) {
-              options.onRefine(updates);
-            }
-          }
-
-          // Handle move_section calls
-          if (options.onMove) {
-            const moves: MoveUpdate[] = result.toolCalls
-              .filter((tc: { name: string }) => tc.name === "move_section")
-              .map((tc: { input: { sectionId: string, direction: "up" | "down" } }) => ({
-                sectionId: tc.input.sectionId,
-                direction: tc.input.direction,
-              }));
-            if (moves.length > 0) {
-              options.onMove(moves);
-            }
-          }
+        // Handle updated sections from backend
+        if (result.updatedSections?.length > 0) {
+          options.onSectionsUpdated?.(result.updatedSections);
         }
 
         // Handle pending actions (e.g., delete confirmation)
