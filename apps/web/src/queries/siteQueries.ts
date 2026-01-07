@@ -1,6 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "@clerk/clerk-react";
-import type { Site } from "@muse/core";
+import type { Site, Section } from "@muse/core";
 import type { Message } from "../hooks/useChat";
 
 const API_URL = "http://localhost:3001";
@@ -78,6 +78,31 @@ export function useSaveSite() {
     onSuccess: (savedSite) => {
       // Update cache directly (no refetch needed)
       queryClient.setQueryData(["site", savedSite.id], savedSite);
+    },
+  });
+}
+
+export function usePatchSection() {
+  const { getToken } = useAuth();
+
+  return useMutation({
+    mutationFn: async ({ siteId, sectionId, updates }: { siteId: string, sectionId: string, updates: Partial<Section> }) => {
+      const token = await getToken();
+      const res = await fetch(`${API_URL}/api/sites/${siteId}/sections/${sectionId}`, {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${token}`,
+        },
+        body: JSON.stringify(updates),
+      });
+
+      if (!res.ok) {
+        const data = await res.json();
+        throw new Error(data.error ?? "Failed to update section");
+      }
+
+      return res.json() as Promise<{ section: Section, pageId: string }>;
     },
   });
 }

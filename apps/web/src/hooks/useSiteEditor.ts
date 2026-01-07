@@ -8,6 +8,7 @@ import type { ImageSelection } from "@muse/media";
 import type { Usage } from "@muse/ai";
 import { useSiteStore } from "../stores/siteStore";
 import { useSite, useSaveSite } from "../queries/siteQueries";
+import { useAutosaveSection } from "./useAutosaveSection";
 import type { ThemeSelection, PageInfo } from "../utils/streamParser";
 import type { RefineUpdate, MoveUpdate, Message } from "./useChat";
 
@@ -23,6 +24,9 @@ export function useSiteEditor(siteId: string | undefined) {
   // Server state
   const { data: serverSite, isLoading } = useSite(siteId);
   const { mutate: saveSite, isPending: isSaving } = useSaveSite();
+
+  // Autosave section edits
+  useAutosaveSection(siteId ?? "");
 
   // Client state from store
   const draft = useSiteStore(state => state.draft);

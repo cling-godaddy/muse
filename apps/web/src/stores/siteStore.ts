@@ -53,6 +53,7 @@ interface SiteState {
 
   // Save coordination
   markSaved: (savedSite: Site) => void
+  markSynced: () => void
 }
 
 export const useSiteStore = create<SiteState>()(
@@ -301,6 +302,10 @@ export const useSiteStore = create<SiteState>()(
         dirty: false,
         undoStack: [],
         redoStack: [],
+      }),
+
+      markSynced: () => set({
+        dirty: false,
       }),
     }),
     { name: "site-store" },
