@@ -7,7 +7,7 @@ import { sectionNeedsImages, getPresetImageInjection, getImageInjection, applyIm
 import type { ImageSelection } from "@muse/media";
 import type { Usage } from "@muse/ai";
 import { useSiteStore } from "../stores/siteStore";
-import { useSite, useSaveSite, usePatchPageSections, useDeleteSection } from "../queries/siteQueries";
+import { useSite, useSaveSite, usePatchPageSections, useCreateSection, useDeleteSection } from "../queries/siteQueries";
 import { useAutosaveSection } from "./useAutosaveSection";
 import type { ThemeSelection, PageInfo } from "../utils/streamParser";
 import type { RefineUpdate, MoveUpdate, Message } from "./useChat";
@@ -25,13 +25,14 @@ export function useSiteEditor(siteId: string | undefined) {
   const { data: serverSite, isLoading } = useSite(siteId);
   const { mutate: saveSite, isPending: isSaving } = useSaveSite();
   const patchPageSections = usePatchPageSections();
+  const createSectionMutation = useCreateSection();
   const deleteSectionMutation = useDeleteSection();
 
   // Autosave section edits
   const { isSyncing: isSyncingSections } = useAutosaveSection(siteId ?? "");
 
   // Aggregate all syncing states
-  const isSyncing = isSyncingSections || patchPageSections.isPending || deleteSectionMutation.isPending;
+  const isSyncing = isSyncingSections || patchPageSections.isPending || createSectionMutation.isPending || deleteSectionMutation.isPending;
 
   // Client state from store
   const draft = useSiteStore(state => state.draft);
@@ -157,7 +158,25 @@ export function useSiteEditor(siteId: string | undefined) {
   }, [updateSection]);
 
   const handleAddSection = useCallback(async (section: Section, index: number, generateWithAI = false) => {
+    // Add to local state (optimistic update)
     addSection(section, index);
+
+    // Immediately sync to backend
+    if (siteId && currentPageId) {
+      try {
+        await createSectionMutation.mutateAsync({
+          siteId,
+          pageId: currentPageId,
+          section,
+          index,
+        });
+        markSynced(); // Clear dirty flag after successful sync
+      }
+      catch (err) {
+        console.error("Failed to sync section creation:", err);
+        // TODO: Show error to user, add retry logic
+      }
+    }
 
     // early return if AI disabled
     if (!generateWithAI) {
@@ -218,7 +237,7 @@ export function useSiteEditor(siteId: string | undefined) {
         return next;
       });
     }
-  }, [addSection, getToken, site, sections, updateSection, handleImages]);
+  }, [addSection, siteId, currentPageId, createSectionMutation, markSynced, getToken, site, sections, updateSection, handleImages]);
 
   const handlePages = useCallback((pages: PageInfo[], themeOverride?: ThemeSelection) => {
     // Use flushSync to ensure all state updates happen synchronously before React renders
