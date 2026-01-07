@@ -255,9 +255,16 @@ importers:
 
   packages/core:
     dependencies:
+      chroma-js:
+        specifier: ^3.1.2
+        version: 3.2.0
       zod:
         specifier: ^4.2.1
         version: 4.3.4
+    devDependencies:
+      '@types/chroma-js':
+        specifier: ^3.1.0
+        version: 3.1.2
 
   packages/db:
     dependencies:
@@ -307,6 +314,9 @@ importers:
       '@radix-ui/react-select':
         specifier: ^2.2.6
         version: 2.2.6(@types/react-dom@19.2.3(@types/react@19.2.7))(@types/react@19.2.7)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)
+      chroma-js:
+        specifier: ^3.2.0
+        version: 3.2.0
       framer-motion:
         specifier: ^12.24.0
         version: 12.24.0(react-dom@19.2.3(react@19.2.3))(react@19.2.3)
@@ -326,6 +336,9 @@ importers:
         specifier: ^16.3.0
         version: 16.3.0
     devDependencies:
+      '@types/chroma-js':
+        specifier: ^3.1.2
+        version: 3.1.2
       '@types/react':
         specifier: ^19.2.7
         version: 19.2.7
