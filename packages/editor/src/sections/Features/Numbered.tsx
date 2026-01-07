@@ -1,4 +1,4 @@
-import type { FeaturesSection as FeaturesSectionType, FeatureItem, RichContent } from "@muse/core";
+import type { FeaturesSection as FeaturesSectionType, FeatureItem, RichContent, Site } from "@muse/core";
 import { EditableText } from "../../ux";
 import { useIsEditable } from "../../context/EditorMode";
 import { FeatureIcon } from "./icons";
@@ -8,6 +8,8 @@ interface Props {
   section: FeaturesSectionType
   onUpdate: (data: Partial<FeaturesSectionType>) => void
   isPending?: boolean
+  site?: Site
+  getToken?: () => Promise<string | null>
 }
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars

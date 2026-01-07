@@ -28,10 +28,7 @@ export function AddItemPopover({ itemType, onAdd, disabled }: AddItemPopoverProp
       </Popover.Trigger>
       <Popover.Portal>
         <Popover.Content className={styles.popover} align="center" sideOffset={4}>
-          <div className={styles.header}>
-            Add
-            {itemType}
-          </div>
+          <div className={styles.header}>{`Add ${itemType}`}</div>
           <button
             type="button"
             className={styles.option}
