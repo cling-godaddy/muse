@@ -3,9 +3,10 @@ import { BrowserRouter, Routes, Route, useParams, useNavigate, useLocation, Link
 import { UserButton } from "@clerk/clerk-react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
-import { SectionEditor, SiteProvider, EditorModeProvider } from "@muse/editor";
+import { SectionEditor, SiteProvider, EditorModeProvider, createSectionFromPreset } from "@muse/editor";
 import type { PreviewDevice } from "@muse/core";
 import { resolveThemeWithEffects, themeToCssVars, getTypography, loadFonts } from "@muse/themes";
+import { getPreset } from "@muse/core";
 import { Chat } from "./components/chat";
 import { useSiteEditor } from "./hooks/useSiteEditor";
 import type { SiteContext } from "./hooks/useChat";
@@ -137,6 +138,19 @@ function MainApp() {
     handleGeneratePage(slug);
   }, [site.pages, handleGeneratePage]);
 
+  // Adapter for AI-initiated "add section" - converts (sectionType, preset, index) to (section, index, generateWithAI)
+  const handleAddSectionFromAI = useCallback((sectionType: string, presetId: string, index?: number) => {
+    const preset = getPreset(presetId);
+    if (!preset) {
+      console.error(`Preset not found: ${presetId}`);
+      return;
+    }
+
+    const section = createSectionFromPreset(preset);
+    const targetIndex = index ?? sections.length; // Default to end if not specified
+    handleAddSection(section, targetIndex, true); // generateWithAI = true for AI-initiated adds
+  }, [sections.length, handleAddSection]);
+
   const { themeStyle, effectsId } = useMemo(() => {
     const { theme: resolved, effects } = resolveThemeWithEffects({
       palette: theme.palette,
@@ -219,7 +233,7 @@ function MainApp() {
         )}
         <main className="flex-1 flex gap-6 p-6 overflow-hidden">
           <div className={`w-[400px] shrink-0 ${isPreview ? "hidden" : ""}`}>
-            <Chat siteId={site.id} siteContext={siteContext} sections={sections} siteCosts={site.costs} autoSendPrompt={autoSendPrompt} intakeContext={intakeContext} onSectionParsed={handleSectionParsed} onThemeSelected={handleThemeSelected} onImages={handleImages} onPages={handlePages} onRefine={handleRefine} onSectionsUpdated={handleSectionsUpdated} onMove={handleMove} onDelete={handleDelete} onGenerationComplete={handleGenerationComplete} onMessagesChange={setMessages} onUsage={handleUsage} onTrackUsageReady={handleTrackUsageReady} />
+            <Chat siteId={site.id} siteContext={siteContext} sections={sections} siteCosts={site.costs} autoSendPrompt={autoSendPrompt} intakeContext={intakeContext} onSectionParsed={handleSectionParsed} onThemeSelected={handleThemeSelected} onImages={handleImages} onPages={handlePages} onRefine={handleRefine} onSectionsUpdated={handleSectionsUpdated} onMove={handleMove} onDelete={handleDelete} onAddSection={handleAddSectionFromAI} onGenerationComplete={handleGenerationComplete} onMessagesChange={setMessages} onUsage={handleUsage} onTrackUsageReady={handleTrackUsageReady} />
           </div>
           <div className="flex-1 min-w-0 overflow-hidden">
             {isPreview
