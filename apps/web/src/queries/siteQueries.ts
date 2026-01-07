@@ -167,3 +167,51 @@ export function usePatchSection() {
     },
   });
 }
+
+export function usePatchPageSections() {
+  const { getToken } = useAuth();
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({ siteId, pageId, sections }: { siteId: string, pageId: string, sections: Section[] }) => {
+      const token = await getToken();
+      const res = await fetch(`${API_URL}/api/sites/${siteId}/pages/${pageId}`, {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${token}`,
+        },
+        body: JSON.stringify({ sections }),
+      });
+
+      if (!res.ok) {
+        const data = await res.json();
+        throw new Error(data.error ?? "Failed to update page sections");
+      }
+
+      const result = await res.json() as { page: { id: string, sections: Section[] } };
+      return { ...result, siteId };
+    },
+    onSuccess: ({ page, siteId }) => {
+      // Update the query cache so serverSite stays fresh
+      queryClient.setQueryData<Site>(["site", siteId], (oldSite) => {
+        if (!oldSite) return oldSite;
+
+        const existingPage = oldSite.pages[page.id];
+        if (!existingPage) return oldSite;
+
+        return {
+          ...oldSite,
+          pages: {
+            ...oldSite.pages,
+            [page.id]: {
+              ...existingPage,
+              sections: page.sections,
+            },
+          },
+          updatedAt: new Date().toISOString(),
+        };
+      });
+    },
+  });
+}

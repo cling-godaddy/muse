@@ -7,7 +7,7 @@ import { sectionNeedsImages, getPresetImageInjection, getImageInjection, applyIm
 import type { ImageSelection } from "@muse/media";
 import type { Usage } from "@muse/ai";
 import { useSiteStore } from "../stores/siteStore";
-import { useSite, useSaveSite } from "../queries/siteQueries";
+import { useSite, useSaveSite, usePatchPageSections } from "../queries/siteQueries";
 import { useAutosaveSection } from "./useAutosaveSection";
 import type { ThemeSelection, PageInfo } from "../utils/streamParser";
 import type { RefineUpdate, MoveUpdate, Message } from "./useChat";
@@ -24,6 +24,7 @@ export function useSiteEditor(siteId: string | undefined) {
   // Server state
   const { data: serverSite, isLoading } = useSite(siteId);
   const { mutate: saveSite, isPending: isSaving } = useSaveSite();
+  const patchPageSections = usePatchPageSections();
 
   // Autosave section edits
   useAutosaveSection(siteId ?? "");
@@ -35,6 +36,7 @@ export function useSiteEditor(siteId: string | undefined) {
   const dirty = useSiteStore(state => state.dirty);
   const hydrateDraft = useSiteStore(state => state.hydrateDraft);
   const markSaved = useSiteStore(state => state.markSaved);
+  const markSynced = useSiteStore(state => state.markSynced);
   const updateSection = useSiteStore(state => state.updateSection);
   const addSection = useSiteStore(state => state.addSection);
   const deleteSection = useSiteStore(state => state.deleteSection);
@@ -283,6 +285,43 @@ export function useSiteEditor(siteId: string | undefined) {
     deleteSection(sectionId);
   }, [deleteSection]);
 
+  const handleMoveSection = useCallback(async (sectionId: string, direction: "up" | "down") => {
+    if (!siteId || !currentPageId) return;
+
+    const index = sections.findIndex(s => s.id === sectionId);
+    if (index === -1) return;
+
+    const newIndex = direction === "up" ? index - 1 : index + 1;
+    if (newIndex < 0 || newIndex >= sections.length) return;
+
+    // Skip if trying to move past footer
+    if (direction === "down" && sections[newIndex]?.type === "footer") return;
+
+    // Reorder sections locally (optimistic update)
+    const reorderedSections = [...sections];
+    const [moved] = reorderedSections.splice(index, 1);
+    if (moved) {
+      reorderedSections.splice(newIndex, 0, moved);
+    }
+
+    // Update local state for optimistic UI and undo/redo
+    setSections(reorderedSections);
+
+    // Immediately sync to backend
+    try {
+      await patchPageSections.mutateAsync({
+        siteId,
+        pageId: currentPageId,
+        sections: reorderedSections,
+      });
+      markSynced(); // Clear dirty flag after successful sync
+    }
+    catch (err) {
+      console.error("Failed to sync section move:", err);
+      // TODO: Show error to user, add retry logic
+    }
+  }, [siteId, currentPageId, sections, setSections, patchPageSections, markSynced]);
+
   const handleGenerationComplete = useCallback(() => {
     // No-op: history is always enabled with the new store
   }, []);
@@ -327,6 +366,7 @@ export function useSiteEditor(siteId: string | undefined) {
     handleRefine,
     handleSectionsUpdated,
     handleMove,
+    handleMoveSection,
     handleDelete,
     handleGenerationComplete,
     getToken: getToken as () => Promise<string | null>,

@@ -16,6 +16,7 @@ interface SectionEditorProps {
   site?: Site
   currentPage?: Page
   onAddSection?: (section: Section, index: number, generateWithAI?: boolean) => void
+  onMoveSection?: (sectionId: string, direction: "up" | "down") => void
   getToken?: () => Promise<string | null>
   trackUsage?: (usage: Usage) => void
 }
@@ -29,6 +30,7 @@ export function SectionEditor({
   site,
   currentPage,
   onAddSection,
+  onMoveSection,
   getToken,
   trackUsage,
 }: SectionEditorProps) {
@@ -118,8 +120,18 @@ export function SectionEditor({
                 onUpdate={data => updateSection(section.id, data)}
                 onDelete={() => deleteSection(section.id)}
                 isPending={pendingImageSections?.has(section.id) ?? false}
-                onMoveUp={showMoveControls ? () => moveSection(sectionIndex, sectionIndex - 1) : void 0}
-                onMoveDown={showMoveControls ? () => moveSection(sectionIndex, sectionIndex + 1) : void 0}
+                onMoveUp={showMoveControls
+                  ? () => {
+                    onMoveSection?.(section.id, "up");
+                    moveSection(sectionIndex, sectionIndex - 1);
+                  }
+                  : void 0}
+                onMoveDown={showMoveControls
+                  ? () => {
+                    onMoveSection?.(section.id, "down");
+                    moveSection(sectionIndex, sectionIndex + 1);
+                  }
+                  : void 0}
                 canMoveUp={showMoveControls && sectionIndex > 0}
                 canMoveDown={showMoveControls && sectionIndex < lastMoveableIndex}
                 site={site}
