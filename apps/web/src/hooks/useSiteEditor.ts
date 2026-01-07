@@ -248,6 +248,13 @@ export function useSiteEditor(siteId: string | undefined) {
   }, [addSection, siteId, currentPageId, createSectionMutation, markSynced, getToken, site, sections, updateSection, handleImages]);
 
   const handlePages = useCallback((pages: PageInfo[], themeOverride?: ThemeSelection) => {
+    // Ensure draft is initialized before making changes
+    const currentDraft = useSiteStore.getState().draft;
+    if (!currentDraft) {
+      console.error("[handlePages] draft is null - initializing from site");
+      hydrateDraft(site);
+    }
+
     // Use flushSync to ensure all state updates happen synchronously before React renders
     flushSync(() => {
       clearSite();
@@ -284,7 +291,7 @@ export function useSiteEditor(siteId: string | undefined) {
         setCurrentPage(firstPageId);
       }
     });
-  }, [clearSite, addNewPage, updatePageSections, setCurrentPage, setNavbar, site, setTheme]);
+  }, [clearSite, addNewPage, updatePageSections, setCurrentPage, setNavbar, site, setTheme, hydrateDraft]);
 
   const handleRefine = useCallback((updates: RefineUpdate[]) => {
     for (const { sectionId, updates: sectionUpdates } of updates) {
