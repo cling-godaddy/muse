@@ -266,7 +266,10 @@ export function useSiteEditor(siteId: string | undefined) {
     setSections(updatedSections);
   }, [setSections]);
 
-  const handleMove = useCallback((moves: MoveUpdate[]) => {
+  const handleMove = useCallback(async (moves: MoveUpdate[]) => {
+    if (!siteId || !currentPageId) return;
+
+    // Apply all moves to sections array
     const currentSections = [...sections];
     for (const { sectionId, direction } of moves) {
       const index = currentSections.findIndex(s => s.id === sectionId);
@@ -278,8 +281,24 @@ export function useSiteEditor(siteId: string | undefined) {
       const [moved] = currentSections.splice(index, 1);
       if (moved) currentSections.splice(newIndex, 0, moved);
     }
+
+    // Update local state (optimistic update + undo/redo)
     setSections(currentSections);
-  }, [sections, setSections]);
+
+    // Immediately sync to backend
+    try {
+      await patchPageSections.mutateAsync({
+        siteId,
+        pageId: currentPageId,
+        sections: currentSections,
+      });
+      markSynced(); // Clear dirty flag after successful sync
+    }
+    catch (err) {
+      console.error("Failed to sync AI moves:", err);
+      // TODO: Show error to user, add retry logic
+    }
+  }, [sections, setSections, siteId, currentPageId, patchPageSections, markSynced]);
 
   const handleDelete = useCallback((sectionId: string) => {
     deleteSection(sectionId);

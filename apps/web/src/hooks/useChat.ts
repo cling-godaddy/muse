@@ -214,6 +214,11 @@ export function useChat(options: UseChatOptions = {}): UseChat {
           options.onSectionsUpdated?.(result.updatedSections);
         }
 
+        // Handle moves from backend
+        if (result.moves?.length > 0) {
+          options.onMove?.(result.moves);
+        }
+
         // Handle pending actions (e.g., delete confirmation)
         const hasPendingActions = result.pendingActions?.length > 0;
         if (hasPendingActions) {

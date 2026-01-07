@@ -91,6 +91,7 @@ chatRoute.post("/refine", async (c) => {
 
   const pendingActions: PendingAction[] = [];
   const updatedSections: Section[] = [];
+  const moves: Array<{ sectionId: string, direction: "up" | "down" }> = [];
 
   const executeTool = async (call: ToolCall) => {
     logger.info("tool_call", { name: call.name, input: call.input });
@@ -170,6 +171,9 @@ chatRoute.post("/refine", async (c) => {
         return { id: call.id, result: { error: "Footer sections cannot be moved" } };
       }
 
+      // Collect the move to be applied by frontend
+      moves.push({ sectionId, direction });
+
       logger.info("move_section", { sectionId, direction });
       return {
         id: call.id,
@@ -243,6 +247,7 @@ chatRoute.post("/refine", async (c) => {
   return c.json({
     message,
     updatedSections,
+    moves,
     pendingActions,
     usage: completeUsage,
   });
