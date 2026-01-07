@@ -76,10 +76,10 @@ function MainApp() {
 
   // Update URL when generation completes
   useEffect(() => {
-    if (isGenerationComplete && !urlSiteId) {
+    if (isGenerationComplete && !urlSiteId && site?.id) {
       navigate(`/sites/${site.id}`, { replace: true });
     }
-  }, [isGenerationComplete, urlSiteId, site.id, navigate]);
+  }, [isGenerationComplete, urlSiteId, site?.id, navigate]);
 
   // Global keyboard shortcuts (undo/redo/save)
   useEffect(() => {

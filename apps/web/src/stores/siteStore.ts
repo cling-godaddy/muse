@@ -289,11 +289,11 @@ export const useSiteStore = create<SiteState>()(
       }),
 
       get canUndo() {
-        return get().undoStack.length > 0;
+        return (get()?.undoStack.length ?? 0) > 0;
       },
 
       get canRedo() {
-        return get().redoStack.length > 0;
+        return (get()?.redoStack.length ?? 0) > 0;
       },
 
       markSaved: savedSite => set({

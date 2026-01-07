@@ -2,8 +2,8 @@ import { useState, useMemo, useCallback, useEffect, useRef } from "react";
 import { flushSync } from "react-dom";
 import { useAuth } from "@clerk/clerk-react";
 import { groupBy } from "lodash-es";
-import type { Section, SectionType, Site } from "@muse/core";
-import { sectionNeedsImages, getPresetImageInjection, getImageInjection, applyImageInjection } from "@muse/core";
+import type { Section, SectionType } from "@muse/core";
+import { sectionNeedsImages, getPresetImageInjection, getImageInjection, applyImageInjection, createSite } from "@muse/core";
 import type { ImageSelection } from "@muse/media";
 import type { Usage } from "@muse/ai";
 import { useSiteStore } from "../stores/siteStore";
@@ -61,7 +61,7 @@ export function useSiteEditor(siteId: string | undefined) {
   }, [serverSite, dirty, hydrateDraft]);
 
   // Derive computed values from draft
-  const site = (draft ?? serverSite) as Site;
+  const site = draft ?? serverSite ?? createSite("Untitled Site");
   const sections = useMemo(() =>
     currentPageId && site?.pages?.[currentPageId] ? site.pages[currentPageId].sections : [],
   [currentPageId, site?.pages],
@@ -247,7 +247,7 @@ export function useSiteEditor(siteId: string | undefined) {
         setCurrentPage(firstPageId);
       }
     });
-  }, [clearSite, addNewPage, updatePageSections, setCurrentPage, setNavbar, site.name, setTheme]);
+  }, [clearSite, addNewPage, updatePageSections, setCurrentPage, setNavbar, site, setTheme]);
 
   const handleRefine = useCallback((updates: RefineUpdate[]) => {
     for (const { sectionId, updates: sectionUpdates } of updates) {
