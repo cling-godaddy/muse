@@ -1,10 +1,12 @@
-import React, { useState } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import type { Meta, StoryObj } from "@storybook/react-vite";
+import chroma from "chroma-js";
 import {
   ColorPicker,
   getContrastRatio,
   meetsContrastThreshold,
   getNearestAccessibleColor,
+  getAccessibilityCurve,
   CONTRAST_AA_NORMAL,
   CONTRAST_AA_LARGE,
 } from "@muse/editor";
@@ -148,4 +150,206 @@ function ContrastDemo() {
 
 export const ContrastChecker: StoryObj = {
   render: () => <ContrastDemo />,
+};
+
+/**
+ * Canvas component that visualizes the accessibility curve in S/V space
+ */
+function AccessibilityCurveCanvas({
+  hue,
+  background,
+  threshold,
+  foregroundSat,
+  foregroundVal,
+  size = 256,
+}: {
+  hue: number
+  background: string
+  threshold: number
+  foregroundSat: number // 0-100
+  foregroundVal: number // 0-100
+  size?: number
+}) {
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return;
+
+    // Draw the S/V gradient (clean, like the ColorPicker)
+    const imageData = ctx.createImageData(size, size);
+    for (let y = 0; y < size; y++) {
+      for (let x = 0; x < size; x++) {
+        const s = x / (size - 1); // saturation: 0-1
+        const v = 1 - y / (size - 1); // value: 1-0 (top is bright)
+        const [r, g, b] = chroma.hsv(hue, s, v).rgb();
+        const i = (y * size + x) * 4;
+        imageData.data[i] = r;
+        imageData.data[i + 1] = g;
+        imageData.data[i + 2] = b;
+        imageData.data[i + 3] = 255;
+      }
+    }
+    ctx.putImageData(imageData, 0, 0);
+
+    // Get the accessibility curve
+    const curve = getAccessibilityCurve(background, hue, threshold);
+    const isBackgroundLight = chroma(background).luminance() > 0.5;
+
+    // Draw the curve line (no dimming - cleaner visual)
+    if (curve.length > 0) {
+      // Shadow for visibility
+      ctx.strokeStyle = "rgba(0, 0, 0, 0.4)";
+      ctx.lineWidth = 4;
+      ctx.lineCap = "round";
+      ctx.beginPath();
+      for (let s = 0; s < curve.length; s++) {
+        const x = (s / 100) * size;
+        const y = (1 - curve[s] / 100) * size;
+        if (s === 0) ctx.moveTo(x, y);
+        else ctx.lineTo(x, y);
+      }
+      ctx.stroke();
+
+      // White line on top
+      ctx.strokeStyle = "white";
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      for (let s = 0; s < curve.length; s++) {
+        const x = (s / 100) * size;
+        const y = (1 - curve[s] / 100) * size;
+        if (s === 0) ctx.moveTo(x, y);
+        else ctx.lineTo(x, y);
+      }
+      ctx.stroke();
+
+      // Add "safe" indicator on the accessible side
+      const labelX = 8;
+      const labelY = isBackgroundLight ? size - 12 : 20;
+      ctx.font = "bold 11px system-ui, sans-serif";
+      ctx.fillStyle = "rgba(0, 0, 0, 0.5)";
+      ctx.fillText("✓ accessible", labelX + 1, labelY + 1);
+      ctx.fillStyle = "white";
+      ctx.fillText("✓ accessible", labelX, labelY);
+    }
+
+    // Draw marker for current foreground position
+    const markerX = (foregroundSat / 100) * size;
+    const markerY = (1 - foregroundVal / 100) * size;
+
+    // Outer ring (shadow)
+    ctx.beginPath();
+    ctx.arc(markerX, markerY, 8, 0, Math.PI * 2);
+    ctx.strokeStyle = "rgba(0, 0, 0, 0.5)";
+    ctx.lineWidth = 3;
+    ctx.stroke();
+
+    // Inner ring (white)
+    ctx.beginPath();
+    ctx.arc(markerX, markerY, 8, 0, Math.PI * 2);
+    ctx.strokeStyle = "white";
+    ctx.lineWidth = 2;
+    ctx.stroke();
+  }, [hue, background, threshold, foregroundSat, foregroundVal, size]);
+
+  return (
+    <canvas
+      ref={canvasRef}
+      width={size}
+      height={size}
+      style={{ borderRadius: 8, border: "1px solid #e5e7eb" }}
+    />
+  );
+}
+
+function CurveVisualizerDemo() {
+  const [foreground, setForeground] = useState("#6366f1");
+  const [background, setBackground] = useState("#ffffff");
+  const [threshold, setThreshold] = useState(CONTRAST_AA_NORMAL);
+
+  const [hue, sat, val] = chroma(foreground).hsv();
+  const normalizedHue = isNaN(hue) ? 0 : hue;
+  const ratio = getContrastRatio(foreground, background);
+  const passes = ratio >= threshold;
+
+  return (
+    <div style={{ display: "flex", gap: 32, alignItems: "flex-start" }}>
+      {/* Left: Color pickers */}
+      <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+        <div>
+          <div style={{ fontSize: 12, color: "#6b7280", marginBottom: 4 }}>Foreground</div>
+          <ColorPicker value={foreground} onChange={setForeground} />
+        </div>
+        <div>
+          <div style={{ fontSize: 12, color: "#6b7280", marginBottom: 4 }}>Background</div>
+          <ColorPicker value={background} onChange={setBackground} />
+        </div>
+      </div>
+
+      {/* Center: Curve visualization */}
+      <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+        <AccessibilityCurveCanvas
+          hue={normalizedHue}
+          background={background}
+          threshold={threshold}
+          foregroundSat={sat * 100}
+          foregroundVal={val * 100}
+          size={280}
+        />
+        <div style={{ fontSize: 12, color: "#6b7280", textAlign: "center" }}>
+          Hue:
+          {" "}
+          {Math.round(normalizedHue)}
+          ° — Curve marks accessibility boundary
+        </div>
+      </div>
+
+      {/* Right: Threshold and ratio */}
+      <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+        <div>
+          <div style={{ fontSize: 12, color: "#6b7280", marginBottom: 4 }}>Threshold</div>
+          <select
+            value={threshold}
+            onChange={e => setThreshold(Number(e.target.value))}
+            style={{
+              padding: "6px 12px",
+              borderRadius: 6,
+              border: "1px solid #e5e7eb",
+              fontSize: 14,
+            }}
+          >
+            <option value={CONTRAST_AA_NORMAL}>4.5:1 (Normal text)</option>
+            <option value={CONTRAST_AA_LARGE}>3:1 (Large text)</option>
+            <option value={7}>7:1 (AAA)</option>
+          </select>
+        </div>
+
+        <div
+          style={{
+            padding: 12,
+            background: "#f9fafb",
+            borderRadius: 8,
+            fontSize: 13,
+          }}
+        >
+          <div style={{ color: "#6b7280", marginBottom: 4 }}>Current ratio</div>
+          <div style={{ fontSize: 20, fontWeight: 700, fontFamily: "monospace" }}>
+            <span style={{ color: passes ? "#16a34a" : "#dc2626" }}>
+              {ratio.toFixed(2)}
+              :1
+              {" "}
+              {passes ? "✓" : "✗"}
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+export const CurveVisualizer: StoryObj = {
+  render: () => <CurveVisualizerDemo />,
 };
