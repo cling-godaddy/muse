@@ -33,11 +33,16 @@ export interface StoredAgentState {
   }
 }
 
+export type UsageAction = "generate_site" | "generate_section" | "generate_item" | "refine";
+
 export interface StoredUsage {
   input: number
   output: number
   cost: number
   model: string
+  action?: UsageAction
+  detail?: string
+  timestamp?: string
 }
 
 export interface StoredMessage {

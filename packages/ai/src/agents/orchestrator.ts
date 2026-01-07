@@ -292,6 +292,8 @@ export async function* orchestrate(
     output: totalUsage.output,
     cost: calculateCost(model, totalUsage.input, totalUsage.output),
     model,
+    action: "generate_site",
+    timestamp: new Date().toISOString(),
   })}]\n`;
 }
 
