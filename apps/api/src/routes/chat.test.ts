@@ -218,19 +218,29 @@ describe("chat routes", () => {
       expect(data.usage).toHaveProperty("output");
       expect(data.usage).toHaveProperty("cost");
       expect(data.usage).toHaveProperty("model");
+      expect(data.usage).toHaveProperty("action");
+      expect(data.usage).toHaveProperty("detail");
+      expect(data.usage).toHaveProperty("timestamp");
 
       // Verify types
       expect(typeof data.usage.input).toBe("number");
       expect(typeof data.usage.output).toBe("number");
       expect(typeof data.usage.cost).toBe("number");
       expect(typeof data.usage.model).toBe("string");
+      expect(typeof data.usage.action).toBe("string");
+      expect(typeof data.usage.detail).toBe("string");
+      expect(typeof data.usage.timestamp).toBe("string");
 
       // Verify values from mock
       expect(data.usage.input).toBe(100);
       expect(data.usage.output).toBe(50);
       expect(data.usage.model).toBe("gpt-4o-mini");
+      expect(data.usage.action).toBe("generate_item");
+      expect(data.usage.detail).toBe("feature");
       // Cost should be calculated: (100 * 0.15 + 50 * 0.6) / 1M
       expect(data.usage.cost).toBeCloseTo(0.000045, 8);
+      // Timestamp should be ISO 8601
+      expect(new Date(data.usage.timestamp).toISOString()).toBe(data.usage.timestamp);
     });
   });
 
@@ -267,6 +277,9 @@ describe("chat routes", () => {
       expect(data.usage).toHaveProperty("output");
       expect(data.usage).toHaveProperty("cost");
       expect(data.usage).toHaveProperty("model");
+      expect(data.usage).toHaveProperty("action");
+      expect(data.usage).toHaveProperty("detail");
+      expect(data.usage).toHaveProperty("timestamp");
 
       // Verify types
       expect(typeof data.usage.input).toBe("number");
@@ -278,8 +291,12 @@ describe("chat routes", () => {
       expect(data.usage.input).toBe(200);
       expect(data.usage.output).toBe(100);
       expect(data.usage.model).toBe("gpt-4o-mini");
+      expect(data.usage.action).toBe("generate_section");
+      expect(data.usage.detail).toBe("hero");
       // Cost should be calculated: (200 * 0.15 + 100 * 0.6) / 1M
       expect(data.usage.cost).toBeCloseTo(0.00009, 8);
+      // Timestamp should be ISO 8601
+      expect(new Date(data.usage.timestamp).toISOString()).toBe(data.usage.timestamp);
     });
   });
 });
