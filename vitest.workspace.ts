@@ -13,8 +13,6 @@ export default defineWorkspace([
     extends: "./packages/ai/vitest.config.ts",
     test: { root: "./packages/ai" },
   },
-  {
-    extends: "./packages/lab/vitest.config.ts",
-    test: { root: "./packages/lab" },
-  },
+  // Lab excluded - Storybook browser tests hang with @vitest/browser-playwright
+  // Run manually with: pnpm --filter @muse/lab dev
 ]);

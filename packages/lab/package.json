@@ -5,9 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "storybook dev -p 6006",
-    "build": "storybook build",
-    "test": "vitest run",
-    "test:watch": "vitest"
+    "build": "storybook build"
   },
   "dependencies": {
     "@muse/core": "workspace:*",
