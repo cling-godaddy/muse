@@ -17,6 +17,7 @@ export default defineConfig({
       "react",
       "react-dom",
       "react-dom/client",
+      "chroma-js",
     ],
   },
   test: {
@@ -28,5 +29,6 @@ export default defineConfig({
       instances: [{ browser: "chromium" }],
     },
     setupFiles: ["./.storybook/vitest.setup.ts"],
+    forceExit: true,
   },
 });

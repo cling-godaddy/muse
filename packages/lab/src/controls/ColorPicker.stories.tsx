@@ -54,3 +54,11 @@ export const Disabled: Story = {
   },
   render: args => <ColorPickerDemo {...args} />,
 };
+
+export const Compact: Story = {
+  args: {
+    value: "#ef4444",
+    compact: true,
+  },
+  render: args => <ColorPickerDemo {...args} />,
+};
