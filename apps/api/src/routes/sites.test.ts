@@ -613,7 +613,7 @@ describe("sites routes", () => {
         body: JSON.stringify({ section: newSection, index: 1 }),
       });
 
-      expect(res.status).toBe(200);
+      expect(res.status).toBe(201);
       const body = await res.json();
       expect(body.page).toBeDefined();
       expect(body.page.sections).toHaveLength(3);
@@ -651,7 +651,7 @@ describe("sites routes", () => {
         body: JSON.stringify({ section: newSection }),
       });
 
-      expect(res.status).toBe(200);
+      expect(res.status).toBe(201);
       const body = await res.json();
       expect(body.page.sections).toHaveLength(2);
       expect(body.page.sections[1]?.id).toBe(newSection.id);

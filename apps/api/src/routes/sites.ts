@@ -223,7 +223,7 @@ sitesRoute.post("/:siteId/pages/:pageId/sections", async (c) => {
   site.updatedAt = new Date().toISOString();
   await sites.save(site, userId);
 
-  return c.json({ page: site.pages[pageId] });
+  return c.json({ page: site.pages[pageId] }, 201);
 });
 
 // DELETE /sites/:siteId/pages/:pageId/sections/:sectionId - Delete a section
