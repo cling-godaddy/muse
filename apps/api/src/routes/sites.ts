@@ -144,6 +144,43 @@ sitesRoute.patch("/:siteId/sections/:sectionId", async (c) => {
   return c.json({ section: foundSection, pageId: foundPageId });
 });
 
+// PATCH /sites/:siteId/pages/:pageId - Update sections order for a page
+sitesRoute.patch("/:siteId/pages/:pageId", async (c) => {
+  const sites = await getSites();
+  const userId = c.get("userId");
+  const siteId = c.req.param("siteId");
+  const pageId = c.req.param("pageId");
+  const { sections } = await c.req.json() as { sections: Section[] };
+
+  if (!sections || !Array.isArray(sections)) {
+    return c.json({ error: "sections array is required" }, 400);
+  }
+
+  // Get site and verify ownership
+  const site = await sites.getByIdForUser(siteId, userId);
+  if (!site) {
+    return c.json({ error: "Site not found" }, 404);
+  }
+
+  // Verify page exists
+  const page = site.pages[pageId];
+  if (!page) {
+    return c.json({ error: "Page not found" }, 404);
+  }
+
+  // Update page sections
+  site.pages[pageId] = {
+    ...page,
+    sections,
+  };
+
+  // Save updated site
+  site.updatedAt = new Date().toISOString();
+  await sites.save(site, userId);
+
+  return c.json({ page: site.pages[pageId] });
+});
+
 // For testing: reset the cached sites table
 export function resetSitesRoute(): void {
   sitesTable = null;
