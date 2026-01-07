@@ -161,7 +161,7 @@ sitesRoute.put("/:id", async (c) => {
     return c.json({ error: "ID mismatch" }, 400);
   }
 
-  if (!site.id || !site.pages || !site.tree) {
+  if (!site.id || !site.pages) {
     return c.json({ error: "Missing required fields" }, 400);
   }
 

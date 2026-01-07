@@ -17,11 +17,12 @@ describe("POST /api/sites/:siteId/pages/:pageId/sections", () => {
         [pageId]: {
           id: pageId,
           slug: "/",
+          parentId: null,
+          order: 0,
           meta: { title: "Home" },
           sections: [section1, section2],
         },
       },
-      tree: [{ pageId, slug: "/", children: [] }],
     });
 
     await app.request(`/api/sites/${site.id}`, {
@@ -58,11 +59,12 @@ describe("POST /api/sites/:siteId/pages/:pageId/sections", () => {
         [pageId]: {
           id: pageId,
           slug: "/",
+          parentId: null,
+          order: 0,
           meta: { title: "Home" },
           sections: [section1],
         },
       },
-      tree: [{ pageId, slug: "/", children: [] }],
     });
 
     await app.request(`/api/sites/${site.id}`, {
@@ -130,11 +132,12 @@ describe("POST /api/sites/:siteId/pages/:pageId/sections", () => {
         [pageId]: {
           id: pageId,
           slug: "/",
+          parentId: null,
+          order: 0,
           meta: { title: "Home" },
           sections: [],
         },
       },
-      tree: [{ pageId, slug: "/", children: [] }],
     });
 
     await app.request(`/api/sites/${site.id}`, {
@@ -163,11 +166,12 @@ describe("POST /api/sites/:siteId/pages/:pageId/sections", () => {
         [pageId]: {
           id: pageId,
           slug: "/",
+          parentId: null,
+          order: 0,
           meta: { title: "Home" },
           sections: [],
         },
       },
-      tree: [{ pageId, slug: "/", children: [] }],
     });
 
     await app.request(`/api/sites/${site.id}`, {

@@ -20,7 +20,6 @@ export function createTestSite(overrides: Partial<Site> = {}): Site {
     id: crypto.randomUUID(),
     name: "Test Site",
     pages: {},
-    tree: [],
     theme: { palette: "slate", typography: "inter" },
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString(),

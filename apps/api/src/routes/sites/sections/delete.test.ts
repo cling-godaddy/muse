@@ -18,11 +18,12 @@ describe("DELETE /api/sites/:siteId/pages/:pageId/sections/:sectionId", () => {
         [pageId]: {
           id: pageId,
           slug: "/",
+          parentId: null,
+          order: 0,
           meta: { title: "Home" },
           sections: [section1, section2, section3],
         },
       },
-      tree: [{ pageId, slug: "/", children: [] }],
     });
 
     await app.request(`/api/sites/${site.id}`, {
@@ -89,11 +90,12 @@ describe("DELETE /api/sites/:siteId/pages/:pageId/sections/:sectionId", () => {
         [pageId]: {
           id: pageId,
           slug: "/",
+          parentId: null,
+          order: 0,
           meta: { title: "Home" },
           sections: [],
         },
       },
-      tree: [{ pageId, slug: "/", children: [] }],
     });
 
     await app.request(`/api/sites/${site.id}`, {
@@ -122,11 +124,12 @@ describe("DELETE /api/sites/:siteId/pages/:pageId/sections/:sectionId", () => {
         [pageId]: {
           id: pageId,
           slug: "/",
+          parentId: null,
+          order: 0,
           meta: { title: "Home" },
           sections: [navbar],
         },
       },
-      tree: [{ pageId, slug: "/", children: [] }],
     });
 
     await app.request(`/api/sites/${site.id}`, {
@@ -155,11 +158,12 @@ describe("DELETE /api/sites/:siteId/pages/:pageId/sections/:sectionId", () => {
         [pageId]: {
           id: pageId,
           slug: "/",
+          parentId: null,
+          order: 0,
           meta: { title: "Home" },
           sections: [footer],
         },
       },
-      tree: [{ pageId, slug: "/", children: [] }],
     });
 
     await app.request(`/api/sites/${site.id}`, {
@@ -188,11 +192,12 @@ describe("DELETE /api/sites/:siteId/pages/:pageId/sections/:sectionId", () => {
         [pageId]: {
           id: pageId,
           slug: "/",
+          parentId: null,
+          order: 0,
           meta: { title: "Home" },
           sections: [section],
         },
       },
-      tree: [{ pageId, slug: "/", children: [] }],
     });
 
     await app.request(`/api/sites/${site.id}`, {

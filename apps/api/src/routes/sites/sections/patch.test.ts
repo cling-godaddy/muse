@@ -15,6 +15,8 @@ describe("PATCH /api/sites/:siteId/sections/:sectionId", () => {
         [pageId]: {
           id: pageId,
           slug: "/",
+          parentId: null,
+          order: 0,
           meta: { title: "Home" },
           sections: [
             {
@@ -27,7 +29,6 @@ describe("PATCH /api/sites/:siteId/sections/:sectionId", () => {
           ],
         },
       },
-      tree: [{ pageId, slug: "/", children: [] }],
     });
 
     await app.request(`/api/sites/${site.id}`, {
@@ -79,6 +80,8 @@ describe("PATCH /api/sites/:siteId/sections/:sectionId", () => {
         [pageId]: {
           id: pageId,
           slug: "/",
+          parentId: null,
+          order: 0,
           meta: { title: "Home" },
           sections: [
             {
@@ -89,7 +92,6 @@ describe("PATCH /api/sites/:siteId/sections/:sectionId", () => {
           ],
         },
       },
-      tree: [{ pageId, slug: "/", children: [] }],
     });
 
     await app.request(`/api/sites/${site.id}`, {
