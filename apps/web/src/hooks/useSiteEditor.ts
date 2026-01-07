@@ -1,4 +1,4 @@
-import { useState, useMemo, useCallback, useEffect, useRef } from "react";
+import { useState, useMemo, useCallback, useEffect, useRef, useLayoutEffect } from "react";
 import { flushSync } from "react-dom";
 import { useAuth } from "@clerk/clerk-react";
 import { groupBy } from "lodash-es";
@@ -64,6 +64,21 @@ export function useSiteEditor(siteId: string | undefined) {
   const [pendingImageSections, setPendingImageSections] = useState<Set<string>>(new Set());
   const trackUsageRef = useRef<((usage: Usage) => void) | null>(null);
   const lastAddedSectionIdRef = useRef<string | null>(null);
+  const prevSiteIdRef = useRef<string | undefined>(siteId);
+
+  // Reset store when siteId changes (must run before hydration)
+  useLayoutEffect(() => {
+    if (siteId !== prevSiteIdRef.current) {
+      useSiteStore.setState({
+        draft: null,
+        currentPageId: null,
+        undoStack: [],
+        redoStack: [],
+        dirty: false,
+      });
+      prevSiteIdRef.current = siteId;
+    }
+  }, [siteId]);
 
   // Hydrate draft on initial load only (not on every serverSite change)
   useEffect(() => {
