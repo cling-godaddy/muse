@@ -8,6 +8,7 @@ import {
   addPage,
   removePage,
   movePage,
+  getSiteThumbnailUrl,
 } from "../../src/site/utils";
 import { createSite } from "../../src/site/types";
 import { createPage } from "../../src/page/types";
@@ -264,6 +265,117 @@ describe("site utils", () => {
       const site = createSite("My Site", home);
 
       expect(site.pages[home.id]).toBe(home);
+    });
+  });
+
+  describe("getSiteThumbnailUrl", () => {
+    it("returns undefined for site with no pages", () => {
+      const site = createSite("Empty Site");
+      expect(getSiteThumbnailUrl(site)).toBeUndefined();
+    });
+
+    it("returns undefined for site with no images", () => {
+      const home = createPage({ slug: "/", meta: { title: "Home" }, parentId: null, order: 0 });
+      home.sections = [{ id: "s1", type: "hero", headline: "Welcome" }];
+      const site = createSite("Site", home);
+      expect(getSiteThumbnailUrl(site)).toBeUndefined();
+    });
+
+    it("extracts hero backgroundImage", () => {
+      const home = createPage({ slug: "/", meta: { title: "Home" }, parentId: null, order: 0 });
+      home.sections = [{
+        id: "s1",
+        type: "hero",
+        headline: "Welcome",
+        backgroundImage: { url: "https://example.com/hero.jpg", alt: "Hero" },
+      }];
+      const site = createSite("Site", home);
+      expect(getSiteThumbnailUrl(site)).toBe("https://example.com/hero.jpg");
+    });
+
+    it("extracts first gallery image", () => {
+      const home = createPage({ slug: "/", meta: { title: "Home" }, parentId: null, order: 0 });
+      home.sections = [{
+        id: "s1",
+        type: "gallery",
+        images: [
+          { url: "https://example.com/img1.jpg", alt: "Image 1" },
+          { url: "https://example.com/img2.jpg", alt: "Image 2" },
+        ],
+      }];
+      const site = createSite("Site", home);
+      expect(getSiteThumbnailUrl(site)).toBe("https://example.com/img1.jpg");
+    });
+
+    it("extracts first feature item image", () => {
+      const home = createPage({ slug: "/", meta: { title: "Home" }, parentId: null, order: 0 });
+      home.sections = [{
+        id: "s1",
+        type: "features",
+        items: [
+          { title: "Feature 1", description: "Desc 1" },
+          { title: "Feature 2", description: "Desc 2", image: { url: "https://example.com/feature.jpg", alt: "Feature" } },
+        ],
+      }];
+      const site = createSite("Site", home);
+      expect(getSiteThumbnailUrl(site)).toBe("https://example.com/feature.jpg");
+    });
+
+    it("extracts about section image", () => {
+      const home = createPage({ slug: "/", meta: { title: "Home" }, parentId: null, order: 0 });
+      home.sections = [{
+        id: "s1",
+        type: "about",
+        headline: "About Us",
+        image: { url: "https://example.com/about.jpg", alt: "About" },
+      }];
+      const site = createSite("Site", home);
+      expect(getSiteThumbnailUrl(site)).toBe("https://example.com/about.jpg");
+    });
+
+    it("extracts first product image", () => {
+      const home = createPage({ slug: "/", meta: { title: "Home" }, parentId: null, order: 0 });
+      home.sections = [{
+        id: "s1",
+        type: "products",
+        items: [
+          { name: "Product 1", price: "$10", image: { url: "https://example.com/product.jpg", alt: "Product" } },
+        ],
+      }];
+      const site = createSite("Site", home);
+      expect(getSiteThumbnailUrl(site)).toBe("https://example.com/product.jpg");
+    });
+
+    it("extracts menu item image", () => {
+      const home = createPage({ slug: "/", meta: { title: "Home" }, parentId: null, order: 0 });
+      home.sections = [{
+        id: "s1",
+        type: "menu",
+        items: [
+          { name: "Dish 1", price: "$15", image: { url: "https://example.com/dish.jpg", alt: "Dish" } },
+        ],
+      }];
+      const site = createSite("Site", home);
+      expect(getSiteThumbnailUrl(site)).toBe("https://example.com/dish.jpg");
+    });
+
+    it("uses first page by order", () => {
+      const about = createPage({ slug: "about", meta: { title: "About" }, parentId: null, order: 1 });
+      about.sections = [{ id: "s2", type: "about", image: { url: "https://example.com/about.jpg", alt: "About" } }];
+
+      const home = createPage({ slug: "/", meta: { title: "Home" }, parentId: null, order: 0 });
+      home.sections = [{ id: "s1", type: "hero", headline: "Welcome", backgroundImage: { url: "https://example.com/hero.jpg", alt: "Hero" } }];
+
+      const site: Site = {
+        id: "site-1",
+        name: "Test",
+        pages: { [about.id]: about, [home.id]: home },
+        theme: { palette: "slate", typography: "inter" },
+        createdAt: "2024-01-01",
+        updatedAt: "2024-01-01",
+      };
+
+      expect(getSiteThumbnailUrl(site)).toBe("https://example.com/hero.jpg");
     });
   });
 });
