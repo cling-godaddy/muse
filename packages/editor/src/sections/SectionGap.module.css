@@ -1,7 +1,11 @@
 .gap {
   position: relative;
-  height: 48px;
-  margin: calc(var(--muse-theme-section-gap, 2rem) * -0.5) 0;
+  z-index: 20;
+  height: 0;
+  padding: 24px 0;
+  margin: -24px auto;
+  width: 160px;
+  overflow: visible;
   opacity: 0;
   transition: opacity 0.2s ease;
 }
@@ -25,24 +29,25 @@
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  width: 32px;
-  height: 32px;
+  width: 36px;
+  height: 36px;
   display: flex;
   align-items: center;
   justify-content: center;
   background: white;
   border: 1px solid var(--muse-border, #e5e7eb);
-  border-radius: 6px;
+  border-radius: 50%;
   cursor: pointer;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
-  color: var(--muse-text-muted, #6b7280);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  color: var(--muse-primary, #3b82f6);
   transition: all 0.15s ease;
 }
 
 .button:hover {
-  border-color: var(--muse-border-light, #cbd5e1);
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  color: var(--muse-text, #111827);
+  border-color: var(--muse-primary, #3b82f6);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  color: var(--muse-primary, #3b82f6);
+  transform: translate(-50%, -50%) scale(1.1);
 }
 
 .button:active {

@@ -79,6 +79,7 @@ html, body, #root {
 
   .muse-section {
     @apply relative;
+    z-index: 0;
     animation: muse-fade-in 0.3s ease-out;
   }
 
