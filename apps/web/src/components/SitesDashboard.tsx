@@ -4,6 +4,7 @@ import { UserButton } from "@clerk/clerk-react";
 import { Trash2, Upload } from "lucide-react";
 import { useAuthFetch } from "../hooks/useAuthFetch";
 import { Dialog, Spinner } from "@muse/editor";
+import { useSiteStore } from "../stores/siteStore";
 
 const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
 
@@ -262,6 +263,9 @@ export function SitesDashboard() {
   const handleCreateSite = async (data: CreateSiteData) => {
     setCreating(true);
     try {
+      // Clear store before navigating to new site
+      useSiteStore.getState().resetStore();
+
       const res = await authFetch("/api/sites", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -286,6 +290,13 @@ export function SitesDashboard() {
     setIsDeleting(true);
     try {
       await authFetch(`/api/sites/${deletingSite.id}`, { method: "DELETE" });
+
+      // Clear store if we're deleting the site that's currently loaded
+      const currentDraft = useSiteStore.getState().draft;
+      if (currentDraft?.id === deletingSite.id) {
+        useSiteStore.getState().resetStore();
+      }
+
       setSites(prev => prev.filter(s => s.id !== deletingSite.id));
       setDeletingSite(null);
     }

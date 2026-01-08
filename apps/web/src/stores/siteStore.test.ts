@@ -302,4 +302,40 @@ describe("siteStore", () => {
       expect(useSiteStore.getState().dirty).toBe(false);
     });
   });
+
+  describe("resetStore", () => {
+    it("should clear all state", () => {
+      const site = createSite("Test Site");
+      const pageId = crypto.randomUUID();
+      site.pages[pageId] = {
+        id: pageId,
+        slug: "/",
+        parentId: null,
+        order: 0,
+        sections: [{ id: "s1", type: "hero", preset: "hero-default", headline: "Welcome" }],
+        meta: { title: "Home" },
+      };
+
+      useSiteStore.getState().hydrateDraft(site);
+      useSiteStore.getState().updateSiteName("New Name");
+      useSiteStore.getState().addPendingImageSection("section-1");
+
+      // Verify state is populated
+      expect(useSiteStore.getState().draft).not.toBeNull();
+      expect(useSiteStore.getState().dirty).toBe(true);
+      expect(useSiteStore.getState().pendingImageSections.size).toBe(1);
+
+      // Reset
+      useSiteStore.getState().resetStore();
+
+      // Verify all state is cleared
+      const state = useSiteStore.getState();
+      expect(state.draft).toBeNull();
+      expect(state.currentPageId).toBeNull();
+      expect(state.dirty).toBe(false);
+      expect(state.undoStack).toHaveLength(0);
+      expect(state.redoStack).toHaveLength(0);
+      expect(state.pendingImageSections.size).toBe(0);
+    });
+  });
 });

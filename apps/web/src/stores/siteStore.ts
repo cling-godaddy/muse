@@ -60,6 +60,9 @@ interface SiteState {
   addPendingImageSection: (id: string) => void
   removePendingImageSections: (ids: string[]) => void
   clearPendingImageSections: () => void
+
+  // Full reset
+  resetStore: () => void
 }
 
 export const useSiteStore = create<SiteState>()(
@@ -344,6 +347,16 @@ export const useSiteStore = create<SiteState>()(
       }),
 
       clearPendingImageSections: () => set({
+        pendingImageSections: new Set(),
+      }),
+
+      resetStore: () => set({
+        draft: null,
+        currentPageId: null,
+        theme: { palette: "slate", typography: "inter", effects: "neutral" },
+        undoStack: [],
+        redoStack: [],
+        dirty: false,
         pendingImageSections: new Set(),
       }),
     }),
