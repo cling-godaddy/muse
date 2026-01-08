@@ -5,6 +5,7 @@ import { Section as SectionWrapper } from "./sections";
 import { SectionGap } from "./sections/SectionGap";
 import { createSectionFromPreset } from "./sections/sectionFactory";
 import { SelectionProvider } from "./context/Selection";
+import { EditorServicesProvider } from "./context/EditorServices";
 import { useIsEditable } from "./context/EditorMode";
 
 interface SectionEditorProps {
@@ -102,64 +103,66 @@ export function SectionEditor({
   const canAddSections = isEditable && site && currentPage;
 
   return (
-    <SelectionProvider>
-      <div className="muse-section-editor">
-        {allSections.length === 0 && isEditable && (
-          <div className="muse-section-editor-empty">
-            No sections yet. Use AI to generate content.
-          </div>
-        )}
-        {canAddSections && (
-          <SectionGap
-            index={0}
-            site={site}
-            currentPage={currentPage}
-            onAdd={handleAddSection}
-          />
-        )}
-        {allSections.map((section) => {
-          const isNavbar = navbar && section.id === navbar.id;
-          const isFooter = section.type === "footer";
-          const sectionIndex = isNavbar ? -1 : sections.findIndex(s => s.id === section.id);
-          const showMoveControls = !isNavbar && !isFooter;
+    <EditorServicesProvider getToken={getToken} trackUsage={trackUsage} site={site}>
+      <SelectionProvider>
+        <div className="muse-section-editor">
+          {allSections.length === 0 && isEditable && (
+            <div className="muse-section-editor-empty">
+              No sections yet. Use AI to generate content.
+            </div>
+          )}
+          {canAddSections && (
+            <SectionGap
+              index={0}
+              site={site}
+              currentPage={currentPage}
+              onAdd={handleAddSection}
+            />
+          )}
+          {allSections.map((section) => {
+            const isNavbar = navbar && section.id === navbar.id;
+            const isFooter = section.type === "footer";
+            const sectionIndex = isNavbar ? -1 : sections.findIndex(s => s.id === section.id);
+            const showMoveControls = !isNavbar && !isFooter;
 
-          return (
-            <Fragment key={section.id}>
-              <SectionWrapper
-                section={section}
-                onUpdate={data => updateSection(section.id, data)}
-                onDelete={() => deleteSection(section.id)}
-                isPending={pendingImageSections?.has(section.id) ?? false}
-                onMoveUp={showMoveControls
-                  ? () => {
-                    onMoveSection?.(section.id, "up");
-                    moveSection(sectionIndex, sectionIndex - 1);
-                  }
-                  : void 0}
-                onMoveDown={showMoveControls
-                  ? () => {
-                    onMoveSection?.(section.id, "down");
-                    moveSection(sectionIndex, sectionIndex + 1);
-                  }
-                  : void 0}
-                canMoveUp={showMoveControls && sectionIndex > 0}
-                canMoveDown={showMoveControls && sectionIndex < lastMoveableIndex}
-                site={site}
-                getToken={getToken}
-                trackUsage={trackUsage}
-              />
-              {canAddSections && !isNavbar && (
-                <SectionGap
-                  index={sectionIndex + 1}
+            return (
+              <Fragment key={section.id}>
+                <SectionWrapper
+                  section={section}
+                  onUpdate={data => updateSection(section.id, data)}
+                  onDelete={() => deleteSection(section.id)}
+                  isPending={pendingImageSections?.has(section.id) ?? false}
+                  onMoveUp={showMoveControls
+                    ? () => {
+                      onMoveSection?.(section.id, "up");
+                      moveSection(sectionIndex, sectionIndex - 1);
+                    }
+                    : void 0}
+                  onMoveDown={showMoveControls
+                    ? () => {
+                      onMoveSection?.(section.id, "down");
+                      moveSection(sectionIndex, sectionIndex + 1);
+                    }
+                    : void 0}
+                  canMoveUp={showMoveControls && sectionIndex > 0}
+                  canMoveDown={showMoveControls && sectionIndex < lastMoveableIndex}
                   site={site}
-                  currentPage={currentPage}
-                  onAdd={handleAddSection}
+                  getToken={getToken}
+                  trackUsage={trackUsage}
                 />
-              )}
-            </Fragment>
-          );
-        })}
-      </div>
-    </SelectionProvider>
+                {canAddSections && !isNavbar && (
+                  <SectionGap
+                    index={sectionIndex + 1}
+                    site={site}
+                    currentPage={currentPage}
+                    onAdd={handleAddSection}
+                  />
+                )}
+              </Fragment>
+            );
+          })}
+        </div>
+      </SelectionProvider>
+    </EditorServicesProvider>
   );
 }

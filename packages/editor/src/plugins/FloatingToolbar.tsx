@@ -7,6 +7,9 @@ import {
   $createRangeSelection,
   $setSelection,
   $getNodeByKey,
+  $getRoot,
+  $createParagraphNode,
+  $createTextNode,
   FORMAT_TEXT_COMMAND,
   SELECTION_CHANGE_COMMAND,
   FOCUS_COMMAND,
@@ -36,6 +39,8 @@ import {
   X,
 } from "lucide-react";
 import { ColorPicker } from "../controls/ColorPicker";
+import { RewriteMenu, type Preset } from "./RewriteMenu";
+import { useEditorServices } from "../context/EditorServices";
 import { useDebouncedCallback } from "@muse/react";
 import styles from "./FloatingToolbar.module.css";
 
@@ -50,6 +55,7 @@ interface FloatingToolbarPluginProps {
 
 export function FloatingToolbarPlugin({ hideLists }: FloatingToolbarPluginProps = {}) {
   const [editor] = useLexicalComposerContext();
+  const { getToken, trackUsage, site } = useEditorServices();
   const [isFocused, setIsFocused] = useState(false);
   const [position, setPosition] = useState<Position>({ top: 0, left: 0 });
   const [showLinkInput, setShowLinkInput] = useState(false);
@@ -60,6 +66,8 @@ export function FloatingToolbarPlugin({ hideLists }: FloatingToolbarPluginProps 
   const [listType, setListType] = useState<"bullet" | "number" | null>(null);
   const [textColor, setTextColor] = useState<string | null>(null);
   const [isColorPickerOpen, setIsColorPickerOpen] = useState(false);
+  const [isRewriteMenuOpen, setIsRewriteMenuOpen] = useState(false);
+  const [isRewriting, setIsRewriting] = useState(false);
   const savedSelectionRef = useRef<{
     anchorKey: string
     anchorOffset: number
@@ -136,8 +144,8 @@ export function FloatingToolbarPlugin({ hideLists }: FloatingToolbarPluginProps 
       () => {
         // Delay blur check to allow toolbar interaction
         setTimeout(() => {
-          // Don't hide if color picker is open (it's in a portal)
-          if (isColorPickerOpen) {
+          // Don't hide if color picker or rewrite menu is open (they're in portals)
+          if (isColorPickerOpen || isRewriteMenuOpen) {
             return;
           }
           const activeElement = document.activeElement;
@@ -153,7 +161,7 @@ export function FloatingToolbarPlugin({ hideLists }: FloatingToolbarPluginProps 
       },
       COMMAND_PRIORITY_LOW,
     );
-  }, [editor, isColorPickerOpen]);
+  }, [editor, isColorPickerOpen, isRewriteMenuOpen]);
 
   // Handle click outside - closes toolbar and any open popovers
   useEffect(() => {
@@ -174,6 +182,7 @@ export function FloatingToolbarPlugin({ hideLists }: FloatingToolbarPluginProps 
 
       // Close everything
       setIsColorPickerOpen(false);
+      setIsRewriteMenuOpen(false);
       setIsFocused(false);
       setShowLinkInput(false);
     };
@@ -326,6 +335,85 @@ export function FloatingToolbarPlugin({ hideLists }: FloatingToolbarPluginProps 
     editor.focus();
   };
 
+  const handleRewrite = useCallback(async (preset: Preset) => {
+    if (!getToken) return;
+
+    // Get text to rewrite
+    let textToRewrite = "";
+    let hasSelection = false;
+
+    editor.getEditorState().read(() => {
+      const selection = $getSelection();
+      if ($isRangeSelection(selection) && !selection.isCollapsed()) {
+        textToRewrite = selection.getTextContent();
+        hasSelection = true;
+      }
+      else {
+        textToRewrite = $getRoot().getTextContent();
+      }
+    });
+
+    if (!textToRewrite.trim()) return;
+
+    setIsRewriting(true);
+
+    try {
+      const token = await getToken();
+      if (!token) {
+        setIsRewriting(false);
+        return;
+      }
+
+      const response = await fetch("/api/chat/rewrite-text", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          text: textToRewrite,
+          prompt: preset.prompt,
+          presetId: preset.id,
+          siteContext: site ? { name: site.name, description: site.description } : undefined,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error("Rewrite request failed");
+      }
+
+      const { rewritten, usage } = await response.json();
+
+      // Replace text in editor
+      editor.update(() => {
+        if (hasSelection) {
+          const selection = $getSelection();
+          if ($isRangeSelection(selection)) {
+            selection.insertText(rewritten);
+          }
+        }
+        else {
+          const root = $getRoot();
+          root.clear();
+          const paragraph = $createParagraphNode();
+          paragraph.append($createTextNode(rewritten));
+          root.append(paragraph);
+        }
+      });
+
+      if (usage && trackUsage) {
+        trackUsage(usage);
+      }
+    }
+    catch (err) {
+      console.error("Rewrite failed:", err);
+    }
+    finally {
+      setIsRewriting(false);
+      editor.focus();
+    }
+  }, [editor, getToken, trackUsage, site]);
+
   if (!isFocused) return null;
 
   return createPortal(
@@ -416,6 +504,18 @@ export function FloatingToolbarPlugin({ hideLists }: FloatingToolbarPluginProps 
           >
             <ListOrdered size={14} />
           </button>
+        </>
+      )}
+
+      {getToken && (
+        <>
+          <div className={styles.divider} />
+          <RewriteMenu
+            open={isRewriteMenuOpen}
+            onOpenChange={setIsRewriteMenuOpen}
+            onSelect={handleRewrite}
+            isLoading={isRewriting}
+          />
         </>
       )}
 
