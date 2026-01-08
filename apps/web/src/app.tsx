@@ -130,7 +130,7 @@ function MainApp() {
 
     // Wait for next tick to ensure DOM is updated
     const timeout = setTimeout(() => {
-      const element = document.querySelector(`[data-section-id="${lastAddedSectionId}"]`);
+      const element = document.getElementById(lastAddedSectionId);
       if (element) {
         element.scrollIntoView({ behavior: "smooth", block: "center" });
       }

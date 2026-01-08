@@ -111,7 +111,7 @@ export function Section({ section, onUpdate, onDelete, onMoveUp, onMoveDown, can
       layout
       className="muse-section"
       data-section-type={section.type}
-      data-section-id={section.id}
+      id={section.id}
       data-has-bg-override={displayColor !== "#ffffff" ? "true" : undefined}
       style={{ "--muse-section-bg": displayColor } as React.CSSProperties}
     >
