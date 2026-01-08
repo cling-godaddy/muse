@@ -115,11 +115,6 @@
   color: #6366f1;
 }
 
-.loadingDots {
-  font-size: 12px;
-  color: #7c3aed;
-  font-style: italic;
-}
 
 @keyframes slideDown {
   from {
@@ -169,47 +164,132 @@
   white-space: nowrap;
 }
 
-/* Suggested section (contextual/smart chips) */
-.suggestedSection {
+/* AI Suggestions section */
+.aiSection {
   padding: 10px 12px;
   background: linear-gradient(135deg, #faf5ff 0%, #f0fdf4 100%);
   border-bottom: 1px solid #e5e7eb;
 }
 
-.suggestedLabel {
+.aiHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.aiLabel {
   font-size: 11px;
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.5px;
   color: #7c3aed;
-  margin-bottom: 8px;
 }
 
-.suggestedChips {
+.aiHint {
+  font-size: 10px;
+  color: #9ca3af;
+}
+
+.aiSuggestions {
   display: flex;
-  flex-wrap: wrap;
+  flex-direction: column;
   gap: 6px;
 }
 
-.smartChip {
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+.aiLoading {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 0;
+  font-size: 12px;
+  color: #7c3aed;
+  font-style: italic;
 }
 
-/* Input section */
-.inputSection {
-  padding: 8px 12px 12px;
+.aiLoadingSpinner {
+  width: 14px;
+  height: 14px;
+  border: 2px solid #e9d5ff;
+  border-top-color: #7c3aed;
+  border-radius: 50%;
+  animation: spin 0.6s linear infinite;
 }
 
-.inputLabel {
-  display: block;
+.aiSuggestion {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 10px 12px;
+  background: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: border-color 0.15s, box-shadow 0.15s, background 0.15s;
+  text-align: left;
+}
+
+.aiSuggestion:hover:not(:disabled) {
+  border-color: #c4b5fd;
+  box-shadow: 0 2px 8px rgba(139, 92, 246, 0.15);
+  background: #faf5ff;
+}
+
+.aiSuggestion:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.aiSuggestionText {
+  flex: 1;
   font-size: 13px;
-  font-weight: 600;
   color: #374151;
+  line-height: 1.4;
+}
+
+.aiSuggestionArrow {
+  flex-shrink: 0;
+  color: #9ca3af;
+  transition: color 0.15s, transform 0.15s;
+}
+
+.aiSuggestion:hover:not(:disabled) .aiSuggestionArrow {
+  color: #7c3aed;
+  transform: translateX(2px);
+}
+
+.aiSuggestionSpinner {
+  width: 14px;
+  height: 14px;
+  border: 2px solid #e9d5ff;
+  border-top-color: #7c3aed;
+  border-radius: 50%;
+  animation: spin 0.6s linear infinite;
+  flex-shrink: 0;
+}
+
+/* Custom instruction section */
+.customSection {
+  padding: 10px 12px;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.customLabel {
+  display: block;
+  font-size: 12px;
+  font-weight: 500;
+  color: #6b7280;
   margin-bottom: 8px;
 }
 
-.input {
-  width: 100%;
+.customInputRow {
+  display: flex;
+  gap: 8px;
+}
+
+.customInput {
+  flex: 1;
   padding: 8px 10px;
   font-size: 13px;
   color: #374151;
@@ -221,18 +301,52 @@
   box-sizing: border-box;
 }
 
-.input:focus {
+.customInput:focus {
   border-color: #6366f1;
   box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.1);
 }
 
-.input::placeholder {
+.customInput::placeholder {
   color: #9ca3af;
 }
 
-.input:disabled {
+.customInput:disabled {
   opacity: 0.6;
   cursor: not-allowed;
+}
+
+.customButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  padding: 0;
+  color: white;
+  background: #6366f1;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background 0.15s;
+  flex-shrink: 0;
+}
+
+.customButton:hover:not(:disabled) {
+  background: #4f46e5;
+}
+
+.customButton:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.customButtonSpinner {
+  width: 16px;
+  height: 16px;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-top-color: white;
+  border-radius: 50%;
+  animation: spin 0.6s linear infinite;
 }
 
 .dropdownButton {
@@ -373,30 +487,3 @@
   border-color: #fdba74;
 }
 
-/* Footer with submit button */
-.footer {
-  padding: 8px 12px;
-  border-top: 1px solid #e5e7eb;
-}
-
-.submitButton {
-  width: 100%;
-  padding: 8px 16px;
-  font-size: 13px;
-  font-weight: 500;
-  color: white;
-  background: #6366f1;
-  border: none;
-  border-radius: 6px;
-  cursor: pointer;
-  transition: background 0.15s;
-}
-
-.submitButton:hover:not(:disabled) {
-  background: #4f46e5;
-}
-
-.submitButton:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-}

@@ -705,15 +705,15 @@ chatRoute.post("/suggest-rewrites", async (c) => {
     ? `\n\nCurrent text: "${currentText.slice(0, 200)}${currentText.length > 200 ? "..." : ""}"`
     : "";
 
-  const systemPrompt = `You are a copywriting expert. Generate 4 SHORT rewrite suggestions (2-4 words each) for improving ${elementContext}${sectionContext}${businessDescription}.
-
-Each suggestion should be an actionable instruction like "more compelling", "add urgency", "shorter", "more specific", "emphasize benefits", etc.
+  const systemPrompt = `You are a copywriting expert. Generate 4 alternative versions of ${elementContext}${sectionContext}${businessDescription}.
+${textPreview}
 
 IMPORTANT:
 - Return ONLY a JSON array of 4 strings
-- Each string should be 2-4 words
-- Suggestions should be relevant to the element type and business
-- No explanations or preamble${textPreview}`;
+- Each string is a complete replacement for the current text
+- Keep similar length to the original (don't make it longer)
+- Make each version distinct in tone/approach
+- No explanations or preamble, just the JSON array`;
 
   try {
     const response = await getClient().chat({

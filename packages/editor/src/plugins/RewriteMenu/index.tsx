@@ -1,14 +1,17 @@
-import { useState, useRef, useEffect, useMemo, useCallback } from "react";
+import { useState, useRef, useEffect, useCallback } from "react";
 import * as Popover from "@radix-ui/react-popover";
-import { Sparkles } from "lucide-react";
+import { Sparkles, ArrowRight } from "lucide-react";
 import { useEditorServices } from "../../context/EditorServices";
-import { PRESETS, getContextualPresets, type Preset } from "./presets";
+import { PRESETS } from "./presets";
 import styles from "./RewriteMenu.module.css";
 
 interface RewriteMenuProps {
   open: boolean
   onOpenChange: (open: boolean) => void
-  onRewrite: (completion: string) => void
+  /** Called with an instruction like "shorter" - triggers API rewrite */
+  onRewrite: (instruction: string) => void
+  /** Called with literal text to apply directly - no API call */
+  onApplyDirectText: (text: string) => void
   isLoading?: boolean
   sourceText?: string
   sectionType?: string
@@ -23,13 +26,11 @@ const colorClass = {
   orange: styles.chipOrange,
 };
 
-// Assign colors to LLM suggestions in rotation
-const SUGGESTION_COLORS: Array<"blue" | "green" | "purple" | "orange"> = ["orange", "green", "purple", "blue"];
-
 export function RewriteMenu({
   open,
   onOpenChange,
   onRewrite,
+  onApplyDirectText,
   isLoading,
   sourceText,
   sectionType,
@@ -38,19 +39,14 @@ export function RewriteMenu({
 }: RewriteMenuProps) {
   const [input, setInput] = useState("");
   const inputRef = useRef<HTMLInputElement>(null);
-  const [llmSuggestions, setLlmSuggestions] = useState<Preset[]>([]);
+  const [llmSuggestions, setLlmSuggestions] = useState<string[]>([]);
   const [isLoadingSuggestions, setIsLoadingSuggestions] = useState(false);
+  const [applyingIndex, setApplyingIndex] = useState<number | null>(null);
   const hasFetchedRef = useRef(false);
   const { getToken, trackUsage } = useEditorServices();
 
-  // Get context-aware presets (rule-based, instant)
-  const contextualPresets = useMemo(
-    () => getContextualPresets(sectionType, elementType),
-    [sectionType, elementType],
-  );
-
-  // Check if we have contextual suggestions (not just defaults)
-  const hasContextualSuggestions = !!(sectionType && elementType);
+  // Check if we have context for AI suggestions
+  const hasContext = !!(sectionType && elementType);
 
   // Fetch LLM suggestions when menu opens
   const fetchLlmSuggestions = useCallback(async () => {
@@ -84,12 +80,7 @@ export function RewriteMenu({
       }
 
       if (suggestions && suggestions.length > 0) {
-        // Convert string suggestions to Preset objects with colors
-        const presets: Preset[] = suggestions.map((label: string, i: number) => ({
-          label,
-          color: SUGGESTION_COLORS[i % SUGGESTION_COLORS.length],
-        }));
-        setLlmSuggestions(presets);
+        setLlmSuggestions(suggestions);
       }
     }
     catch (err) {
@@ -111,12 +102,10 @@ export function RewriteMenu({
       // Reset when menu closes
       hasFetchedRef.current = false;
       setLlmSuggestions([]);
+      setApplyingIndex(null);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open]);
-
-  // Use LLM suggestions if available, otherwise fall back to rule-based
-  const suggestedPresets = llmSuggestions.length > 0 ? llmSuggestions : contextualPresets;
 
   // Focus input when popover opens, clear when it closes
   useEffect(() => {
@@ -136,9 +125,14 @@ export function RewriteMenu({
     // Parent will close after rewrite completes
   };
 
-  const handleChipClick = (preset: string) => {
-    setInput(preset);
+  const handleChipClick = (instruction: string) => {
+    setInput(instruction);
     inputRef.current?.focus();
+  };
+
+  const handleSuggestionClick = (text: string, index: number) => {
+    setApplyingIndex(index);
+    onApplyDirectText(text);
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
@@ -198,27 +192,34 @@ export function RewriteMenu({
             </div>
           )}
 
-          {/* Contextual suggestions (LLM or rule-based fallback) */}
-          {hasContextualSuggestions && (
-            <div className={styles.suggestedSection}>
-              <div className={styles.suggestedLabel}>
-                {llmSuggestions.length > 0 ? "AI suggestions" : `Suggested for this ${elementType}`}
+          {/* AI Suggestions - direct replacement text */}
+          {hasContext && (isLoadingSuggestions || llmSuggestions.length > 0) && (
+            <div className={styles.aiSection}>
+              <div className={styles.aiHeader}>
+                <span className={styles.aiLabel}>AI suggestions</span>
+                <span className={styles.aiHint}>click to use</span>
               </div>
-              <div className={styles.suggestedChips}>
+              <div className={styles.aiSuggestions}>
                 {isLoadingSuggestions
                   ? (
-                    <span className={styles.loadingDots}>Generating suggestions...</span>
+                    <div className={styles.aiLoading}>
+                      <span className={styles.aiLoadingSpinner} />
+                      <span>Generating suggestions...</span>
+                    </div>
                   )
                   : (
-                    suggestedPresets.map(preset => (
+                    llmSuggestions.map((text, index) => (
                       <button
-                        key={preset.label}
+                        key={index}
                         type="button"
-                        className={`${styles.chip} ${styles.smartChip} ${colorClass[preset.color]}`}
-                        onClick={() => handleChipClick(preset.label)}
-                        disabled={isLoading}
+                        className={styles.aiSuggestion}
+                        onClick={() => handleSuggestionClick(text, index)}
+                        disabled={isLoading || applyingIndex !== null}
                       >
-                        {preset.label}
+                        <span className={styles.aiSuggestionText}>{text}</span>
+                        {applyingIndex === index
+                          ? <span className={styles.aiSuggestionSpinner} />
+                          : <ArrowRight size={14} className={styles.aiSuggestionArrow} />}
                       </button>
                     ))
                   )}
@@ -226,22 +227,33 @@ export function RewriteMenu({
             </div>
           )}
 
-          {/* Subtitle + Input */}
-          <div className={styles.inputSection}>
-            <label className={styles.inputLabel}>Make this text:</label>
-            <input
-              ref={inputRef}
-              type="text"
-              className={styles.input}
-              value={input}
-              onChange={e => setInput(e.target.value)}
-              onKeyDown={handleKeyDown}
-              placeholder="shorter, more professional..."
-              disabled={isLoading}
-            />
+          {/* Custom instruction input with inline button */}
+          <div className={styles.customSection}>
+            <label className={styles.customLabel}>Or describe a change:</label>
+            <div className={styles.customInputRow}>
+              <input
+                ref={inputRef}
+                type="text"
+                className={styles.customInput}
+                value={input}
+                onChange={e => setInput(e.target.value)}
+                onKeyDown={handleKeyDown}
+                placeholder="shorter, more professional..."
+                disabled={isLoading}
+              />
+              <button
+                type="button"
+                className={styles.customButton}
+                onClick={handleSubmit}
+                disabled={!input.trim() || isLoading}
+                title="Rewrite"
+              >
+                {isLoading ? <span className={styles.customButtonSpinner} /> : <ArrowRight size={16} />}
+              </button>
+            </div>
           </div>
 
-          {/* All chips */}
+          {/* Instruction chips - fill input */}
           <div className={styles.chips}>
             {PRESETS.map(preset => (
               <button
@@ -254,18 +266,6 @@ export function RewriteMenu({
                 {preset.label}
               </button>
             ))}
-          </div>
-
-          {/* Submit button */}
-          <div className={styles.footer}>
-            <button
-              type="button"
-              className={styles.submitButton}
-              onClick={handleSubmit}
-              disabled={!input.trim() || isLoading}
-            >
-              {isLoading ? "Rewriting..." : "Rewrite"}
-            </button>
           </div>
         </Popover.Content>
       </Popover.Portal>

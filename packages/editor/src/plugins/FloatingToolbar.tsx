@@ -434,6 +434,34 @@ export function FloatingToolbarPlugin({ hideLists }: FloatingToolbarPluginProps 
     }
   }, [editor, getToken, trackUsage, site]);
 
+  // Direct text replacement (for AI suggestions)
+  const handleApplyDirectText = useCallback((text: string) => {
+    setIsRewriting(true);
+
+    // Mark this as a programmatic update so SyncPlugin doesn't revert it
+    markProgrammaticUpdate(text);
+
+    // Replace text in editor
+    editor.update(() => {
+      // Check if there's a selection
+      const selection = $getSelection();
+      if ($isRangeSelection(selection) && !selection.isCollapsed()) {
+        selection.insertText(text);
+      }
+      else {
+        const root = $getRoot();
+        root.clear();
+        const paragraph = $createParagraphNode();
+        paragraph.append($createTextNode(text));
+        root.append(paragraph);
+      }
+    });
+
+    setIsRewriting(false);
+    setIsRewriteMenuOpen(false);
+    editor.focus();
+  }, [editor]);
+
   if (!isFocused) return null;
 
   return createPortal(
@@ -550,6 +578,7 @@ export function FloatingToolbarPlugin({ hideLists }: FloatingToolbarPluginProps 
                 setIsRewriteMenuOpen(open);
               }}
               onRewrite={handleRewrite}
+              onApplyDirectText={handleApplyDirectText}
               isLoading={isRewriting}
               sourceText={rewriteSourceText}
               sectionType={sectionType}
