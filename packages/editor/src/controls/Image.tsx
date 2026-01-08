@@ -41,6 +41,7 @@ export function Image({
   const [query, setQuery] = useState("");
   const [results, setResults] = useState<SearchResult[]>([]);
   const [searching, setSearching] = useState(false);
+  const [hasSearched, setHasSearched] = useState(false);
 
   const handleAltChange = (value: string) => {
     if (!image) return;
@@ -50,6 +51,15 @@ export function Image({
   const handleRemove = () => {
     setOpen(false);
     onRemove?.();
+  };
+
+  const handleQueryChange = (value: string) => {
+    setQuery(value);
+    // Clear previous results when typing new query
+    if (results.length > 0 || hasSearched) {
+      setResults([]);
+      setHasSearched(false);
+    }
   };
 
   const handleSearch = async (e: React.FormEvent) => {
@@ -64,6 +74,7 @@ export function Image({
       if (!res.ok) throw new Error("Search failed");
       const data = await res.json() as { results: SearchResult[], usage?: Usage };
       setResults(data.results);
+      setHasSearched(true);
 
       if (data.usage && onUsage) {
         onUsage(data.usage);
@@ -108,23 +119,21 @@ export function Image({
       <Popover.Portal>
         <Popover.Content className={styles.content} side="bottom" align="center" sideOffset={8}>
           <form className={styles.searchForm} onSubmit={handleSearch}>
-            <input
-              type="text"
-              className={styles.input}
-              value={query}
-              onChange={e => setQuery(e.target.value)}
-              placeholder="Search images..."
-            />
-            <button type="submit" className={styles.searchButton} disabled={searching}>
-              <Search size={16} />
-            </button>
+            <div className={styles.searchInputWrapper}>
+              <Search size={16} className={styles.searchIcon} />
+              <input
+                type="text"
+                className={styles.searchInput}
+                value={query}
+                onChange={e => handleQueryChange(e.target.value)}
+                placeholder="Search images..."
+              />
+              {searching && <Loader2 size={16} className={styles.spinner} />}
+            </div>
           </form>
 
-          {searching && (
-            <div className={styles.loading}>
-              <Loader2 size={20} className={styles.spinner} />
-              <span>Searching...</span>
-            </div>
+          {!searching && hasSearched && results.length === 0 && (
+            <div className={styles.empty}>No images found</div>
           )}
 
           {!searching && results.length > 0 && (
