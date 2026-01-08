@@ -1,6 +1,6 @@
 import { useState } from "react";
 import * as Popover from "@radix-ui/react-popover";
-import { Search, Loader2 } from "lucide-react";
+import { Search, Loader2, Trash2 } from "lucide-react";
 import type { ImageSource, Usage } from "@muse/core";
 import styles from "./Image.module.css";
 
@@ -107,20 +107,6 @@ export function Image({
 
       <Popover.Portal>
         <Popover.Content className={styles.content} side="bottom" align="center" sideOffset={8}>
-          <div className={styles.field}>
-            <label className={styles.label} htmlFor="image-alt">
-              Alt text
-            </label>
-            <input
-              id="image-alt"
-              type="text"
-              className={styles.input}
-              value={image.alt}
-              onChange={e => handleAltChange(e.target.value)}
-              placeholder="Describe this image..."
-            />
-          </div>
-
           <form className={styles.searchForm} onSubmit={handleSearch}>
             <input
               type="text"
@@ -158,17 +144,30 @@ export function Image({
 
           {error && <div className={styles.error}>{error}</div>}
 
-          {onRemove && (
-            <div className={styles.actions}>
+          <div className={styles.footer}>
+            <label className={styles.footerLabel} htmlFor="image-alt">
+              Alt
+            </label>
+            <input
+              id="image-alt"
+              type="text"
+              className={styles.footerInput}
+              value={image.alt}
+              onChange={e => handleAltChange(e.target.value)}
+              placeholder="Describe image..."
+            />
+            {onRemove && (
               <button
                 type="button"
-                className={`${styles.button} ${styles.danger}`}
+                className={styles.trashButton}
                 onClick={handleRemove}
+                aria-label="Remove image"
               >
-                Remove
+                <Trash2 size={14} />
               </button>
-            </div>
-          )}
+            )}
+          </div>
+
           <Popover.Arrow className={styles.arrow} />
         </Popover.Content>
       </Popover.Portal>

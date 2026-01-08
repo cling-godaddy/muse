@@ -164,6 +164,7 @@
 }
 
 .content {
+  position: relative;
   background: white;
   border: 1px solid #e5e7eb;
   border-radius: 8px;
@@ -185,17 +186,65 @@
   }
 }
 
-.field {
+.footer {
   display: flex;
-  flex-direction: column;
-  gap: 4px;
-  margin-bottom: 12px;
+  align-items: center;
+  gap: 8px;
+  padding-top: 8px;
+  margin-top: 4px;
+  border-top: 1px solid #f3f4f6;
 }
 
-.label {
-  font-size: 12px;
+.footerLabel {
+  font-size: 11px;
   font-weight: 500;
-  color: #374151;
+  color: #9ca3af;
+  text-transform: uppercase;
+  letter-spacing: 0.025em;
+}
+
+.footerInput {
+  flex: 1;
+  padding: 4px 6px;
+  font-size: 12px;
+  color: #6b7280;
+  background: transparent;
+  border: none;
+  border-radius: 4px;
+  outline: none;
+  transition: background 0.15s;
+}
+
+.footerInput:hover {
+  background: #f9fafb;
+}
+
+.footerInput:focus {
+  background: #f3f4f6;
+}
+
+.footerInput::placeholder {
+  color: #d1d5db;
+}
+
+.trashButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  padding: 0;
+  color: #d1d5db;
+  background: none;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: color 0.15s, background 0.15s;
+}
+
+.trashButton:hover {
+  color: #dc2626;
+  background: #fef2f2;
 }
 
 .input {
@@ -214,38 +263,6 @@
 
 .input::placeholder {
   color: #9ca3af;
-}
-
-.actions {
-  display: flex;
-  gap: 8px;
-}
-
-.button {
-  flex: 1;
-  padding: 6px 12px;
-  font-size: 12px;
-  font-weight: 500;
-  color: #374151;
-  background: #f9fafb;
-  border: 1px solid #e5e7eb;
-  border-radius: 6px;
-  cursor: pointer;
-  transition: background 0.15s, border-color 0.15s;
-}
-
-.button:hover {
-  background: #f3f4f6;
-  border-color: #d1d5db;
-}
-
-.button.danger {
-  color: #dc2626;
-}
-
-.button.danger:hover {
-  background: #fef2f2;
-  border-color: #fecaca;
 }
 
 .arrow {
