@@ -66,8 +66,10 @@ export function Section({ section, onUpdate, onDelete, onMoveUp, onMoveDown, can
   const [pendingColor, setPendingColor] = useState<string | null>(null);
   const debounceRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
 
+  // If section has a background image, don't override with color
+  const hasBackgroundImage = "backgroundImage" in section && section.backgroundImage != null;
   const propColor = section.backgroundColor ?? "#ffffff";
-  const displayColor = pendingColor ?? propColor;
+  const displayColor = hasBackgroundImage ? undefined : (pendingColor ?? propColor);
 
   const handleColorChange = useCallback((color: string) => {
     setPendingColor(color);
@@ -97,8 +99,7 @@ export function Section({ section, onUpdate, onDelete, onMoveUp, onMoveDown, can
       className="muse-section"
       data-section-type={section.type}
       id={section.id}
-      data-has-bg-override={displayColor !== "#ffffff" ? "true" : undefined}
-      style={{ "--muse-section-bg": displayColor } as React.CSSProperties}
+      style={displayColor ? { "--muse-section-bg": displayColor } as React.CSSProperties : undefined}
     >
       {isEditable && (
         <div className="muse-section-controls">
@@ -131,12 +132,14 @@ export function Section({ section, onUpdate, onDelete, onMoveUp, onMoveDown, can
               onChange={preset => onUpdate({ preset })}
             />
           )}
-          <ColorPicker
-            value={displayColor}
-            onChange={handleColorChange}
-            ariaLabel="Section background color"
-            compact
-          />
+          {!hasBackgroundImage && (
+            <ColorPicker
+              value={displayColor ?? "#ffffff"}
+              onChange={handleColorChange}
+              ariaLabel="Section background color"
+              compact
+            />
+          )}
           <button
             type="button"
             className="muse-section-delete"
