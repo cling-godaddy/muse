@@ -45,3 +45,12 @@ const send = useCallback(() => {
 - **getState()**: When reading Zustand store values in callbacks
 - **useLatest(options)**: When a hook receives an options object with callbacks
 - **Neither needed**: When the callback is short-lived (onClick handlers that run immediately)
+
+## Portals and Popovers
+
+When working with portaled UI (Radix popovers, modals, etc.), watch for:
+
+- **Event bubbling**: Portal events bubble through React tree, not DOM tree. A click inside a portal can trigger handlers on React ancestors even though it's elsewhere in the DOM.
+- **Focus fights**: Contenteditables and rich text editors aggressively reclaim focus, which can interfere with inputs inside popovers.
+- **Click-outside detection**: Custom outside-click handlers must account for portaled content rendered outside the parent DOM hierarchy.
+- **CSS animation conflicts**: Animation `transform` values override inline `transform`. Combine them in keyframes if both are needed.
