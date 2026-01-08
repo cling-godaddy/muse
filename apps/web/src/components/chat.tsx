@@ -9,6 +9,7 @@ import { useChat, type Message, type RefineUpdate, type MoveUpdate, type SiteCon
 import { useAutosaveMessages } from "../hooks/useAutosaveMessages";
 import type { AgentState, ThemeSelection, PageInfo } from "../utils/streamParser";
 import { TimelineModal } from "./modals/timeline";
+import { CostsModal } from "./modals/costs";
 
 interface IntakeContext {
   name?: string
@@ -53,15 +54,9 @@ interface ChatProps {
   onTrackUsageReady?: (trackUsage: (usage: Usage) => void) => void
 }
 
-function formatTokens(n: number): string {
-  if (n < 1000) return String(n);
-  if (n < 1_000_000) return `${Math.round(n / 1000)}k`;
-  return `${(n / 1_000_000).toFixed(1)}M`;
-}
-
 export function Chat({ siteId, siteContext, sections, siteCosts, autoSendPrompt, intakeContext, onSectionParsed, onThemeSelected, onImages, onPages, onRefine, onSectionsUpdated, onMove, onDelete, onAddSection, onGenerationComplete, onMessagesChange, onUsage, onTrackUsageReady }: ChatProps) {
   const options = useMemo(() => ({ siteId, siteContext, sections, siteCosts, onSectionParsed, onThemeSelected, onImages, onPages, onRefine, onSectionsUpdated, onMove, onDelete, onAddSection, onGenerationComplete, onMessagesChange, onUsage }), [siteId, siteContext, sections, siteCosts, onSectionParsed, onThemeSelected, onImages, onPages, onRefine, onSectionsUpdated, onMove, onDelete, onAddSection, onGenerationComplete, onMessagesChange, onUsage]);
-  const { messages, input, setInput, isLoading, error, send, sessionUsage, lastUsage, agents, agentsMessageIndex, pendingAction, confirmPendingAction, cancelPendingAction, selectOption, trackUsage } = useChat(options);
+  const { messages, input, setInput, isLoading, error, send, sessionUsage, agents, agentsMessageIndex, pendingAction, confirmPendingAction, cancelPendingAction, selectOption, trackUsage } = useChat(options);
   const isRefineMode = sections && sections.length > 0;
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const autoSendTriggeredRef = useRef(false);
@@ -96,31 +91,19 @@ export function Chat({ siteId, siteContext, sections, siteCosts, autoSendPrompt,
   return (
     <div className="flex flex-col h-full border border-border rounded bg-bg-subtle">
       {sessionUsage.cost > 0 && (
-        <div className="px-4 py-2 border-b border-border text-xs text-text-subtle flex justify-between">
-          <span>
-            Session: $
-            {sessionUsage.cost.toFixed(4)}
-            {" "}
-            (
-            {formatTokens(sessionUsage.input + sessionUsage.output)}
-            )
-          </span>
-          {lastUsage && (
-            <span>
-              Last: $
-              {lastUsage.cost.toFixed(4)}
-              {" "}
-              (
-              {formatTokens(lastUsage.input)}
-              {" "}
-              in ·
-              {" "}
-              {formatTokens(lastUsage.output)}
-              {" "}
-              out)
-            </span>
+        <CostsModal
+          costs={siteCosts ?? []}
+          totalCost={sessionUsage.cost}
+          trigger={(
+            <button className="w-full px-4 py-2 border-b border-border text-xs text-text-subtle flex items-center hover:bg-bg-subtle/80 transition-colors cursor-pointer">
+              <span className="tabular-nums">
+                $
+                {sessionUsage.cost.toFixed(4)}
+              </span>
+              <span className="ml-auto text-text-subtle/60">›</span>
+            </button>
           )}
-        </div>
+        />
       )}
       <div className="flex-1 overflow-y-auto p-4">
         {messages.length === 0 && (
