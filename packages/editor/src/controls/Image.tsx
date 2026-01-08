@@ -22,6 +22,8 @@ interface Props {
   onUsage?: (usage: Usage) => void
   className?: string
   searchUrl?: string
+  /** Custom trigger element. If provided, renders this instead of the image. */
+  trigger?: React.ReactNode
 }
 
 const DEFAULT_SEARCH_URL = "/api/search/images";
@@ -33,6 +35,7 @@ export function Image({
   onUsage,
   className,
   searchUrl = DEFAULT_SEARCH_URL,
+  trigger,
 }: Props) {
   const [open, setOpen] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -109,20 +112,23 @@ export function Image({
     handleOpenChange(false);
   };
 
-  if (!image) {
+  // When using custom trigger, allow rendering even without image (for adding new images)
+  if (!image && !trigger) {
     return null;
   }
 
   return (
     <Popover.Root open={open} onOpenChange={handleOpenChange}>
       <Popover.Trigger asChild>
-        <img
-          key={image.url}
-          src={image.url}
-          alt={image.alt}
-          className={`${styles.image} ${className ?? ""}`}
-          data-state={open ? "open" : "closed"}
-        />
+        {trigger ?? (
+          <img
+            key={image?.url}
+            src={image?.url}
+            alt={image?.alt}
+            className={`${styles.image} ${className ?? ""}`}
+            data-state={open ? "open" : "closed"}
+          />
+        )}
       </Popover.Trigger>
 
       <Popover.Portal>
@@ -162,29 +168,31 @@ export function Image({
 
           {error && <div className={styles.error}>{error}</div>}
 
-          <div className={styles.footer}>
-            <label className={styles.footerLabel} htmlFor="image-alt">
-              Alt
-            </label>
-            <input
-              id="image-alt"
-              type="text"
-              className={styles.footerInput}
-              value={image.alt}
-              onChange={e => handleAltChange(e.target.value)}
-              placeholder="Describe image..."
-            />
-            {onRemove && (
-              <button
-                type="button"
-                className={styles.trashButton}
-                onClick={handleRemove}
-                aria-label="Remove image"
-              >
-                <Trash2 size={14} />
-              </button>
-            )}
-          </div>
+          {image && (
+            <div className={styles.footer}>
+              <label className={styles.footerLabel} htmlFor="image-alt">
+                Alt
+              </label>
+              <input
+                id="image-alt"
+                type="text"
+                className={styles.footerInput}
+                value={image.alt}
+                onChange={e => handleAltChange(e.target.value)}
+                placeholder="Describe image..."
+              />
+              {onRemove && (
+                <button
+                  type="button"
+                  className={styles.trashButton}
+                  onClick={handleRemove}
+                  aria-label="Remove image"
+                >
+                  <Trash2 size={14} />
+                </button>
+              )}
+            </div>
+          )}
 
           <Popover.Arrow className={styles.arrow} />
         </Popover.Content>

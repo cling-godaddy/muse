@@ -1,10 +1,11 @@
 import { useMemo, useCallback, useState, useEffect, useRef } from "react";
-import { Trash2 } from "lucide-react";
+import { Trash2, Image as ImageIcon } from "lucide-react";
 import { motion } from "framer-motion";
-import type { Section as SectionType, Site, Usage } from "@muse/core";
+import type { Section as SectionType, Site, Usage, ImageSource } from "@muse/core";
 import { getSectionComponent, type SectionComponent } from "./registry";
 import { PresetPicker } from "../controls/PresetPicker";
 import { ColorPicker } from "../controls/ColorPicker";
+import { Image } from "../controls/Image";
 import { supportsPresets } from "../controls/presets";
 import { useSelection } from "../context/Selection";
 import { useIsEditable } from "../context/EditorMode";
@@ -68,7 +69,16 @@ export function Section({ section, onUpdate, onDelete, onMoveUp, onMoveDown, can
 
   // Hide color picker for sections with background images
   const hasBackgroundImage = "backgroundImage" in section && section.backgroundImage != null;
+  const backgroundImage = hasBackgroundImage ? (section as { backgroundImage: ImageSource }).backgroundImage : undefined;
   const colorPickerValue = pendingColor ?? section.backgroundColor ?? "#ffffff";
+
+  const handleBackgroundImageUpdate = useCallback((image: ImageSource) => {
+    onUpdate({ backgroundImage: image } as Partial<SectionType>);
+  }, [onUpdate]);
+
+  const handleBackgroundImageRemove = useCallback(() => {
+    onUpdate({ backgroundImage: undefined } as Partial<SectionType>);
+  }, [onUpdate]);
 
   const handleColorChange = useCallback((color: string) => {
     setPendingColor(color);
@@ -130,14 +140,28 @@ export function Section({ section, onUpdate, onDelete, onMoveUp, onMoveDown, can
               onChange={preset => onUpdate({ preset })}
             />
           )}
-          {!hasBackgroundImage && (
-            <ColorPicker
-              value={colorPickerValue}
-              onChange={handleColorChange}
-              ariaLabel="Section background color"
-              compact
-            />
-          )}
+          {hasBackgroundImage
+            ? (
+              <Image
+                image={backgroundImage}
+                onUpdate={handleBackgroundImageUpdate}
+                onRemove={handleBackgroundImageRemove}
+                onUsage={trackUsage}
+                trigger={(
+                  <button type="button" className="muse-section-image" aria-label="Edit background image">
+                    <ImageIcon size={12} />
+                  </button>
+                )}
+              />
+            )
+            : (
+              <ColorPicker
+                value={colorPickerValue}
+                onChange={handleColorChange}
+                ariaLabel="Section background color"
+                compact
+              />
+            )}
           <button
             type="button"
             className="muse-section-delete"

@@ -1,4 +1,5 @@
-import { type HeroSection as HeroSectionType, type RichContent } from "@muse/core";
+import { type HeroSection as HeroSectionType, type RichContent, type ImageSource, type Usage } from "@muse/core";
+import { Image } from "../controls/Image";
 import { EditableText, EditableLink, ImageLoader, Skeleton } from "../ux";
 import styles from "./Hero.module.css";
 
@@ -6,6 +7,7 @@ interface Props {
   section: HeroSectionType
   onUpdate: (data: Partial<HeroSectionType>) => void
   isPending?: boolean
+  trackUsage?: (usage: Usage) => void
 }
 
 function HeroSkeleton() {
@@ -69,10 +71,18 @@ function HeroContent({ section, onUpdate, isPending }: Props) {
   );
 }
 
-export function Hero({ section, onUpdate, isPending }: Props) {
+export function Hero({ section, onUpdate, isPending, trackUsage }: Props) {
   const preset = section.preset ?? "hero-centered";
   const isSplit = preset === "hero-split-left" || preset === "hero-split-right";
   const isOverlay = preset === "hero-overlay";
+
+  const handleImageUpdate = (image: ImageSource) => {
+    onUpdate({ backgroundImage: image });
+  };
+
+  const handleImageRemove = () => {
+    onUpdate({ backgroundImage: undefined });
+  };
 
   // Split layout: side-by-side text and image
   if (isSplit) {
@@ -83,11 +93,11 @@ export function Hero({ section, onUpdate, isPending }: Props) {
           <HeroContent section={section} onUpdate={onUpdate} isPending={isPending} />
         </div>
         <div className={styles.splitImage}>
-          <ImageLoader
-            image={section.backgroundImage}
-            isPending={!!isPending}
-            className={styles.splitImg}
-          />
+          {isPending && !section.backgroundImage
+            ? <ImageLoader isPending className={styles.splitImg} />
+            : section.backgroundImage
+              ? <Image image={section.backgroundImage} onUpdate={handleImageUpdate} onRemove={handleImageRemove} onUsage={trackUsage} className={styles.splitImg} />
+              : null}
         </div>
       </div>
     );

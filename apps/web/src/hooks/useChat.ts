@@ -103,7 +103,7 @@ export interface UseChat {
 const API_URL = "http://localhost:3001/api/chat";
 const REFINE_URL = "http://localhost:3001/api/chat/refine";
 
-const emptyUsage: Usage = { input: 0, output: 0, cost: 0, model: "" };
+const emptyUsage: Usage = { input: 0, output: 0, cost: 0, model: "", timestamp: "" };
 
 export function useChat(options: UseChatOptions = {}): UseChat {
   // Use ref to avoid stale closures when accessing options in callbacks
@@ -168,6 +168,7 @@ export function useChat(options: UseChatOptions = {}): UseChat {
       output: sumBy(costs, c => c.output),
       cost: sumBy(costs, c => c.cost),
       model: costs.at(-1)?.model ?? "",
+      timestamp: costs.at(-1)?.timestamp ?? "",
     });
   }, [options.siteCosts]);
 

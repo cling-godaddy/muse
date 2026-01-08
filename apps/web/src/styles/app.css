@@ -112,11 +112,13 @@ html, body, #root {
     @apply opacity-100;
   }
   .muse-section-delete,
-  .muse-section-move {
+  .muse-section-move,
+  .muse-section-image {
     @apply w-6 h-6 flex items-center justify-center bg-white border border-gray-200 rounded-md text-gray-400 cursor-pointer shadow-sm transition-colors;
   }
   .muse-section-delete:hover,
-  .muse-section-move:hover:not(:disabled) {
+  .muse-section-move:hover:not(:disabled),
+  .muse-section-image:hover {
     @apply border-gray-300 text-gray-600;
   }
   .muse-section-move:disabled {
