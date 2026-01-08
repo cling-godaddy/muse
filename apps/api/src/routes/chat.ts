@@ -612,3 +612,58 @@ chatRoute.post("/generate-item", async (c) => {
     usage: completeUsage,
   });
 });
+
+chatRoute.post("/rewrite-text", async (c) => {
+  const { text, prompt, presetId, siteContext } = await c.req.json<{
+    text: string
+    prompt: string
+    presetId?: string
+    siteContext?: { name?: string, description?: string }
+  }>();
+
+  logger.info("rewrite_text_request", { presetId, textLength: text.length });
+
+  if (!text.trim()) {
+    return c.json({ error: "No text provided" }, 400);
+  }
+
+  const systemPrompt = `You are a copywriting assistant. Rewrite the following text according to the user's instructions.
+
+${siteContext?.name || siteContext?.description
+  ? `BUSINESS CONTEXT:
+- Name: ${siteContext.name || "Not provided"}
+- Description: ${siteContext.description || "Not provided"}`
+  : ""}
+
+IMPORTANT:
+- Return ONLY the rewritten text, no explanations, quotes, or commentary
+- Preserve the general meaning unless asked to change it
+- Keep approximately the same length unless specifically asked to expand or shorten`;
+
+  const response = await getClient().chat({
+    model: "gpt-4o-mini",
+    messages: [
+      { role: "system", content: systemPrompt },
+      { role: "user", content: `Text to rewrite:\n"${text}"\n\nInstruction: ${prompt}` },
+    ],
+  });
+
+  logger.info("rewrite_text_complete", { presetId, outputLength: response.content.length });
+
+  const completeUsage = response.usage
+    ? {
+      input: response.usage.input,
+      output: response.usage.output,
+      cost: calculateCost("gpt-4o-mini", response.usage.input, response.usage.output),
+      model: "gpt-4o-mini",
+      action: "rewrite_text" as const,
+      detail: presetId,
+      timestamp: new Date().toISOString(),
+    }
+    : undefined;
+
+  return c.json({
+    rewritten: response.content,
+    usage: completeUsage,
+  });
+});
