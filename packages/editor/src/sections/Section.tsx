@@ -2,7 +2,6 @@ import { useMemo, useCallback, useState, useEffect, useRef } from "react";
 import { Trash2 } from "lucide-react";
 import { motion } from "framer-motion";
 import type { Section as SectionType, Site, Usage } from "@muse/core";
-import { normalizeHex } from "@muse/core";
 import { getSectionComponent, type SectionComponent } from "./registry";
 import { PresetPicker } from "../controls/PresetPicker";
 import { ColorPicker } from "../controls/ColorPicker";
@@ -65,22 +64,9 @@ export function Section({ section, onUpdate, onDelete, onMoveUp, onMoveDown, can
 
   // Local pending color for immediate UI feedback, debounced to store
   const [pendingColor, setPendingColor] = useState<string | null>(null);
-  const [computedBg, setComputedBg] = useState<string | null>(null);
   const debounceRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
-  const sectionRef = useRef<HTMLDivElement>(null);
 
-  // Read computed background from DOM if no backgroundColor is set
-  useEffect(() => {
-    if (section.backgroundColor || !sectionRef.current) return;
-    const inner = sectionRef.current.querySelector(":scope > div:not(.muse-section-controls)");
-    if (!inner) return;
-    const bg = getComputedStyle(inner).backgroundColor;
-    if (bg && bg !== "rgba(0, 0, 0, 0)" && bg !== "transparent") {
-      setComputedBg(normalizeHex(bg));
-    }
-  }, [section.backgroundColor, section.preset]);
-
-  const propColor = section.backgroundColor ?? computedBg ?? "#ffffff";
+  const propColor = section.backgroundColor ?? "#ffffff";
   const displayColor = pendingColor ?? propColor;
 
   const handleColorChange = useCallback((color: string) => {
@@ -107,7 +93,6 @@ export function Section({ section, onUpdate, onDelete, onMoveUp, onMoveDown, can
 
   return (
     <motion.div
-      ref={sectionRef}
       layout
       className="muse-section"
       data-section-type={section.type}

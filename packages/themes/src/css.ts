@@ -1,5 +1,4 @@
 import type { Theme } from "./types";
-import { resolveTheme } from "./resolve";
 
 function hexToRgb(hex: string): string {
   const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
@@ -40,32 +39,4 @@ export function themeToCssString(theme: Theme): string {
   return Object.entries(vars)
     .map(([key, value]) => `${key}: ${value};`)
     .join("\n");
-}
-
-/**
- * Extract the fallback value from a CSS var() expression.
- * e.g., "var(--muse-theme-bg-alt, #f8fafc)" → "#f8fafc"
- */
-export function extractCssVarFallback(varString: string): string | null {
-  // Use .+ to capture fallback values that may contain parentheses (like rgb())
-  const match = varString.match(/var\([^,]+,\s*(.+)\)$/);
-  return match?.[1]?.trim() ?? null;
-}
-
-/**
- * Resolve a CSS var() expression to its actual value using the theme config.
- * e.g., "var(--muse-theme-bg-alt, #f8fafc)" with palette "indigo" → "#f8fafc"
- */
-export function resolveCssVar(
-  varString: string,
-  themeConfig: { palette: string, typography: string },
-): string | null {
-  const match = varString.match(/var\((--[\w-]+)/);
-  if (!match || !match[1]) return null;
-
-  const varName = match[1];
-  const theme = resolveTheme(themeConfig);
-  const cssVars = themeToCssVars(theme);
-
-  return cssVars[varName] ?? null;
 }
