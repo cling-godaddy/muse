@@ -20,6 +20,10 @@ import {
   REMOVE_LIST_COMMAND,
   $isListNode,
 } from "@lexical/list";
+import {
+  $patchStyleText,
+  $getSelectionStyleValueForProperty,
+} from "@lexical/selection";
 import { $isElementNode } from "lexical";
 import { $getNearestNodeOfType } from "@lexical/utils";
 import { ListNode } from "@lexical/list";
@@ -29,7 +33,9 @@ import {
   Link,
   List,
   ListOrdered,
+  X,
 } from "lucide-react";
+import { ColorPicker } from "../controls/ColorPicker";
 import styles from "./FloatingToolbar.module.css";
 
 interface Position {
@@ -47,6 +53,8 @@ export function FloatingToolbarPlugin() {
   const [isItalic, setIsItalic] = useState(false);
   const [isLink, setIsLink] = useState(false);
   const [listType, setListType] = useState<"bullet" | "number" | null>(null);
+  const [textColor, setTextColor] = useState<string | null>(null);
+  const [isColorPickerOpen, setIsColorPickerOpen] = useState(false);
   const savedSelectionRef = useRef<{
     anchorKey: string
     anchorOffset: number
@@ -97,6 +105,10 @@ export function FloatingToolbarPlugin() {
     else {
       setListType(null);
     }
+
+    // Check for text color
+    const color = $getSelectionStyleValueForProperty(selection, "color");
+    setTextColor(color || null);
   }, []);
 
   // Handle focus
@@ -119,6 +131,10 @@ export function FloatingToolbarPlugin() {
       () => {
         // Delay blur check to allow toolbar interaction
         setTimeout(() => {
+          // Don't hide if color picker is open (it's in a portal)
+          if (isColorPickerOpen) {
+            return;
+          }
           const activeElement = document.activeElement;
           const toolbar = toolbarRef.current;
           if (toolbar && toolbar.contains(activeElement)) {
@@ -132,7 +148,7 @@ export function FloatingToolbarPlugin() {
       },
       COMMAND_PRIORITY_LOW,
     );
-  }, [editor]);
+  }, [editor, isColorPickerOpen]);
 
   // Update format states on selection change
   useEffect(() => {
@@ -170,6 +186,26 @@ export function FloatingToolbarPlugin() {
     editor.dispatchCommand(FORMAT_TEXT_COMMAND, "italic");
     editor.focus();
   };
+
+  const handleTextColor = useCallback((color: string) => {
+    editor.update(() => {
+      const selection = $getSelection();
+      if ($isRangeSelection(selection)) {
+        $patchStyleText(selection, { color });
+      }
+    });
+    editor.focus();
+  }, [editor]);
+
+  const clearTextColor = useCallback(() => {
+    editor.update(() => {
+      const selection = $getSelection();
+      if ($isRangeSelection(selection)) {
+        $patchStyleText(selection, { color: null });
+      }
+    });
+    editor.focus();
+  }, [editor]);
 
   const toggleLink = () => {
     if (isLink) {
@@ -283,6 +319,29 @@ export function FloatingToolbarPlugin() {
       >
         <Italic size={14} />
       </button>
+
+      <div className={styles.divider} />
+
+      <div className={styles.colorPickerWrapper}>
+        <ColorPicker
+          value={textColor || "#000000"}
+          onChange={handleTextColor}
+          onOpenChange={setIsColorPickerOpen}
+          compact
+          side="bottom"
+          ariaLabel="Text color"
+        />
+        {textColor && (
+          <button
+            type="button"
+            className={styles.clearColorButton}
+            onClick={clearTextColor}
+            title="Clear color"
+          >
+            <X size={10} />
+          </button>
+        )}
+      </div>
 
       <div className={styles.divider} />
 
