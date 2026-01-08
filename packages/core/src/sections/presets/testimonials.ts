@@ -13,6 +13,7 @@ export const testimonialsCarousel: SectionPreset = {
   requiredFields: ["quotes"],
   optionalFields: ["headline"],
   className: "muse-testimonials--carousel",
+  defaultBackground: "backgroundAlt",
 };
 
 export const testimonialsGrid: SectionPreset = {
@@ -28,6 +29,7 @@ export const testimonialsGrid: SectionPreset = {
   requiredFields: ["quotes"],
   optionalFields: ["headline"],
   className: "muse-testimonials--grid",
+  defaultBackground: "backgroundAlt",
 };
 
 export const testimonialsSingle: SectionPreset = {
@@ -43,6 +45,7 @@ export const testimonialsSingle: SectionPreset = {
   requiredFields: ["quotes"],
   optionalFields: ["headline"],
   className: "muse-testimonials--single",
+  defaultBackground: "backgroundAlt",
 };
 
 export const testimonialsPresets = {

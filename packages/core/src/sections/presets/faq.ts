@@ -13,6 +13,7 @@ export const faqAccordion: SectionPreset = {
   requiredFields: ["items"],
   optionalFields: ["headline", "subheadline"],
   className: "muse-faq--accordion",
+  defaultBackground: "background",
 };
 
 export const faqTwoColumn: SectionPreset = {
@@ -28,6 +29,7 @@ export const faqTwoColumn: SectionPreset = {
   requiredFields: ["items"],
   optionalFields: ["headline", "subheadline"],
   className: "muse-faq--two-column",
+  defaultBackground: "background",
 };
 
 export const faqPresets = {

@@ -13,6 +13,7 @@ export const contactForm: SectionPreset = {
   requiredFields: ["formFields"],
   optionalFields: ["headline", "subheadline", "email", "phone"],
   className: "muse-contact--form",
+  defaultBackground: "background",
 };
 
 export const contactSplitMap: SectionPreset = {
@@ -28,6 +29,7 @@ export const contactSplitMap: SectionPreset = {
   requiredFields: ["formFields", "address"],
   optionalFields: ["headline", "email", "phone", "hours"],
   className: "muse-contact--split-map",
+  defaultBackground: "background",
 };
 
 export const contactPresets = {

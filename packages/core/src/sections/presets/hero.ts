@@ -13,6 +13,7 @@ export const heroCentered: SectionPreset = {
   requiredFields: ["headline"],
   optionalFields: ["subheadline", "cta", "secondaryCta", "backgroundImage"],
   className: "muse-hero--centered",
+  defaultBackground: "background",
 };
 
 export const heroSplitLeft: SectionPreset = {
@@ -28,6 +29,7 @@ export const heroSplitLeft: SectionPreset = {
   requiredFields: ["headline", "backgroundImage"],
   optionalFields: ["subheadline", "cta", "secondaryCta"],
   className: "muse-hero--split-left",
+  defaultBackground: "background",
   imageRequirements: { category: "subject", count: 1, orientation: "horizontal" },
   imageInjection: { type: "single", field: "backgroundImage" },
 };
@@ -45,6 +47,7 @@ export const heroSplitRight: SectionPreset = {
   requiredFields: ["headline", "backgroundImage"],
   optionalFields: ["subheadline", "cta", "secondaryCta"],
   className: "muse-hero--split-right",
+  defaultBackground: "background",
   imageRequirements: { category: "subject", count: 1, orientation: "horizontal" },
   imageInjection: { type: "single", field: "backgroundImage" },
 };
@@ -62,6 +65,7 @@ export const heroOverlay: SectionPreset = {
   requiredFields: ["headline", "backgroundImage"],
   optionalFields: ["subheadline", "cta", "secondaryCta", "backgroundOverlay"],
   className: "muse-hero--overlay",
+  defaultBackground: "background",
   imageRequirements: { category: "ambient", count: 1, orientation: "horizontal" },
   imageInjection: { type: "single", field: "backgroundImage" },
 };

@@ -13,6 +13,7 @@ export const footerSimple: SectionPreset = {
   requiredFields: [],
   optionalFields: ["companyName", "copyright", "links", "socialLinks"],
   className: "muse-footer--simple",
+  defaultBackground: "backgroundAlt",
 };
 
 export const footerPresets = {

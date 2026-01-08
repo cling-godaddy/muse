@@ -13,6 +13,7 @@ export const logosGrid: SectionPreset = {
   requiredFields: ["logos"],
   optionalFields: ["headline"],
   className: "muse-logos--grid",
+  defaultBackground: "backgroundAlt",
 };
 
 export const logosMarquee: SectionPreset = {
@@ -28,6 +29,7 @@ export const logosMarquee: SectionPreset = {
   requiredFields: ["logos"],
   optionalFields: ["headline"],
   className: "muse-logos--marquee",
+  defaultBackground: "backgroundAlt",
 };
 
 export const logosPresets = {

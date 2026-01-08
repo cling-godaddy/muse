@@ -13,6 +13,7 @@ export const subscribeInline: SectionPreset = {
   requiredFields: ["buttonText"],
   optionalFields: ["headline", "placeholderText", "disclaimer"],
   className: "muse-subscribe--inline",
+  defaultBackground: "backgroundAlt",
 };
 
 export const subscribeCard: SectionPreset = {
@@ -28,6 +29,7 @@ export const subscribeCard: SectionPreset = {
   requiredFields: ["headline", "buttonText"],
   optionalFields: ["subheadline", "placeholderText", "disclaimer"],
   className: "muse-subscribe--card",
+  defaultBackground: "backgroundAlt",
 };
 
 export const subscribeBanner: SectionPreset = {
@@ -43,6 +45,7 @@ export const subscribeBanner: SectionPreset = {
   requiredFields: ["headline", "buttonText"],
   optionalFields: ["subheadline", "placeholderText", "disclaimer"],
   className: "muse-subscribe--banner",
+  defaultBackground: "backgroundAlt",
 };
 
 export const subscribePresets = {

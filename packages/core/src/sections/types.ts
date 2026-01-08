@@ -71,6 +71,9 @@ export type ImageInjection
     | { type: "single", field: string }
     | { type: "nested", array: string, field: string };
 
+// Semantic keys that map to theme.colors
+export type ThemeBackground = "background" | "backgroundAlt";
+
 export interface SectionPreset {
   id: string
   name: string
@@ -87,6 +90,9 @@ export interface SectionPreset {
   optionalFields: string[]
 
   className: string
+
+  // Semantic background key - resolved to hex from theme.colors at generation time
+  defaultBackground?: ThemeBackground
 
   imageRequirements?: ImageRequirements
   imageInjection?: ImageInjection

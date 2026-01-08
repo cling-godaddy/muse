@@ -13,6 +13,7 @@ export const statsRow: SectionPreset = {
   requiredFields: ["stats"],
   optionalFields: ["headline"],
   className: "muse-stats--row",
+  defaultBackground: "backgroundAlt",
 };
 
 export const statsGrid: SectionPreset = {
@@ -28,6 +29,7 @@ export const statsGrid: SectionPreset = {
   requiredFields: ["stats"],
   optionalFields: ["headline"],
   className: "muse-stats--grid",
+  defaultBackground: "backgroundAlt",
 };
 
 export const statsCounters: SectionPreset = {
@@ -43,6 +45,7 @@ export const statsCounters: SectionPreset = {
   requiredFields: ["stats"],
   optionalFields: ["headline"],
   className: "muse-stats--counters",
+  defaultBackground: "backgroundAlt",
 };
 
 export const statsPresets = {

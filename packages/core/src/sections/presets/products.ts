@@ -13,6 +13,7 @@ export const productsGrid: SectionPreset = {
   requiredFields: ["items"],
   optionalFields: ["headline", "subheadline"],
   className: "muse-products--grid",
+  defaultBackground: "background",
   imageRequirements: { category: "subject", count: 8, orientation: "square" },
   imageInjection: { type: "nested", array: "items", field: "image" },
 };
@@ -30,6 +31,7 @@ export const productsFeatured: SectionPreset = {
   requiredFields: ["items"],
   optionalFields: ["headline", "subheadline"],
   className: "muse-products--featured",
+  defaultBackground: "background",
   imageRequirements: { category: "subject", count: 5, orientation: "mixed" },
   imageInjection: { type: "nested", array: "items", field: "image" },
 };
@@ -47,6 +49,7 @@ export const productsMinimal: SectionPreset = {
   requiredFields: ["items"],
   optionalFields: ["headline"],
   className: "muse-products--minimal",
+  defaultBackground: "background",
   imageRequirements: { category: "subject", count: 6, orientation: "vertical" },
   imageInjection: { type: "nested", array: "items", field: "image" },
 };

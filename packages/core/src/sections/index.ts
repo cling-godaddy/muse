@@ -71,6 +71,7 @@ export type {
   ImageOrientation,
   ImageRequirements,
   ImageInjection,
+  ThemeBackground,
 } from "./types";
 
 export {

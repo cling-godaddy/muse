@@ -13,6 +13,7 @@ export const pricingCards: SectionPreset = {
   requiredFields: ["plans"],
   optionalFields: ["headline", "subheadline", "billingToggle"],
   className: "muse-pricing--cards",
+  defaultBackground: "backgroundAlt",
 };
 
 export const pricingPresets = {

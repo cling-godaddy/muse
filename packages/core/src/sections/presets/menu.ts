@@ -13,6 +13,7 @@ export const menuList: SectionPreset = {
   requiredFields: ["categories"],
   optionalFields: ["headline", "subheadline", "items"],
   className: "muse-menu--list",
+  defaultBackground: "background",
 };
 
 export const menuCards: SectionPreset = {
@@ -28,6 +29,7 @@ export const menuCards: SectionPreset = {
   requiredFields: ["items"],
   optionalFields: ["headline", "subheadline", "categories"],
   className: "muse-menu--cards",
+  defaultBackground: "background",
   imageRequirements: { category: "subject", count: 6, orientation: "square" },
   imageInjection: { type: "nested", array: "items", field: "image" },
 };
@@ -45,6 +47,7 @@ export const menuSimple: SectionPreset = {
   requiredFields: ["items"],
   optionalFields: ["headline", "categories"],
   className: "muse-menu--simple",
+  defaultBackground: "background",
 };
 
 export const menuPresets = {

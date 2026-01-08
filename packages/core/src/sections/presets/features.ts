@@ -13,6 +13,7 @@ export const featuresGrid: SectionPreset = {
   requiredFields: ["items"],
   optionalFields: ["headline", "subheadline"],
   className: "muse-features--grid",
+  defaultBackground: "backgroundAlt",
 };
 
 export const featuresGridImages: SectionPreset = {
@@ -28,6 +29,7 @@ export const featuresGridImages: SectionPreset = {
   requiredFields: ["items"],
   optionalFields: ["headline", "subheadline"],
   className: "muse-features--grid-images",
+  defaultBackground: "backgroundAlt",
   imageRequirements: { category: "subject", count: 6, orientation: "horizontal" },
   imageInjection: { type: "nested", array: "items", field: "image" },
 };
@@ -45,6 +47,7 @@ export const featuresBento: SectionPreset = {
   requiredFields: ["items"],
   optionalFields: ["headline"],
   className: "muse-features--bento",
+  defaultBackground: "backgroundAlt",
   imageRequirements: { category: "subject", count: 6, orientation: "mixed" },
   imageInjection: { type: "nested", array: "items", field: "image" },
 };
@@ -62,6 +65,7 @@ export const featuresBentoSpotlight: SectionPreset = {
   requiredFields: ["items"],
   optionalFields: ["headline"],
   className: "muse-features--bento-spotlight",
+  defaultBackground: "backgroundAlt",
   imageRequirements: { category: "subject", count: 8, orientation: "mixed", min: 7, max: 8 },
   imageInjection: { type: "nested", array: "items", field: "image" },
 };
@@ -79,6 +83,7 @@ export const featuresBentoSplit: SectionPreset = {
   requiredFields: ["items"],
   optionalFields: ["headline"],
   className: "muse-features--bento-split",
+  defaultBackground: "backgroundAlt",
   imageRequirements: { category: "subject", count: 4, orientation: "mixed", max: 8 },
   imageInjection: { type: "nested", array: "items", field: "image" },
 };
@@ -96,6 +101,7 @@ export const featuresNumbered: SectionPreset = {
   requiredFields: ["items"],
   optionalFields: ["headline", "subheadline"],
   className: "muse-features--numbered",
+  defaultBackground: "background",
 };
 
 export const featuresPresets = {

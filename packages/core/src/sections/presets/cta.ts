@@ -13,6 +13,7 @@ export const ctaCentered: SectionPreset = {
   requiredFields: ["headline", "buttonText"],
   optionalFields: ["description", "buttonHref", "secondaryButton"],
   className: "muse-cta--centered",
+  defaultBackground: "backgroundAlt",
 };
 
 export const ctaPresets = {

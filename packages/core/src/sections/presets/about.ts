@@ -13,6 +13,7 @@ export const aboutStory: SectionPreset = {
   requiredFields: ["body"],
   optionalFields: ["headline", "image"],
   className: "muse-about--story",
+  defaultBackground: "background",
   imageRequirements: { category: "ambient", count: 1, orientation: "horizontal" },
   imageInjection: { type: "single", field: "image" },
 };
@@ -30,6 +31,7 @@ export const aboutTeam: SectionPreset = {
   requiredFields: ["teamMembers"],
   optionalFields: ["headline"],
   className: "muse-about--team",
+  defaultBackground: "backgroundAlt",
   imageRequirements: { category: "people", count: 6, orientation: "square" },
   imageInjection: { type: "nested", array: "teamMembers", field: "image" },
 };
