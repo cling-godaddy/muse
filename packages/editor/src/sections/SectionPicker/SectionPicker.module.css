@@ -1,5 +1,5 @@
 .popover {
-  width: 360px;
+  width: 640px;
   max-height: 480px;
   overflow-y: auto;
   background: white;
@@ -10,6 +10,12 @@
   z-index: 1000;
 }
 
+@media (max-width: 700px) {
+  .popover {
+    width: 360px;
+  }
+}
+
 .category {
   padding: 12px 0 4px;
 }
@@ -18,14 +24,34 @@
   padding-top: 4px;
 }
 
+.presetsGrid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 4px;
+  padding: 0 8px;
+}
+
+@media (max-width: 700px) {
+  .presetsGrid {
+    grid-template-columns: 1fr;
+    padding: 0;
+  }
+}
+
 .categoryLabel {
   font-size: 11px;
   font-weight: 600;
   text-transform: uppercase;
   color: var(--muse-text-muted);
-  padding: 0 12px;
+  padding: 0 16px;
   margin-bottom: 4px;
   letter-spacing: 0.5px;
+}
+
+@media (max-width: 700px) {
+  .categoryLabel {
+    padding: 0 12px;
+  }
 }
 
 .presetCard {
@@ -36,12 +62,19 @@
   text-align: left;
   background: none;
   border: none;
+  border-radius: 6px;
   cursor: pointer;
   transition: background 0.15s;
 }
 
 .presetCard:hover {
   background: var(--muse-bg-subtle);
+}
+
+@media (max-width: 700px) {
+  .presetCard {
+    border-radius: 0;
+  }
 }
 
 .presetContent {

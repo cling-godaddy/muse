@@ -25,13 +25,15 @@ export function CategoryGroup({ category, presets, onPresetSelect }: CategoryGro
       <div className={styles.categoryLabel}>
         {CATEGORY_LABELS[category]}
       </div>
-      {presets.map(preset => (
-        <PresetCard
-          key={preset.id}
-          preset={preset}
-          onClick={() => onPresetSelect(preset.id)}
-        />
-      ))}
+      <div className={styles.presetsGrid}>
+        {presets.map(preset => (
+          <PresetCard
+            key={preset.id}
+            preset={preset}
+            onClick={() => onPresetSelect(preset.id)}
+          />
+        ))}
+      </div>
     </div>
   );
 }
