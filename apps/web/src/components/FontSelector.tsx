@@ -70,7 +70,18 @@ export function FontSelector({ value, onChange, disabled }: FontSelectorProps) {
   }, [open, allTypography]);
 
   const handleSelect = (id: string) => {
-    onChange(id);
+    // Fade out, change font, fade back in
+    const preview = document.querySelector("[data-site-preview]");
+    if (preview) {
+      preview.classList.add("font-transition-out");
+      setTimeout(() => {
+        onChange(id);
+        preview.classList.remove("font-transition-out");
+      }, 150);
+    }
+    else {
+      onChange(id);
+    }
     setOpen(false);
   };
 

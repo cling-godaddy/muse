@@ -133,3 +133,12 @@ html, body, #root {
     font-family: var(--font-heading);
   }
 }
+
+/* Font transition effect */
+[data-site-preview] {
+  transition: opacity 0.15s ease-out;
+}
+
+[data-site-preview].font-transition-out {
+  opacity: 0.85;
+}

@@ -277,7 +277,7 @@ function MainApp() {
               ? (
                 <PreviewContainer device={previewDevice}>
                   <PreviewLinkInterceptor pageMap={pageMap} onNavigate={setCurrentPage}>
-                    <div style={themeStyle} data-effects={effectsId} data-preview-device={previewDevice}>
+                    <div style={themeStyle} data-effects={effectsId} data-preview-device={previewDevice} data-site-preview>
                       <EditorModeProvider mode={editorMode}>
                         <SectionEditor sections={sections} onChange={setSections} pendingImageSections={pendingImageSections} navbar={navbar ?? void 0} onNavbarChange={updateNavbar} site={site} currentPage={currentPage} onAddSection={handleAddSection} onUpdateSection={updateSection} onMoveSection={handleMoveSection} onDeleteSection={handleDelete} getToken={getToken} trackUsage={trackUsage ?? undefined} />
                       </EditorModeProvider>
@@ -290,7 +290,7 @@ function MainApp() {
                   <GenerationPreview agents={agents} />
                 )
                 : (
-                  <div className="h-full overflow-y-auto" style={themeStyle} data-effects={effectsId}>
+                  <div className="h-full overflow-y-auto" style={themeStyle} data-effects={effectsId} data-site-preview>
                     <EditorModeProvider mode={editorMode}>
                       <SectionEditor sections={sections} onChange={setSections} pendingImageSections={pendingImageSections} navbar={navbar ?? void 0} onNavbarChange={updateNavbar} site={site} currentPage={currentPage} onAddSection={handleAddSection} onUpdateSection={updateSection} onMoveSection={handleMoveSection} onDeleteSection={handleDelete} getToken={getToken} trackUsage={trackUsage ?? undefined} />
                     </EditorModeProvider>
