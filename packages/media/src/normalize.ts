@@ -5,9 +5,15 @@ export interface MediaQueryIntent {
   terms: string[] // single tokens, sorted
 }
 
+export interface NormalizeUsage {
+  input: number
+  output: number
+}
+
 export interface NormalizeResult {
   intent: MediaQueryIntent
   queryString: string
+  usage?: NormalizeUsage
 }
 
 export interface QueryNormalizer {
@@ -108,10 +114,15 @@ export function createQueryNormalizer(apiKey: string): QueryNormalizer {
     });
 
     const content = response.choices[0]?.message?.content;
+    const usage = response.usage
+      ? { input: response.usage.prompt_tokens, output: response.usage.completion_tokens }
+      : undefined;
+
     if (!content) {
       return {
         intent: { phrases: [], terms: [query.toLowerCase()] },
         queryString: query.toLowerCase(),
+        usage,
       };
     }
 
@@ -121,6 +132,7 @@ export function createQueryNormalizer(apiKey: string): QueryNormalizer {
     return {
       intent,
       queryString: buildQueryString(intent),
+      usage,
     };
   }
 
