@@ -1,6 +1,7 @@
 import type { MediaClient, ImageSelection } from "@muse/media";
 import { createLogger, type Logger } from "@muse/logger";
-import { getMinimumImages, getImageRequirements, type Section, type Page, createPage } from "@muse/core";
+import { getMinimumImages, getImageRequirements, allPresets, type Section, type Page, createPage, type ThemeBackground } from "@muse/core";
+import { resolveTheme } from "@muse/themes";
 import type { Message, Provider } from "../types";
 import { runWithRetry } from "../retry";
 import { calculateCost } from "../pricing";
@@ -31,6 +32,25 @@ function assignSectionIds(sections: Section[]): { sections: Section[], idMap: Ma
     return { ...section, id: newId };
   });
   return { sections: newSections, idMap };
+}
+
+// Resolve section backgrounds from preset semantic keys to hex values
+function resolveSectionBackgrounds(sections: Section[], theme: ThemeSelection): Section[] {
+  const resolved = resolveTheme({ palette: theme.palette, typography: theme.typography });
+  const bgMap: Record<ThemeBackground, string> = {
+    background: resolved.colors.background,
+    backgroundAlt: resolved.colors.backgroundAlt,
+  };
+
+  return sections.map((section) => {
+    if (section.backgroundColor) return section; // Already has explicit color
+    if (!section.preset) return section;
+
+    const preset = allPresets[section.preset];
+    if (!preset?.defaultBackground) return section;
+
+    return { ...section, backgroundColor: bgMap[preset.defaultBackground] };
+  });
 }
 
 // Extract copy section summaries for image agent context
@@ -198,7 +218,7 @@ export async function* orchestrate(
     copyLog.debug("copy_output_ids", { ids: parsed.sections?.map(s => s.id) ?? [] });
 
     const result = assignSectionIds(parsed.sections ?? []);
-    sections = result.sections;
+    sections = resolveSectionBackgrounds(result.sections, themeResult.selection);
     sectionIdMap = result.idMap;
 
     copyLog.debug("id_mapping", {
@@ -450,7 +470,7 @@ export async function* orchestrateSite(
         pageLog.debug("copy_output_ids", { page: pagePlan.slug, ids: parsed.sections?.map(s => s.id) ?? [] });
 
         const result = assignSectionIds(parsed.sections ?? []);
-        sections = result.sections;
+        sections = resolveSectionBackgrounds(result.sections, theme);
         idMap = result.idMap;
 
         pageLog.debug("id_mapping", {
