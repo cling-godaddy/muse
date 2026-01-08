@@ -2,6 +2,7 @@ import { create } from "zustand";
 import { devtools } from "zustand/middleware";
 import { produceWithPatches, applyPatches, enablePatches, type Patch } from "immer";
 import type { Site, Section, NavbarSection } from "@muse/core";
+import { resolveTheme, type Theme } from "@muse/themes";
 
 // Enable Immer patches plugin
 enablePatches();
@@ -11,10 +12,13 @@ interface HistoryEntry {
   inversePatches: Patch[]
 }
 
+const defaultResolved = resolveTheme({ palette: "slate", typography: "inter" });
+
 interface ThemeState {
   palette: string
   typography: string
   effects: string
+  resolved: Theme
 }
 
 interface SiteState {
@@ -70,13 +74,16 @@ export const useSiteStore = create<SiteState>()(
     (set, get) => ({
       draft: null,
       currentPageId: null,
-      theme: { palette: "slate", typography: "inter", effects: "neutral" },
+      theme: { palette: "slate", typography: "inter", effects: "neutral", resolved: defaultResolved },
       undoStack: [],
       redoStack: [],
       dirty: false,
       pendingImageSections: new Set(),
 
       hydrateDraft: (site) => {
+        const { palette, typography } = site.theme;
+        const resolved = resolveTheme({ palette, typography });
+
         // Migration: ensure all pages have parentId and order
         const migratedPages = Object.fromEntries(
           Object.entries(site.pages).map(([id, page], index) => [
@@ -93,9 +100,10 @@ export const useSiteStore = create<SiteState>()(
           draft: { ...site, pages: migratedPages },
           currentPageId: Object.keys(site.pages)[0] ?? null,
           theme: {
-            palette: site.theme.palette,
-            typography: site.theme.typography,
-            effects: "neutral", // derive from palette
+            palette,
+            typography,
+            effects: "neutral",
+            resolved,
           },
           undoStack: [],
           redoStack: [],
@@ -199,8 +207,9 @@ export const useSiteStore = create<SiteState>()(
         const { applyDraftOp } = get();
         const resolvedEffects = effects
           ?? (palette === "terminal" ? "crt" : palette === "synthwave" ? "neon" : "neutral");
+        const resolved = resolveTheme({ palette, typography });
 
-        set({ theme: { palette, typography, effects: resolvedEffects } });
+        set({ theme: { palette, typography, effects: resolvedEffects, resolved } });
 
         applyDraftOp((draft) => {
           draft.theme = { palette, typography };
@@ -353,7 +362,7 @@ export const useSiteStore = create<SiteState>()(
       resetStore: () => set({
         draft: null,
         currentPageId: null,
-        theme: { palette: "slate", typography: "inter", effects: "neutral" },
+        theme: { palette: "slate", typography: "inter", effects: "neutral", resolved: defaultResolved },
         undoStack: [],
         redoStack: [],
         dirty: false,

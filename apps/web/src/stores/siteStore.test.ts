@@ -1,6 +1,9 @@
 import { describe, it, expect, beforeEach } from "vitest";
 import { useSiteStore } from "./siteStore";
 import { createSite } from "@muse/core";
+import { resolveTheme } from "@muse/themes";
+
+const defaultResolved = resolveTheme({ palette: "slate", typography: "inter" });
 
 describe("siteStore", () => {
   beforeEach(() => {
@@ -8,7 +11,7 @@ describe("siteStore", () => {
     useSiteStore.setState({
       draft: null,
       currentPageId: null,
-      theme: { palette: "slate", typography: "inter", effects: "neutral" },
+      theme: { palette: "slate", typography: "inter", effects: "neutral", resolved: defaultResolved },
       undoStack: [],
       redoStack: [],
       dirty: false,
@@ -36,6 +39,28 @@ describe("siteStore", () => {
       expect(state.currentPageId).toBe(pageId);
       expect(state.dirty).toBe(false);
       expect(state.undoStack).toHaveLength(0);
+    });
+
+    it("should resolve theme with design tokens", () => {
+      const site = createSite("Test Site");
+      site.theme = { palette: "indigo", typography: "inter" };
+      const pageId = crypto.randomUUID();
+      site.pages[pageId] = {
+        id: pageId,
+        slug: "/",
+        parentId: null,
+        order: 0,
+        sections: [],
+        meta: { title: "Home" },
+      };
+
+      useSiteStore.getState().hydrateDraft(site);
+
+      const { theme } = useSiteStore.getState();
+      expect(theme.palette).toBe("indigo");
+      expect(theme.resolved.colors.background).toMatch(/^#[0-9a-f]{6}$/i);
+      expect(theme.resolved.colors.backgroundAlt).toMatch(/^#[0-9a-f]{6}$/i);
+      expect(theme.resolved.colors.primary).toMatch(/^#[0-9a-f]{6}$/i);
     });
   });
 
