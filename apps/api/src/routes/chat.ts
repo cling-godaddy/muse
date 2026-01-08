@@ -675,3 +675,105 @@ IMPORTANT:
     usage: completeUsage,
   });
 });
+
+chatRoute.post("/suggest-rewrites", async (c) => {
+  const { elementType, sectionType, businessContext, currentText } = await c.req.json<{
+    elementType?: string
+    sectionType?: string
+    businessContext?: { name?: string, description?: string }
+    currentText?: string
+  }>();
+
+  logger.info("suggest_rewrites_request", { elementType, sectionType, hasText: !!currentText });
+
+  // Build context-aware prompt
+  const businessDescription = businessContext?.description
+    ? `for a ${businessContext.description}`
+    : businessContext?.name
+      ? `for ${businessContext.name}`
+      : "";
+
+  const elementContext = elementType
+    ? `a ${elementType}`
+    : "some text";
+
+  const sectionContext = sectionType
+    ? ` in a ${sectionType} section`
+    : "";
+
+  const textPreview = currentText
+    ? `\n\nCurrent text: "${currentText.slice(0, 200)}${currentText.length > 200 ? "..." : ""}"`
+    : "";
+
+  const systemPrompt = `You are a copywriting expert. Generate 4 SHORT rewrite suggestions (2-4 words each) for improving ${elementContext}${sectionContext}${businessDescription}.
+
+Each suggestion should be an actionable instruction like "more compelling", "add urgency", "shorter", "more specific", "emphasize benefits", etc.
+
+IMPORTANT:
+- Return ONLY a JSON array of 4 strings
+- Each string should be 2-4 words
+- Suggestions should be relevant to the element type and business
+- No explanations or preamble${textPreview}`;
+
+  try {
+    const response = await getClient().chat({
+      model: "gpt-4o-mini",
+      messages: [
+        { role: "system", content: systemPrompt },
+        { role: "user", content: "Generate 4 rewrite suggestions." },
+      ],
+    });
+
+    logger.info("suggest_rewrites_complete", { elementType, sectionType });
+
+    // Parse the response - handle both raw JSON and markdown-wrapped JSON
+    let suggestions: string[] = [];
+    let content = response.content.trim();
+
+    // Strip markdown code block if present
+    if (content.startsWith("```")) {
+      content = content.replace(/^```(?:json)?\n?/, "").replace(/\n?```$/, "");
+    }
+
+    try {
+      suggestions = JSON.parse(content);
+    }
+    catch {
+      logger.warn("suggest_rewrites_parse_error", { content });
+      // Fallback: try to extract array-like content
+      const match = content.match(/\[[\s\S]*\]/);
+      if (match) {
+        suggestions = JSON.parse(match[0]);
+      }
+    }
+
+    // Validate and limit to 4 suggestions
+    suggestions = suggestions
+      .filter((s): s is string => typeof s === "string" && s.length > 0)
+      .slice(0, 4);
+
+    const completeUsage = response.usage
+      ? {
+        input: response.usage.input,
+        output: response.usage.output,
+        cost: calculateCost("gpt-4o-mini", response.usage.input, response.usage.output),
+        model: "gpt-4o-mini",
+        action: "suggest_rewrites" as const,
+        detail: `${sectionType || "*"}:${elementType || "*"}`,
+        timestamp: new Date().toISOString(),
+      }
+      : undefined;
+
+    return c.json({
+      suggestions,
+      usage: completeUsage,
+    });
+  }
+  catch (err) {
+    logger.error("suggest_rewrites_failed", { error: err });
+    return c.json({
+      suggestions: [],
+      error: "Failed to generate suggestions",
+    }, 500);
+  }
+});

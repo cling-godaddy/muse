@@ -1,7 +1,8 @@
-import { useState, useRef, useEffect, useMemo } from "react";
+import { useState, useRef, useEffect, useMemo, useCallback } from "react";
 import * as Popover from "@radix-ui/react-popover";
 import { Sparkles } from "lucide-react";
-import { PRESETS, getContextualPresets } from "./presets";
+import { useEditorServices } from "../../context/EditorServices";
+import { PRESETS, getContextualPresets, type Preset } from "./presets";
 import styles from "./RewriteMenu.module.css";
 
 interface RewriteMenuProps {
@@ -22,6 +23,9 @@ const colorClass = {
   orange: styles.chipOrange,
 };
 
+// Assign colors to LLM suggestions in rotation
+const SUGGESTION_COLORS: Array<"blue" | "green" | "purple" | "orange"> = ["orange", "green", "purple", "blue"];
+
 export function RewriteMenu({
   open,
   onOpenChange,
@@ -30,10 +34,13 @@ export function RewriteMenu({
   sourceText,
   sectionType,
   elementType,
-  // siteContext - will be used in Phase 3 for LLM suggestions
+  siteContext,
 }: RewriteMenuProps) {
   const [input, setInput] = useState("");
   const inputRef = useRef<HTMLInputElement>(null);
+  const [llmSuggestions, setLlmSuggestions] = useState<Preset[]>([]);
+  const [isLoadingSuggestions, setIsLoadingSuggestions] = useState(false);
+  const { getToken, trackUsage } = useEditorServices();
 
   // Get context-aware presets (rule-based, instant)
   const contextualPresets = useMemo(
@@ -43,6 +50,68 @@ export function RewriteMenu({
 
   // Check if we have contextual suggestions (not just defaults)
   const hasContextualSuggestions = !!(sectionType && elementType);
+
+  // Fetch LLM suggestions when menu opens
+  const fetchLlmSuggestions = useCallback(async () => {
+    if (!getToken || !elementType) return;
+
+    setIsLoadingSuggestions(true);
+    try {
+      const token = await getToken();
+      if (!token) return;
+
+      const response = await fetch("/api/chat/suggest-rewrites", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          elementType,
+          sectionType,
+          businessContext: siteContext,
+          currentText: sourceText?.slice(0, 200), // Limit text sent
+        }),
+      });
+
+      if (!response.ok) return;
+
+      const { suggestions, usage } = await response.json();
+
+      if (usage && trackUsage) {
+        trackUsage(usage);
+      }
+
+      if (suggestions && suggestions.length > 0) {
+        // Convert string suggestions to Preset objects with colors
+        const presets: Preset[] = suggestions.map((label: string, i: number) => ({
+          label,
+          color: SUGGESTION_COLORS[i % SUGGESTION_COLORS.length],
+        }));
+        setLlmSuggestions(presets);
+      }
+    }
+    catch (err) {
+      console.error("Failed to fetch LLM suggestions:", err);
+    }
+    finally {
+      setIsLoadingSuggestions(false);
+    }
+  }, [getToken, elementType, sectionType, siteContext, sourceText, trackUsage]);
+
+  // Fetch suggestions when menu opens (only if we have context)
+  useEffect(() => {
+    if (open && elementType && getToken) {
+      fetchLlmSuggestions();
+    }
+    if (!open) {
+      // Reset suggestions when menu closes
+      setLlmSuggestions([]);
+    }
+  }, [open, elementType, getToken, fetchLlmSuggestions]);
+
+  // Use LLM suggestions if available, otherwise fall back to rule-based
+  const suggestedPresets = llmSuggestions.length > 0 ? llmSuggestions : contextualPresets;
 
   // Focus input when popover opens, clear when it closes
   useEffect(() => {
@@ -124,26 +193,30 @@ export function RewriteMenu({
             </div>
           )}
 
-          {/* Contextual suggestions (rule-based, instant) */}
+          {/* Contextual suggestions (LLM or rule-based fallback) */}
           {hasContextualSuggestions && (
             <div className={styles.suggestedSection}>
               <div className={styles.suggestedLabel}>
-                Suggested for this
-                {" "}
-                {elementType}
+                {llmSuggestions.length > 0 ? "AI suggestions" : `Suggested for this ${elementType}`}
               </div>
               <div className={styles.suggestedChips}>
-                {contextualPresets.map(preset => (
-                  <button
-                    key={preset.label}
-                    type="button"
-                    className={`${styles.chip} ${styles.smartChip} ${colorClass[preset.color]}`}
-                    onClick={() => handleChipClick(preset.label)}
-                    disabled={isLoading}
-                  >
-                    {preset.label}
-                  </button>
-                ))}
+                {isLoadingSuggestions
+                  ? (
+                    <span className={styles.loadingDots}>Generating suggestions...</span>
+                  )
+                  : (
+                    suggestedPresets.map(preset => (
+                      <button
+                        key={preset.label}
+                        type="button"
+                        className={`${styles.chip} ${styles.smartChip} ${colorClass[preset.color]}`}
+                        onClick={() => handleChipClick(preset.label)}
+                        disabled={isLoading}
+                      >
+                        {preset.label}
+                      </button>
+                    ))
+                  )}
               </div>
             </div>
           )}

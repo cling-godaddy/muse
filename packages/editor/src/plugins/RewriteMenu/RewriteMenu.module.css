@@ -115,6 +115,12 @@
   color: #6366f1;
 }
 
+.loadingDots {
+  font-size: 12px;
+  color: #7c3aed;
+  font-style: italic;
+}
+
 @keyframes slideDown {
   from {
     opacity: 0;
