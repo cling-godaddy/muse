@@ -11,7 +11,7 @@ interface SiteRow {
   site_type: string | null
   theme: SiteTheme
   navbar: NavbarSection | null
-  costs: Array<{ input: number, output: number, cost: number, model: string }> | null
+  costs: Site["costs"] | null
   domain: string | null
   published_at: string | null
   created_at: string

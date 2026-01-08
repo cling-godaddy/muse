@@ -53,6 +53,7 @@ searchRoute.get("/images", async (c) => {
       cost: calculateCost("gpt-4o-mini", normalized.usage.input, normalized.usage.output),
       model: "gpt-4o-mini",
       action: "normalize_query" as const,
+      timestamp: new Date().toISOString(),
     }
     : undefined;
 

@@ -14,7 +14,7 @@ export interface Usage {
   model: string
   action?: UsageAction
   detail?: string
-  timestamp?: string
+  timestamp: string
 }
 
 export interface ResponseSchema {

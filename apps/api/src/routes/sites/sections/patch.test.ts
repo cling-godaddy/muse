@@ -143,7 +143,7 @@ describe("PATCH /api/sites/:siteId/sections/:sectionId", () => {
     const sectionId = crypto.randomUUID();
     const pageId = crypto.randomUUID();
     const site = createTestSite({
-      costs: [{ input: 100, output: 50, cost: 0.01, model: "test-model" }],
+      costs: [{ input: 100, output: 50, cost: 0.01, model: "test-model", timestamp: "2024-01-01T00:00:00.000Z" }],
       pages: {
         [pageId]: {
           id: pageId,
