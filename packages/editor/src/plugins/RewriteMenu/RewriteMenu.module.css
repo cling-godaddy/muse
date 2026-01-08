@@ -5,26 +5,57 @@
   width: 28px;
   height: 28px;
   padding: 0;
-  color: #374151;
-  background: transparent;
-  border: none;
-  border-radius: 4px;
+  color: #8b5cf6;
+  background: linear-gradient(135deg, #faf5ff 0%, #f3e8ff 100%);
+  border: 1px solid #e9d5ff;
+  border-radius: 6px;
   cursor: pointer;
-  transition: background 0.1s, color 0.1s;
+  transition: transform 0.15s, box-shadow 0.15s, border-color 0.15s;
+  position: relative;
+  overflow: hidden;
+}
+
+.trigger::before {
+  content: "";
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: linear-gradient(
+    45deg,
+    transparent 40%,
+    rgba(255, 255, 255, 0.8) 50%,
+    transparent 60%
+  );
+  animation: shimmer 3s ease-in-out infinite;
+}
+
+@keyframes shimmer {
+  0% { transform: translateX(-100%) rotate(45deg); }
+  100% { transform: translateX(100%) rotate(45deg); }
 }
 
 .trigger:hover {
-  background: #f3f4f6;
+  transform: scale(1.05);
+  border-color: #c4b5fd;
+  box-shadow: 0 0 12px rgba(139, 92, 246, 0.3);
 }
 
 .trigger:disabled {
   cursor: not-allowed;
   opacity: 0.6;
+  transform: none;
+}
+
+.trigger:disabled::before {
+  animation: none;
 }
 
 .trigger[data-active="true"] {
-  background: #e0e7ff;
-  color: #4f46e5;
+  background: linear-gradient(135deg, #ede9fe 0%, #ddd6fe 100%);
+  border-color: #c4b5fd;
+  color: #7c3aed;
 }
 
 .spinner {
