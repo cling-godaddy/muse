@@ -10,10 +10,10 @@ import { useLatest } from "./useLatest";
  *   fetchResults(query);
  * }, 300);
  */
-export function useDebouncedCallback<T extends (...args: unknown[]) => void>(
-  callback: T,
+export function useDebouncedCallback<Args extends unknown[]>(
+  callback: (...args: Args) => void,
   delay: number,
-): T {
+): (...args: Args) => void {
   const callbackRef = useLatest(callback);
   const timeoutRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
 
@@ -27,7 +27,7 @@ export function useDebouncedCallback<T extends (...args: unknown[]) => void>(
   }, []);
 
   const debouncedCallback = useMemo(() => {
-    const fn = (...args: Parameters<T>) => {
+    return (...args: Args) => {
       if (timeoutRef.current) {
         clearTimeout(timeoutRef.current);
       }
@@ -35,7 +35,6 @@ export function useDebouncedCallback<T extends (...args: unknown[]) => void>(
         callbackRef.current(...args);
       }, delay);
     };
-    return fn as T;
   }, [delay, callbackRef]);
 
   return debouncedCallback;
