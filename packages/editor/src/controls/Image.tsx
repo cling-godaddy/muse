@@ -43,13 +43,24 @@ export function Image({
   const [searching, setSearching] = useState(false);
   const [hasSearched, setHasSearched] = useState(false);
 
+  const handleOpenChange = (isOpen: boolean) => {
+    setOpen(isOpen);
+    // Reset search state when closing
+    if (!isOpen) {
+      setQuery("");
+      setResults([]);
+      setHasSearched(false);
+      setError(null);
+    }
+  };
+
   const handleAltChange = (value: string) => {
     if (!image) return;
     onUpdate({ ...image, alt: value });
   };
 
   const handleRemove = () => {
-    setOpen(false);
+    handleOpenChange(false);
     onRemove?.();
   };
 
@@ -95,9 +106,7 @@ export function Image({
       provider: result.provider,
       providerId: result.id,
     });
-    setOpen(false);
-    setQuery("");
-    setResults([]);
+    handleOpenChange(false);
   };
 
   if (!image) {
@@ -105,7 +114,7 @@ export function Image({
   }
 
   return (
-    <Popover.Root open={open} onOpenChange={setOpen}>
+    <Popover.Root open={open} onOpenChange={handleOpenChange}>
       <Popover.Trigger asChild>
         <img
           key={image.url}

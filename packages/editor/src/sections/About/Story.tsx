@@ -1,14 +1,24 @@
-import type { AboutSection as AboutSectionType, RichContent } from "@muse/core";
-import { EditableText, ImageLoader } from "../../ux";
+import type { AboutSection as AboutSectionType, ImageSource, RichContent, Usage } from "@muse/core";
+import { Image } from "../../controls/Image";
+import { EditableText } from "../../ux";
 import styles from "./Story.module.css";
 
 interface Props {
   section: AboutSectionType
   onUpdate: (data: Partial<AboutSectionType>) => void
   isPending?: boolean
+  trackUsage?: (usage: Usage) => void
 }
 
-export function Story({ section, onUpdate, isPending }: Props) {
+export function Story({ section, onUpdate, trackUsage }: Props) {
+  const handleImageUpdate = (image: ImageSource) => {
+    onUpdate({ image });
+  };
+
+  const handleImageRemove = () => {
+    onUpdate({ image: undefined });
+  };
+
   return (
     <section className={styles.section} style={{ backgroundColor: section.backgroundColor }}>
       <EditableText
@@ -22,7 +32,13 @@ export function Story({ section, onUpdate, isPending }: Props) {
       />
 
       {section.image && (
-        <ImageLoader image={section.image} isPending={!!isPending} className={styles.image} />
+        <Image
+          image={section.image}
+          onUpdate={handleImageUpdate}
+          onRemove={handleImageRemove}
+          onUsage={trackUsage}
+          className={styles.image}
+        />
       )}
 
       <EditableText
