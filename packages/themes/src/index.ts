@@ -16,7 +16,7 @@ export {
 
 export { generateThemePrompt, generatePaletteTypographyPrompt } from "./ai";
 
-export { themeToCssVars, themeToCssString } from "./css";
+export { themeToCssVars, themeToCssString, resolveCssVar, extractCssVarFallback } from "./css";
 
 // legacy theme presets (keep for backward compat)
 import "./presets";
