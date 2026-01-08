@@ -13,6 +13,7 @@ interface SiteSummary {
   name: string
   updatedAt: string
   pageCount: number
+  thumbnailUrl?: string
 }
 
 interface CoverageItem {
@@ -60,10 +61,20 @@ function SiteCard({ site, to, onDelete }: { site: SiteSummary, to: string, onDel
         to={to}
         className="block bg-bg-muted rounded-lg overflow-hidden hover:ring-2 ring-primary transition-all"
       >
-        <div className="aspect-video bg-bg-subtle flex items-center justify-center">
-          <span className="text-4xl text-text-subtle font-medium">
-            {site.name.charAt(0).toUpperCase()}
-          </span>
+        <div className="aspect-video bg-bg-subtle flex items-center justify-center overflow-hidden">
+          {site.thumbnailUrl
+            ? (
+              <img
+                src={site.thumbnailUrl}
+                alt={site.name}
+                className="w-full h-full object-cover"
+              />
+            )
+            : (
+              <span className="text-4xl text-text-subtle font-medium">
+                {site.name.charAt(0).toUpperCase()}
+              </span>
+            )}
         </div>
         <div className="p-4">
           <h3 className="font-medium truncate text-text">{site.name}</h3>
