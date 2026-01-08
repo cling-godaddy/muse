@@ -66,7 +66,11 @@ export function ColorPicker({
 
   const handleHue = useCallback(
     (h: number) => {
-      updateColor({ ...hsv, h });
+      // If saturation and brightness are both very low (near black),
+      // bump them to 85% so hue changes are immediately visible
+      const s = hsv.s < 5 && hsv.v < 5 ? 85 : hsv.s;
+      const v = hsv.s < 5 && hsv.v < 5 ? 85 : hsv.v;
+      updateColor({ h, s, v });
     },
     [hsv, updateColor],
   );
