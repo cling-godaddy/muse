@@ -52,9 +52,11 @@ interface ChatProps {
   onUsage?: (usage: Usage) => void
   /** Called with trackUsage function when chat is ready */
   onTrackUsageReady?: (trackUsage: (usage: Usage) => void) => void
+  /** Called when agents state changes (for generation preview) */
+  onAgentsChange?: (agents: AgentState[]) => void
 }
 
-export function Chat({ siteId, siteContext, sections, siteCosts, autoSendPrompt, intakeContext, onSectionParsed, onThemeSelected, onImages, onPages, onRefine, onSectionsUpdated, onMove, onDelete, onAddSection, onGenerationComplete, onMessagesChange, onUsage, onTrackUsageReady }: ChatProps) {
+export function Chat({ siteId, siteContext, sections, siteCosts, autoSendPrompt, intakeContext, onSectionParsed, onThemeSelected, onImages, onPages, onRefine, onSectionsUpdated, onMove, onDelete, onAddSection, onGenerationComplete, onMessagesChange, onUsage, onTrackUsageReady, onAgentsChange }: ChatProps) {
   const options = useMemo(() => ({ siteId, siteContext, sections, siteCosts, onSectionParsed, onThemeSelected, onImages, onPages, onRefine, onSectionsUpdated, onMove, onDelete, onAddSection, onGenerationComplete, onMessagesChange, onUsage }), [siteId, siteContext, sections, siteCosts, onSectionParsed, onThemeSelected, onImages, onPages, onRefine, onSectionsUpdated, onMove, onDelete, onAddSection, onGenerationComplete, onMessagesChange, onUsage]);
   const { messages, input, setInput, isLoading, error, send, sessionUsage, agents, agentsMessageIndex, pendingAction, confirmPendingAction, cancelPendingAction, selectOption, trackUsage } = useChat(options);
   const isRefineMode = sections && sections.length > 0;
@@ -68,6 +70,11 @@ export function Chat({ siteId, siteContext, sections, siteCosts, autoSendPrompt,
   useEffect(() => {
     onTrackUsageReady?.(trackUsage);
   }, [onTrackUsageReady, trackUsage]);
+
+  // expose agents state to parent for generation preview
+  useEffect(() => {
+    onAgentsChange?.(agents);
+  }, [onAgentsChange, agents]);
 
   // auto-send initial prompt if provided and no existing content
   useEffect(() => {

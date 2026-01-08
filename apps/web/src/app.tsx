@@ -8,6 +8,8 @@ import type { PreviewDevice } from "@muse/core";
 import { resolveThemeWithEffects, themeToCssVars, getTypography, loadFonts } from "@muse/themes";
 import { getPreset } from "@muse/core";
 import { Chat } from "./components/chat";
+import { GenerationPreview } from "./components/GenerationPreview";
+import type { AgentState } from "./utils/streamParser";
 import { useSiteEditor } from "./hooks/useSiteEditor";
 import type { SiteContext } from "./hooks/useChat";
 import { EditorToolbar } from "./components/EditorToolbar";
@@ -143,7 +145,12 @@ function MainApp() {
 
   const [editorMode, setEditorMode] = useState<"edit" | "preview">("edit");
   const [previewDevice, setPreviewDevice] = useState<PreviewDevice>("desktop");
+  const [agents, setAgents] = useState<AgentState[]>([]);
   const isPreview = editorMode === "preview";
+
+  // Derive preview visibility from current state
+  const hasAgentsStarted = agents.some(a => a.status !== "pending");
+  const shouldShowPreview = sections.length === 0 && hasAgentsStarted;
 
   const handleEditorModeChange = useCallback((mode: "edit" | "preview") => {
     setEditorMode(mode);
@@ -263,7 +270,7 @@ function MainApp() {
         )}
         <main className="flex-1 flex gap-6 p-6 overflow-hidden">
           <div className={`w-[400px] shrink-0 ${isPreview ? "hidden" : ""}`}>
-            <Chat siteId={urlSiteId ?? site.id} siteContext={siteContext} sections={sections} siteCosts={site.costs} autoSendPrompt={autoSendPrompt} intakeContext={intakeContext} onSectionParsed={handleSectionParsed} onThemeSelected={handleThemeSelected} onImages={handleImages} onPages={handlePages} onRefine={handleRefine} onSectionsUpdated={handleSectionsUpdated} onMove={handleMove} onDelete={handleDelete} onAddSection={handleAddSectionFromAI} onGenerationComplete={handleGenerationComplete} onMessagesChange={setMessages} onUsage={handleUsage} onTrackUsageReady={handleTrackUsageReady} />
+            <Chat siteId={urlSiteId ?? site.id} siteContext={siteContext} sections={sections} siteCosts={site.costs} autoSendPrompt={autoSendPrompt} intakeContext={intakeContext} onSectionParsed={handleSectionParsed} onThemeSelected={handleThemeSelected} onImages={handleImages} onPages={handlePages} onRefine={handleRefine} onSectionsUpdated={handleSectionsUpdated} onMove={handleMove} onDelete={handleDelete} onAddSection={handleAddSectionFromAI} onGenerationComplete={handleGenerationComplete} onMessagesChange={setMessages} onUsage={handleUsage} onTrackUsageReady={handleTrackUsageReady} onAgentsChange={setAgents} />
           </div>
           <div className="flex-1 min-w-0 overflow-hidden">
             {isPreview
@@ -278,13 +285,17 @@ function MainApp() {
                   </PreviewLinkInterceptor>
                 </PreviewContainer>
               )
-              : (
-                <div className="h-full overflow-y-auto" style={themeStyle} data-effects={effectsId}>
-                  <EditorModeProvider mode={editorMode}>
-                    <SectionEditor sections={sections} onChange={setSections} pendingImageSections={pendingImageSections} navbar={navbar ?? void 0} onNavbarChange={updateNavbar} site={site} currentPage={currentPage} onAddSection={handleAddSection} onUpdateSection={updateSection} onMoveSection={handleMoveSection} onDeleteSection={handleDelete} getToken={getToken} trackUsage={trackUsage ?? undefined} />
-                  </EditorModeProvider>
-                </div>
-              )}
+              : shouldShowPreview
+                ? (
+                  <GenerationPreview agents={agents} />
+                )
+                : (
+                  <div className="h-full overflow-y-auto" style={themeStyle} data-effects={effectsId}>
+                    <EditorModeProvider mode={editorMode}>
+                      <SectionEditor sections={sections} onChange={setSections} pendingImageSections={pendingImageSections} navbar={navbar ?? void 0} onNavbarChange={updateNavbar} site={site} currentPage={currentPage} onAddSection={handleAddSection} onUpdateSection={updateSection} onMoveSection={handleMoveSection} onDeleteSection={handleDelete} getToken={getToken} trackUsage={trackUsage ?? undefined} />
+                    </EditorModeProvider>
+                  </div>
+                )}
           </div>
         </main>
       </div>
