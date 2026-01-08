@@ -14,6 +14,7 @@ export function HueSlider({ hue, onChange }: HueSliderProps) {
         max={360}
         value={hue}
         onChange={e => onChange(Number(e.target.value))}
+        onPointerDown={e => e.stopPropagation()}
         aria-label="Hue"
         className={styles.hueSliderInput}
       />

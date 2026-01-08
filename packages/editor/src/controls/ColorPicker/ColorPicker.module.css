@@ -80,7 +80,7 @@
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
   padding: 12px;
   min-width: 240px;
-  z-index: 50;
+  z-index: 150;
   animation: slideDown 0.15s ease-out;
 }
 

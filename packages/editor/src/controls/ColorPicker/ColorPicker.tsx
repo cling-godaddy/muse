@@ -16,6 +16,8 @@ export interface ColorPickerProps {
   side?: "top" | "right" | "bottom" | "left"
   /** Show only the color swatch, no hex value or chevron. Default: false */
   compact?: boolean
+  /** Called when popover open state changes */
+  onOpenChange?: (open: boolean) => void
 }
 
 export function ColorPicker({
@@ -25,8 +27,14 @@ export function ColorPicker({
   ariaLabel,
   side = "bottom",
   compact = false,
+  onOpenChange,
 }: ColorPickerProps) {
   const [open, setOpen] = useState(false);
+
+  const handleOpenChange = useCallback((newOpen: boolean) => {
+    setOpen(newOpen);
+    onOpenChange?.(newOpen);
+  }, [onOpenChange]);
   const [hsv, setHsv] = useState<HSV>(() => hexToHsv(value));
 
   // sync HSV when external value changes
@@ -65,7 +73,7 @@ export function ColorPicker({
   );
 
   return (
-    <Popover.Root open={open} onOpenChange={setOpen}>
+    <Popover.Root open={open} onOpenChange={handleOpenChange}>
       <Popover.Trigger asChild>
         <button
           type="button"
@@ -93,6 +101,9 @@ export function ColorPicker({
           align="start"
           role="dialog"
           aria-label="Color picker"
+          onPointerDown={e => e.stopPropagation()}
+          onMouseDown={e => e.stopPropagation()}
+          onFocusOutside={e => e.preventDefault()}
         >
           <ColorArea
             hue={hsv.h}
