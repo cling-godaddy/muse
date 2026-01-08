@@ -118,13 +118,14 @@ export function useSiteEditor(siteId: string | undefined) {
 
   // Persist usage costs to site
   const handleUsage = useCallback((usage: Usage) => {
-    if (!draft) return;
-    // Update costs directly in draft via applyDraftOp
+    // Read current state directly to avoid stale closure issues
+    const currentDraft = useSiteStore.getState().draft;
+    if (!currentDraft) return;
     useSiteStore.getState().applyDraftOp((d) => {
       d.costs = [...(d.costs ?? []), usage];
       d.updatedAt = new Date().toISOString();
     });
-  }, [draft]);
+  }, []);
 
   // Store trackUsage function from Chat
   const handleTrackUsageReady = useCallback((trackUsage: (usage: Usage) => void) => {
