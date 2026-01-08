@@ -26,7 +26,7 @@ export function initializeFromValue(
       const root = $getRoot();
       root.clear();
       const paragraph = $createParagraphNode();
-      paragraph.append($createTextNode(value));
+      paragraph.append($createTextNode(value ?? ""));
       root.append(paragraph);
     });
   }
