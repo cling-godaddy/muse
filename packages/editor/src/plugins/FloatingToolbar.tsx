@@ -39,7 +39,7 @@ import {
   X,
 } from "lucide-react";
 import { ColorPicker } from "../controls/ColorPicker";
-import { RewriteMenu, type Preset } from "./RewriteMenu";
+import { RewriteMenu } from "./RewriteMenu";
 import { useEditorServices } from "../context/EditorServices";
 import { markProgrammaticUpdate } from "../ux/RichEditable";
 import { useDebouncedCallback } from "@muse/react";
@@ -69,6 +69,7 @@ export function FloatingToolbarPlugin({ hideLists }: FloatingToolbarPluginProps 
   const [isColorPickerOpen, setIsColorPickerOpen] = useState(false);
   const [isRewriteMenuOpen, setIsRewriteMenuOpen] = useState(false);
   const [isRewriting, setIsRewriting] = useState(false);
+  const [rewriteSourceText, setRewriteSourceText] = useState("");
   const savedSelectionRef = useRef<{
     anchorKey: string
     anchorOffset: number
@@ -336,7 +337,7 @@ export function FloatingToolbarPlugin({ hideLists }: FloatingToolbarPluginProps 
     editor.focus();
   };
 
-  const handleRewrite = useCallback(async (preset: Preset) => {
+  const handleRewrite = useCallback(async (completion: string) => {
     if (!getToken) return;
 
     // Get text to rewrite
@@ -365,6 +366,9 @@ export function FloatingToolbarPlugin({ hideLists }: FloatingToolbarPluginProps 
         return;
       }
 
+      // Build prompt from template: "Make this [completion]"
+      const prompt = `Make this ${completion}`;
+
       const response = await fetch("/api/chat/rewrite-text", {
         method: "POST",
         headers: {
@@ -373,8 +377,8 @@ export function FloatingToolbarPlugin({ hideLists }: FloatingToolbarPluginProps 
         },
         body: JSON.stringify({
           text: textToRewrite,
-          prompt: preset.prompt,
-          presetId: preset.id,
+          prompt,
+          presetId: completion, // Use completion as ID for tracking
           siteContext: site ? { name: site.name, description: site.description } : undefined,
         }),
       });
@@ -414,6 +418,7 @@ export function FloatingToolbarPlugin({ hideLists }: FloatingToolbarPluginProps 
     }
     finally {
       setIsRewriting(false);
+      setIsRewriteMenuOpen(false);
       editor.focus();
     }
   }, [editor, getToken, trackUsage, site]);
@@ -516,9 +521,24 @@ export function FloatingToolbarPlugin({ hideLists }: FloatingToolbarPluginProps 
           <div className={styles.divider} />
           <RewriteMenu
             open={isRewriteMenuOpen}
-            onOpenChange={setIsRewriteMenuOpen}
-            onSelect={handleRewrite}
+            onOpenChange={(open) => {
+              if (open) {
+                // Capture source text when menu opens
+                editor.getEditorState().read(() => {
+                  const selection = $getSelection();
+                  if ($isRangeSelection(selection) && !selection.isCollapsed()) {
+                    setRewriteSourceText(selection.getTextContent());
+                  }
+                  else {
+                    setRewriteSourceText($getRoot().getTextContent());
+                  }
+                });
+              }
+              setIsRewriteMenuOpen(open);
+            }}
+            onRewrite={handleRewrite}
             isLoading={isRewriting}
+            sourceText={rewriteSourceText}
           />
         </>
       )}

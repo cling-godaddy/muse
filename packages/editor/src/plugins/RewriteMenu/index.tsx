@@ -1,24 +1,65 @@
+import { useState, useRef, useEffect } from "react";
 import * as Popover from "@radix-ui/react-popover";
 import { Sparkles } from "lucide-react";
-import { PRESET_CATEGORIES, type Preset } from "./presets";
+import { PRESETS } from "./presets";
 import styles from "./RewriteMenu.module.css";
 
 interface RewriteMenuProps {
   open: boolean
   onOpenChange: (open: boolean) => void
-  onSelect: (preset: Preset) => void
+  onRewrite: (completion: string) => void
   isLoading?: boolean
+  sourceText?: string
 }
+
+const colorClass = {
+  blue: styles.chipBlue,
+  green: styles.chipGreen,
+  purple: styles.chipPurple,
+  orange: styles.chipOrange,
+};
 
 export function RewriteMenu({
   open,
   onOpenChange,
-  onSelect,
+  onRewrite,
   isLoading,
+  sourceText,
 }: RewriteMenuProps) {
-  const handleSelect = (preset: Preset) => {
-    onSelect(preset);
-    onOpenChange(false);
+  const [input, setInput] = useState("");
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  // Focus input when popover opens, clear when it closes
+  useEffect(() => {
+    if (open) {
+      setTimeout(() => inputRef.current?.focus(), 0);
+    }
+    else {
+      // Use setTimeout to avoid synchronous setState in effect
+      setTimeout(() => setInput(""), 0);
+    }
+  }, [open]);
+
+  const handleSubmit = () => {
+    if (!input.trim()) return;
+    onRewrite(input.trim());
+    // Don't close here - stay open to show loading state
+    // Parent will close after rewrite completes
+  };
+
+  const handleChipClick = (preset: string) => {
+    setInput(preset);
+    inputRef.current?.focus();
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === "Enter" && input.trim()) {
+      e.preventDefault();
+      handleSubmit();
+    }
+    if (e.key === "Escape") {
+      onOpenChange(false);
+    }
   };
 
   return (
@@ -44,33 +85,73 @@ export function RewriteMenu({
           align="end"
           sideOffset={8}
           data-rewrite-menu
+          onOpenAutoFocus={e => e.preventDefault()}
         >
+          {/* Loading overlay */}
+          {isLoading && (
+            <div className={styles.loadingOverlay}>
+              <div className={styles.loadingSpinner} />
+              <span className={styles.loadingText}>Rewriting...</span>
+            </div>
+          )}
+
+          {/* Header */}
           <div className={styles.header}>
             <Sparkles size={14} />
-            <span>AI Rewrite</span>
+            <span>Rewrite with AI</span>
           </div>
 
-          {PRESET_CATEGORIES.map(category => (
-            <div key={category.id} className={styles.category}>
-              <div className={styles.categoryLabel}>{category.label}</div>
-              <div className={styles.presetGrid}>
-                {category.presets.map(preset => (
-                  <button
-                    key={preset.id}
-                    type="button"
-                    className={styles.presetButton}
-                    onClick={() => handleSelect(preset)}
-                  >
-                    {preset.label}
-                  </button>
-                ))}
-              </div>
+          {/* Source text preview */}
+          {sourceText && (
+            <div className={styles.sourcePreview}>
+              <span className={styles.sourceLabel}>Text:</span>
+              <span className={styles.sourceText}>{sourceText}</span>
             </div>
-          ))}
+          )}
+
+          {/* Subtitle + Input */}
+          <div className={styles.inputSection}>
+            <label className={styles.inputLabel}>Make this text:</label>
+            <input
+              ref={inputRef}
+              type="text"
+              className={styles.input}
+              value={input}
+              onChange={e => setInput(e.target.value)}
+              onKeyDown={handleKeyDown}
+              placeholder="shorter, more professional..."
+              disabled={isLoading}
+            />
+          </div>
+
+          {/* All chips */}
+          <div className={styles.chips}>
+            {PRESETS.map(preset => (
+              <button
+                key={preset.label}
+                type="button"
+                className={`${styles.chip} ${colorClass[preset.color]}`}
+                onClick={() => handleChipClick(preset.label)}
+                disabled={isLoading}
+              >
+                {preset.label}
+              </button>
+            ))}
+          </div>
+
+          {/* Submit button */}
+          <div className={styles.footer}>
+            <button
+              type="button"
+              className={styles.submitButton}
+              onClick={handleSubmit}
+              disabled={!input.trim() || isLoading}
+            >
+              {isLoading ? "Rewriting..." : "Rewrite"}
+            </button>
+          </div>
         </Popover.Content>
       </Popover.Portal>
     </Popover.Root>
   );
 }
-
-export type { Preset } from "./presets";

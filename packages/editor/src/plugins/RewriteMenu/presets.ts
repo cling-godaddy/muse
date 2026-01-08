@@ -1,44 +1,28 @@
 export interface Preset {
-  id: string
   label: string
-  prompt: string
+  color: "blue" | "green" | "purple" | "orange"
 }
 
-export interface PresetCategory {
-  id: string
-  label: string
-  presets: Preset[]
-}
-
-export const PRESET_CATEGORIES: PresetCategory[] = [
-  {
-    id: "tone",
-    label: "Tone",
-    presets: [
-      { id: "clearer", label: "Clearer", prompt: "Rewrite this to be clearer" },
-      { id: "shorter", label: "Shorter", prompt: "Make this shorter" },
-      { id: "expanded", label: "Expanded", prompt: "Expand this section" },
-      { id: "bullets", label: "Bullet points", prompt: "Turn this into bullet points" },
-    ],
-  },
-  {
-    id: "voice",
-    label: "Voice",
-    presets: [
-      { id: "professional", label: "Professional", prompt: "Make this sound more professional" },
-      { id: "friendly", label: "Friendly", prompt: "Make this more friendly" },
-      { id: "confident", label: "Confident", prompt: "Make this more confident" },
-    ],
-  },
-  {
-    id: "business",
-    label: "Business Copy",
-    presets: [
-      { id: "explain-business", label: "Explain business", prompt: "Explain what my business does more clearly" },
-      { id: "differentiate", label: "Differentiate", prompt: "Highlight what makes my business different" },
-      { id: "stronger-cta", label: "Stronger CTA", prompt: "Write a stronger call to action" },
-      { id: "button-text", label: "Button text", prompt: "Rewrite this button text" },
-      { id: "seo-optimize", label: "SEO optimize", prompt: "Optimize this for search engines" },
-    ],
-  },
+// All presets shown as chips, colored by category
+export const PRESETS: Preset[] = [
+  // Tone - blue
+  { label: "shorter", color: "blue" },
+  { label: "clearer", color: "blue" },
+  { label: "more detailed", color: "blue" },
+  { label: "simpler", color: "blue" },
+  // Voice - green
+  { label: "more professional", color: "green" },
+  { label: "more friendly", color: "green" },
+  { label: "more confident", color: "green" },
+  { label: "more casual", color: "green" },
+  // Format - purple
+  { label: "into bullet points", color: "purple" },
+  { label: "into a numbered list", color: "purple" },
+  { label: "into a headline", color: "purple" },
+  { label: "into paragraphs", color: "purple" },
+  // Style - orange
+  { label: "sound like Apple marketing", color: "orange" },
+  { label: "more urgent", color: "orange" },
+  { label: "more persuasive", color: "orange" },
+  { label: "SEO optimized", color: "orange" },
 ];

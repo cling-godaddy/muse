@@ -636,7 +636,9 @@ ${siteContext?.name || siteContext?.description
   : ""}
 
 IMPORTANT:
-- Return ONLY the rewritten text, no explanations, quotes, or commentary
+- Return ONLY the rewritten text
+- Do NOT wrap your response in quotation marks
+- No explanations, preamble, or commentary
 - Preserve the general meaning unless asked to change it
 - Keep approximately the same length unless specifically asked to expand or shorten`;
 
@@ -644,7 +646,7 @@ IMPORTANT:
     model: "gpt-4o-mini",
     messages: [
       { role: "system", content: systemPrompt },
-      { role: "user", content: `Text to rewrite:\n"${text}"\n\nInstruction: ${prompt}` },
+      { role: "user", content: `Text to rewrite:\n${text}\n\nInstruction: ${prompt}` },
     ],
   });
 
@@ -662,8 +664,14 @@ IMPORTANT:
     }
     : undefined;
 
+  // Strip leading/trailing quotes if present (model sometimes ignores instructions)
+  let rewritten = response.content;
+  if (rewritten.startsWith("\"") && rewritten.endsWith("\"")) {
+    rewritten = rewritten.slice(1, -1);
+  }
+
   return c.json({
-    rewritten: response.content,
+    rewritten,
     usage: completeUsage,
   });
 });
