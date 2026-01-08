@@ -31,6 +31,7 @@ export function Masonry({ section, onUpdate, isPending, trackUsage }: Props) {
         <EditableText
           rich
           hideLists
+          elementType="headline"
           value={section.headline}
           onChange={(v: RichContent) => onUpdate({ headline: v.text ? v : undefined })}
           as="h2"

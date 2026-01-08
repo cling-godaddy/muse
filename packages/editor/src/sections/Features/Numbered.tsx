@@ -99,6 +99,7 @@ export function Numbered({ section, onUpdate, site, getToken, trackUsage }: Prop
       <EditableText
         rich
         hideLists
+        elementType="headline"
         value={section.headline ?? ""}
         onChange={(v: RichContent) => onUpdate({ headline: v.text ? v : undefined })}
         as="h2"
@@ -135,6 +136,7 @@ export function Numbered({ section, onUpdate, site, getToken, trackUsage }: Prop
               </div>
               <EditableText
                 rich
+                elementType="description"
                 value={item.description}
                 onChange={(v: RichContent) => updateItem(i, { description: v })}
                 as="p"

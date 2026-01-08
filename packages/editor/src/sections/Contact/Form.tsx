@@ -46,6 +46,7 @@ export function Form({ section, onUpdate }: Props) {
           as="h2"
           className={styles.headline}
           placeholder="Section headline..."
+          elementType="headline"
         />
       )}
       {section.subheadline !== undefined && (

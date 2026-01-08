@@ -52,6 +52,7 @@ function MenuItemRow({ item, onUpdate, onRemove, preset, isPending }: MenuItemRo
         {!isSimple && item.description !== undefined && (
           <EditableText
             rich
+            elementType="description"
             value={item.description ?? ""}
             onChange={(v: RichContent) => onUpdate({ description: v.text ? v : undefined })}
             as="p"
@@ -189,6 +190,7 @@ export function Menu({ section, onUpdate, isPending }: Props) {
         <EditableText
           rich
           hideLists
+          elementType="headline"
           value={section.headline}
           onChange={(v: RichContent) => onUpdate({ headline: v.text ? v : undefined })}
           as="h2"

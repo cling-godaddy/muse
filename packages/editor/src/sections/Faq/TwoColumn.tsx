@@ -21,6 +21,7 @@ export function TwoColumn({ section, onUpdate }: Props) {
         <EditableText
           rich
           hideLists
+          elementType="headline"
           value={section.headline}
           onChange={(v: RichContent) => onUpdate({ headline: v.text ? v : undefined })}
           as="h2"
@@ -49,6 +50,7 @@ export function TwoColumn({ section, onUpdate }: Props) {
             />
             <EditableText
               rich
+              elementType="description"
               value={item.answer}
               onChange={(v: RichContent) => updateItem(i, { answer: v })}
               as="p"

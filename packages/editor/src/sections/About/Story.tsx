@@ -29,6 +29,7 @@ export function Story({ section, onUpdate, trackUsage }: Props) {
         as="h2"
         className={styles.headline}
         placeholder="About Us"
+        elementType="headline"
       />
 
       {section.image && (
@@ -48,6 +49,7 @@ export function Story({ section, onUpdate, trackUsage }: Props) {
         as="p"
         className={styles.body}
         placeholder="Tell your story..."
+        elementType="description"
       />
     </section>
   );

@@ -37,6 +37,7 @@ export function Accordion({ section, onUpdate }: Props) {
           as="h2"
           className={styles.headline}
           placeholder="Section headline..."
+          elementType="headline"
         />
       )}
       {section.subheadline !== undefined && (
@@ -85,6 +86,7 @@ export function Accordion({ section, onUpdate }: Props) {
                     as="p"
                     className={styles.answer}
                     placeholder="Answer..."
+                    elementType="description"
                   />
                 </div>
               )}

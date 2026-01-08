@@ -62,6 +62,7 @@ export function Grid({ section, onUpdate, isPending }: Props) {
             as="h2"
             className={styles.headline}
             placeholder="Section headline..."
+            elementType="headline"
           />
         </div>
       )}

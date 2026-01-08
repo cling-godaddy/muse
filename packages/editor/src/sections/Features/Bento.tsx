@@ -70,6 +70,7 @@ function BentoCard({ item, onUpdate, onRemove, isPending, isLarge, trackUsage }:
           as="p"
           className={styles.itemDescription}
           placeholder="Description..."
+          elementType="description"
         />
       </div>
       {isEditable && (
@@ -203,6 +204,7 @@ export function Bento({ section, onUpdate, isPending, site, getToken, trackUsage
         as="h2"
         className={styles.headline}
         placeholder="Section headline..."
+        elementType="headline"
       />
       <div className={`${styles.bento} ${layoutClass}`}>
         {section.items.map((item, i) => (

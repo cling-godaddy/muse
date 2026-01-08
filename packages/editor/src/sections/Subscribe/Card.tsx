@@ -23,6 +23,7 @@ export function Card({ section, onUpdate }: Props) {
           as="h2"
           className={styles.headline}
           placeholder="Stay in the loop"
+          elementType="headline"
         />
         <EditableText
           value={section.subheadline ?? ""}

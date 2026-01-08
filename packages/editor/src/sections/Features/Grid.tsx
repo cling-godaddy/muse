@@ -79,6 +79,7 @@ function FeatureCard({ item, onUpdate, onRemove, isPending, trackUsage }: Featur
         as="p"
         className={styles.itemDescription}
         placeholder="Description..."
+        elementType="description"
       />
       {isEditable && (
         <button
@@ -204,6 +205,7 @@ export function Grid({ section, onUpdate, isPending, site, getToken, trackUsage 
             as="h2"
             className={styles.headline}
             placeholder="Section headline..."
+            elementType="headline"
           />
         )}
       <div className={styles.grid}>

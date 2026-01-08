@@ -34,6 +34,7 @@ export function Cta({ section, onUpdate, isPending }: Props) {
         as="h2"
         className={styles.headline}
         placeholder="CTA headline..."
+        elementType="headline"
       />
       <EditableText
         rich
@@ -42,6 +43,7 @@ export function Cta({ section, onUpdate, isPending }: Props) {
         as="p"
         className={styles.description}
         placeholder="Description..."
+        elementType="description"
       />
       <EditableLink
         text={section.buttonText}

@@ -51,6 +51,7 @@ export function Team({ section, onUpdate, trackUsage }: Props) {
         as="h2"
         className={styles.headline}
         placeholder="Meet the Team"
+        elementType="headline"
       />
 
       <div className={styles.grid}>
@@ -86,6 +87,7 @@ export function Team({ section, onUpdate, trackUsage }: Props) {
               as="p"
               className={styles.memberBio}
               placeholder="Short bio..."
+              elementType="description"
             />
             {isEditable && (
               <button type="button" onClick={() => removeMember(i)} className={styles.removeButton}>

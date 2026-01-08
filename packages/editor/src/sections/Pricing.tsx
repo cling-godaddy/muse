@@ -63,6 +63,7 @@ export function Pricing({ section, onUpdate, isPending }: Props) {
           as="h2"
           className={styles.headline}
           placeholder="Section headline..."
+          elementType="headline"
         />
       )}
       {section.subheadline !== undefined && (
@@ -119,6 +120,7 @@ export function Pricing({ section, onUpdate, isPending }: Props) {
               as="p"
               className={styles.description}
               placeholder="Plan description..."
+              elementType="description"
             />
             <ul className={styles.features}>
               {plan.features.map((feature, j) => (

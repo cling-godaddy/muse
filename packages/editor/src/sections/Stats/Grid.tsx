@@ -38,6 +38,7 @@ export function Grid({ section, onUpdate }: Props) {
         as="h2"
         className={styles.headline}
         placeholder="By the numbers"
+        elementType="headline"
       />
 
       <div className={styles.grid}>
