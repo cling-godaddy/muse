@@ -166,12 +166,7 @@ export function GenerationPreview({ agents }: GenerationPreviewProps) {
           <div className="space-y-2">
             <PaletteSwatches paletteId={themeAgent?.data?.palette} />
             {palette && typography && (
-              <span>
-                {palette.name}
-                {" "}
-                ·
-                {typography.name}
-              </span>
+              <span>{`${palette.name} · ${typography.name}`}</span>
             )}
             {!palette && "Selecting colors..."}
           </div>
