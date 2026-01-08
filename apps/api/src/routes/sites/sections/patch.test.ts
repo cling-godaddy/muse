@@ -136,4 +136,52 @@ describe("PATCH /api/sites/:siteId/sections/:sectionId", () => {
     const body = await res.json();
     expect(body.error).toBe("Section not found");
   });
+
+  it("does not overwrite other site fields when updating a section", async () => {
+    const app = getApp();
+
+    const sectionId = crypto.randomUUID();
+    const pageId = crypto.randomUUID();
+    const site = createTestSite({
+      costs: [{ input: 100, output: 50, cost: 0.01, model: "test-model" }],
+      pages: {
+        [pageId]: {
+          id: pageId,
+          slug: "/",
+          parentId: null,
+          order: 0,
+          meta: { title: "Home" },
+          sections: [
+            {
+              id: sectionId,
+              type: "hero" as const,
+              headline: "Original",
+            },
+          ],
+        },
+      },
+    });
+
+    await app.request(`/api/sites/${site.id}`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(site),
+    });
+
+    // Update the section
+    const res = await app.request(`/api/sites/${site.id}/sections/${sectionId}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ headline: "Updated" }),
+    });
+
+    expect(res.status).toBe(200);
+
+    // Verify costs were not overwritten
+    const getRes = await app.request(`/api/sites/${site.id}`);
+    const loaded = await getRes.json();
+    expect(loaded.costs).toHaveLength(1);
+    expect(loaded.costs[0].cost).toBe(0.01);
+    expect(loaded.pages[pageId].sections[0].headline).toBe("Updated");
+  });
 });

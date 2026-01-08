@@ -1,4 +1,4 @@
-import type { Site } from "@muse/core";
+import type { Site, Section } from "@muse/core";
 
 export interface SiteSummary {
   id: string
@@ -13,6 +13,7 @@ export interface SitesTable {
   getByIdForUser(id: string, userId: string): Promise<Site | null>
   listByUser(userId: string): Promise<SiteSummary[]>
   delete(id: string, userId: string): Promise<void>
+  updateSection(sectionId: string, section: Section): Promise<void>
 }
 
 export type AgentName = "brief" | "structure" | "theme" | "image" | "copy" | "sitemap" | "pages";

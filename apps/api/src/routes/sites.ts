@@ -200,38 +200,25 @@ sitesRoute.patch("/:siteId/sections/:sectionId", async (c) => {
     return c.json({ error: "Site not found" }, 404);
   }
 
-  // Find and update the section in any page
+  // Find the section and its page
   let foundSection: Section | null = null;
   let foundPageId: string | null = null;
 
   for (const [pageId, page] of Object.entries(site.pages)) {
-    const sectionIndex = page.sections.findIndex(s => s.id === sectionId);
-    if (sectionIndex !== -1) {
+    const existingSection = page.sections.find(s => s.id === sectionId);
+    if (existingSection) {
       foundPageId = pageId;
-      const sectionToUpdate = page.sections[sectionIndex];
-      if (sectionToUpdate) {
-        foundSection = { ...sectionToUpdate, ...updates } as Section;
-        const updatedSection = foundSection;
-
-        // Update the section in the site
-        site.pages[pageId] = {
-          ...page,
-          sections: page.sections.map(s =>
-            s.id === sectionId ? updatedSection : s,
-          ),
-        };
-      }
+      foundSection = { ...existingSection, ...updates } as Section;
       break;
     }
   }
 
-  if (!foundSection) {
+  if (!foundSection || !foundPageId) {
     return c.json({ error: "Section not found" }, 404);
   }
 
-  // Save updated site
-  site.updatedAt = new Date().toISOString();
-  await sites.save(site, userId);
+  // Update only the section row (not the whole site) to avoid race conditions
+  await sites.updateSection(sectionId, foundSection);
 
   return c.json({ section: foundSection, pageId: foundPageId });
 });

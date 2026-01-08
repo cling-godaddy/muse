@@ -248,6 +248,21 @@ export function createPostgresSitesTable(): SitesTable {
     async delete(id: string, userId: string): Promise<void> {
       await sql`DELETE FROM sites WHERE id = ${id} AND user_id = ${userId}`;
     },
+
+    async updateSection(sectionId: string, section: Section): Promise<void> {
+      const { id, type, preset, ...content } = section;
+      const now = new Date().toISOString();
+      void id; // extracted to exclude from content
+
+      await sql`
+        UPDATE sections
+        SET type = ${type},
+            preset = ${preset ?? null},
+            content = ${JSON.stringify(content)},
+            updated_at = ${now}
+        WHERE id = ${sectionId}
+      `;
+    },
   };
 }
 

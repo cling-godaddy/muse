@@ -1,4 +1,4 @@
-import type { Site } from "@muse/core";
+import type { Site, Section } from "@muse/core";
 import type { SitesTable, SiteSummary, MessagesTable, StoredMessage } from "./types";
 
 interface StoredSite {
@@ -45,6 +45,18 @@ export function createMemorySitesTable(): SitesTable {
       const entry = store.get(id);
       if (entry && entry.userId === userId) {
         store.delete(id);
+      }
+    },
+
+    async updateSection(sectionId: string, section: Section): Promise<void> {
+      for (const entry of store.values()) {
+        for (const page of Object.values(entry.site.pages)) {
+          const index = page.sections.findIndex(s => s.id === sectionId);
+          if (index !== -1) {
+            page.sections[index] = structuredClone(section);
+            return;
+          }
+        }
       }
     },
   };
