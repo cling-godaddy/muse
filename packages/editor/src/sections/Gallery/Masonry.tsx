@@ -1,4 +1,4 @@
-import type { GallerySection as GallerySectionType, ImageSource, RichContent } from "@muse/core";
+import type { GallerySection as GallerySectionType, ImageSource, RichContent, Usage } from "@muse/core";
 import { Image } from "../../controls/Image";
 import { EditableText } from "../../ux";
 import styles from "./Masonry.module.css";
@@ -7,10 +7,11 @@ interface Props {
   section: GallerySectionType
   onUpdate: (data: Partial<GallerySectionType>) => void
   isPending?: boolean
+  trackUsage?: (usage: Usage) => void
 }
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-export function Masonry({ section, onUpdate, isPending }: Props) {
+export function Masonry({ section, onUpdate, isPending, trackUsage }: Props) {
   const columns = section.columns ?? 3;
   const images = section.images ?? [];
 
@@ -47,6 +48,7 @@ export function Masonry({ section, onUpdate, isPending }: Props) {
               image={image}
               onUpdate={img => updateImage(i, img)}
               onRemove={() => removeImage(i)}
+              onUsage={trackUsage}
             />
           </div>
         ))}
