@@ -1,4 +1,4 @@
-import { useRef, useEffect, useMemo } from "react";
+import { useRef, useEffect, useMemo, useState } from "react";
 import type { Section } from "@muse/core";
 import type { ImageSelection } from "@muse/media";
 import type { Usage } from "@muse/ai";
@@ -311,33 +311,52 @@ function MessageBubble({ message, isLast, isLoading, agents, intakeContext }: Me
             <div className={`p-3 whitespace-pre-wrap break-words ${showTimeline && message.content ? "border-t border-border-light" : ""}`}>
               {message.content || (isLast && isLoading && agents.length === 0 ? "Generating..." : "")}
               {!isAssistant && intakeContext && (
-                <details className="mt-3 text-xs">
-                  <summary className="cursor-pointer text-text-muted hover:text-text font-medium">
-                    Business context
-                  </summary>
-                  <div className="mt-2 p-3 bg-bg rounded-lg border border-border-light space-y-2">
-                    {intakeContext.name && (
-                      <div className="flex items-center gap-1.5">
-                        <Building2 size={12} className="text-text-subtle shrink-0" />
-                        <span className="font-medium text-text">{intakeContext.name}</span>
-                      </div>
-                    )}
-                    {intakeContext.location && (
-                      <div className="flex items-center gap-1.5">
-                        <MapPin size={12} className="text-text-subtle shrink-0" />
-                        <span className="text-text-muted">{intakeContext.location}</span>
-                      </div>
-                    )}
-                    {intakeContext.description && (
-                      <p className="text-text-muted pt-2 border-t border-border-light">
-                        {intakeContext.description}
-                      </p>
-                    )}
-                  </div>
-                </details>
+                <BusinessContextCollapsible intakeContext={intakeContext} />
               )}
             </div>
           )}
+      </div>
+    </div>
+  );
+}
+
+function BusinessContextCollapsible({ intakeContext }: { intakeContext: IntakeContext }) {
+  const [isOpen, setIsOpen] = useState(true);
+
+  return (
+    <div className="mt-3 text-xs">
+      <button
+        type="button"
+        className="cursor-pointer text-text-muted hover:text-text font-medium flex items-center gap-1"
+        onClick={() => setIsOpen(!isOpen)}
+      >
+        <span className={`transition-transform duration-200 ${isOpen ? "rotate-90" : ""}`}>▶</span>
+        Business context
+      </button>
+      <div
+        className={`grid transition-[grid-template-rows] duration-200 ${isOpen ? "grid-rows-[1fr]" : "grid-rows-[0fr]"}`}
+      >
+        <div className="overflow-hidden">
+          <div className="mt-2 p-3 bg-bg rounded-lg border border-border-light space-y-2">
+            {intakeContext.name && (
+              <div className="flex items-center gap-1.5">
+                <Building2 size={12} className="text-text-subtle shrink-0" />
+                <span className="font-medium text-text">{intakeContext.name}</span>
+              </div>
+            )}
+            {intakeContext.location && (
+              <div className="flex items-center gap-1.5">
+                <MapPin size={12} className="text-text-subtle shrink-0" />
+                <span className="text-text-muted">{intakeContext.location}</span>
+              </div>
+            )}
+            {intakeContext.description && (
+              <p className="text-text-muted pt-2 border-t border-border-light">
+                {intakeContext.description}
+              </p>
+            )}
+          </div>
+        </div>
       </div>
     </div>
   );
