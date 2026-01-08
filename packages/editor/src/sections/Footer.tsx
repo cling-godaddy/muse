@@ -57,7 +57,7 @@ export function Footer({ section, onUpdate }: Props) {
   };
 
   return (
-    <footer className={styles.footer}>
+    <footer className={styles.footer} style={{ backgroundColor: section.backgroundColor }}>
       {section.companyName !== undefined && (
         <EditableText
           value={section.companyName}

@@ -165,7 +165,7 @@ export function Grid({ section, onUpdate, isPending, site, getToken, trackUsage 
   // Show section-level skeleton when empty array during generation
   if (isPending && section.items.length === 0) {
     return (
-      <div className={styles.section}>
+      <div className={styles.section} style={{ backgroundColor: section.backgroundColor }}>
         <Skeleton variant="text" height="2em" width="50%" className={styles.headline} />
         <div className={styles.grid}>
           {[0, 1, 2].map(i => (
@@ -182,7 +182,7 @@ export function Grid({ section, onUpdate, isPending, site, getToken, trackUsage 
   }
 
   return (
-    <div className={styles.section}>
+    <div className={styles.section} style={{ backgroundColor: section.backgroundColor }}>
       {isPending
         ? <Skeleton variant="text" height="2em" width="50%" className={styles.headline} />
         : (

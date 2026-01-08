@@ -83,12 +83,6 @@ html, body, #root {
     animation: muse-fade-in 0.3s ease-out;
   }
 
-  /* Apply section background color when set */
-  .muse-section > div:not(.muse-section-controls) {
-    transition: background-color 0.2s ease-out;
-    background: var(--muse-section-bg, transparent);
-  }
-
   .muse-fade-in {
     animation: muse-fade-in 0.25s ease-out both;
   }

@@ -16,7 +16,7 @@ export function Cta({ section, onUpdate, isPending }: Props) {
 
   if (isPending) {
     return (
-      <div className={`${styles.section} ${variantClass}`}>
+      <div className={`${styles.section} ${variantClass}`} style={{ backgroundColor: section.backgroundColor }}>
         <Skeleton variant="text" height="2.5em" width="60%" className={styles.headline} />
         <Skeleton variant="text" height="1.2em" width="80%" className={styles.description} />
         <Skeleton variant="rect" height="48px" width="180px" />
@@ -25,7 +25,7 @@ export function Cta({ section, onUpdate, isPending }: Props) {
   }
 
   return (
-    <div className={`${styles.section} ${variantClass}`}>
+    <div className={`${styles.section} ${variantClass}`} style={{ backgroundColor: section.backgroundColor }}>
       <EditableText
         value={section.headline}
         onChange={v => onUpdate({ headline: v })}

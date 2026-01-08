@@ -66,7 +66,7 @@ export function Carousel({ section, onUpdate, isPending }: Props) {
   };
 
   return (
-    <div className={styles.section}>
+    <div className={styles.section} style={{ backgroundColor: section.backgroundColor }}>
       {section.headline !== undefined && (
         <EditableText
           value={section.headline}

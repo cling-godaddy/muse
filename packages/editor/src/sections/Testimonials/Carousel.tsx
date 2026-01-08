@@ -30,7 +30,7 @@ export function Carousel({ section, onUpdate, isPending }: Props) {
   if (!quote) return null;
 
   return (
-    <section className={styles.section}>
+    <section className={styles.section} style={{ backgroundColor: section.backgroundColor }}>
       {section.headline !== undefined && (
         <div className={styles.header}>
           <EditableText

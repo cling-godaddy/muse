@@ -15,7 +15,7 @@ export function Grid({ section, onUpdate, isPending }: Props) {
   // Show section-level skeleton when empty array during generation
   if (isPending && section.quotes.length === 0) {
     return (
-      <section className={styles.section}>
+      <section className={styles.section} style={{ backgroundColor: section.backgroundColor }}>
         {section.headline !== undefined && (
           <div className={styles.header}>
             <Skeleton variant="text" height="2em" width="40%" className={styles.headline} />
@@ -51,7 +51,7 @@ export function Grid({ section, onUpdate, isPending }: Props) {
   };
 
   return (
-    <section className={styles.section}>
+    <section className={styles.section} style={{ backgroundColor: section.backgroundColor }}>
       {section.headline !== undefined && (
         <div className={styles.header}>
           <EditableText

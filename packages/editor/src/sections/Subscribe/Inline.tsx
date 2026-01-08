@@ -12,7 +12,7 @@ export function Inline({ section, onUpdate }: Props) {
   const isEditable = useIsEditable();
 
   return (
-    <section className={styles.section}>
+    <section className={styles.section} style={{ backgroundColor: section.backgroundColor }}>
       <EditableText
         value={section.headline ?? ""}
         onChange={v => onUpdate({ headline: v || undefined })}

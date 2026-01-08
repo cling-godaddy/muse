@@ -14,7 +14,7 @@ export function Grid({ section, onUpdate, isPending }: Props) {
   const images = section.images ?? [];
 
   return (
-    <div className={styles.section}>
+    <div className={styles.section} style={{ backgroundColor: section.backgroundColor }}>
       {section.headline !== undefined && (
         <EditableText
           value={section.headline}

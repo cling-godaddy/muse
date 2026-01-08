@@ -13,7 +13,7 @@ export function Card({ section, onUpdate }: Props) {
   const isEditable = useIsEditable();
 
   return (
-    <section className={styles.section}>
+    <section className={styles.section} style={{ backgroundColor: section.backgroundColor }}>
       <div className={styles.card}>
         <EditableText
           value={section.headline ?? ""}

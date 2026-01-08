@@ -76,7 +76,7 @@ export function Hero({ section, onUpdate, isPending }: Props) {
   if (isSplit) {
     const imageFirst = preset === "hero-split-right";
     return (
-      <div className={`${styles.section} ${styles.split} ${imageFirst ? styles.splitRight : ""}`}>
+      <div className={`${styles.section} ${styles.split} ${imageFirst ? styles.splitRight : ""}`} style={{ backgroundColor: section.backgroundColor }}>
         <div className={styles.splitContent}>
           <HeroContent section={section} onUpdate={onUpdate} isPending={isPending} />
         </div>
@@ -114,7 +114,7 @@ export function Hero({ section, onUpdate, isPending }: Props) {
 
   // Centered layout: default
   return (
-    <div className={styles.section}>
+    <div className={styles.section} style={{ backgroundColor: section.backgroundColor }}>
       <HeroContent section={section} onUpdate={onUpdate} isPending={isPending} />
     </div>
   );

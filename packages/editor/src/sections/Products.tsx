@@ -116,7 +116,7 @@ export function Products({ section, onUpdate, isPending }: Props) {
   };
 
   return (
-    <div className={`${styles.section} ${layoutClass}`}>
+    <div className={`${styles.section} ${layoutClass}`} style={{ backgroundColor: section.backgroundColor }}>
       {section.headline !== undefined && (
         <EditableText
           value={section.headline}

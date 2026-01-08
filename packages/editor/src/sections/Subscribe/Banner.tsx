@@ -12,7 +12,7 @@ export function Banner({ section, onUpdate }: Props) {
   const isEditable = useIsEditable();
 
   return (
-    <section className={styles.section}>
+    <section className={styles.section} style={{ backgroundColor: section.backgroundColor }}>
       <div className={styles.content}>
         <EditableText
           value={section.headline ?? ""}

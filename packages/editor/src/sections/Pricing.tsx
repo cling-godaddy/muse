@@ -15,7 +15,7 @@ export function Pricing({ section, onUpdate, isPending }: Props) {
   // Show section-level skeleton when empty array during generation
   if (isPending && section.plans.length === 0) {
     return (
-      <div className={styles.section}>
+      <div className={styles.section} style={{ backgroundColor: section.backgroundColor }}>
         {section.headline !== undefined && (
           <Skeleton variant="text" height="2em" width="50%" className={styles.headline} />
         )}
@@ -53,7 +53,7 @@ export function Pricing({ section, onUpdate, isPending }: Props) {
   };
 
   return (
-    <div className={styles.section}>
+    <div className={styles.section} style={{ backgroundColor: section.backgroundColor }}>
       {section.headline !== undefined && (
         <EditableText
           value={section.headline}

@@ -165,7 +165,7 @@ export function Bento({ section, onUpdate, isPending, site, getToken, trackUsage
   // Show section-level skeleton when empty array during generation
   if (isPending && section.items.length === 0) {
     return (
-      <div className={styles.section}>
+      <div className={styles.section} style={{ backgroundColor: section.backgroundColor }}>
         <Skeleton variant="text" height="2em" width="50%" className={styles.headline} />
         <div className={`${styles.bento} ${layoutClass}`}>
           {[0, 1, 2, 3].map(i => (
@@ -184,7 +184,7 @@ export function Bento({ section, onUpdate, isPending, site, getToken, trackUsage
   };
 
   return (
-    <div className={styles.section}>
+    <div className={styles.section} style={{ backgroundColor: section.backgroundColor }}>
       <EditableText
         value={section.headline ?? ""}
         onChange={v => onUpdate({ headline: v || undefined })}

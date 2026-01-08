@@ -36,7 +36,7 @@ export function Form({ section, onUpdate }: Props) {
   };
 
   return (
-    <div className={styles.section}>
+    <div className={styles.section} style={{ backgroundColor: section.backgroundColor }}>
       {section.headline !== undefined && (
         <EditableText
           value={section.headline}

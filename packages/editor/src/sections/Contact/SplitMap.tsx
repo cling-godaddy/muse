@@ -51,7 +51,7 @@ export function SplitMap({ section, onUpdate }: Props) {
     : null;
 
   return (
-    <section className={styles.section}>
+    <section className={styles.section} style={{ backgroundColor: section.backgroundColor }}>
       {section.headline !== undefined && (
         <EditableText
           value={section.headline}
