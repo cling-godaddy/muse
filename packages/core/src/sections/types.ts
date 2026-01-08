@@ -119,7 +119,7 @@ export interface ImageSource {
 
 export interface HeroSection extends SectionBase {
   type: "hero"
-  headline: string
+  headline: TextOrRich
   subheadline?: TextOrRich
   cta?: { text: string, href: string }
   secondaryCta?: { text: string, href: string }
@@ -137,14 +137,14 @@ export interface FeatureItem {
 
 export interface FeaturesSection extends SectionBase {
   type: "features"
-  headline?: string
+  headline?: TextOrRich
   items: FeatureItem[]
   columns?: 2 | 3 | 4
 }
 
 export interface CtaSection extends SectionBase {
   type: "cta"
-  headline: string
+  headline: TextOrRich
   description?: TextOrRich
   buttonText: string
   buttonHref: string
@@ -161,13 +161,13 @@ export interface Quote {
 
 export interface TestimonialsSection extends SectionBase {
   type: "testimonials"
-  headline?: string
+  headline?: TextOrRich
   quotes: Quote[]
 }
 
 export interface GallerySection extends SectionBase {
   type: "gallery"
-  headline?: string
+  headline?: TextOrRich
   images: ImageSource[]
   columns?: 2 | 3 | 4
 }
@@ -184,7 +184,7 @@ export interface PricingPlan {
 
 export interface PricingSection extends SectionBase {
   type: "pricing"
-  headline?: string
+  headline?: TextOrRich
   subheadline?: string
   plans: PricingPlan[]
 }
@@ -196,7 +196,7 @@ export interface FaqItem {
 
 export interface FaqSection extends SectionBase {
   type: "faq"
-  headline?: string
+  headline?: TextOrRich
   subheadline?: string
   items: FaqItem[]
 }
@@ -211,7 +211,7 @@ export interface FormField {
 
 export interface ContactSection extends SectionBase {
   type: "contact"
-  headline?: string
+  headline?: TextOrRich
   subheadline?: string
   email?: string
   phone?: string
@@ -250,7 +250,7 @@ export interface TeamMember {
 
 export interface AboutSection extends SectionBase {
   type: "about"
-  headline?: string
+  headline?: TextOrRich
   body?: TextOrRich
   image?: ImageSource
   teamMembers?: TeamMember[]
@@ -258,7 +258,7 @@ export interface AboutSection extends SectionBase {
 
 export interface SubscribeSection extends SectionBase {
   type: "subscribe"
-  headline?: string
+  headline?: TextOrRich
   subheadline?: string
   buttonText: string
   placeholderText?: string
@@ -272,7 +272,7 @@ export interface StatItem {
 
 export interface StatsSection extends SectionBase {
   type: "stats"
-  headline?: string
+  headline?: TextOrRich
   stats: StatItem[]
 }
 
@@ -283,7 +283,7 @@ export interface LogoItem {
 
 export interface LogosSection extends SectionBase {
   type: "logos"
-  headline?: string
+  headline?: TextOrRich
   logos: LogoItem[]
 }
 
@@ -302,7 +302,7 @@ export interface MenuCategory {
 
 export interface MenuSection extends SectionBase {
   type: "menu"
-  headline?: string
+  headline?: TextOrRich
   subheadline?: string
   items?: MenuItem[]
   categories?: MenuCategory[]
@@ -320,7 +320,7 @@ export interface ProductItem {
 
 export interface ProductsSection extends SectionBase {
   type: "products"
-  headline?: string
+  headline?: TextOrRich
   subheadline?: string
   items: ProductItem[]
 }

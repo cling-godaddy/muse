@@ -1,4 +1,4 @@
-import type { GallerySection as GallerySectionType, ImageSource } from "@muse/core";
+import type { GallerySection as GallerySectionType, ImageSource, RichContent } from "@muse/core";
 import { Image } from "../../controls/Image";
 import { EditableText } from "../../ux";
 import styles from "./Masonry.module.css";
@@ -28,8 +28,10 @@ export function Masonry({ section, onUpdate, isPending }: Props) {
     <div className={styles.section} style={{ backgroundColor: section.backgroundColor }}>
       {section.headline !== undefined && (
         <EditableText
+          rich
+          hideLists
           value={section.headline}
-          onChange={v => onUpdate({ headline: v || undefined })}
+          onChange={(v: RichContent) => onUpdate({ headline: v.text ? v : undefined })}
           as="h2"
           className={styles.headline}
           placeholder="Section headline..."

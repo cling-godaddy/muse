@@ -187,8 +187,10 @@ export function Grid({ section, onUpdate, isPending, site, getToken, trackUsage 
         ? <Skeleton variant="text" height="2em" width="50%" className={styles.headline} />
         : (
           <EditableText
+            rich
+            hideLists
             value={section.headline ?? ""}
-            onChange={v => onUpdate({ headline: v || undefined })}
+            onChange={(v: RichContent) => onUpdate({ headline: v.text ? v : undefined })}
             as="h2"
             className={styles.headline}
             placeholder="Section headline..."

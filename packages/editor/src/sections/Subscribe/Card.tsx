@@ -1,4 +1,4 @@
-import type { SubscribeSection as SubscribeSectionType } from "@muse/core";
+import type { SubscribeSection as SubscribeSectionType, RichContent } from "@muse/core";
 import { EditableText } from "../../ux";
 import { useIsEditable } from "../../context/EditorMode";
 import styles from "./Card.module.css";
@@ -16,8 +16,10 @@ export function Card({ section, onUpdate }: Props) {
     <section className={styles.section} style={{ backgroundColor: section.backgroundColor }}>
       <div className={styles.card}>
         <EditableText
+          rich
+          hideLists
           value={section.headline ?? ""}
-          onChange={v => onUpdate({ headline: v || undefined })}
+          onChange={(v: RichContent) => onUpdate({ headline: v.text ? v : undefined })}
           as="h2"
           className={styles.headline}
           placeholder="Stay in the loop"

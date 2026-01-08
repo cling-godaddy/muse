@@ -29,8 +29,10 @@ function HeroContent({ section, onUpdate, isPending }: Props) {
   return (
     <>
       <EditableText
+        rich
+        hideLists
         value={section.headline}
-        onChange={v => onUpdate({ headline: v })}
+        onChange={(v: RichContent) => onUpdate({ headline: v })}
         as="h1"
         className={styles.headline}
         placeholder="Headline..."
