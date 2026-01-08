@@ -34,7 +34,7 @@ export interface StoredAgentState {
   }
 }
 
-export type UsageAction = "generate_site" | "generate_section" | "generate_item" | "refine";
+export type UsageAction = "generate_site" | "generate_section" | "generate_item" | "refine" | "rewrite_text";
 
 export interface StoredUsage {
   input: number
