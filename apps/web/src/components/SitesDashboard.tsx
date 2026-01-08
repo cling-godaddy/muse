@@ -163,7 +163,7 @@ function CreateSiteModal({
 
   return (
     <Dialog open={open} onOpenChange={handleOpenChange} title="Create New Site">
-      <form onSubmit={handleSubmit} className="p-5 pt-0 space-y-4">
+      <form onSubmit={handleSubmit} className="p-5 pt-2 space-y-4">
         <div>
           <label className="block text-sm font-medium text-text mb-1">Site Name</label>
           <input
