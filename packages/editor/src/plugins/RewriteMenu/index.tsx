@@ -40,6 +40,7 @@ export function RewriteMenu({
   const inputRef = useRef<HTMLInputElement>(null);
   const [llmSuggestions, setLlmSuggestions] = useState<Preset[]>([]);
   const [isLoadingSuggestions, setIsLoadingSuggestions] = useState(false);
+  const hasFetchedRef = useRef(false);
   const { getToken, trackUsage } = useEditorServices();
 
   // Get context-aware presets (rule-based, instant)
@@ -99,16 +100,20 @@ export function RewriteMenu({
     }
   }, [getToken, elementType, sectionType, siteContext, sourceText, trackUsage]);
 
-  // Fetch suggestions when menu opens (only if we have context)
+  // Fetch suggestions once when menu opens
+  // Intentionally only depends on `open` to prevent re-fetches when other props change
   useEffect(() => {
-    if (open && elementType && getToken) {
+    if (open && elementType && getToken && !hasFetchedRef.current) {
+      hasFetchedRef.current = true;
       fetchLlmSuggestions();
     }
     if (!open) {
-      // Reset suggestions when menu closes
+      // Reset when menu closes
+      hasFetchedRef.current = false;
       setLlmSuggestions([]);
     }
-  }, [open, elementType, getToken, fetchLlmSuggestions]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [open]);
 
   // Use LLM suggestions if available, otherwise fall back to rule-based
   const suggestedPresets = llmSuggestions.length > 0 ? llmSuggestions : contextualPresets;
