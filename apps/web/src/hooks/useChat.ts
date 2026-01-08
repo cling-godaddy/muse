@@ -5,6 +5,7 @@ import type { Section } from "@muse/core";
 import type { Usage } from "@muse/ai";
 import type { ImageSelection } from "@muse/media";
 import { parseStream, type ParseState, type AgentState, type ThemeSelection, type PageInfo } from "../utils/streamParser";
+import { useLatest } from "./useLatest";
 
 const MESSAGES_URL = "http://localhost:3001/api/messages";
 
@@ -105,6 +106,8 @@ const REFINE_URL = "http://localhost:3001/api/chat/refine";
 const emptyUsage: Usage = { input: 0, output: 0, cost: 0, model: "" };
 
 export function useChat(options: UseChatOptions = {}): UseChat {
+  // Use ref to avoid stale closures when accessing options in callbacks
+  const optionsRef = useLatest(options);
   const { onMessagesChange } = options;
   const { getToken } = useAuth();
   const [messages, setMessages] = useState<Message[]>([]);
@@ -181,7 +184,8 @@ export function useChat(options: UseChatOptions = {}): UseChat {
     const newMessages = [...messages, userMessage];
 
     // Refine mode: when sections exist, use refine endpoint
-    const isRefineMode = options.sections && options.sections.length > 0;
+    const opts = optionsRef.current;
+    const isRefineMode = opts.sections && opts.sections.length > 0;
 
     setMessages(newMessages);
     setInput("");
@@ -207,8 +211,8 @@ export function useChat(options: UseChatOptions = {}): UseChat {
             "Authorization": `Bearer ${token}`,
           },
           body: JSON.stringify({
-            siteId: options.siteId,
-            sections: options.sections,
+            siteId: opts.siteId,
+            sections: opts.sections,
             messages: newMessages, // Send full conversation history
           }),
         });
@@ -221,12 +225,12 @@ export function useChat(options: UseChatOptions = {}): UseChat {
 
         // Handle updated sections from backend
         if (result.updatedSections?.length > 0) {
-          options.onSectionsUpdated?.(result.updatedSections);
+          optionsRef.current.onSectionsUpdated?.(result.updatedSections);
         }
 
         // Handle moves from backend
         if (result.moves?.length > 0) {
-          options.onMove?.(result.moves);
+          optionsRef.current.onMove?.(result.moves);
         }
 
         // Handle pending actions (e.g., delete confirmation)
@@ -242,7 +246,7 @@ export function useChat(options: UseChatOptions = {}): UseChat {
 
         if (usage) {
           setLastUsage(usage);
-          options.onUsage?.(usage);
+          optionsRef.current.onUsage?.(usage);
         }
 
         // Skip assistant message if there are pending actions (confirmation UI handles it)
@@ -258,6 +262,9 @@ export function useChat(options: UseChatOptions = {}): UseChat {
           ];
           setMessages(finalMessages);
         }
+
+        // Save site to persist costs (reuse generation complete handler)
+        optionsRef.current.onGenerationComplete?.();
       }
       catch (err) {
         const message = err instanceof Error ? err.message : "Unknown error";
@@ -282,7 +289,7 @@ export function useChat(options: UseChatOptions = {}): UseChat {
         body: JSON.stringify({
           messages: newMessages,
           stream: true,
-          siteContext: options.siteContext,
+          siteContext: optionsRef.current.siteContext,
         }),
       });
 
@@ -311,25 +318,25 @@ export function useChat(options: UseChatOptions = {}): UseChat {
 
         // emit new sections
         for (const section of result.newSections) {
-          options.onSectionParsed?.(section);
+          optionsRef.current.onSectionParsed?.(section);
         }
 
         // emit theme selection (only once per response)
         if (result.theme && !themeProcessedRef.current) {
           themeProcessedRef.current = true;
-          options.onThemeSelected?.(result.theme);
+          optionsRef.current.onThemeSelected?.(result.theme);
         }
 
         // emit pages FIRST (before images) so sections exist when images are injected
         if (result.newPages.length > 0 && !pagesProcessedRef.current) {
           pagesProcessedRef.current = true;
-          options.onPages?.(result.newPages, result.theme);
+          optionsRef.current.onPages?.(result.newPages, result.theme);
         }
 
         // emit images with sections from current parse result
         if (result.newImages.length > 0) {
           const allSections = result.state.pages.flatMap(p => p.sections);
-          options.onImages?.(result.newImages, allSections);
+          optionsRef.current.onImages?.(result.newImages, allSections);
         }
 
         // update agents if changed
@@ -342,7 +349,7 @@ export function useChat(options: UseChatOptions = {}): UseChat {
         if (result.usage && !usageProcessedRef.current) {
           usageProcessedRef.current = true;
           setLastUsage(result.usage);
-          options.onUsage?.(result.usage);
+          optionsRef.current.onUsage?.(result.usage);
         }
 
         // update parse state
@@ -368,7 +375,7 @@ export function useChat(options: UseChatOptions = {}): UseChat {
           usage: finalResult.usage,
         },
       ]);
-      options.onGenerationComplete?.();
+      optionsRef.current.onGenerationComplete?.();
     }
     catch (err) {
       const message = err instanceof Error ? err.message : "Unknown error";
@@ -379,19 +386,19 @@ export function useChat(options: UseChatOptions = {}): UseChat {
     finally {
       setIsLoading(false);
     }
-  }, [input, messages, isLoading, options, getToken]);
+  }, [input, messages, isLoading, getToken, optionsRef]);
 
   const confirmPendingAction = useCallback(() => {
     if (!pendingAction) return;
 
     if (pendingAction.type === "delete_section") {
-      options.onDelete?.(pendingAction.payload.sectionId as string);
+      optionsRef.current.onDelete?.(pendingAction.payload.sectionId as string);
     }
 
     if (pendingAction.type === "add_section" && !pendingAction.step) {
       // Final confirmation step - has all params
       const { sectionType, preset, index } = pendingAction.payload;
-      options.onAddSection?.(
+      optionsRef.current.onAddSection?.(
         sectionType as string,
         preset as string,
         index as number | undefined,
@@ -399,7 +406,7 @@ export function useChat(options: UseChatOptions = {}): UseChat {
     }
 
     setPendingAction(null);
-  }, [pendingAction, options]);
+  }, [pendingAction, optionsRef]);
 
   const cancelPendingAction = useCallback(() => {
     setPendingAction(null);
@@ -435,8 +442,8 @@ export function useChat(options: UseChatOptions = {}): UseChat {
     // Don't update sessionUsage directly - let useEffect recalculate from siteCosts
     // to avoid double counting (this usage gets added to site.costs via onUsage,
     // then useEffect adds siteCosts to sessionUsage)
-    options.onUsage?.(usage);
-  }, [options]);
+    optionsRef.current.onUsage?.(usage);
+  }, [optionsRef]);
 
   return { messages, input, setInput, isLoading, error, send, sessionUsage, lastUsage, agents, agentsMessageIndex, pendingAction, confirmPendingAction, cancelPendingAction, selectOption, trackUsage };
 }
