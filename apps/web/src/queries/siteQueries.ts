@@ -309,3 +309,28 @@ export function useDeleteSection() {
     },
   });
 }
+
+export function usePatchSite() {
+  const { getToken } = useAuth();
+
+  return useMutation({
+    mutationFn: async ({ siteId, fields }: { siteId: string, fields: { name?: string, description?: string | null, location?: string | null, thumbnailUrl?: string | null } }) => {
+      const token = await getToken();
+      const res = await fetch(`${API_URL}/api/sites/${siteId}`, {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${token}`,
+        },
+        body: JSON.stringify(fields),
+      });
+
+      if (!res.ok) {
+        const data = await res.json();
+        throw new Error(data.error ?? "Failed to update site");
+      }
+
+      return res.json();
+    },
+  });
+}

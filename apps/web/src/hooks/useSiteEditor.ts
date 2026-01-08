@@ -3,11 +3,11 @@ import { flushSync } from "react-dom";
 import { useAuth } from "@clerk/clerk-react";
 import { groupBy } from "lodash-es";
 import type { Section, SectionType } from "@muse/core";
-import { sectionNeedsImages, getPresetImageInjection, getImageInjection, applyImageInjection, createSite } from "@muse/core";
+import { sectionNeedsImages, getPresetImageInjection, getImageInjection, applyImageInjection, createSite, getSiteThumbnailUrl } from "@muse/core";
 import type { ImageSelection } from "@muse/media";
 import type { Usage } from "@muse/ai";
 import { useSiteStore } from "../stores/siteStore";
-import { useSite, useSaveSite, usePatchPageSections, useCreateSection, useDeleteSection } from "../queries/siteQueries";
+import { useSite, useSaveSite, usePatchPageSections, useCreateSection, useDeleteSection, usePatchSite } from "../queries/siteQueries";
 import { useAutosaveSection } from "./useAutosaveSection";
 import type { ThemeSelection, PageInfo } from "../utils/streamParser";
 import type { RefineUpdate, MoveUpdate, Message } from "./useChat";
@@ -27,6 +27,7 @@ export function useSiteEditor(siteId: string | undefined) {
   const patchPageSections = usePatchPageSections();
   const createSectionMutation = useCreateSection();
   const deleteSectionMutation = useDeleteSection();
+  const patchSiteMutation = usePatchSite();
 
   // Autosave section edits
   const { isSyncing: isSyncingSections } = useAutosaveSection(siteId ?? "");
@@ -434,11 +435,16 @@ export function useSiteEditor(siteId: string | undefined) {
         {
           onSuccess: (savedSite) => {
             markSaved(savedSite);
+            // Update thumbnail after save completes
+            const thumbnailUrl = getSiteThumbnailUrl(savedSite);
+            if (thumbnailUrl) {
+              patchSiteMutation.mutate({ siteId: savedSite.id, fields: { thumbnailUrl } });
+            }
           },
         },
       );
     }
-  }, [saveSite, markSaved]);
+  }, [saveSite, markSaved, patchSiteMutation]);
 
   return {
     // State
