@@ -281,6 +281,9 @@ export function createPostgresSitesTable(): SitesTable {
       if ("thumbnailUrl" in fields) {
         await sql`UPDATE sites SET thumbnail_url = ${fields.thumbnailUrl}, updated_at = ${now} WHERE id = ${siteId}`;
       }
+      if ("theme" in fields) {
+        await sql`UPDATE sites SET theme = ${JSON.stringify(fields.theme)}, updated_at = ${now} WHERE id = ${siteId}`;
+      }
     },
 
     async appendCost(siteId: string, cost: StoredUsage): Promise<void> {

@@ -314,7 +314,7 @@ export function usePatchSite() {
   const { getToken } = useAuth();
 
   return useMutation({
-    mutationFn: async ({ siteId, fields }: { siteId: string, fields: { name?: string, description?: string | null, location?: string | null, thumbnailUrl?: string | null } }) => {
+    mutationFn: async ({ siteId, fields }: { siteId: string, fields: { name?: string, description?: string | null, location?: string | null, thumbnailUrl?: string | null, theme?: { palette: string, typography: string } } }) => {
       const token = await getToken();
       const res = await fetch(`${API_URL}/api/sites/${siteId}`, {
         method: "PATCH",

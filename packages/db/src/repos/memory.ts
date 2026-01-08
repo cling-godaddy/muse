@@ -73,6 +73,9 @@ export function createMemorySitesTable(): SitesTable {
       if ("location" in fields) {
         entry.site.location = fields.location ?? undefined;
       }
+      if ("theme" in fields && fields.theme !== undefined) {
+        entry.site.theme = fields.theme;
+      }
       // thumbnailUrl is computed dynamically in listByUser, no need to store
       entry.site.updatedAt = new Date().toISOString();
     },

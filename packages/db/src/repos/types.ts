@@ -12,6 +12,7 @@ export interface SiteUpdatableFields {
   description?: string | null
   location?: string | null
   thumbnailUrl?: string | null
+  theme?: { palette: string, typography: string }
 }
 
 export interface SitesTable {

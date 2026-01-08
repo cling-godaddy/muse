@@ -91,6 +91,35 @@ export function useSiteEditor(siteId: string | undefined) {
     }
   }, [serverSite, draft, hydrateDraft]);
 
+  // Auto-save theme changes
+  const prevThemeRef = useRef<{ palette: string, typography: string } | null>(null);
+  useEffect(() => {
+    if (!siteId || !draft) return;
+
+    const currentTheme = { palette: theme.palette, typography: theme.typography };
+
+    // Initialize ref on first run
+    if (!prevThemeRef.current) {
+      prevThemeRef.current = currentTheme;
+      return;
+    }
+
+    // Check if theme actually changed
+    if (
+      prevThemeRef.current.palette === currentTheme.palette
+      && prevThemeRef.current.typography === currentTheme.typography
+    ) {
+      return;
+    }
+
+    // Theme changed - patch it
+    prevThemeRef.current = currentTheme;
+    patchSiteMutation.mutate(
+      { siteId, fields: { theme: currentTheme } },
+      { onSuccess: () => markSynced() },
+    );
+  }, [siteId, draft, theme.palette, theme.typography, patchSiteMutation, markSynced]);
+
   // Derive computed values from draft
   const site = draft ?? serverSite ?? createSite("Untitled Site");
   const sections = useMemo(() =>
