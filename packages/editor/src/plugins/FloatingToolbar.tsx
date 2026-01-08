@@ -151,6 +151,40 @@ export function FloatingToolbarPlugin() {
     );
   }, [editor, isColorPickerOpen]);
 
+  // Handle click outside - closes toolbar and any open popovers
+  useEffect(() => {
+    if (!isFocused) return;
+
+    const handleClickOutside = (e: MouseEvent) => {
+      const toolbar = toolbarRef.current;
+      const rootElement = editor.getRootElement();
+      const target = e.target as Node;
+
+      // Check if click is inside toolbar or editor
+      if (toolbar?.contains(target)) return;
+      if (rootElement?.contains(target)) return;
+
+      // Check if click is inside a Radix popover (color picker)
+      const popoverContent = document.querySelector("[data-radix-popper-content-wrapper]");
+      if (popoverContent?.contains(target)) return;
+
+      // Close everything
+      setIsColorPickerOpen(false);
+      setIsFocused(false);
+      setShowLinkInput(false);
+    };
+
+    // Delay adding listener to avoid catching the focus click
+    const timeoutId = setTimeout(() => {
+      document.addEventListener("mousedown", handleClickOutside);
+    }, 0);
+
+    return () => {
+      clearTimeout(timeoutId);
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [editor, isFocused]);
+
   // Update format states on selection change
   useEffect(() => {
     return editor.registerCommand(
@@ -326,6 +360,7 @@ export function FloatingToolbarPlugin() {
         <ColorPicker
           value={textColor || "#000000"}
           onChange={handleTextColor}
+          open={isColorPickerOpen}
           onOpenChange={setIsColorPickerOpen}
           compact
           side="bottom"

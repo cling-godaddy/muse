@@ -16,6 +16,8 @@ export interface ColorPickerProps {
   side?: "top" | "right" | "bottom" | "left"
   /** Show only the color swatch, no hex value or chevron. Default: false */
   compact?: boolean
+  /** Control open state externally. If undefined, uses internal state. */
+  open?: boolean
   /** Called when popover open state changes */
   onOpenChange?: (open: boolean) => void
 }
@@ -27,14 +29,19 @@ export function ColorPicker({
   ariaLabel,
   side = "bottom",
   compact = false,
+  open: controlledOpen,
   onOpenChange,
 }: ColorPickerProps) {
-  const [open, setOpen] = useState(false);
+  const [internalOpen, setInternalOpen] = useState(false);
+  const isControlled = controlledOpen !== undefined;
+  const open = isControlled ? controlledOpen : internalOpen;
 
   const handleOpenChange = useCallback((newOpen: boolean) => {
-    setOpen(newOpen);
+    if (!isControlled) {
+      setInternalOpen(newOpen);
+    }
     onOpenChange?.(newOpen);
-  }, [onOpenChange]);
+  }, [isControlled, onOpenChange]);
   const [hsv, setHsv] = useState<HSV>(() => hexToHsv(value));
 
   // sync HSV when external value changes
