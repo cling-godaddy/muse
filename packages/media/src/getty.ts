@@ -12,6 +12,8 @@ interface GettyDisplaySize {
 interface GettyImageResult {
   id: string
   url: string
+  title?: string
+  caption?: string
   display_sizes: GettyDisplaySize[]
   max_dimensions?: {
     width: number
@@ -51,6 +53,12 @@ export function createGettyProvider(config: GettyProviderConfig): MediaProvider 
         reportUsage: "true",
       });
 
+      // fields must be specified multiple times
+      params.append("fields", "display_set");
+      params.append("fields", "max_dimensions");
+      params.append("fields", "caption");
+      params.append("fields", "title");
+
       if (options.orientation) {
         params.append("orientations", options.orientation);
       }
@@ -81,7 +89,7 @@ export function createGettyProvider(config: GettyProviderConfig): MediaProvider 
 
         return {
           id: image.id,
-          title: `Getty Image ${image.id}`,
+          title: image.caption || image.title || `Getty Image ${image.id}`,
           previewUrl: gettyUrl ?? image.url,
           displayUrl: gettyUrl ?? image.url,
           width,
