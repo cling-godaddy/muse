@@ -1,5 +1,6 @@
 import { useState, useCallback } from "react";
-import type { FeaturesSection as FeaturesSectionType, FeatureItem, RichContent, Site, Usage } from "@muse/core";
+import type { FeaturesSection as FeaturesSectionType, FeatureItem, RichContent, Site, Usage, ImageSource } from "@muse/core";
+import { Image } from "../../controls/Image";
 import { EditableText, ImageLoader, Skeleton } from "../../ux";
 import { useIsEditable } from "../../context/EditorMode";
 import { FeatureIcon } from "./icons";
@@ -20,10 +21,19 @@ interface FeatureCardProps {
   onUpdate: (data: Partial<FeatureItem>) => void
   onRemove: () => void
   isPending?: boolean
+  trackUsage?: (usage: Usage) => void
 }
 
-function FeatureCard({ item, onUpdate, onRemove, isPending }: FeatureCardProps) {
+function FeatureCard({ item, onUpdate, onRemove, isPending, trackUsage }: FeatureCardProps) {
   const isEditable = useIsEditable();
+
+  const handleImageUpdate = (image: ImageSource) => {
+    onUpdate({ image });
+  };
+
+  const handleImageRemove = () => {
+    onUpdate({ image: undefined });
+  };
 
   if (isPending) {
     return (
@@ -41,7 +51,7 @@ function FeatureCard({ item, onUpdate, onRemove, isPending }: FeatureCardProps) 
   return (
     <div className={styles.item}>
       {item.image
-        ? <ImageLoader image={item.image} isPending={false} className={styles.itemImage} />
+        ? <Image image={item.image} onUpdate={handleImageUpdate} onRemove={handleImageRemove} onUsage={trackUsage} className={styles.itemImage} />
         : isEditable
           ? (
             <input
@@ -204,6 +214,7 @@ export function Grid({ section, onUpdate, isPending, site, getToken, trackUsage 
             onUpdate={data => updateItem(i, data)}
             onRemove={() => removeItem(i)}
             isPending={isPending}
+            trackUsage={trackUsage}
           />
         ))}
         {isGenerating && (

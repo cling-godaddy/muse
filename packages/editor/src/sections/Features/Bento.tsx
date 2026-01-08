@@ -1,5 +1,6 @@
 import { useState, useCallback } from "react";
-import type { FeaturesSection as FeaturesSectionType, FeatureItem, RichContent, Site, Usage } from "@muse/core";
+import type { FeaturesSection as FeaturesSectionType, FeatureItem, RichContent, Site, Usage, ImageSource } from "@muse/core";
+import { Image } from "../../controls/Image";
 import { EditableText, ImageLoader, Skeleton } from "../../ux";
 import { useIsEditable } from "../../context/EditorMode";
 import { FeatureIcon } from "./icons";
@@ -21,17 +22,26 @@ interface BentoCardProps {
   onRemove: () => void
   isPending?: boolean
   isLarge?: boolean
+  trackUsage?: (usage: Usage) => void
 }
 
-function BentoCard({ item, onUpdate, onRemove, isPending, isLarge }: BentoCardProps) {
+function BentoCard({ item, onUpdate, onRemove, isPending, isLarge, trackUsage }: BentoCardProps) {
   const isEditable = useIsEditable();
+
+  const handleImageUpdate = (image: ImageSource) => {
+    onUpdate({ image });
+  };
+
+  const handleImageRemove = () => {
+    onUpdate({ image: undefined });
+  };
 
   return (
     <div className={styles.item}>
       {isPending && !item.image
         ? <ImageLoader isPending className={styles.itemImage} />
         : item.image
-          ? <ImageLoader image={item.image} isPending={false} className={styles.itemImage} />
+          ? <Image image={item.image} onUpdate={handleImageUpdate} onRemove={handleImageRemove} onUsage={trackUsage} className={styles.itemImage} />
           : isEditable
             ? (
               <input
@@ -203,6 +213,7 @@ export function Bento({ section, onUpdate, isPending, site, getToken, trackUsage
             onRemove={() => removeItem(i)}
             isPending={isPending}
             isLarge={i === 0}
+            trackUsage={trackUsage}
           />
         ))}
         {isGenerating && (
