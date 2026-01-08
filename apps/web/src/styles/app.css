@@ -83,6 +83,10 @@ html, body, #root {
     animation: muse-fade-in 0.3s ease-out;
   }
 
+  .muse-section > *:not(.muse-section-controls) {
+    transition: background-color 0.2s ease-out;
+  }
+
   .muse-fade-in {
     animation: muse-fade-in 0.25s ease-out both;
   }
