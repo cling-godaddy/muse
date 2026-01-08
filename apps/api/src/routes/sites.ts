@@ -186,6 +186,23 @@ sitesRoute.delete("/:id", async (c) => {
   return c.body(null, 204);
 });
 
+// PATCH /sites/:id - Partial update for site fields
+sitesRoute.patch("/:id", async (c) => {
+  const sites = await getSites();
+  const userId = c.get("userId");
+  const id = c.req.param("id");
+  const body = await c.req.json() as { name?: string, description?: string | null, location?: string | null, thumbnailUrl?: string | null };
+
+  const site = await sites.getByIdForUser(id, userId);
+  if (!site) {
+    return c.json({ error: "Site not found" }, 404);
+  }
+
+  await sites.updateFields(id, body);
+
+  return c.json({ ok: true });
+});
+
 // PATCH /sites/:siteId/sections/:sectionId - Update a specific section
 sitesRoute.patch("/:siteId/sections/:sectionId", async (c) => {
   const sites = await getSites();
