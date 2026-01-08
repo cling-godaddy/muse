@@ -1,4 +1,5 @@
 import type { Page } from "../page/types";
+import type { Section } from "../sections/types";
 import type { Site } from "./types";
 
 export interface FlattenedPage {
@@ -126,4 +127,48 @@ export function movePage(
     },
     updatedAt: new Date().toISOString(),
   };
+}
+
+// Extract the first image URL from a section (if available)
+function getImageFromSection(section: Section): string | undefined {
+  switch (section.type) {
+    case "hero":
+      return section.backgroundImage?.url;
+    case "gallery":
+      return section.images?.[0]?.url;
+    case "features":
+      return section.items?.find(item => item.image?.url)?.image?.url;
+    case "about":
+      return section.image?.url ?? section.teamMembers?.find(m => m.image?.url)?.image?.url;
+    case "products":
+      return section.items?.[0]?.image?.url;
+    case "menu": {
+      const itemImage = section.items?.find(item => item.image?.url)?.image?.url;
+      if (itemImage) return itemImage;
+      for (const category of section.categories ?? []) {
+        const catImage = category.items?.find(item => item.image?.url)?.image?.url;
+        if (catImage) return catImage;
+      }
+      return undefined;
+    }
+    default:
+      return undefined;
+  }
+}
+
+// Get a thumbnail URL for a site by scanning the first page's sections
+export function getSiteThumbnailUrl(site: Site): string | undefined {
+  const rootPages = Object.values(site.pages)
+    .filter(p => p.parentId === null)
+    .sort((a, b) => a.order - b.order);
+
+  const firstPage = rootPages[0];
+  if (!firstPage) return undefined;
+
+  for (const section of firstPage.sections) {
+    const url = getImageFromSection(section);
+    if (url) return url;
+  }
+
+  return undefined;
 }
