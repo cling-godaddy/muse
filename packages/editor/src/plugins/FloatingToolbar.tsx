@@ -79,6 +79,17 @@ export function FloatingToolbarPlugin({ hideLists }: FloatingToolbarPluginProps 
   const toolbarRef = useRef<HTMLDivElement>(null);
   const linkInputRef = useRef<HTMLInputElement>(null);
 
+  // Read editing context from DOM data attributes
+  const getEditingContext = useCallback(() => {
+    const rootElement = editor.getRootElement();
+    if (!rootElement) return { sectionType: undefined, elementType: undefined };
+
+    const elementType = rootElement.closest("[data-element-type]")?.getAttribute("data-element-type") || undefined;
+    const sectionType = rootElement.closest("[data-section-type]")?.getAttribute("data-section-type") || undefined;
+
+    return { sectionType, elementType };
+  }, [editor]);
+
   // Update position based on editor root element
   const updatePosition = useCallback(() => {
     const rootElement = editor.getRootElement();
@@ -516,32 +527,38 @@ export function FloatingToolbarPlugin({ hideLists }: FloatingToolbarPluginProps 
         </>
       )}
 
-      {getToken && (
-        <>
-          <div className={styles.divider} />
-          <RewriteMenu
-            open={isRewriteMenuOpen}
-            onOpenChange={(open) => {
-              if (open) {
-                // Capture source text when menu opens
-                editor.getEditorState().read(() => {
-                  const selection = $getSelection();
-                  if ($isRangeSelection(selection) && !selection.isCollapsed()) {
-                    setRewriteSourceText(selection.getTextContent());
-                  }
-                  else {
-                    setRewriteSourceText($getRoot().getTextContent());
-                  }
-                });
-              }
-              setIsRewriteMenuOpen(open);
-            }}
-            onRewrite={handleRewrite}
-            isLoading={isRewriting}
-            sourceText={rewriteSourceText}
-          />
-        </>
-      )}
+      {getToken && (() => {
+        const { sectionType, elementType } = getEditingContext();
+        return (
+          <>
+            <div className={styles.divider} />
+            <RewriteMenu
+              open={isRewriteMenuOpen}
+              onOpenChange={(open) => {
+                if (open) {
+                  // Capture source text when menu opens
+                  editor.getEditorState().read(() => {
+                    const selection = $getSelection();
+                    if ($isRangeSelection(selection) && !selection.isCollapsed()) {
+                      setRewriteSourceText(selection.getTextContent());
+                    }
+                    else {
+                      setRewriteSourceText($getRoot().getTextContent());
+                    }
+                  });
+                }
+                setIsRewriteMenuOpen(open);
+              }}
+              onRewrite={handleRewrite}
+              isLoading={isRewriting}
+              sourceText={rewriteSourceText}
+              sectionType={sectionType}
+              elementType={elementType}
+              siteContext={site ? { name: site.name, description: site.description } : undefined}
+            />
+          </>
+        );
+      })()}
 
       {showLinkInput && (
         <div className={styles.linkInput}>

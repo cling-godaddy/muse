@@ -1,7 +1,7 @@
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useMemo } from "react";
 import * as Popover from "@radix-ui/react-popover";
 import { Sparkles } from "lucide-react";
-import { PRESETS } from "./presets";
+import { PRESETS, getContextualPresets } from "./presets";
 import styles from "./RewriteMenu.module.css";
 
 interface RewriteMenuProps {
@@ -10,6 +10,9 @@ interface RewriteMenuProps {
   onRewrite: (completion: string) => void
   isLoading?: boolean
   sourceText?: string
+  sectionType?: string
+  elementType?: string
+  siteContext?: { name?: string, description?: string }
 }
 
 const colorClass = {
@@ -25,9 +28,21 @@ export function RewriteMenu({
   onRewrite,
   isLoading,
   sourceText,
+  sectionType,
+  elementType,
+  // siteContext - will be used in Phase 3 for LLM suggestions
 }: RewriteMenuProps) {
   const [input, setInput] = useState("");
   const inputRef = useRef<HTMLInputElement>(null);
+
+  // Get context-aware presets (rule-based, instant)
+  const contextualPresets = useMemo(
+    () => getContextualPresets(sectionType, elementType),
+    [sectionType, elementType],
+  );
+
+  // Check if we have contextual suggestions (not just defaults)
+  const hasContextualSuggestions = !!(sectionType && elementType);
 
   // Focus input when popover opens, clear when it closes
   useEffect(() => {
@@ -106,6 +121,30 @@ export function RewriteMenu({
             <div className={styles.sourcePreview}>
               <span className={styles.sourceLabel}>Text:</span>
               <span className={styles.sourceText}>{sourceText}</span>
+            </div>
+          )}
+
+          {/* Contextual suggestions (rule-based, instant) */}
+          {hasContextualSuggestions && (
+            <div className={styles.suggestedSection}>
+              <div className={styles.suggestedLabel}>
+                Suggested for this
+                {" "}
+                {elementType}
+              </div>
+              <div className={styles.suggestedChips}>
+                {contextualPresets.map(preset => (
+                  <button
+                    key={preset.label}
+                    type="button"
+                    className={`${styles.chip} ${styles.smartChip} ${colorClass[preset.color]}`}
+                    onClick={() => handleChipClick(preset.label)}
+                    disabled={isLoading}
+                  >
+                    {preset.label}
+                  </button>
+                ))}
+              </div>
             </div>
           )}
 

@@ -38,6 +38,7 @@ function HeroContent({ section, onUpdate, isPending }: Props) {
         as="h1"
         className={styles.headline}
         placeholder="Headline..."
+        elementType="headline"
       />
       <EditableText
         rich
@@ -46,6 +47,7 @@ function HeroContent({ section, onUpdate, isPending }: Props) {
         as="p"
         className={styles.subheadline}
         placeholder="Subheadline..."
+        elementType="subheadline"
       />
       <div className={styles.ctas}>
         {section.cta && (

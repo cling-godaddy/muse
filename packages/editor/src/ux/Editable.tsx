@@ -21,6 +21,8 @@ interface RichEditableTextProps {
   placeholder?: string
   rich: true
   hideLists?: boolean
+  /** Element type for smart rewrite suggestions */
+  elementType?: string
 }
 
 type Props = EditableTextProps | RichEditableTextProps;
@@ -67,6 +69,7 @@ function RichEditableText({
   className,
   placeholder,
   hideLists,
+  elementType,
 }: RichEditableTextProps) {
   const isEditable = useIsEditable();
   const plainText = getPlainText(value);
@@ -84,6 +87,7 @@ function RichEditableText({
       className={className}
       placeholder={placeholder}
       hideLists={hideLists}
+      elementType={elementType}
     />
   );
 }

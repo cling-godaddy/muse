@@ -35,6 +35,8 @@ interface RichEditableProps {
   className?: string
   placeholder?: string
   hideLists?: boolean
+  /** Element type for smart rewrite suggestions (e.g., "headline", "description", "cta") */
+  elementType?: string
 }
 
 function SyncPlugin({
@@ -91,6 +93,7 @@ export function RichEditable({
   onChange,
   className,
   hideLists,
+  elementType,
 }: RichEditableProps) {
   const initialConfig = {
     namespace: "muse-rich-editable",
@@ -113,7 +116,7 @@ export function RichEditable({
     <LexicalComposer initialConfig={initialConfig}>
       <RichTextPlugin
         contentEditable={(
-          <div>
+          <div data-element-type={elementType}>
             <ContentEditable
               className={`${styles.editor} ${className ?? ""}`}
             />

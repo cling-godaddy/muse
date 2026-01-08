@@ -163,6 +163,32 @@
   white-space: nowrap;
 }
 
+/* Suggested section (contextual/smart chips) */
+.suggestedSection {
+  padding: 10px 12px;
+  background: linear-gradient(135deg, #faf5ff 0%, #f0fdf4 100%);
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.suggestedLabel {
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: #7c3aed;
+  margin-bottom: 8px;
+}
+
+.suggestedChips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.smartChip {
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
 /* Input section */
 .inputSection {
   padding: 8px 12px 12px;
@@ -170,10 +196,10 @@
 
 .inputLabel {
   display: block;
-  font-size: 12px;
-  font-weight: 500;
-  color: #6b7280;
-  margin-bottom: 6px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #374151;
+  margin-bottom: 8px;
 }
 
 .input {
