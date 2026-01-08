@@ -117,24 +117,33 @@ export function useSiteEditor(siteId: string | undefined) {
   }, [draft, dirty, messages, saveSite, markSaved]);
 
   // Persist usage costs to site
-  const handleUsage = useCallback((usage: Usage) => {
+  const handleUsage = useCallback(async (usage: Usage) => {
     // Read current state directly to avoid stale closure issues
     const currentDraft = useSiteStore.getState().draft;
     if (!currentDraft) return;
+
+    // Update local state
     useSiteStore.getState().applyDraftOp((d) => {
       d.costs = [...(d.costs ?? []), usage];
       d.updatedAt = new Date().toISOString();
     });
 
-    // Immediately save the updated costs
-    const updatedDraft = useSiteStore.getState().draft;
-    if (updatedDraft) {
-      saveSite(
-        { site: updatedDraft, messages: [] },
-        { onSuccess: savedSite => markSaved(savedSite) },
-      );
+    // Persist to backend with targeted PATCH (avoids overwriting other data)
+    try {
+      const token = await getToken();
+      await fetch(`/api/sites/${currentDraft.id}/costs`, {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${token}`,
+        },
+        body: JSON.stringify(usage),
+      });
     }
-  }, [saveSite, markSaved]);
+    catch (err) {
+      console.error("Failed to persist usage cost:", err);
+    }
+  }, [getToken]);
 
   // Store trackUsage function from Chat
   const handleTrackUsageReady = useCallback((trackUsage: (usage: Usage) => void) => {

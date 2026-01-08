@@ -263,6 +263,18 @@ export function createPostgresSitesTable(): SitesTable {
         WHERE id = ${sectionId}
       `;
     },
+
+    async appendCost(siteId: string, cost: StoredUsage): Promise<void> {
+      const now = new Date().toISOString();
+      // Use jsonb_set to append cost to the existing array, or create new array if null
+      await sql`
+        UPDATE sites
+        SET
+          costs = COALESCE(costs, '[]'::jsonb) || ${JSON.stringify(cost)}::jsonb,
+          updated_at = ${now}
+        WHERE id = ${siteId}
+      `;
+    },
   };
 }
 

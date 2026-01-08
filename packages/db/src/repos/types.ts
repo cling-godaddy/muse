@@ -14,6 +14,7 @@ export interface SitesTable {
   listByUser(userId: string): Promise<SiteSummary[]>
   delete(id: string, userId: string): Promise<void>
   updateSection(sectionId: string, section: Section): Promise<void>
+  appendCost(siteId: string, cost: StoredUsage): Promise<void>
 }
 
 export type AgentName = "brief" | "structure" | "theme" | "image" | "copy" | "sitemap" | "pages";
@@ -43,7 +44,7 @@ export interface StoredUsage {
   model: string
   action?: UsageAction
   detail?: string
-  timestamp?: string
+  timestamp: string
 }
 
 export interface StoredMessage {

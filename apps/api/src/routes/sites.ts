@@ -359,6 +359,23 @@ sitesRoute.delete("/:siteId/pages/:pageId/sections/:sectionId", async (c) => {
   return c.json({ page: site.pages[pageId] });
 });
 
+// PATCH /sites/:siteId/costs - Append a cost entry
+sitesRoute.patch("/:siteId/costs", async (c) => {
+  const sites = await getSites();
+  const userId = c.get("userId");
+  const siteId = c.req.param("siteId");
+  const cost = await c.req.json();
+
+  // Verify ownership
+  const site = await sites.getByIdForUser(siteId, userId);
+  if (!site) {
+    return c.json({ error: "Site not found" }, 404);
+  }
+
+  await sites.appendCost(siteId, cost);
+  return c.json({ success: true });
+});
+
 // For testing: reset the cached sites table
 export function resetSitesRoute(): void {
   sitesTable = null;

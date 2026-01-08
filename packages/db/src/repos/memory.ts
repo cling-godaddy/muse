@@ -1,5 +1,5 @@
 import type { Site, Section } from "@muse/core";
-import type { SitesTable, SiteSummary, MessagesTable, StoredMessage } from "./types";
+import type { SitesTable, SiteSummary, MessagesTable, StoredMessage, StoredUsage } from "./types";
 
 interface StoredSite {
   site: Site
@@ -58,6 +58,13 @@ export function createMemorySitesTable(): SitesTable {
           }
         }
       }
+    },
+
+    async appendCost(siteId: string, cost: StoredUsage): Promise<void> {
+      const entry = store.get(siteId);
+      if (!entry) return;
+      entry.site.costs = [...(entry.site.costs ?? []), structuredClone(cost)];
+      entry.site.updatedAt = new Date().toISOString();
     },
   };
 }
