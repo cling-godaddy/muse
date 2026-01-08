@@ -1,4 +1,4 @@
-import type { TestimonialsSection as TestimonialsSectionType, Quote } from "@muse/core";
+import type { TestimonialsSection as TestimonialsSectionType, Quote, RichContent } from "@muse/core";
 import { useIsEditable } from "../../context/EditorMode";
 import { Avatar, EditableText, Skeleton } from "../../ux";
 import styles from "./Grid.module.css";
@@ -55,8 +55,10 @@ export function Grid({ section, onUpdate, isPending }: Props) {
       {section.headline !== undefined && (
         <div className={styles.header}>
           <EditableText
+            rich
+            hideLists
             value={section.headline}
-            onChange={v => onUpdate({ headline: v || undefined })}
+            onChange={(v: RichContent) => onUpdate({ headline: v.text ? v : undefined })}
             as="h2"
             className={styles.headline}
             placeholder="Section headline..."

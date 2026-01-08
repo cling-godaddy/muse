@@ -1,4 +1,4 @@
-import type { StatsSection as StatsSectionType, StatItem } from "@muse/core";
+import type { StatsSection as StatsSectionType, StatItem, RichContent } from "@muse/core";
 import { EditableText } from "../../ux";
 import { useIsEditable } from "../../context/EditorMode";
 import styles from "./Grid.module.css";
@@ -31,8 +31,10 @@ export function Grid({ section, onUpdate }: Props) {
   return (
     <section className={styles.section} style={{ backgroundColor: section.backgroundColor }}>
       <EditableText
+        rich
+        hideLists
         value={section.headline ?? ""}
-        onChange={v => onUpdate({ headline: v || undefined })}
+        onChange={(v: RichContent) => onUpdate({ headline: v.text ? v : undefined })}
         as="h2"
         className={styles.headline}
         placeholder="By the numbers"

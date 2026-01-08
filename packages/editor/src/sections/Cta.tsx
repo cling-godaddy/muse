@@ -27,8 +27,10 @@ export function Cta({ section, onUpdate, isPending }: Props) {
   return (
     <div className={`${styles.section} ${variantClass}`} style={{ backgroundColor: section.backgroundColor }}>
       <EditableText
+        rich
+        hideLists
         value={section.headline}
-        onChange={v => onUpdate({ headline: v })}
+        onChange={(v: RichContent) => onUpdate({ headline: v })}
         as="h2"
         className={styles.headline}
         placeholder="CTA headline..."

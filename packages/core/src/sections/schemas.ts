@@ -32,7 +32,7 @@ const ctaLinkSchema = z.object({
 // --- Hero ---
 export const heroFields = {
   type: field(z.literal("hero"), { editable: false }),
-  headline: field(z.string(), { aliases: ["title", "heading"] }),
+  headline: field(textOrRichSchema, { aliases: ["title", "heading"] }),
   subheadline: field(textOrRichSchema.optional(), { aliases: ["subheading", "tagline", "subtitle"] }),
   cta: field(ctaLinkSchema.optional(), { aliases: ["button", "action", "primary button"] }),
   secondaryCta: field(ctaLinkSchema.optional(), { aliases: ["secondary button", "second button"] }),
@@ -53,7 +53,7 @@ const featureItemSchema = z.object({
 // --- Features ---
 export const featuresFields = {
   type: field(z.literal("features"), { editable: false }),
-  headline: field(z.string().optional(), { aliases: ["title", "heading"] }),
+  headline: field(textOrRichSchema.optional(), { aliases: ["title", "heading"] }),
   items: field(z.array(featureItemSchema).min(1), { aliases: ["features"] }),
   columns: field(z.union([z.literal(2), z.literal(3), z.literal(4)]).optional()),
 };
@@ -63,7 +63,7 @@ export const featuresSectionSchema = sectionBase.extend(toZodShape(featuresField
 // --- CTA ---
 export const ctaFields = {
   type: field(z.literal("cta"), { editable: false }),
-  headline: field(z.string(), { aliases: ["title", "heading"] }),
+  headline: field(textOrRichSchema, { aliases: ["title", "heading"] }),
   description: field(textOrRichSchema.optional(), { aliases: ["body", "text", "subheadline"] }),
   buttonText: field(z.string(), { aliases: ["button", "cta text", "action text"] }),
   buttonHref: field(z.string(), { aliases: ["button link", "cta link", "action link"] }),
@@ -83,7 +83,7 @@ const quoteSchema = z.object({
 // --- Testimonials ---
 export const testimonialsFields = {
   type: field(z.literal("testimonials"), { editable: false }),
-  headline: field(z.string().optional(), { aliases: ["title", "heading"] }),
+  headline: field(textOrRichSchema.optional(), { aliases: ["title", "heading"] }),
   quotes: field(z.array(quoteSchema).min(1), { aliases: ["testimonials", "reviews"] }),
 };
 
@@ -92,7 +92,7 @@ export const testimonialsSectionSchema = sectionBase.extend(toZodShape(testimoni
 // --- Gallery ---
 export const galleryFields = {
   type: field(z.literal("gallery"), { editable: false }),
-  headline: field(z.string().optional(), { aliases: ["title", "heading"] }),
+  headline: field(textOrRichSchema.optional(), { aliases: ["title", "heading"] }),
   images: field(z.array(imageSourceSchema).min(1), { editable: false }),
   columns: field(z.union([z.literal(2), z.literal(3), z.literal(4)]).optional()),
 };
@@ -112,7 +112,7 @@ const pricingPlanSchema = z.object({
 // --- Pricing ---
 export const pricingFields = {
   type: field(z.literal("pricing"), { editable: false }),
-  headline: field(z.string().optional(), { aliases: ["title", "heading"] }),
+  headline: field(textOrRichSchema.optional(), { aliases: ["title", "heading"] }),
   subheadline: field(z.string().optional(), { aliases: ["subheading", "tagline", "subtitle"] }),
   plans: field(z.array(pricingPlanSchema).min(1), { aliases: ["tiers", "pricing plans"] }),
 };
@@ -127,7 +127,7 @@ const faqItemSchema = z.object({
 // --- FAQ ---
 export const faqFields = {
   type: field(z.literal("faq"), { editable: false }),
-  headline: field(z.string().optional(), { aliases: ["title", "heading"] }),
+  headline: field(textOrRichSchema.optional(), { aliases: ["title", "heading"] }),
   subheadline: field(z.string().optional(), { aliases: ["subheading", "subtitle"] }),
   items: field(z.array(faqItemSchema).min(1), { aliases: ["questions", "faqs"] }),
 };
@@ -145,7 +145,7 @@ const formFieldSchema = z.object({
 // --- Contact ---
 export const contactFields = {
   type: field(z.literal("contact"), { editable: false }),
-  headline: field(z.string().optional(), { aliases: ["title", "heading"] }),
+  headline: field(textOrRichSchema.optional(), { aliases: ["title", "heading"] }),
   subheadline: field(z.string().optional(), { aliases: ["subheading", "subtitle"] }),
   email: field(z.string().optional(), { aliases: ["email address"] }),
   phone: field(z.string().optional(), { aliases: ["phone number", "telephone"] }),
@@ -188,7 +188,7 @@ const teamMemberSchema = z.object({
 // --- About ---
 export const aboutFields = {
   type: field(z.literal("about"), { editable: false }),
-  headline: field(z.string().optional(), { aliases: ["title", "heading"] }),
+  headline: field(textOrRichSchema.optional(), { aliases: ["title", "heading"] }),
   body: field(textOrRichSchema.optional(), { aliases: ["description", "content", "text"] }),
   image: field(imageSourceSchema.optional(), { editable: false }),
   teamMembers: field(z.array(teamMemberSchema).optional(), { aliases: ["team", "members"] }),
@@ -199,7 +199,7 @@ export const aboutSectionSchema = sectionBase.extend(toZodShape(aboutFields));
 // --- Subscribe ---
 export const subscribeFields = {
   type: field(z.literal("subscribe"), { editable: false }),
-  headline: field(z.string().optional(), { aliases: ["title", "heading"] }),
+  headline: field(textOrRichSchema.optional(), { aliases: ["title", "heading"] }),
   subheadline: field(z.string().optional(), { aliases: ["subheading", "subtitle"] }),
   buttonText: field(z.string(), { aliases: ["button", "submit text"] }),
   placeholderText: field(z.string().optional(), { aliases: ["placeholder", "input placeholder"] }),
@@ -216,7 +216,7 @@ const statItemSchema = z.object({
 // --- Stats ---
 export const statsFields = {
   type: field(z.literal("stats"), { editable: false }),
-  headline: field(z.string().optional(), { aliases: ["title", "heading"] }),
+  headline: field(textOrRichSchema.optional(), { aliases: ["title", "heading"] }),
   stats: field(z.array(statItemSchema).min(1), { aliases: ["statistics", "metrics", "numbers"] }),
 };
 
@@ -230,7 +230,7 @@ const logoItemSchema = z.object({
 // --- Logos ---
 export const logosFields = {
   type: field(z.literal("logos"), { editable: false }),
-  headline: field(z.string().optional(), { aliases: ["title", "heading"] }),
+  headline: field(textOrRichSchema.optional(), { aliases: ["title", "heading"] }),
   logos: field(z.array(logoItemSchema).min(1), { editable: false }),
 };
 

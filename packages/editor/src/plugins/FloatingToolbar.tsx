@@ -44,7 +44,11 @@ interface Position {
   left: number
 }
 
-export function FloatingToolbarPlugin() {
+interface FloatingToolbarPluginProps {
+  hideLists?: boolean
+}
+
+export function FloatingToolbarPlugin({ hideLists }: FloatingToolbarPluginProps = {}) {
   const [editor] = useLexicalComposerContext();
   const [isFocused, setIsFocused] = useState(false);
   const [position, setPosition] = useState<Position>({ top: 0, left: 0 });
@@ -390,26 +394,30 @@ export function FloatingToolbarPlugin() {
         <Link size={14} />
       </button>
 
-      <div className={styles.divider} />
+      {!hideLists && (
+        <>
+          <div className={styles.divider} />
 
-      <button
-        type="button"
-        className={styles.button}
-        data-active={listType === "bullet"}
-        onClick={toggleBulletList}
-        title="Bullet list"
-      >
-        <List size={14} />
-      </button>
-      <button
-        type="button"
-        className={styles.button}
-        data-active={listType === "number"}
-        onClick={toggleNumberList}
-        title="Numbered list"
-      >
-        <ListOrdered size={14} />
-      </button>
+          <button
+            type="button"
+            className={styles.button}
+            data-active={listType === "bullet"}
+            onClick={toggleBulletList}
+            title="Bullet list"
+          >
+            <List size={14} />
+          </button>
+          <button
+            type="button"
+            className={styles.button}
+            data-active={listType === "number"}
+            onClick={toggleNumberList}
+            title="Numbered list"
+          >
+            <ListOrdered size={14} />
+          </button>
+        </>
+      )}
 
       {showLinkInput && (
         <div className={styles.linkInput}>

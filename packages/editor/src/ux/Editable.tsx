@@ -20,6 +20,7 @@ interface RichEditableTextProps {
   className?: string
   placeholder?: string
   rich: true
+  hideLists?: boolean
 }
 
 type Props = EditableTextProps | RichEditableTextProps;
@@ -65,6 +66,7 @@ function RichEditableText({
   as: Component = "span",
   className,
   placeholder,
+  hideLists,
 }: RichEditableTextProps) {
   const isEditable = useIsEditable();
   const plainText = getPlainText(value);
@@ -81,6 +83,7 @@ function RichEditableText({
       onChange={onChange}
       className={className}
       placeholder={placeholder}
+      hideLists={hideLists}
     />
   );
 }

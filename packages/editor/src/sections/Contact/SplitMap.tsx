@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import type { ContactSection as ContactSectionType, FormField } from "@muse/core";
+import type { ContactSection as ContactSectionType, FormField, RichContent } from "@muse/core";
 import { EditableText } from "../../ux";
 import { useIsEditable } from "../../context/EditorMode";
 import styles from "./SplitMap.module.css";
@@ -54,8 +54,10 @@ export function SplitMap({ section, onUpdate }: Props) {
     <section className={styles.section} style={{ backgroundColor: section.backgroundColor }}>
       {section.headline !== undefined && (
         <EditableText
+          rich
+          hideLists
           value={section.headline}
-          onChange={v => onUpdate({ headline: v || undefined })}
+          onChange={(v: RichContent) => onUpdate({ headline: v.text ? v : undefined })}
           as="h2"
           className={styles.headline}
           placeholder="Section headline..."

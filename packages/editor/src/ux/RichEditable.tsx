@@ -25,6 +25,7 @@ interface RichEditableProps {
   onChange: (value: RichContent) => void
   className?: string
   placeholder?: string
+  hideLists?: boolean
 }
 
 function SyncPlugin({
@@ -72,6 +73,7 @@ export function RichEditable({
   value,
   onChange,
   className,
+  hideLists,
 }: RichEditableProps) {
   const initialConfig = {
     namespace: "muse-rich-editable",
@@ -105,7 +107,7 @@ export function RichEditable({
       <HistoryPlugin />
       <LinkPlugin />
       <ListPlugin />
-      <FloatingToolbarPlugin />
+      <FloatingToolbarPlugin hideLists={hideLists} />
       <LinkEditorPlugin />
       <SyncPlugin value={value} />
       <OnChangePlugin onChange={handleChange} ignoreSelectionChange />

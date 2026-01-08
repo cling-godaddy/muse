@@ -34,8 +34,10 @@ export function Team({ section, onUpdate, isPending }: Props) {
   return (
     <section className={styles.section} style={{ backgroundColor: section.backgroundColor }}>
       <EditableText
+        rich
+        hideLists
         value={section.headline ?? ""}
-        onChange={v => onUpdate({ headline: v || undefined })}
+        onChange={(v: RichContent) => onUpdate({ headline: v.text ? v : undefined })}
         as="h2"
         className={styles.headline}
         placeholder="Meet the Team"
