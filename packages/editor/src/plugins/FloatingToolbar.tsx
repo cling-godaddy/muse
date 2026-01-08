@@ -41,6 +41,7 @@ import {
 import { ColorPicker } from "../controls/ColorPicker";
 import { RewriteMenu, type Preset } from "./RewriteMenu";
 import { useEditorServices } from "../context/EditorServices";
+import { markProgrammaticUpdate } from "../ux/RichEditable";
 import { useDebouncedCallback } from "@muse/react";
 import styles from "./FloatingToolbar.module.css";
 
@@ -383,6 +384,9 @@ export function FloatingToolbarPlugin({ hideLists }: FloatingToolbarPluginProps 
       }
 
       const { rewritten, usage } = await response.json();
+
+      // Mark this as a programmatic update so SyncPlugin doesn't revert it
+      markProgrammaticUpdate(rewritten);
 
       // Replace text in editor
       editor.update(() => {

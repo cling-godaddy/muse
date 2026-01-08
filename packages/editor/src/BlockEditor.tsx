@@ -17,6 +17,7 @@ interface SectionEditorProps {
   site?: Site
   currentPage?: Page
   onAddSection?: (section: Section, index: number, generateWithAI?: boolean) => void
+  onUpdateSection: (sectionId: string, data: Partial<Section>) => void
   onMoveSection?: (sectionId: string, direction: "up" | "down") => void
   onDeleteSection?: (sectionId: string) => void
   getToken?: () => Promise<string | null>
@@ -32,6 +33,7 @@ export function SectionEditor({
   site,
   currentPage,
   onAddSection,
+  onUpdateSection,
   onMoveSection,
   onDeleteSection,
   getToken,
@@ -54,7 +56,7 @@ export function SectionEditor({
       onNavbarChange?.({ ...navbar, ...data } as NavbarSection);
       return;
     }
-    onChange(sections.map(s => (s.id === id ? { ...s, ...data } as Section : s)));
+    onUpdateSection(id, data);
   };
 
   const deleteSection = (id: string) => {

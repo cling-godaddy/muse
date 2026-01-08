@@ -5,7 +5,7 @@ export interface Message {
   content: string
 }
 
-export type UsageAction = "generate_site" | "generate_section" | "generate_item" | "refine" | "normalize_query";
+export type UsageAction = "generate_site" | "generate_section" | "generate_item" | "refine" | "normalize_query" | "rewrite_text";
 
 export interface Usage {
   input: number

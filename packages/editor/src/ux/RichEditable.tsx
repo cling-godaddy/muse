@@ -20,6 +20,15 @@ import { LinkEditorPlugin } from "../plugins/LinkEditor";
 import { initializeFromValue } from "../utils/richContent";
 import styles from "./RichEditable.module.css";
 
+// Track text from programmatic updates (e.g., AI rewrite)
+// SyncPlugin will skip syncing if the editor contains this text
+// This prevents stale React renders from reverting the change
+let programmaticUpdateText: string | null = null;
+
+export function markProgrammaticUpdate(text: string) {
+  programmaticUpdateText = text;
+}
+
 interface RichEditableProps {
   value: TextOrRich
   onChange: (value: RichContent) => void
@@ -51,19 +60,27 @@ function SyncPlugin({
     const prevText = getPlainText(lastValueRef.current);
     const newText = getPlainText(value);
 
-    if (prevText !== newText) {
-      // Value changed - check if it differs from editor content
-      let editorText = "";
-      editor.getEditorState().read(() => {
-        editorText = $getRoot().getTextContent();
-      });
+    let editorText = "";
+    editor.getEditorState().read(() => {
+      editorText = $getRoot().getTextContent();
+    });
 
+    if (prevText !== newText) {
       // Only sync if external change (editor content doesn't match new value)
       if (editorText !== newText) {
+        // Skip sync if editor contains text from a programmatic update
+        // This prevents stale React renders from reverting AI rewrites
+        if (programmaticUpdateText && editorText === programmaticUpdateText) {
+          programmaticUpdateText = null;
+          return;
+        }
         initializeFromValue(editor, value);
       }
-      lastValueRef.current = value;
     }
+
+    // Always update lastValueRef to acknowledge current state
+    // This prevents false positives from internal editor changes
+    lastValueRef.current = value;
   }, [editor, value]);
 
   return null;

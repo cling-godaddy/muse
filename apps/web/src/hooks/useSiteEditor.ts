@@ -462,6 +462,7 @@ export function useSiteEditor(siteId: string | undefined) {
     // Actions
     setCurrentPage,
     setSections,
+    updateSection,
     updateSiteName,
     addNewPage: (slug: string, title: string) => addNewPage(slug, title),
     deletePage,
