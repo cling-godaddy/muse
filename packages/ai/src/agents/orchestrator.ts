@@ -2,7 +2,7 @@ import type { MediaClient, ImageSelection } from "@muse/media";
 import { createLogger, type Logger } from "@muse/logger";
 import { getMinimumImages, getImageRequirements, allPresets, type Section, type Page, createPage, type ThemeBackground } from "@muse/core";
 import { resolveTheme } from "@muse/themes";
-import type { Message, Provider } from "../types";
+import type { Message, Provider, UsageAction } from "../types";
 import { runWithRetry } from "../retry";
 import { calculateCost } from "../pricing";
 import { briefAgent, briefSystemPrompt, parseBrief } from "./brief";
@@ -16,6 +16,22 @@ import type { BrandBrief, PageStructure, CopySectionContent, SitemapPlan } from 
 interface UsageAccumulator {
   input: number
   output: number
+}
+
+function formatUsageMarker(
+  provider: Provider,
+  usage: UsageAccumulator,
+  action: UsageAction,
+): string {
+  const model = provider.name === "anthropic" ? "claude-3-5-sonnet-20241022" : "gpt-4o-mini";
+  return `[USAGE:${JSON.stringify({
+    input: usage.input,
+    output: usage.output,
+    cost: calculateCost(model, usage.input, usage.output),
+    model,
+    action,
+    timestamp: new Date().toISOString(),
+  })}]\n`;
 }
 
 // Simple JSON parser for schema-validated responses
@@ -306,15 +322,7 @@ export async function* orchestrate(
   }
 
   // Emit total usage for cost tracking
-  const model = provider.name === "anthropic" ? "claude-3-5-sonnet-20241022" : "gpt-4o-mini";
-  yield `[USAGE:${JSON.stringify({
-    input: totalUsage.input,
-    output: totalUsage.output,
-    cost: calculateCost(model, totalUsage.input, totalUsage.output),
-    model,
-    action: "generate_site",
-    timestamp: new Date().toISOString(),
-  })}]\n`;
+  yield formatUsageMarker(provider, totalUsage, "generate_site");
 }
 
 // ============================================
@@ -591,13 +599,5 @@ export async function* orchestrateSite(
   }
 
   // Emit total usage
-  const model = provider.name === "anthropic" ? "claude-3-5-sonnet-20241022" : "gpt-4o-mini";
-  yield `[USAGE:${JSON.stringify({
-    input: totalUsage.input,
-    output: totalUsage.output,
-    cost: calculateCost(model, totalUsage.input, totalUsage.output),
-    model,
-    action: "generate_site",
-    timestamp: new Date().toISOString(),
-  })}]\n`;
+  yield formatUsageMarker(provider, totalUsage, "generate_site");
 }
