@@ -3,6 +3,7 @@ import { Undo2, Redo2, Eye, PenLine, Smartphone, Tablet, Monitor, RotateCcw, Sav
 import type { Site, PreviewDevice } from "@muse/core";
 import { getPagesFlattened } from "@muse/core";
 import { useSiteStore } from "../stores/siteStore";
+import { FontSelector } from "./FontSelector";
 
 type EditorMode = "edit" | "preview";
 
@@ -70,6 +71,8 @@ export function EditorToolbar({
     state.draft?.pages ? Object.values(state.draft.pages).some(p => p.sections.length > 0) : false,
   );
   const hasUnsavedChanges = useSiteStore(state => state.dirty);
+  const theme = useSiteStore(state => state.theme);
+  const setTheme = useSiteStore(state => state.setTheme);
   const isPreview = editorMode === "preview";
   const canPreview = isGenerationComplete;
   const flattenedPages = useMemo(() => getPagesFlattened(site), [site]);
@@ -185,8 +188,17 @@ export function EditorToolbar({
         </div>
       )}
 
+      {/* Font selector */}
+      <div className={`flex items-center border-r border-border pr-2 mr-2 ${!isPreview ? "ml-auto" : ""}`}>
+        <FontSelector
+          value={theme.typography}
+          onChange={typography => setTheme(theme.palette, typography, theme.effects)}
+          disabled={isPreview}
+        />
+      </div>
+
       {/* Undo/Redo actions and Preview toggle */}
-      <div className={`flex items-center gap-1 ${!isPreview ? "ml-auto" : ""}`}>
+      <div className="flex items-center gap-1">
         {onUndo && (
           <button
             onClick={onUndo}
