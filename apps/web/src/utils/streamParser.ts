@@ -246,7 +246,7 @@ export function parseStream(
     .trim();
 
   // convert agents map to ordered array
-  const agentOrder: AgentName[] = ["brief", "sitemap", "theme", "pages", "copy", "image"];
+  const agentOrder: AgentName[] = ["brief", "sitemap", "structure", "theme", "pages", "copy", "image"];
   const agentsArray = agentOrder
     .map(name => agents.get(name))
     .filter((agent): agent is AgentState => agent !== undefined);
