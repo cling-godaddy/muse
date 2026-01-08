@@ -67,7 +67,7 @@ export function useSiteEditor(siteId: string | undefined) {
   const [messages, setMessages] = useState<Message[]>([]);
   const trackUsageRef = useRef<((usage: Usage) => void) | null>(null);
   const lastAddedSectionIdRef = useRef<string | null>(null);
-  const prevSiteIdRef = useRef<string | undefined>(siteId);
+  const prevSiteIdRef = useRef<string | undefined>(undefined);
 
   // Reset store when siteId changes (must run before hydration)
   useLayoutEffect(() => {
@@ -86,10 +86,11 @@ export function useSiteEditor(siteId: string | undefined) {
 
   // Hydrate draft on initial load only (not on every serverSite change)
   useEffect(() => {
-    if (serverSite && !draft) {
+    // Ensure serverSite matches current siteId to avoid hydrating stale data
+    if (serverSite && !draft && serverSite.id === siteId) {
       hydrateDraft(serverSite);
     }
-  }, [serverSite, draft, hydrateDraft]);
+  }, [serverSite, draft, siteId, hydrateDraft]);
 
   // Auto-save theme changes
   const prevThemeRef = useRef<{ palette: string, typography: string } | null>(null);
