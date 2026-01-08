@@ -7,6 +7,13 @@ export interface SiteSummary {
   pageCount: number
 }
 
+export interface SiteUpdatableFields {
+  name?: string
+  description?: string | null
+  location?: string | null
+  thumbnailUrl?: string | null
+}
+
 export interface SitesTable {
   save(site: Site, userId: string): Promise<void>
   getById(id: string): Promise<Site | null>
@@ -14,6 +21,7 @@ export interface SitesTable {
   listByUser(userId: string): Promise<SiteSummary[]>
   delete(id: string, userId: string): Promise<void>
   updateSection(sectionId: string, section: Section): Promise<void>
+  updateFields(siteId: string, fields: SiteUpdatableFields): Promise<void>
   appendCost(siteId: string, cost: StoredUsage): Promise<void>
 }
 

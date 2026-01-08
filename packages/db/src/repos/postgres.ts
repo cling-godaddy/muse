@@ -1,5 +1,5 @@
 import type { Site, SiteTheme, Page, Section, NavbarSection } from "@muse/core";
-import type { SitesTable, SiteSummary, MessagesTable, StoredMessage, StoredUsage, StoredAgentState } from "./types";
+import type { SitesTable, SiteSummary, SiteUpdatableFields, MessagesTable, StoredMessage, StoredUsage, StoredAgentState } from "./types";
 import { getDb } from "../db";
 
 interface SiteRow {
@@ -229,19 +229,20 @@ export function createPostgresSitesTable(): SitesTable {
 
     async listByUser(userId: string): Promise<SiteSummary[]> {
       const rows = await sql`
-        SELECT s.id, s.name, s.updated_at, COUNT(p.id)::int as page_count
+        SELECT s.id, s.name, s.updated_at, s.thumbnail_url, COUNT(p.id)::int as page_count
         FROM sites s
         LEFT JOIN pages p ON p.site_id = s.id
         WHERE s.user_id = ${userId}
         GROUP BY s.id
         ORDER BY s.updated_at DESC
-      ` as { id: string, name: string, updated_at: string, page_count: number }[];
+      ` as { id: string, name: string, updated_at: string, thumbnail_url: string | null, page_count: number }[];
 
       return rows.map(r => ({
         id: r.id,
         name: r.name,
         updatedAt: r.updated_at,
         pageCount: r.page_count,
+        thumbnailUrl: r.thumbnail_url ?? undefined,
       }));
     },
 
@@ -262,6 +263,24 @@ export function createPostgresSitesTable(): SitesTable {
             updated_at = ${now}
         WHERE id = ${sectionId}
       `;
+    },
+
+    async updateFields(siteId: string, fields: SiteUpdatableFields): Promise<void> {
+      const now = new Date().toISOString();
+
+      // Update each field individually - simpler than dynamic query building
+      if ("name" in fields) {
+        await sql`UPDATE sites SET name = ${fields.name}, updated_at = ${now} WHERE id = ${siteId}`;
+      }
+      if ("description" in fields) {
+        await sql`UPDATE sites SET description = ${fields.description}, updated_at = ${now} WHERE id = ${siteId}`;
+      }
+      if ("location" in fields) {
+        await sql`UPDATE sites SET location = ${fields.location}, updated_at = ${now} WHERE id = ${siteId}`;
+      }
+      if ("thumbnailUrl" in fields) {
+        await sql`UPDATE sites SET thumbnail_url = ${fields.thumbnailUrl}, updated_at = ${now} WHERE id = ${siteId}`;
+      }
     },
 
     async appendCost(siteId: string, cost: StoredUsage): Promise<void> {

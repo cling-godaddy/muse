@@ -1,5 +1,5 @@
 import type { Site, Section } from "@muse/core";
-import type { SitesTable, SiteSummary, MessagesTable, StoredMessage, StoredUsage } from "./types";
+import type { SitesTable, SiteSummary, SiteUpdatableFields, MessagesTable, StoredMessage, StoredUsage } from "./types";
 
 interface StoredSite {
   site: Site
@@ -58,6 +58,23 @@ export function createMemorySitesTable(): SitesTable {
           }
         }
       }
+    },
+
+    async updateFields(siteId: string, fields: SiteUpdatableFields): Promise<void> {
+      const entry = store.get(siteId);
+      if (!entry) return;
+
+      if ("name" in fields && fields.name !== undefined) {
+        entry.site.name = fields.name;
+      }
+      if ("description" in fields) {
+        entry.site.description = fields.description ?? undefined;
+      }
+      if ("location" in fields) {
+        entry.site.location = fields.location ?? undefined;
+      }
+      // thumbnailUrl is computed dynamically in listByUser, no need to store
+      entry.site.updatedAt = new Date().toISOString();
     },
 
     async appendCost(siteId: string, cost: StoredUsage): Promise<void> {
