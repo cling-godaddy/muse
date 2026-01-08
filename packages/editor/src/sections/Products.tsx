@@ -1,4 +1,5 @@
-import type { ProductsSection as ProductsSectionType, ProductItem, RichContent } from "@muse/core";
+import type { ProductsSection as ProductsSectionType, ProductItem, RichContent, ImageSource, Usage } from "@muse/core";
+import { Image } from "../controls/Image";
 import { EditableText, ImageLoader } from "../ux";
 import { useIsEditable } from "../context/EditorMode";
 import styles from "./Products.module.css";
@@ -7,6 +8,7 @@ interface Props {
   section: ProductsSectionType
   onUpdate: (data: Partial<ProductsSectionType>) => void
   isPending?: boolean
+  trackUsage?: (usage: Usage) => void
 }
 
 interface ProductCardProps {
@@ -16,18 +18,27 @@ interface ProductCardProps {
   preset: string
   isPending?: boolean
   isHero?: boolean
+  trackUsage?: (usage: Usage) => void
 }
 
-function ProductCard({ item, onUpdate, onRemove, preset, isPending, isHero }: ProductCardProps) {
+function ProductCard({ item, onUpdate, onRemove, preset, isPending, isHero, trackUsage }: ProductCardProps) {
   const isEditable = useIsEditable();
   const isMinimal = preset === "products-minimal";
+
+  const handleImageUpdate = (image: ImageSource) => {
+    onUpdate({ image });
+  };
+
+  const handleImageRemove = () => {
+    onUpdate({ image: undefined });
+  };
 
   return (
     <div className={`${styles.card} ${isHero ? styles.heroCard : ""}`}>
       {isPending && !item.image
         ? <ImageLoader isPending className={styles.cardImage} />
-        : item.image
-          ? <ImageLoader image={item.image} isPending={false} className={styles.cardImage} />
+        : item.image?.url
+          ? <Image image={item.image} onUpdate={handleImageUpdate} onRemove={handleImageRemove} onUsage={trackUsage} className={styles.cardImage} />
           : <div className={styles.cardImagePlaceholder} />}
 
       {item.badge && (
@@ -85,7 +96,7 @@ function ProductCard({ item, onUpdate, onRemove, preset, isPending, isHero }: Pr
   );
 }
 
-export function Products({ section, onUpdate, isPending }: Props) {
+export function Products({ section, onUpdate, isPending, trackUsage }: Props) {
   const isEditable = useIsEditable();
   const preset = section.preset ?? "products-grid";
 
@@ -148,6 +159,7 @@ export function Products({ section, onUpdate, isPending }: Props) {
             preset={preset}
             isPending={isPending}
             isHero={preset === "products-featured" && i === 0}
+            trackUsage={trackUsage}
           />
         ))}
       </div>
