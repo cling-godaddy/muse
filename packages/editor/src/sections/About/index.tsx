@@ -15,7 +15,7 @@ export function About({ section, onUpdate, isPending, trackUsage }: Props) {
 
   switch (preset) {
     case "about-team":
-      return <Team section={section} onUpdate={onUpdate} isPending={isPending} />;
+      return <Team section={section} onUpdate={onUpdate} isPending={isPending} trackUsage={trackUsage} />;
     case "about-story":
     default:
       return <Story section={section} onUpdate={onUpdate} isPending={isPending} trackUsage={trackUsage} />;

@@ -1,5 +1,6 @@
-import type { AboutSection as AboutSectionType, TeamMember, RichContent } from "@muse/core";
-import { EditableText, ImageLoader } from "../../ux";
+import type { AboutSection as AboutSectionType, TeamMember, RichContent, ImageSource, Usage } from "@muse/core";
+import { Image } from "../../controls/Image";
+import { EditableText } from "../../ux";
 import { useIsEditable } from "../../context/EditorMode";
 import styles from "./Team.module.css";
 
@@ -7,9 +8,10 @@ interface Props {
   section: AboutSectionType
   onUpdate: (data: Partial<AboutSectionType>) => void
   isPending?: boolean
+  trackUsage?: (usage: Usage) => void
 }
 
-export function Team({ section, onUpdate, isPending }: Props) {
+export function Team({ section, onUpdate, trackUsage }: Props) {
   const isEditable = useIsEditable();
 
   const updateMember = (index: number, data: Partial<TeamMember>) => {
@@ -31,6 +33,14 @@ export function Team({ section, onUpdate, isPending }: Props) {
     });
   };
 
+  const updateMemberImage = (index: number, image: ImageSource) => {
+    updateMember(index, { image });
+  };
+
+  const removeMemberImage = (index: number) => {
+    updateMember(index, { image: undefined });
+  };
+
   return (
     <section className={styles.section} style={{ backgroundColor: section.backgroundColor }}>
       <EditableText
@@ -47,9 +57,11 @@ export function Team({ section, onUpdate, isPending }: Props) {
         {section.teamMembers?.map((member, i) => (
           <div key={i} className={styles.member}>
             {member.image && (
-              <ImageLoader
+              <Image
                 image={member.image}
-                isPending={!!isPending}
+                onUpdate={img => updateMemberImage(i, img)}
+                onRemove={() => removeMemberImage(i)}
+                onUsage={trackUsage}
                 className={styles.avatar}
               />
             )}
