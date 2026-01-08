@@ -85,6 +85,7 @@ function SiteCard({ site, to, onDelete }: { site: SiteSummary, to: string, onDel
             {site.pageCount !== 1 ? "s" : ""}
             {" "}
             ·
+            {" "}
             {formatRelativeTime(site.updatedAt)}
           </p>
         </div>
@@ -100,18 +101,20 @@ function SiteCard({ site, to, onDelete }: { site: SiteSummary, to: string, onDel
   );
 }
 
-function EmptyState({ onCreate }: { onCreate: () => void }) {
+function NewSiteCard({ onClick }: { onClick: () => void }) {
   return (
-    <div className="text-center py-16">
-      <div className="text-6xl mb-4 text-text-subtle">+</div>
-      <p className="text-text-muted mb-6">No sites yet. Create your first one.</p>
-      <button
-        onClick={onCreate}
-        className="px-6 py-3 bg-primary hover:bg-primary-hover text-white rounded-lg font-medium transition-colors"
-      >
-        Create Site
-      </button>
-    </div>
+    <button
+      onClick={onClick}
+      className="block bg-bg-muted rounded-lg overflow-hidden hover:ring-2 ring-primary transition-all text-left w-full"
+    >
+      <div className="aspect-video bg-bg-subtle flex items-center justify-center border-2 border-dashed border-border">
+        <span className="text-5xl text-text-subtle font-light">+</span>
+      </div>
+      <div className="p-4">
+        <h3 className="font-medium text-text">New Site</h3>
+        <p className="text-sm text-text-muted">Create a new site</p>
+      </div>
+    </button>
   );
 }
 
@@ -260,9 +263,7 @@ export function SitesDashboard() {
   const [importing, setImporting] = useState(false);
   const [importError, setImportError] = useState<string | null>(null);
   const [importAnalysis, setImportAnalysis] = useState<ImportAnalysis | null>(null);
-  const [isDragging, setIsDragging] = useState(false);
-  const fileInputRef = useRef<HTMLInputElement>(null);
-  const dragCountRef = useRef(0);
+  const [showImportModal, setShowImportModal] = useState(false);
 
   useEffect(() => {
     authFetch("/api/sites")
@@ -316,7 +317,7 @@ export function SitesDashboard() {
     }
   };
 
-  const processFile = async (file: File) => {
+  const handleImport = async (file: File) => {
     // Client-side validation
     if (!file.type.includes("json") && !file.name.endsWith(".json")) {
       setImportError("Please select a JSON file");
@@ -364,10 +365,125 @@ export function SitesDashboard() {
     }
   };
 
+  return (
+    <div className="min-h-screen bg-bg text-text">
+      <header className="px-6 py-3 border-b border-border bg-bg flex items-center gap-4">
+        <Link to="/" className="text-xl font-semibold hover:text-primary transition-colors">
+          Muse
+        </Link>
+        <div className="ml-auto">
+          <UserButton afterSignOutUrl="/sign-in" />
+        </div>
+      </header>
+
+      <div className="max-w-6xl mx-auto p-8">
+        <div className="flex items-center justify-between mb-8">
+          <h1 className="text-2xl font-semibold">My Sites</h1>
+          <button
+            onClick={() => setShowImportModal(true)}
+            className="px-4 py-2 border border-border hover:bg-bg-subtle rounded-lg font-medium transition-colors flex items-center gap-2"
+          >
+            <Upload size={16} />
+            Import
+          </button>
+        </div>
+
+        {loading
+          ? (
+            <div className="flex justify-center py-16">
+              <Spinner />
+            </div>
+          )
+          : (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+              <NewSiteCard onClick={() => setShowCreateModal(true)} />
+              {sites.map(site => (
+                <SiteCard
+                  key={site.id}
+                  site={site}
+                  to={`/sites/${site.id}`}
+                  onDelete={() => setDeletingSite(site)}
+                />
+              ))}
+            </div>
+          )}
+      </div>
+
+      <Dialog
+        open={!!deletingSite}
+        onOpenChange={open => !open && setDeletingSite(null)}
+        title="Delete Site"
+      >
+        <div className="p-5 pt-0">
+          <p className="text-text-muted mb-6">
+            Are you sure you want to delete
+            {" "}
+            <span className="font-medium text-text">{deletingSite?.name}</span>
+            ? This action cannot be undone.
+          </p>
+          <div className="flex gap-3 justify-end">
+            <button
+              onClick={() => setDeletingSite(null)}
+              className="px-4 py-2 rounded-lg border border-border hover:bg-bg-subtle transition-colors"
+            >
+              Cancel
+            </button>
+            <button
+              onClick={handleDelete}
+              disabled={isDeleting}
+              className="px-4 py-2 rounded-lg bg-red-500 hover:bg-red-600 text-white transition-colors disabled:opacity-50 flex items-center gap-2"
+            >
+              {isDeleting ? <Spinner /> : "Delete"}
+            </button>
+          </div>
+        </div>
+      </Dialog>
+
+      <CreateSiteModal
+        open={showCreateModal}
+        onOpenChange={setShowCreateModal}
+        onSubmit={handleCreateSite}
+        isCreating={creating}
+      />
+
+      <ImportModal
+        open={showImportModal}
+        onOpenChange={setShowImportModal}
+        onImport={handleImport}
+        importing={importing}
+        importError={importError}
+        importAnalysis={importAnalysis}
+        onDismissAnalysis={() => setImportAnalysis(null)}
+      />
+    </div>
+  );
+}
+
+function ImportModal({
+  open,
+  onOpenChange,
+  onImport,
+  importing,
+  importError,
+  importAnalysis,
+  onDismissAnalysis,
+}: {
+  open: boolean
+  onOpenChange: (open: boolean) => void
+  onImport: (file: File) => void
+  importing: boolean
+  importError: string | null
+  importAnalysis: ImportAnalysis | null
+  onDismissAnalysis: () => void
+}) {
+  const [isDragging, setIsDragging] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const dragCountRef = useRef(0);
+
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
-      processFile(file);
+      onImport(file);
       e.target.value = "";
     }
   };
@@ -399,62 +515,59 @@ export function SitesDashboard() {
 
     const file = e.dataTransfer.files[0];
     if (file) {
-      processFile(file);
+      onImport(file);
     }
   };
 
   return (
-    <div className="min-h-screen bg-bg text-text">
-      <header className="px-6 py-3 border-b border-border bg-bg flex items-center gap-4">
-        <Link to="/" className="text-xl font-semibold hover:text-primary transition-colors">
-          Muse
-        </Link>
-        <div className="ml-auto">
-          <UserButton afterSignOutUrl="/sign-in" />
-        </div>
-      </header>
+    <Dialog open={open} onOpenChange={onOpenChange} title="Import Site">
+      <div className="p-5 pt-0 space-y-4">
+        <input
+          ref={fileInputRef}
+          type="file"
+          accept=".json,application/json"
+          className="hidden"
+          onChange={handleFileSelect}
+        />
 
-      <div className="max-w-6xl mx-auto p-8">
-        <div className="flex items-center justify-between mb-8">
-          <h1 className="text-2xl font-semibold">My Sites</h1>
-          {sites.length > 0 && (
-            <div className="flex items-center gap-2">
-              <input
-                ref={fileInputRef}
-                type="file"
-                accept=".json,application/json"
-                className="hidden"
-                onChange={handleFileSelect}
-              />
-              <button
-                onClick={() => fileInputRef.current?.click()}
-                disabled={importing}
-                className="px-4 py-2 border border-border hover:bg-bg-subtle rounded-lg font-medium transition-colors flex items-center gap-2 disabled:opacity-50"
-              >
-                {importing ? <Spinner /> : <Upload size={16} />}
-                Import
-              </button>
-              <button
-                onClick={() => setShowCreateModal(true)}
-                className="px-4 py-2 bg-primary hover:bg-primary-hover text-white rounded-lg font-medium transition-colors flex items-center gap-2"
-              >
-                New Site
-              </button>
-            </div>
-          )}
+        <div
+          className={`p-8 border-2 border-dashed rounded-lg transition-colors cursor-pointer ${
+            isDragging
+              ? "border-primary bg-primary/5"
+              : "border-border hover:border-text-muted"
+          }`}
+          onClick={() => fileInputRef.current?.click()}
+          onDragEnter={handleDragEnter}
+          onDragLeave={handleDragLeave}
+          onDragOver={handleDragOver}
+          onDrop={handleDrop}
+        >
+          <div className="flex flex-col items-center gap-2 text-center">
+            {importing
+              ? <Spinner />
+              : <Upload className={isDragging ? "text-primary" : "text-text-muted"} size={24} />}
+            <p className={isDragging ? "text-primary font-medium" : "text-text-muted"}>
+              {importing
+                ? "Processing..."
+                : isDragging
+                  ? "Drop to import"
+                  : "Drag JSON file here or click to browse"}
+            </p>
+          </div>
         </div>
 
         {importError && (
-          <div className="mb-4 p-3 bg-red-500/10 border border-red-500/20 rounded-lg text-red-500 text-sm">
+          <div className="p-3 bg-red-500/10 border border-red-500/20 rounded-lg text-red-500 text-sm">
             {importError}
           </div>
         )}
+
         {importAnalysis && (
-          <div className="mb-4 p-4 bg-bg-muted rounded-lg">
+          <div className="p-4 bg-bg-muted rounded-lg">
             <div className="flex items-center justify-between mb-3">
               <h3 className="font-medium">{importAnalysis.baseUrl}</h3>
               <button
-                onClick={() => setImportAnalysis(null)}
+                onClick={onDismissAnalysis}
                 className="text-text-muted hover:text-text text-sm"
               >
                 Dismiss
@@ -467,7 +580,6 @@ export function SitesDashboard() {
               {importAnalysis.crawlDuration && ` in ${(importAnalysis.crawlDuration / 1000).toFixed(1)}s`}
             </p>
 
-            {/* Coverage Report */}
             <div className="pt-3 border-t border-border">
               <p className="text-sm font-medium mb-2">
                 Coverage:
@@ -517,85 +629,15 @@ export function SitesDashboard() {
           </div>
         )}
 
-        <div
-          className={`mb-6 p-6 border-2 border-dashed rounded-lg transition-colors ${
-            isDragging
-              ? "border-primary bg-primary/5"
-              : "border-border hover:border-text-muted"
-          }`}
-          onDragEnter={handleDragEnter}
-          onDragLeave={handleDragLeave}
-          onDragOver={handleDragOver}
-          onDrop={handleDrop}
-        >
-          <div className="flex flex-col items-center gap-2 text-center">
-            <Upload className={isDragging ? "text-primary" : "text-text-muted"} size={24} />
-            <p className={isDragging ? "text-primary font-medium" : "text-text-muted"}>
-              {isDragging ? "Drop to import" : "Drag JSON file here to import"}
-            </p>
-          </div>
+        <div className="flex justify-end">
+          <button
+            onClick={() => onOpenChange(false)}
+            className="px-4 py-2 rounded-lg border border-border hover:bg-bg-subtle transition-colors"
+          >
+            Close
+          </button>
         </div>
-
-        {loading
-          ? (
-            <div className="flex justify-center py-16">
-              <Spinner />
-            </div>
-          )
-          : sites.length === 0
-            ? (
-              <EmptyState onCreate={() => setShowCreateModal(true)} />
-            )
-            : (
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                {sites.map(site => (
-                  <SiteCard
-                    key={site.id}
-                    site={site}
-                    to={`/sites/${site.id}`}
-                    onDelete={() => setDeletingSite(site)}
-                  />
-                ))}
-              </div>
-            )}
       </div>
-
-      <Dialog
-        open={!!deletingSite}
-        onOpenChange={open => !open && setDeletingSite(null)}
-        title="Delete Site"
-      >
-        <div className="p-5 pt-0">
-          <p className="text-text-muted mb-6">
-            Are you sure you want to delete
-            {" "}
-            <span className="font-medium text-text">{deletingSite?.name}</span>
-            ? This action cannot be undone.
-          </p>
-          <div className="flex gap-3 justify-end">
-            <button
-              onClick={() => setDeletingSite(null)}
-              className="px-4 py-2 rounded-lg border border-border hover:bg-bg-subtle transition-colors"
-            >
-              Cancel
-            </button>
-            <button
-              onClick={handleDelete}
-              disabled={isDeleting}
-              className="px-4 py-2 rounded-lg bg-red-500 hover:bg-red-600 text-white transition-colors disabled:opacity-50 flex items-center gap-2"
-            >
-              {isDeleting ? <Spinner /> : "Delete"}
-            </button>
-          </div>
-        </div>
-      </Dialog>
-
-      <CreateSiteModal
-        open={showCreateModal}
-        onOpenChange={setShowCreateModal}
-        onSubmit={handleCreateSite}
-        isCreating={creating}
-      />
-    </div>
+    </Dialog>
   );
 }
