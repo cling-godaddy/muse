@@ -36,4 +36,17 @@ describe("parseStream", () => {
       expect(result.displayText).toBe("");
     });
   });
+
+  describe("null stripping", () => {
+    it("converts null values to undefined in parsed sections", () => {
+      const input = "[SECTIONS:[{\"id\":\"1\",\"type\":\"contact\",\"preset\":\"contact/form\",\"headline\":null,\"subheadline\":null,\"email\":\"test@example.com\"}]]";
+      const result = parseStream(input, initialState);
+
+      expect(result.newSections).toHaveLength(1);
+      const section = result.newSections[0];
+      expect(section).toHaveProperty("email", "test@example.com");
+      expect(section && "headline" in section && section.headline).toBeFalsy();
+      expect(section && "subheadline" in section && section.subheadline).toBeFalsy();
+    });
+  });
 });

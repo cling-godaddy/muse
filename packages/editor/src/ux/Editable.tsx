@@ -54,7 +54,7 @@ function PlainEditableText({
       ref={ref}
       className={className}
       rows={1}
-      value={value}
+      value={value ?? ""}
       onChange={e => onChange(e.target.value)}
       placeholder={placeholder}
       style={{ resize: "none" }}

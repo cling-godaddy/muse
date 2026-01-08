@@ -62,6 +62,18 @@ const PAGE_REGEX = /\[PAGE:([^\]]+)\]/g;
 const AGENT_START_REGEX = /\[AGENT:(\w+):start\]/g;
 const AGENT_COMPLETE_REGEX = /\[AGENT:(\w+):complete\]([^\n]*)/g;
 
+// Strip null values from AI-generated data (OpenAI Structured Outputs uses null for optional fields)
+function stripNulls<T>(obj: T): T {
+  if (obj === null) return undefined as T;
+  if (Array.isArray(obj)) return obj.map(stripNulls) as T;
+  if (typeof obj === "object") {
+    return Object.fromEntries(
+      Object.entries(obj as object).map(([k, v]) => [k, stripNulls(v)]),
+    ) as T;
+  }
+  return obj;
+}
+
 export function parseStream(
   accumulated: string,
   previousState: ParseState,
@@ -183,7 +195,7 @@ export function parseStream(
           const sectionsJson = sectionsMatches[idx]?.[1];
           let pageSections: Section[] = [];
           if (sectionsJson) {
-            pageSections = JSON.parse(sectionsJson) as Section[];
+            pageSections = stripNulls(JSON.parse(sectionsJson) as Section[]);
           }
           return {
             slug: pageInfo.slug,
@@ -207,7 +219,7 @@ export function parseStream(
       const sectionsJson = sectionsMatches[0]?.[1];
       if (sectionsJson) {
         try {
-          sections = JSON.parse(sectionsJson) as Section[];
+          sections = stripNulls(JSON.parse(sectionsJson) as Section[]);
           newSections = sections;
           // Create a default page
           pages = [{ slug: "/", title: "Home", sections }];
