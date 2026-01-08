@@ -7,6 +7,7 @@ const actionLabels: Record<UsageAction, string> = {
   refine: "Refinement",
   normalize_query: "Query Normalization",
   rewrite_text: "Text Rewrite",
+  suggest_rewrites: "Rewrite Suggestions",
 };
 
 export function formatAction(action?: UsageAction): string {
