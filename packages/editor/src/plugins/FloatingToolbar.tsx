@@ -36,6 +36,7 @@ import {
   X,
 } from "lucide-react";
 import { ColorPicker } from "../controls/ColorPicker";
+import { useDebouncedCallback } from "@muse/react";
 import styles from "./FloatingToolbar.module.css";
 
 interface Position {
@@ -187,15 +188,14 @@ export function FloatingToolbarPlugin() {
     editor.focus();
   };
 
-  const handleTextColor = useCallback((color: string) => {
+  const handleTextColor = useDebouncedCallback((color: string) => {
     editor.update(() => {
       const selection = $getSelection();
       if ($isRangeSelection(selection)) {
         $patchStyleText(selection, { color });
       }
     });
-    editor.focus();
-  }, [editor]);
+  }, 32);
 
   const clearTextColor = useCallback(() => {
     editor.update(() => {

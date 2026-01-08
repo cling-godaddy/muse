@@ -16,6 +16,7 @@
     "@muse/ai": "workspace:*",
     "@muse/core": "workspace:*",
     "@muse/editor": "workspace:*",
+    "@muse/react": "workspace:*",
     "@muse/media": "workspace:*",
     "@muse/themes": "workspace:*",
     "@tanstack/react-query": "^5.90.16",

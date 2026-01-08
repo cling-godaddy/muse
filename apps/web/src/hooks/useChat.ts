@@ -5,7 +5,7 @@ import type { Section } from "@muse/core";
 import type { Usage } from "@muse/ai";
 import type { ImageSelection } from "@muse/media";
 import { parseStream, type ParseState, type AgentState, type ThemeSelection, type PageInfo } from "../utils/streamParser";
-import { useLatest } from "./useLatest";
+import { useLatest } from "@muse/react";
 
 const MESSAGES_URL = "http://localhost:3001/api/messages";
 
