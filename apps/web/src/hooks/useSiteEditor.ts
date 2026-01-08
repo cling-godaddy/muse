@@ -125,7 +125,16 @@ export function useSiteEditor(siteId: string | undefined) {
       d.costs = [...(d.costs ?? []), usage];
       d.updatedAt = new Date().toISOString();
     });
-  }, []);
+
+    // Immediately save the updated costs
+    const updatedDraft = useSiteStore.getState().draft;
+    if (updatedDraft) {
+      saveSite(
+        { site: updatedDraft, messages: [] },
+        { onSuccess: savedSite => markSaved(savedSite) },
+      );
+    }
+  }, [saveSite, markSaved]);
 
   // Store trackUsage function from Chat
   const handleTrackUsageReady = useCallback((trackUsage: (usage: Usage) => void) => {
@@ -467,7 +476,7 @@ export function useSiteEditor(siteId: string | undefined) {
     handleDelete,
     handleGenerationComplete,
     getToken: getToken as () => Promise<string | null>,
-    trackUsage: trackUsageRef.current,
+    trackUsage: handleUsage,
     lastAddedSectionId: lastAddedSectionIdRef.current,
     clearLastAddedSection,
   };
