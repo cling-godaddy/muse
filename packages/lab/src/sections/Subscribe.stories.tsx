@@ -1,7 +1,7 @@
 import React from "react";
 import type { Meta, StoryObj } from "@storybook/react-vite";
 import { expect, within } from "storybook/test";
-import { Subscribe } from "@muse/editor";
+import { Subscribe } from "@muse/sections";
 import type { SubscribeSection } from "@muse/core";
 
 type SubscribeArgs = {

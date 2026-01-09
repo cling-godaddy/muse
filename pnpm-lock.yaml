@@ -151,6 +151,9 @@ importers:
       '@muse/react':
         specifier: workspace:*
         version: link:../../packages/react
+      '@muse/sections':
+        specifier: workspace:*
+        version: link:../../packages/sections
       '@muse/themes':
         specifier: workspace:*
         version: link:../../packages/themes
@@ -397,6 +400,9 @@ importers:
       '@muse/editor':
         specifier: workspace:*
         version: link:../editor
+      '@muse/sections':
+        specifier: workspace:*
+        version: link:../sections
       '@muse/themes':
         specifier: workspace:*
         version: link:../themes

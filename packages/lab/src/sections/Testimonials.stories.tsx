@@ -1,7 +1,7 @@
 import React from "react";
 import type { Meta, StoryObj } from "@storybook/react-vite";
 import { expect, within } from "storybook/test";
-import { Testimonials } from "@muse/editor";
+import { Testimonials } from "@muse/sections";
 import type { TestimonialsSection, Quote } from "@muse/core";
 
 const sampleQuotes: Quote[] = [

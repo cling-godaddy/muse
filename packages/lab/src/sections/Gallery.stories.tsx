@@ -1,7 +1,7 @@
 import React from "react";
 import type { Meta, StoryObj } from "@storybook/react-vite";
 import { expect, within } from "storybook/test";
-import { Gallery } from "@muse/editor";
+import { Gallery } from "@muse/sections";
 import type { GallerySection, ImageSource } from "@muse/core";
 
 const sampleImages: ImageSource[] = [

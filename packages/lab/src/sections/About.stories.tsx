@@ -1,7 +1,7 @@
 import React from "react";
 import type { Meta, StoryObj } from "@storybook/react-vite";
 import { expect, within } from "storybook/test";
-import { About } from "@muse/editor";
+import { About } from "@muse/sections";
 import type { AboutSection, TeamMember } from "@muse/core";
 
 const sampleTeam: TeamMember[] = [

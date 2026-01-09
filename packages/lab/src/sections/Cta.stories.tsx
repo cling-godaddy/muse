@@ -1,7 +1,7 @@
 import React from "react";
 import type { Meta, StoryObj } from "@storybook/react-vite";
 import { expect, within } from "storybook/test";
-import { Cta } from "@muse/editor";
+import { Cta } from "@muse/sections";
 import type { CtaSection } from "@muse/core";
 
 type CtaArgs = {

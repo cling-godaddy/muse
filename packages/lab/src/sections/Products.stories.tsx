@@ -1,7 +1,7 @@
 import React from "react";
 import type { Meta, StoryObj } from "@storybook/react-vite";
 import { expect, within } from "storybook/test";
-import { Products } from "@muse/editor";
+import { Products } from "@muse/sections";
 import type { ProductsSection, ProductItem } from "@muse/core";
 
 const sampleProducts: ProductItem[] = [

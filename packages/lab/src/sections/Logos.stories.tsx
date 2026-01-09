@@ -1,7 +1,7 @@
 import React from "react";
 import type { Meta, StoryObj } from "@storybook/react-vite";
 import { expect, within } from "storybook/test";
-import { Logos } from "@muse/editor";
+import { Logos } from "@muse/sections";
 import type { LogosSection, LogoItem } from "@muse/core";
 
 function makeLogo(name: string, color: string): LogoItem {

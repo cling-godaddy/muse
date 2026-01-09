@@ -1,7 +1,7 @@
 import React from "react";
 import type { Meta, StoryObj } from "@storybook/react-vite";
 import { expect, within } from "storybook/test";
-import { Menu } from "@muse/editor";
+import { Menu } from "@muse/sections";
 import type { MenuSection, MenuCategory, MenuItem } from "@muse/core";
 
 const sampleCategories: MenuCategory[] = [

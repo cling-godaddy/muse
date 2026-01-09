@@ -1,7 +1,7 @@
 import React from "react";
 import type { Meta, StoryObj } from "@storybook/react-vite";
 import { expect, within } from "storybook/test";
-import { Footer } from "@muse/editor";
+import { Footer } from "@muse/sections";
 import type { FooterSection, FooterLink, SocialLink } from "@muse/core";
 
 const sampleLinks: FooterLink[] = [

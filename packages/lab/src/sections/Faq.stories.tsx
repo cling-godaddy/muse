@@ -1,7 +1,7 @@
 import React from "react";
 import type { Meta, StoryObj } from "@storybook/react-vite";
 import { expect, within } from "storybook/test";
-import { Faq } from "@muse/editor";
+import { Faq } from "@muse/sections";
 import type { FaqSection, FaqItem } from "@muse/core";
 
 const sampleItems: FaqItem[] = [
