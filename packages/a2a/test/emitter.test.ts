@@ -30,8 +30,20 @@ describe("createA2AEmitter", () => {
 
       const status = update.status as Record<string, unknown>;
       expect(status.state).toBe("working");
-      expect(status.message).toBe("brief");
+      // message is description (human-friendly), step is in metadata
+      expect(status.message).toBe("Extracting brand context");
       expect(status.timestamp).toBeDefined();
+    });
+
+    it("handles statusUpdate without description", () => {
+      const { emitter, events } = createTestEmitter();
+
+      emitter.statusUpdate("brief");
+
+      const update = (events[0] as { statusUpdate: unknown }).statusUpdate as Record<string, unknown>;
+      const status = update.status as Record<string, unknown>;
+      expect(status.message).toBeUndefined();
+      expect(update.metadata).toEqual({ step: "brief" });
     });
   });
 
@@ -68,6 +80,20 @@ describe("createA2AEmitter", () => {
       const artifact = update.artifact as Record<string, unknown>;
       expect(artifact.artifactId).toMatch(/^[0-9a-f-]{36}$/i);
     });
+
+    it("uses stable artifactId for same name", () => {
+      const { emitter, events } = createTestEmitter();
+
+      emitter.artifactUpdate({ name: "theme", parts: [{ data: { v: 1 } }] });
+      emitter.artifactUpdate({ name: "theme", parts: [{ data: { v: 2 } }] }, { append: true });
+
+      const update1 = (events[0] as { artifactUpdate: unknown }).artifactUpdate as Record<string, unknown>;
+      const update2 = (events[1] as { artifactUpdate: unknown }).artifactUpdate as Record<string, unknown>;
+      const artifact1 = update1.artifact as Record<string, unknown>;
+      const artifact2 = update2.artifact as Record<string, unknown>;
+
+      expect(artifact1.artifactId).toBe(artifact2.artifactId);
+    });
   });
 
   describe("inputRequired", () => {
@@ -89,7 +115,7 @@ describe("createA2AEmitter", () => {
   });
 
   describe("message", () => {
-    it("emits agent message", () => {
+    it("emits agent message with taskId and contextId", () => {
       const { emitter, events } = createTestEmitter();
 
       emitter.message([{ text: "I've generated your landing page." }]);
@@ -100,6 +126,8 @@ describe("createA2AEmitter", () => {
       const message = (events[0] as { message: unknown }).message as Record<string, unknown>;
       expect(message.role).toBe("agent");
       expect(message.messageId).toBeDefined();
+      expect(message.taskId).toBe("task-123");
+      expect(message.contextId).toBe("ctx-456");
       expect(message.parts).toEqual([{ text: "I've generated your landing page." }]);
     });
   });

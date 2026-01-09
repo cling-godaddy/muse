@@ -73,7 +73,7 @@ export interface A2AEmitter {
    * Mark the task as failed.
    * Emits final statusUpdate with state: "failed", error details, and final: true
    */
-  fail(error: Error | string): void
+  fail(error: Error | string | unknown): void
 
   /**
    * Emit the final task object.
@@ -100,6 +100,12 @@ export interface A2AEmitter {
  */
 export function createA2AEmitter(options: A2AEmitterOptions): A2AEmitter {
   const { taskId, contextId, onEvent } = options;
+
+  // Stable artifact IDs by name for append scenarios
+  const artifactIdsByName = new Map<string, string>();
+
+  // Don't leak stacks in production
+  const isProd = typeof process !== "undefined" && process.env?.NODE_ENV === "production";
 
   function emitStatusUpdate(
     state: TaskState,
@@ -144,13 +150,27 @@ export function createA2AEmitter(options: A2AEmitterOptions): A2AEmitter {
     onEvent({ artifactUpdate });
   }
 
+  function getOrCreateArtifactId(name?: string, providedId?: string): string {
+    if (providedId) return providedId;
+    if (name) {
+      const existing = artifactIdsByName.get(name);
+      if (existing) return existing;
+      const newId = uuid();
+      artifactIdsByName.set(name, newId);
+      return newId;
+    }
+    return uuid();
+  }
+
   return {
     taskId,
     contextId,
 
     statusUpdate(step: string, metadata?: Record<string, unknown>): void {
+      // Use description for human-friendly message, keep step in metadata
+      const description = metadata?.description;
       emitStatusUpdate("working", {
-        message: step,
+        message: typeof description === "string" ? description : undefined,
         final: false,
         metadata: { step, ...metadata },
       });
@@ -161,8 +181,8 @@ export function createA2AEmitter(options: A2AEmitterOptions): A2AEmitter {
       opts?: { append?: boolean, lastChunk?: boolean, metadata?: Record<string, unknown> },
     ): void {
       const fullArtifact: Artifact = {
-        artifactId: artifact.artifactId ?? uuid(),
         ...artifact,
+        artifactId: getOrCreateArtifactId(artifact.name, artifact.artifactId),
       };
       emitArtifactUpdate(fullArtifact, opts);
     },
@@ -178,6 +198,8 @@ export function createA2AEmitter(options: A2AEmitterOptions): A2AEmitter {
     message(parts: Message["parts"], metadata?: Record<string, unknown>): void {
       const message: Message = {
         messageId: uuid(),
+        taskId,
+        contextId,
         role: "agent",
         parts,
         metadata,
@@ -192,11 +214,17 @@ export function createA2AEmitter(options: A2AEmitterOptions): A2AEmitter {
       });
     },
 
-    fail(error: Error | string): void {
-      const errorMessage = typeof error === "string" ? error : error.message;
+    fail(error: Error | string | unknown): void {
+      const errorMessage = error instanceof Error
+        ? error.message
+        : typeof error === "string"
+          ? error
+          : "Unknown error";
+
       const taskError: TaskError = {
         message: errorMessage,
-        stack: error instanceof Error ? error.stack : undefined,
+        // Only include stack in non-production
+        stack: !isProd && error instanceof Error ? error.stack : undefined,
       };
 
       emitStatusUpdate("failed", {

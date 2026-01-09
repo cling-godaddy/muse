@@ -79,6 +79,17 @@ function formatSSE(id: string | number, event: StreamResponse): string {
   return JSON.stringify(response);
 }
 
+// Method name aliases (v1.0 uses PascalCase, we also accept slash-style)
+const methodAliases: Record<string, string> = {
+  SendMessage: "message/send",
+  GetTask: "tasks/get",
+  CancelTask: "tasks/cancel",
+};
+
+function normalizeMethodName(method: string): string {
+  return methodAliases[method] ?? method;
+}
+
 // Method handlers
 type MethodHandler = (params: unknown) => Promise<unknown> | unknown;
 
@@ -186,19 +197,22 @@ a2aRoute.post("/", async (c) => {
       return c.json(jsonRpcError(rpcId, invalidParams("Missing method")));
     }
 
-    // Handle message/stream with SSE
-    if (body.method === "message/stream") {
+    // Handle streaming methods (v1.0: SendStreamingMessage, alias: message/stream)
+    if (body.method === "SendStreamingMessage" || body.method === "message/stream") {
       return handleMessageStream(c, rpcId, body.params);
     }
 
+    // Normalize method names (v1.0 uses PascalCase, we also accept slash-style)
+    const normalizedMethod = normalizeMethodName(body.method);
+
     // Find and execute handler for other methods
-    const handler = methods[body.method];
+    const handler = methods[normalizedMethod];
     if (!handler) {
-      logger.warn("a2a_method_not_found", { method: body.method });
+      logger.warn("a2a_method_not_found", { method: body.method, normalized: normalizedMethod });
       return c.json(jsonRpcError(rpcId, methodNotFound(body.method)));
     }
 
-    logger.info("a2a_request", { method: body.method, id: rpcId });
+    logger.info("a2a_request", { method: body.method, normalized: normalizedMethod, id: rpcId });
     const result = await handler(body.params);
     return c.json(jsonRpcSuccess(rpcId, result));
   }
