@@ -11,7 +11,6 @@ import { useIsEditable } from "./context/EditorMode";
 interface SectionEditorProps {
   sections: Section[]
   onChange: (sections: Section[]) => void
-  pendingImageSections?: Set<string>
   navbar?: NavbarSection
   onNavbarChange?: (navbar: NavbarSection) => void
   site?: Site
@@ -27,7 +26,6 @@ interface SectionEditorProps {
 export function SectionEditor({
   sections,
   onChange,
-  pendingImageSections,
   navbar,
   onNavbarChange,
   site,
@@ -133,7 +131,6 @@ export function SectionEditor({
                   section={section}
                   onUpdate={data => updateSection(section.id, data)}
                   onDelete={() => deleteSection(section.id)}
-                  isPending={pendingImageSections?.has(section.id) ?? false}
                   onMoveUp={showMoveControls
                     ? () => {
                       onMoveSection?.(section.id, "up");
@@ -148,8 +145,6 @@ export function SectionEditor({
                     : void 0}
                   canMoveUp={showMoveControls && sectionIndex > 0}
                   canMoveDown={showMoveControls && sectionIndex < lastMoveableIndex}
-                  site={site}
-                  getToken={getToken}
                   trackUsage={trackUsage}
                 />
                 {canAddSections && !isNavbar && (

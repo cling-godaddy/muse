@@ -1,13 +1,12 @@
 import { useMemo, useCallback, useState, useEffect, useRef } from "react";
 import { Trash2, Image as ImageIcon } from "lucide-react";
 import { motion } from "framer-motion";
-import type { Section as SectionType, Site, Usage, ImageSource } from "@muse/core";
-import { getSectionComponent, type SectionComponent } from "./registry";
+import type { Section as SectionType, Usage, ImageSource } from "@muse/core";
+import { getLayoutComponent, EditableSection } from "../renderers";
 import { PresetPicker } from "../controls/PresetPicker";
 import { ColorPicker } from "../controls/ColorPicker";
 import { Image } from "../controls/Image";
 import { supportsPresets } from "../controls/presets";
-import { useSelection } from "../context/Selection";
 import { useIsEditable } from "../context/EditorMode";
 import { Dialog } from "../ux/Dialog";
 import dialogStyles from "../ux/Dialog.module.css";
@@ -20,9 +19,6 @@ interface Props {
   onMoveDown?: () => void
   canMoveUp?: boolean
   canMoveDown?: boolean
-  isPending?: boolean
-  site?: Site
-  getToken?: () => Promise<string | null>
   trackUsage?: (usage: Usage) => void
 }
 
@@ -42,24 +38,13 @@ function ChevronDownIcon() {
   );
 }
 
-function UnknownSection({ section }: { section: SectionType }) {
-  return (
-    <div className="muse-section muse-section--unknown">
-      Unknown section type:
-      {" "}
-      {section.type}
-    </div>
-  );
-}
-
-export function Section({ section, onUpdate, onDelete, onMoveUp, onMoveDown, canMoveUp, canMoveDown, isPending, site, getToken, trackUsage }: Props) {
-  const Component = useMemo<SectionComponent>(
-    () => getSectionComponent(section.type) ?? UnknownSection,
+export function Section({ section, onUpdate, onDelete, onMoveUp, onMoveDown, canMoveUp, canMoveDown, trackUsage }: Props) {
+  const LayoutComponent = useMemo(
+    () => getLayoutComponent(section.type),
     [section.type],
   );
 
   const isEditable = useIsEditable();
-  const { select, isSelected } = useSelection();
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const showPresetPicker = supportsPresets(section.type);
 
@@ -93,14 +78,6 @@ export function Section({ section, onUpdate, onDelete, onMoveUp, onMoveDown, can
   useEffect(() => {
     return () => clearTimeout(debounceRef.current);
   }, []);
-
-  const selectItem = useCallback((itemIndex?: number) => {
-    select(section.id, itemIndex);
-  }, [select, section.id]);
-
-  const isItemSelected = useCallback((itemIndex?: number) => {
-    return isSelected(section.id, itemIndex);
-  }, [isSelected, section.id]);
 
   return (
     <motion.div
@@ -202,17 +179,22 @@ export function Section({ section, onUpdate, onDelete, onMoveUp, onMoveDown, can
           </div>
         </div>
       </Dialog>
-      {/* eslint-disable-next-line react-hooks/static-components -- registry lookup, not component creation */}
-      <Component
-        section={section}
-        onUpdate={onUpdate}
-        isPending={isPending}
-        selectItem={selectItem}
-        isItemSelected={isItemSelected}
-        site={site}
-        getToken={getToken}
-        trackUsage={trackUsage}
-      />
+      {LayoutComponent
+        ? (
+          <EditableSection
+            Component={LayoutComponent}
+            section={section}
+            onUpdate={onUpdate}
+            onUsage={trackUsage}
+          />
+        )
+        : (
+          <div className="muse-section muse-section--unknown">
+            Unknown section type:
+            {" "}
+            {section.type}
+          </div>
+        )}
     </motion.div>
   );
 }
