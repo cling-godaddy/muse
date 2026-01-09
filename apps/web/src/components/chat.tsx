@@ -22,8 +22,6 @@ interface IntakeContext {
 }
 
 interface ChatProps {
-  /** Site ID for message persistence */
-  siteId?: string
   /** Business context for content generation */
   siteContext?: SiteContext
   /** Current sections - enables refine mode when provided */
@@ -62,15 +60,15 @@ interface ChatProps {
   onAgentsChange?: (agents: AgentState[]) => void
 }
 
-export function Chat({ siteId, siteContext, sections, theme, siteCosts, autoSendPrompt, intakeContext, onSectionParsed, onThemeSelected, onImages, onPages, onRefine, onSectionsUpdated, onMove, onDelete, onAddSection, onGenerationComplete, onMessagesChange, onUsage, onTrackUsageReady, onAgentsChange }: ChatProps) {
-  const options = useMemo(() => ({ siteId, siteContext, sections, theme, siteCosts, onSectionParsed, onThemeSelected, onImages, onPages, onRefine, onSectionsUpdated, onMove, onDelete, onAddSection, onGenerationComplete, onMessagesChange, onUsage }), [siteId, siteContext, sections, theme, siteCosts, onSectionParsed, onThemeSelected, onImages, onPages, onRefine, onSectionsUpdated, onMove, onDelete, onAddSection, onGenerationComplete, onMessagesChange, onUsage]);
+export function Chat({ siteContext, sections, theme, siteCosts, autoSendPrompt, intakeContext, onSectionParsed, onThemeSelected, onImages, onPages, onRefine, onSectionsUpdated, onMove, onDelete, onAddSection, onGenerationComplete, onMessagesChange, onUsage, onTrackUsageReady, onAgentsChange }: ChatProps) {
+  const options = useMemo(() => ({ siteContext, sections, theme, siteCosts, onSectionParsed, onThemeSelected, onImages, onPages, onRefine, onSectionsUpdated, onMove, onDelete, onAddSection, onGenerationComplete, onMessagesChange, onUsage }), [siteContext, sections, theme, siteCosts, onSectionParsed, onThemeSelected, onImages, onPages, onRefine, onSectionsUpdated, onMove, onDelete, onAddSection, onGenerationComplete, onMessagesChange, onUsage]);
   const { messages, input, setInput, isLoading, error, send, sessionUsage, agents, agentsMessageIndex, pendingAction, confirmPendingAction, cancelPendingAction, selectOption, trackUsage } = useChat(options);
   const isRefineMode = sections && sections.length > 0;
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const autoSendTriggeredRef = useRef(false);
 
   // Autosave messages after each conversation turn completes
-  useAutosaveMessages(siteId, messages, isLoading);
+  useAutosaveMessages(messages, isLoading);
 
   // expose trackUsage function to parent
   useEffect(() => {

@@ -13,10 +13,19 @@ vi.mock("../queries/siteQueries", () => ({
   }),
 }));
 
+// Mock useSiteStore to provide siteId from global state
+let mockDraftId: string | null = "site_123";
+vi.mock("../stores/siteStore", () => ({
+  useSiteStore: (selector: (state: { draft: { id: string } | null }) => unknown) => {
+    return selector({ draft: mockDraftId ? { id: mockDraftId } : null });
+  },
+}));
+
 describe("useAutosaveMessages", () => {
   beforeEach(() => {
     mockMutateAsync.mockClear();
     mockMutateAsync.mockResolvedValue({});
+    mockDraftId = "site_123";
   });
 
   it("doesn't save messages on initial load", async () => {
@@ -25,7 +34,7 @@ describe("useAutosaveMessages", () => {
     ];
 
     renderHook(() =>
-      useAutosaveMessages("site_123", existingMessages, false),
+      useAutosaveMessages(existingMessages, false),
     );
 
     await waitFor(() => {
@@ -41,7 +50,7 @@ describe("useAutosaveMessages", () => {
 
     const { rerender } = renderHook(
       ({ messages, isLoading }: { messages: Message[], isLoading: boolean }) =>
-        useAutosaveMessages("site_123", messages, isLoading),
+        useAutosaveMessages(messages, isLoading),
       {
         initialProps: {
           messages: existingMessages,
@@ -85,7 +94,7 @@ describe("useAutosaveMessages", () => {
   it("triggers save only when isLoading transitions from true to false", async () => {
     const { rerender } = renderHook(
       ({ isLoading }: { isLoading: boolean }) =>
-        useAutosaveMessages("site_123", [], isLoading),
+        useAutosaveMessages([], isLoading),
       { initialProps: { isLoading: false } },
     );
 
@@ -107,7 +116,7 @@ describe("useAutosaveMessages", () => {
   it("saves incrementally across multiple conversation turns", async () => {
     const { rerender } = renderHook(
       ({ messages, isLoading }: { messages: Message[], isLoading: boolean }) =>
-        useAutosaveMessages("site_123", messages, isLoading),
+        useAutosaveMessages(messages, isLoading),
       {
         initialProps: {
           messages: [] as Message[],
@@ -182,7 +191,7 @@ describe("useAutosaveMessages", () => {
 
     const { rerender } = renderHook(
       ({ isLoading }: { isLoading: boolean }) =>
-        useAutosaveMessages("site_123", messages, isLoading),
+        useAutosaveMessages(messages, isLoading),
       { initialProps: { isLoading: true } },
     );
 
@@ -195,10 +204,13 @@ describe("useAutosaveMessages", () => {
     });
   });
 
-  it("doesn't save if siteId is undefined", async () => {
+  it("doesn't save if siteId is undefined (no draft in store)", async () => {
+    // Mock store to return null draft
+    mockDraftId = null;
+
     const { rerender } = renderHook(
       ({ messages, isLoading }: { messages: Message[], isLoading: boolean }) =>
-        useAutosaveMessages(undefined, messages, isLoading),
+        useAutosaveMessages(messages, isLoading),
       {
         initialProps: {
           messages: [] as Message[],

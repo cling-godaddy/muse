@@ -7,6 +7,7 @@ import type { Usage } from "@muse/ai";
 import type { ImageSelection } from "@muse/media";
 import { parseStream, type ParseState, type AgentState, type ThemeSelection, type PageInfo } from "../utils/streamParser";
 import { useLatest } from "@muse/react";
+import { useSiteStore } from "../stores/siteStore";
 
 const { api } = getConfig();
 const MESSAGES_URL = `${api.baseUrl}/api/messages`;
@@ -50,8 +51,6 @@ export interface SiteContext {
 }
 
 export interface UseChatOptions {
-  /** Site ID for message persistence */
-  siteId?: string
   /** Business context for content generation */
   siteContext?: SiteContext
   /** Current sections - when provided, chat switches to refine mode */
@@ -130,14 +129,17 @@ export function useChat(options: UseChatOptions = {}): UseChat {
   const pagesProcessedRef = useRef(false);
   const loadedSiteIdRef = useRef<string | null>(null);
 
+  // Read siteId from global state
+  const siteId = useSiteStore(state => state.draft?.id);
+
   // Load messages when siteId changes
   useEffect(() => {
-    if (!options.siteId || options.siteId === loadedSiteIdRef.current) return;
+    if (!siteId || siteId === loadedSiteIdRef.current) return;
 
     const loadMessages = async () => {
       try {
         const token = await getToken();
-        const response = await fetch(`${MESSAGES_URL}/${options.siteId}`, {
+        const response = await fetch(`${MESSAGES_URL}/${siteId}`, {
           headers: { Authorization: `Bearer ${token}` },
         });
         if (response.ok) {
@@ -154,7 +156,7 @@ export function useChat(options: UseChatOptions = {}): UseChat {
             // Don't set sessionUsage here - let the useEffect below be the single source of truth
           }
         }
-        loadedSiteIdRef.current = options.siteId ?? null;
+        loadedSiteIdRef.current = siteId;
       }
       catch (err) {
         console.error("Failed to load messages:", err);
@@ -162,7 +164,7 @@ export function useChat(options: UseChatOptions = {}): UseChat {
     };
 
     loadMessages();
-  }, [options.siteId, getToken]);
+  }, [siteId, getToken]);
 
   // Single source of truth: sessionUsage = sum(site.costs)
   // message.usage is kept for debugging but not counted
@@ -217,7 +219,7 @@ export function useChat(options: UseChatOptions = {}): UseChat {
             "Authorization": `Bearer ${token}`,
           },
           body: JSON.stringify({
-            siteId: opts.siteId,
+            siteId,
             sections: opts.sections,
             messages: newMessages, // Send full conversation history
             theme: opts.theme,
@@ -302,7 +304,7 @@ export function useChat(options: UseChatOptions = {}): UseChat {
           "Authorization": `Bearer ${token}`,
         },
         body: JSON.stringify({
-          siteId: optionsRef.current.siteId,
+          siteId,
           messages: newMessages,
           stream: true,
           siteContext: optionsRef.current.siteContext,
@@ -402,7 +404,7 @@ export function useChat(options: UseChatOptions = {}): UseChat {
     finally {
       setIsLoading(false);
     }
-  }, [input, messages, isLoading, getToken, optionsRef]);
+  }, [input, messages, isLoading, getToken, optionsRef, siteId]);
 
   const confirmPendingAction = useCallback(() => {
     if (!pendingAction) return;

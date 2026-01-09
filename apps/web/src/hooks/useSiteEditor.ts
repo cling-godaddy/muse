@@ -30,7 +30,7 @@ export function useSiteEditor(siteId: string | undefined) {
   const patchSiteMutation = usePatchSite();
 
   // Autosave section edits
-  const { isSyncing: isSyncingSections } = useAutosaveSection(siteId ?? "");
+  const { isSyncing: isSyncingSections } = useAutosaveSection();
 
   // Aggregate all syncing states
   const isSyncing = isSyncingSections || patchPageSections.isPending || createSectionMutation.isPending || deleteSectionMutation.isPending;

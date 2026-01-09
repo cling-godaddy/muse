@@ -1,12 +1,16 @@
 import { useEffect, useRef } from "react";
 import type { Message } from "./useChat";
 import { useSaveMessages } from "../queries/siteQueries";
+import { useSiteStore } from "../stores/siteStore";
 
-export function useAutosaveMessages(siteId: string | undefined, messages: Message[], isLoading: boolean) {
+export function useAutosaveMessages(messages: Message[], isLoading: boolean) {
   const saveMessages = useSaveMessages();
   const prevIsLoadingRef = useRef(isLoading);
   const lastSavedCountRef = useRef(0);
   const isFirstRenderRef = useRef(true);
+
+  // Read siteId from global state
+  const siteId = useSiteStore(state => state.draft?.id);
   const prevSiteIdRef = useRef<string | undefined>(siteId);
 
   // Reset refs when siteId changes to prevent stale state

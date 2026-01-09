@@ -3,11 +3,14 @@ import type { Section } from "@muse/core";
 import { usePatchSection } from "../queries/siteQueries";
 import { useSiteStore } from "../stores/siteStore";
 
-export function useAutosaveSection(siteId: string) {
+export function useAutosaveSection() {
   const patchSection = usePatchSection();
   const draft = useSiteStore(state => state.draft);
   const dirty = useSiteStore(state => state.dirty);
   const markSynced = useSiteStore(state => state.markSynced);
+
+  // Read siteId from global state
+  const siteId = draft?.id;
 
   const timerRef = useRef<NodeJS.Timeout | undefined>(undefined);
   const prevDraftRef = useRef(draft);
@@ -28,7 +31,7 @@ export function useAutosaveSection(siteId: string) {
   }, [dirty, draft]);
 
   useEffect(() => {
-    if (!dirty || !draft) return;
+    if (!dirty || !draft || !siteId) return;
 
     // Clear existing timer
     clearTimeout(timerRef.current);
