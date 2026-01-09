@@ -268,13 +268,45 @@ async function handleMessageStream(c: Context, rpcId: string | number, params: u
   const skillId = metadata?.skillId ?? inferSkillFromMessage(message);
   const contextId = message.contextId;
 
-  // Create task
-  const task = getTaskStore().create({
-    contextId,
-    initialMessage: message,
-  });
+  // Task resumption logic:
+  // 1. If message.taskId exists and task is in input-required state → resume
+  // 2. Else if contextId exists → find latest input-required task in that context
+  // 3. Else → create new task
+  let task: Task;
+  let isResume = false;
 
-  logger.info("a2a_message_stream", { taskId: task.id, contextId, skillId });
+  if (message.taskId) {
+    const existingTask = getTaskStore().get(message.taskId);
+    if (existingTask && existingTask.status.state === "input-required") {
+      task = existingTask;
+      isResume = true;
+      // Add the new message to history
+      getTaskStore().addMessage(task.id, message);
+      logger.info("a2a_task_resume_by_id", { taskId: task.id });
+    }
+    else {
+      // Task not found or not resumable, create new
+      task = getTaskStore().create({ contextId, initialMessage: message });
+    }
+  }
+  else if (contextId) {
+    // Find latest input-required task in this context
+    const contextTasks = getTaskStore().list({ contextId, status: ["input-required"] });
+    if (contextTasks.length > 0 && contextTasks[0]) {
+      task = contextTasks[0];
+      isResume = true;
+      getTaskStore().addMessage(task.id, message);
+      logger.info("a2a_task_resume_by_context", { taskId: task.id, contextId });
+    }
+    else {
+      task = getTaskStore().create({ contextId, initialMessage: message });
+    }
+  }
+  else {
+    task = getTaskStore().create({ contextId, initialMessage: message });
+  }
+
+  logger.info("a2a_message_stream", { taskId: task.id, contextId, skillId, isResume });
 
   return streamSSE(c, async (stream) => {
     const emitter = createA2AEmitter({
@@ -295,33 +327,15 @@ async function handleMessageStream(c: Context, rpcId: string | number, params: u
       // Emit initial status
       emitter.statusUpdate("starting", { skillId, description: "Starting generation" });
 
-      // Convert A2A message to AI message format
-      const aiMessages = convertToAIMessages(message);
-
-      // Select orchestrator based on skill
-      const generator = skillId === "generate_site" ? orchestrateSite : orchestrate;
-
-      // Create marker translator to convert orchestrator output to A2A events
-      const translator = createMarkerTranslator(emitter, {
-        onParseError: (marker, error) => {
-          logger.warn("a2a_marker_parse_error", { taskId: task.id, marker: marker.slice(0, 100), error: error.message });
-        },
-      });
-
-      // Run orchestrator and translate markers to A2A events
-      const config = { mediaClient: getMediaClient(), logger };
-      const input = { messages: aiMessages };
-
-      for await (const chunk of generator(input, getClient(), { config })) {
-        translator.processChunk(chunk);
+      // Route based on skill
+      if (skillId === "refine") {
+        await handleRefineSkill(task, message, emitter);
+      }
+      else {
+        await handleGenerateSkill(task, message, skillId, emitter);
       }
 
-      // Mark complete
-      const completionMessage = `Site generation complete (skill: ${skillId})`;
-      getTaskStore().update(task.id, { state: "completed", message: completionMessage });
-      emitter.complete(completionMessage);
-
-      // Emit final task
+      // Emit final task (state set by skill handlers)
       const finalTask = getTaskStore().get(task.id);
       if (finalTask) {
         emitter.emitTask(finalTask);
@@ -337,6 +351,246 @@ async function handleMessageStream(c: Context, rpcId: string | number, params: u
       emitter.fail(err);
     }
   });
+}
+
+/**
+ * Handle generate_landing and generate_site skills.
+ */
+async function handleGenerateSkill(
+  task: Task,
+  message: Message,
+  skillId: string,
+  emitter: ReturnType<typeof createA2AEmitter>,
+): Promise<void> {
+  // Convert A2A message to AI message format
+  const aiMessages = convertToAIMessages(message);
+
+  // Select orchestrator based on skill
+  const generator = skillId === "generate_site" ? orchestrateSite : orchestrate;
+
+  // Create marker translator to convert orchestrator output to A2A events
+  const translator = createMarkerTranslator(emitter, {
+    onParseError: (marker, error) => {
+      logger.warn("a2a_marker_parse_error", { taskId: task.id, marker: marker.slice(0, 100), error: error.message });
+    },
+  });
+
+  // Run orchestrator and translate markers to A2A events
+  const config = { mediaClient: getMediaClient(), logger };
+  const input = { messages: aiMessages };
+
+  for await (const chunk of generator(input, getClient(), { config })) {
+    translator.processChunk(chunk);
+  }
+
+  // Mark complete
+  const completionMessage = `Site generation complete (skill: ${skillId})`;
+  getTaskStore().update(task.id, { state: "completed", message: completionMessage });
+  emitter.complete(completionMessage);
+}
+
+// Refine state stored in task.metadata.refine
+interface RefineState {
+  step: "select_action" | "select_section_type" | "select_preset" | "confirm"
+  action?: string
+  sectionType?: string
+}
+
+// Available refinement actions (numbered for easy selection)
+const REFINE_ACTIONS = [
+  { id: "add_section", label: "Add Section", description: "Add a new section to the page" },
+  { id: "edit_section", label: "Edit Section", description: "Modify content in an existing section" },
+  { id: "delete_section", label: "Delete Section", description: "Remove a section from the page" },
+  { id: "move_section", label: "Move Section", description: "Reorder sections on the page" },
+];
+
+// Section types for add_section (numbered for easy selection)
+const SECTION_TYPES = [
+  { id: "hero", label: "Hero", description: "Large header with headline and call-to-action" },
+  { id: "features", label: "Features", description: "Showcase product features" },
+  { id: "cta", label: "Call to Action", description: "Drive users to take action" },
+  { id: "testimonials", label: "Testimonials", description: "Customer reviews and quotes" },
+  { id: "pricing", label: "Pricing", description: "Pricing tables and plans" },
+  { id: "faq", label: "FAQ", description: "Frequently asked questions" },
+  { id: "gallery", label: "Gallery", description: "Image gallery or portfolio" },
+  { id: "stats", label: "Stats", description: "Key metrics and statistics" },
+  { id: "contact", label: "Contact", description: "Contact form and information" },
+];
+
+/**
+ * Handle refine skill with INPUT_REQUIRED flow.
+ * Demonstrates multi-turn conversation where agent asks for clarification.
+ */
+async function handleRefineSkill(
+  task: Task,
+  message: Message,
+  emitter: ReturnType<typeof createA2AEmitter>,
+): Promise<void> {
+  // Check if this is a continuation (state stored in metadata.refine)
+  const refineState = task.metadata?.refine as RefineState | undefined;
+  const userText = extractTextFromMessage(message);
+
+  if (!refineState) {
+    // New refinement request - ask what action to take
+    emitter.statusUpdate("refine", { description: "Analyzing refinement request" });
+
+    // For MVP, always ask for action selection
+    // A smarter implementation would parse the user's intent from the message
+    getTaskStore().update(task.id, {
+      state: "input-required",
+      message: "What would you like to do?",
+    });
+
+    // Store state in namespaced metadata.refine
+    updateTaskMetadata(task.id, {
+      refine: { step: "select_action" } as RefineState,
+    });
+
+    emitter.inputRequired("What would you like to do?", {
+      metadata: {
+        kind: "selection",
+        options: REFINE_ACTIONS,
+      },
+    });
+    return;
+  }
+
+  // Handle continuation based on step
+  switch (refineState.step) {
+    case "select_action": {
+      const selectedAction = matchOption(userText, REFINE_ACTIONS);
+      if (!selectedAction) {
+        // Didn't understand selection, ask again
+        emitter.inputRequired("I didn't understand that. Please select an option (1-4) or type the action name.", {
+          metadata: { kind: "selection", options: REFINE_ACTIONS },
+        });
+        return;
+      }
+
+      if (selectedAction.id === "add_section") {
+        // Need to select section type
+        getTaskStore().update(task.id, {
+          state: "input-required",
+          message: "What type of section would you like to add?",
+        });
+        updateTaskMetadata(task.id, {
+          refine: { step: "select_section_type", action: "add_section" } as RefineState,
+        });
+        emitter.inputRequired("What type of section would you like to add?", {
+          metadata: { kind: "selection", options: SECTION_TYPES },
+        });
+        return;
+      }
+
+      // For other actions, complete with a message (full implementation would do the action)
+      getTaskStore().update(task.id, {
+        state: "completed",
+        message: `Refinement action '${selectedAction.id}' acknowledged. Full implementation coming soon.`,
+      });
+      updateTaskMetadata(task.id, { refine: undefined });
+      emitter.complete(`Refinement action '${selectedAction.id}' acknowledged. Full implementation coming soon.`);
+      return;
+    }
+
+    case "select_section_type": {
+      const selectedType = matchOption(userText, SECTION_TYPES);
+      if (!selectedType) {
+        emitter.inputRequired("I didn't understand that. Please select an option (1-9) or type the section type.", {
+          metadata: { kind: "selection", options: SECTION_TYPES },
+        });
+        return;
+      }
+
+      // For MVP, complete here. Full implementation would continue to preset selection.
+      getTaskStore().update(task.id, {
+        state: "completed",
+        message: `Adding ${selectedType.label} section. Full implementation coming soon.`,
+      });
+      updateTaskMetadata(task.id, { refine: undefined });
+      emitter.artifactUpdate(
+        {
+          name: "refinement",
+          parts: [{ data: { action: "add_section", sectionType: selectedType.id } }],
+        },
+        { lastChunk: true },
+      );
+      emitter.complete(`Adding ${selectedType.label} section. Full implementation coming soon.`);
+      return;
+    }
+
+    default: {
+      // Unknown state, reset
+      getTaskStore().update(task.id, { state: "failed", message: "Unknown refinement state" });
+      updateTaskMetadata(task.id, { refine: undefined });
+      emitter.fail("Unknown refinement state");
+    }
+  }
+}
+
+/**
+ * Extract text content from an A2A message.
+ */
+function extractTextFromMessage(message: Message): string {
+  return message.parts
+    .filter((p): p is { text: string } => "text" in p)
+    .map(p => p.text)
+    .join(" ")
+    .toLowerCase()
+    .trim();
+}
+
+/**
+ * Match user input to an option by:
+ * 1. Numeric index (1, 2, 3...)
+ * 2. Exact id match
+ * 3. Exact label match
+ * 4. Partial match (id or label contained in input)
+ *
+ * Returns undefined if no match or ambiguous.
+ */
+function matchOption<T extends { id: string, label: string }>(
+  input: string,
+  options: T[],
+): T | undefined {
+  const normalized = input.toLowerCase().trim();
+
+  // 1. Try numeric selection (1-indexed)
+  const numericMatch = normalized.match(/^(\d+)$/);
+  if (numericMatch?.[1]) {
+    const index = parseInt(numericMatch[1], 10) - 1;
+    if (index >= 0 && index < options.length) {
+      return options[index];
+    }
+    return undefined; // Invalid index
+  }
+
+  // 2. Exact id match
+  const exactIdMatch = options.find(opt => opt.id.toLowerCase() === normalized);
+  if (exactIdMatch) return exactIdMatch;
+
+  // 3. Exact label match
+  const exactLabelMatch = options.find(opt => opt.label.toLowerCase() === normalized);
+  if (exactLabelMatch) return exactLabelMatch;
+
+  // 4. Partial match - but only if unambiguous
+  const partialMatches = options.filter(
+    opt => normalized.includes(opt.id.toLowerCase())
+      || normalized.includes(opt.label.toLowerCase()),
+  );
+
+  // Only return if exactly one match to avoid ambiguity
+  if (partialMatches.length === 1) {
+    return partialMatches[0];
+  }
+
+  return undefined;
+}
+
+/**
+ * Update task metadata (merge with existing).
+ */
+function updateTaskMetadata(taskId: string, metadata: Record<string, unknown>): void {
+  getTaskStore().updateMetadata(taskId, metadata);
 }
 
 /**

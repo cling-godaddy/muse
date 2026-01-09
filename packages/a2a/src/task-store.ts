@@ -10,6 +10,7 @@ export interface TaskStore {
   create(options?: CreateTaskOptions): Task
   get(taskId: string): Task | undefined
   update(taskId: string, patch: Partial<TaskStatus>): Task | undefined
+  updateMetadata(taskId: string, metadata: Record<string, unknown>): Task | undefined
   addArtifact(taskId: string, artifact: Artifact): Task | undefined
   addMessage(taskId: string, message: Message): Task | undefined
   list(options?: ListOptions): Task[]
@@ -146,6 +147,24 @@ export function createTaskStore(options: TaskStoreOptions = {}): TaskStore {
     return safeReturn(stored.task);
   }
 
+  function updateMetadata(
+    taskId: string,
+    metadata: Record<string, unknown>,
+  ): Task | undefined {
+    const stored = tasks.get(taskId);
+    if (!stored) return undefined;
+
+    // Merge new metadata with existing, clone to prevent mutations
+    stored.task.metadata = {
+      ...stored.task.metadata,
+      ...structuredClone(metadata),
+    };
+    stored.task.version++;
+    stored.updatedAt = Date.now();
+
+    return safeReturn(stored.task);
+  }
+
   function addArtifact(taskId: string, artifact: Artifact): Task | undefined {
     const stored = tasks.get(taskId);
     if (!stored) return undefined;
@@ -214,6 +233,7 @@ export function createTaskStore(options: TaskStoreOptions = {}): TaskStore {
     create,
     get,
     update,
+    updateMetadata,
     addArtifact,
     addMessage,
     list,

@@ -124,6 +124,68 @@ describe("createTaskStore", () => {
     });
   });
 
+  describe("updateMetadata", () => {
+    it("sets task metadata", () => {
+      const store = createTaskStore({ freezeInDev: false });
+      const task = store.create();
+
+      const updated = store.updateMetadata(task.id, { foo: "bar" });
+
+      expect(updated?.metadata).toEqual({ foo: "bar" });
+    });
+
+    it("merges with existing metadata", () => {
+      const store = createTaskStore({ freezeInDev: false });
+      const task = store.create();
+
+      store.updateMetadata(task.id, { foo: "bar" });
+      const updated = store.updateMetadata(task.id, { baz: 123 });
+
+      expect(updated?.metadata).toEqual({ foo: "bar", baz: 123 });
+    });
+
+    it("overwrites existing keys", () => {
+      const store = createTaskStore({ freezeInDev: false });
+      const task = store.create();
+
+      store.updateMetadata(task.id, { foo: "bar" });
+      const updated = store.updateMetadata(task.id, { foo: "updated" });
+
+      expect(updated?.metadata).toEqual({ foo: "updated" });
+    });
+
+    it("increments version on metadata update", () => {
+      const store = createTaskStore({ freezeInDev: false });
+      const task = store.create();
+      expect(task.version).toBe(1);
+
+      const updated = store.updateMetadata(task.id, { test: true });
+      expect(updated?.version).toBe(2);
+    });
+
+    it("returns undefined for non-existent task", () => {
+      const store = createTaskStore({ freezeInDev: false });
+      const result = store.updateMetadata("non-existent", { foo: "bar" });
+
+      expect(result).toBeUndefined();
+    });
+
+    it("clones metadata to prevent mutations", () => {
+      const store = createTaskStore({ freezeInDev: false });
+      const task = store.create();
+
+      const metadata = { nested: { value: 1 } };
+      store.updateMetadata(task.id, metadata);
+
+      // Mutate the original object
+      metadata.nested.value = 999;
+
+      // Stored metadata should be unchanged
+      const retrieved = store.get(task.id);
+      expect((retrieved?.metadata as { nested: { value: number } }).nested.value).toBe(1);
+    });
+  });
+
   describe("addArtifact", () => {
     it("adds artifact to task", () => {
       const store = createTaskStore({ freezeInDev: false });
