@@ -302,6 +302,7 @@ export function useChat(options: UseChatOptions = {}): UseChat {
           "Authorization": `Bearer ${token}`,
         },
         body: JSON.stringify({
+          siteId: optionsRef.current.siteId,
           messages: newMessages,
           stream: true,
           siteContext: optionsRef.current.siteContext,
