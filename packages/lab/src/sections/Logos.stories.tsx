@@ -1,8 +1,7 @@
-import React from "react";
 import type { Meta, StoryObj } from "@storybook/react-vite";
 import { expect, within } from "storybook/test";
-import { Logos } from "@muse/sections";
-import type { LogosSection, LogoItem } from "@muse/core";
+import { Logos, type LogosVariant } from "@muse/sections";
+import type { LogoItem } from "@muse/core";
 
 function makeLogo(name: string, color: string): LogoItem {
   const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 40"><rect width="120" height="40" rx="4" fill="${color}"/><text x="60" y="25" text-anchor="middle" fill="white" font-family="system-ui" font-size="14" font-weight="600">${name}</text></svg>`;
@@ -20,16 +19,32 @@ const sampleLogos: LogoItem[] = [
   makeLogo("Cyberdyne", "#6366f1"),
 ];
 
+/** Renders logo items */
+function LogoImages({ logos }: { logos: LogoItem[] }) {
+  return (
+    <>
+      {logos.map((logo, i) => (
+        <a key={i} href={logo.href} style={{ display: "block" }}>
+          <img src={logo.image.url} alt={logo.image.alt} style={{ height: "40px", width: "auto" }} />
+        </a>
+      ))}
+    </>
+  );
+}
+
 type LogosArgs = {
   headline: string
-  preset: string
+  variant: LogosVariant
   logoCount: number
 };
 
 const meta: Meta<LogosArgs> = {
   title: "Sections/Logos",
   argTypes: {
-    preset: { table: { disable: true } },
+    variant: {
+      control: "select",
+      options: ["grid", "marquee"],
+    },
     headline: { control: "text" },
     logoCount: {
       control: { type: "range", min: 3, max: 8, step: 1 },
@@ -37,19 +52,18 @@ const meta: Meta<LogosArgs> = {
   },
   args: {
     headline: "Trusted By",
-    preset: "logos-grid",
+    variant: "grid",
     logoCount: 6,
   },
   render: (args) => {
-    const section: LogosSection = {
-      id: "story-logos",
-      type: "logos",
-      version: 1,
-      headline: args.headline || undefined,
-      preset: args.preset,
-      logos: sampleLogos.slice(0, args.logoCount),
-    };
-    return <Logos section={section} onUpdate={console.log} />;
+    const logos = sampleLogos.slice(0, args.logoCount);
+    return (
+      <Logos
+        headline={args.headline ? <h2>{args.headline}</h2> : undefined}
+        logos={<LogoImages logos={logos} />}
+        variant={args.variant}
+      />
+    );
   },
 };
 
@@ -65,7 +79,7 @@ export const Grid: Story = {
 };
 
 export const Marquee: Story = {
-  args: { preset: "logos-marquee", logoCount: 8 },
+  args: { variant: "marquee", logoCount: 8 },
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
     await expect(canvas.getAllByRole("img").length).toBeGreaterThanOrEqual(1);

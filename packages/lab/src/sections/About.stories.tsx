@@ -1,8 +1,7 @@
-import React from "react";
 import type { Meta, StoryObj } from "@storybook/react-vite";
 import { expect, within } from "storybook/test";
-import { About } from "@muse/sections";
-import type { AboutSection, TeamMember } from "@muse/core";
+import { About, type AboutVariant } from "@muse/sections";
+import type { TeamMember } from "@muse/core";
 
 const sampleTeam: TeamMember[] = [
   {
@@ -25,10 +24,32 @@ const sampleTeam: TeamMember[] = [
   },
 ];
 
+/** Renders team member cards */
+function TeamCards({ members }: { members: TeamMember[] }) {
+  return (
+    <>
+      {members.map((member, i) => (
+        <div key={i} style={{ textAlign: "center" }}>
+          {member.image && (
+            <img
+              src={member.image.url}
+              alt={member.image.alt}
+              style={{ width: "8rem", height: "8rem", borderRadius: "50%", objectFit: "cover", marginBottom: "1rem" }}
+            />
+          )}
+          <h3 style={{ fontWeight: 600, marginBottom: "0.25rem" }}>{member.name}</h3>
+          <p style={{ color: "#6b7280", fontSize: "0.875rem" }}>{member.role}</p>
+          {member.bio && <p style={{ fontSize: "0.875rem", marginTop: "0.5rem" }}>{member.bio}</p>}
+        </div>
+      ))}
+    </>
+  );
+}
+
 type AboutArgs = {
   headline: string
   body: string
-  preset: string
+  variant: AboutVariant
   showImage: boolean
   teamCount: number
 };
@@ -36,7 +57,10 @@ type AboutArgs = {
 const meta: Meta<AboutArgs> = {
   title: "Sections/About",
   argTypes: {
-    preset: { table: { disable: true } },
+    variant: {
+      control: "select",
+      options: ["story", "team"],
+    },
     headline: { control: "text" },
     body: { control: "text" },
     showImage: { control: "boolean" },
@@ -47,24 +71,20 @@ const meta: Meta<AboutArgs> = {
   args: {
     headline: "Our Story",
     body: "We started with a simple mission: to make building beautiful websites accessible to everyone. Today, we serve thousands of customers worldwide.",
-    preset: "about-story",
+    variant: "story",
     showImage: true,
     teamCount: 0,
   },
   render: (args) => {
-    const section: AboutSection = {
-      id: "story-about",
-      type: "about",
-      version: 1,
-      headline: args.headline || undefined,
-      body: args.body || undefined,
-      preset: args.preset,
-      image: args.showImage
-        ? { url: "https://images.unsplash.com/photo-1522071820081-009f0129c71c?w=800", alt: "Team" }
-        : undefined,
-      teamMembers: args.teamCount > 0 ? sampleTeam.slice(0, args.teamCount) : undefined,
-    };
-    return <About section={section} onUpdate={console.log} />;
+    return (
+      <About
+        headline={args.headline ? <h2>{args.headline}</h2> : undefined}
+        body={args.body ? <p>{args.body}</p> : undefined}
+        image={args.showImage ? <img src="https://images.unsplash.com/photo-1522071820081-009f0129c71c?w=800" alt="Team" style={{ width: "100%", borderRadius: "0.5rem" }} /> : undefined}
+        teamMembers={args.teamCount > 0 ? <TeamCards members={sampleTeam.slice(0, args.teamCount)} /> : undefined}
+        variant={args.variant}
+      />
+    );
   },
 };
 
@@ -82,7 +102,7 @@ export const Story: Story = {
 export const Team: Story = {
   args: {
     headline: "Meet the Team",
-    preset: "about-team",
+    variant: "team",
     teamCount: 3,
     showImage: false,
   },

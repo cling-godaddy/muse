@@ -1,8 +1,7 @@
-import React from "react";
 import type { Meta, StoryObj } from "@storybook/react-vite";
 import { expect, within } from "storybook/test";
-import { Menu } from "@muse/sections";
-import type { MenuSection, MenuCategory, MenuItem } from "@muse/core";
+import { Menu, type MenuVariant } from "@muse/sections";
+import type { MenuCategory, MenuItem } from "@muse/core";
 
 const sampleCategories: MenuCategory[] = [
   {
@@ -56,23 +55,80 @@ const sampleSimpleItems: MenuItem[] = [
   { name: "Latte", price: "$5" },
 ];
 
+/** Renders menu categories */
+function MenuCategories({ categories }: { categories: MenuCategory[] }) {
+  return (
+    <>
+      {categories.map((category, i) => (
+        <div key={i} style={{ marginBottom: "2rem" }}>
+          <h3 style={{ fontSize: "1.25rem", fontWeight: 600, marginBottom: "1rem" }}>{category.name}</h3>
+          {category.items.map((item, j) => (
+            <div key={j} style={{ display: "flex", justifyContent: "space-between", padding: "0.75rem 0", borderBottom: "1px solid #e5e7eb" }}>
+              <div>
+                <div style={{ fontWeight: 500 }}>{item.name}</div>
+                {item.description && <div style={{ fontSize: "0.875rem", color: "#6b7280" }}>{item.description}</div>}
+              </div>
+              <div style={{ fontWeight: 600 }}>{item.price}</div>
+            </div>
+          ))}
+        </div>
+      ))}
+    </>
+  );
+}
+
+/** Renders menu items as cards */
+function MenuCards({ items }: { items: MenuItem[] }) {
+  return (
+    <>
+      {items.map((item, i) => (
+        <div key={i} style={{ background: "#f9fafb", borderRadius: "0.5rem", overflow: "hidden" }}>
+          {item.image && <img src={item.image.url} alt={item.image.alt} style={{ width: "100%", height: "150px", objectFit: "cover" }} />}
+          <div style={{ padding: "1rem" }}>
+            <div style={{ fontWeight: 500 }}>{item.name}</div>
+            {item.description && <div style={{ fontSize: "0.875rem", color: "#6b7280", marginTop: "0.25rem" }}>{item.description}</div>}
+            <div style={{ fontWeight: 600, marginTop: "0.5rem" }}>{item.price}</div>
+          </div>
+        </div>
+      ))}
+    </>
+  );
+}
+
+/** Renders simple menu items */
+function SimpleMenuItems({ items }: { items: MenuItem[] }) {
+  return (
+    <>
+      {items.map((item, i) => (
+        <div key={i} style={{ display: "flex", justifyContent: "space-between", padding: "0.5rem 0" }}>
+          <span>{item.name}</span>
+          <span style={{ fontWeight: 500 }}>{item.price}</span>
+        </div>
+      ))}
+    </>
+  );
+}
+
 type MenuArgs = {
   headline: string
   subheadline: string
-  preset: string
+  variant: MenuVariant
 };
 
 const meta: Meta<MenuArgs> = {
   title: "Sections/Menu",
   argTypes: {
-    preset: { table: { disable: true } },
+    variant: {
+      control: "select",
+      options: ["list", "cards", "simple"],
+    },
     headline: { control: "text" },
     subheadline: { control: "text" },
   },
   args: {
     headline: "Our Menu",
     subheadline: "Fresh ingredients, crafted with care",
-    preset: "menu-list",
+    variant: "list",
   },
 };
 
@@ -81,16 +137,14 @@ type Story = StoryObj<MenuArgs>;
 
 export const List: Story = {
   render: (args) => {
-    const section: MenuSection = {
-      id: "story-menu",
-      type: "menu",
-      version: 1,
-      headline: args.headline || undefined,
-      subheadline: args.subheadline || undefined,
-      preset: args.preset,
-      categories: sampleCategories,
-    };
-    return <Menu section={section} onUpdate={console.log} />;
+    return (
+      <Menu
+        headline={args.headline ? <h2>{args.headline}</h2> : undefined}
+        subheadline={args.subheadline ? <p>{args.subheadline}</p> : undefined}
+        items={<MenuCategories categories={sampleCategories} />}
+        variant={args.variant}
+      />
+    );
   },
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
@@ -104,19 +158,17 @@ export const Cards: Story = {
   args: {
     headline: "Today's Selection",
     subheadline: "Freshly baked every morning",
-    preset: "menu-cards",
+    variant: "cards",
   },
   render: (args) => {
-    const section: MenuSection = {
-      id: "story-menu",
-      type: "menu",
-      version: 1,
-      headline: args.headline || undefined,
-      subheadline: args.subheadline || undefined,
-      preset: args.preset,
-      items: sampleItemsWithImages,
-    };
-    return <Menu section={section} onUpdate={console.log} />;
+    return (
+      <Menu
+        headline={args.headline ? <h2>{args.headline}</h2> : undefined}
+        subheadline={args.subheadline ? <p>{args.subheadline}</p> : undefined}
+        items={<MenuCards items={sampleItemsWithImages} />}
+        variant={args.variant}
+      />
+    );
   },
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
@@ -129,19 +181,17 @@ export const Simple: Story = {
   args: {
     headline: "Drinks",
     subheadline: "",
-    preset: "menu-simple",
+    variant: "simple",
   },
   render: (args) => {
-    const section: MenuSection = {
-      id: "story-menu",
-      type: "menu",
-      version: 1,
-      headline: args.headline || undefined,
-      subheadline: args.subheadline || undefined,
-      preset: args.preset,
-      items: sampleSimpleItems,
-    };
-    return <Menu section={section} onUpdate={console.log} />;
+    return (
+      <Menu
+        headline={args.headline ? <h2>{args.headline}</h2> : undefined}
+        subheadline={args.subheadline ? <p>{args.subheadline}</p> : undefined}
+        items={<SimpleMenuItems items={sampleSimpleItems} />}
+        variant={args.variant}
+      />
+    );
   },
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);

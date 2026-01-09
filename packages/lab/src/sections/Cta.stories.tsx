@@ -1,21 +1,17 @@
-import React from "react";
 import type { Meta, StoryObj } from "@storybook/react-vite";
 import { expect, within } from "storybook/test";
-import { Cta } from "@muse/sections";
-import type { CtaSection } from "@muse/core";
+import { Cta, type CtaVariant } from "@muse/sections";
 
 type CtaArgs = {
   headline: string
   description: string
   buttonText: string
-  variant: "primary" | "secondary"
-  preset: string
+  variant: CtaVariant
 };
 
 const meta: Meta<CtaArgs> = {
   title: "Sections/CTA",
   argTypes: {
-    preset: { table: { disable: true } },
     headline: { control: "text" },
     description: { control: "text" },
     buttonText: { control: "text" },
@@ -29,21 +25,16 @@ const meta: Meta<CtaArgs> = {
     description: "Join thousands of satisfied customers today.",
     buttonText: "Start Now",
     variant: "primary",
-    preset: "cta-centered",
   },
   render: (args) => {
-    const section: CtaSection = {
-      id: "story-cta",
-      type: "cta",
-      version: 1,
-      headline: args.headline,
-      description: args.description || undefined,
-      buttonText: args.buttonText,
-      buttonHref: "#",
-      variant: args.variant,
-      preset: args.preset,
-    };
-    return <Cta section={section} onUpdate={console.log} />;
+    return (
+      <Cta
+        headline={<h2>{args.headline}</h2>}
+        description={args.description ? <p>{args.description}</p> : undefined}
+        button={<a href="#" style={{ padding: "0.75rem 1.5rem", background: "#6366f1", color: "white", borderRadius: "0.375rem", textDecoration: "none" }}>{args.buttonText}</a>}
+        variant={args.variant}
+      />
+    );
   },
 };
 

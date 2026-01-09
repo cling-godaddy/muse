@@ -1,8 +1,7 @@
-import React from "react";
 import type { Meta, StoryObj } from "@storybook/react-vite";
 import { expect, within } from "storybook/test";
-import { Products } from "@muse/sections";
-import type { ProductsSection, ProductItem } from "@muse/core";
+import { Products, type ProductsVariant } from "@muse/sections";
+import type { ProductItem } from "@muse/core";
 
 const sampleProducts: ProductItem[] = [
   { image: { url: "https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=400", alt: "Watch" }, name: "Classic Watch", price: "$249", rating: 4.8 },
@@ -13,14 +12,6 @@ const sampleProducts: ProductItem[] = [
   { image: { url: "https://images.unsplash.com/photo-1590874103328-eac38a683ce7?w=400", alt: "Bag" }, name: "Leather Tote", price: "$195", rating: 4.4 },
   { image: { url: "https://images.unsplash.com/photo-1526170375885-4d8ecf77b99f?w=400", alt: "Camera" }, name: "Polaroid Camera", price: "$99", rating: 4.3 },
   { image: { url: "https://images.unsplash.com/photo-1583394838336-acd977736f90?w=400", alt: "Headphones 2" }, name: "Studio Headphones", price: "$299", rating: 4.8 },
-  { image: { url: "https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=400", alt: "Sneaker" }, name: "Sport Sneaker", price: "$135", rating: 4.6 },
-  { image: { url: "https://images.unsplash.com/photo-1524805444758-089113d48a6d?w=400", alt: "Watch 2" }, name: "Digital Watch", price: "$189", rating: 4.5, badge: "Popular" },
-  { image: { url: "https://images.unsplash.com/photo-1434056886845-dbd39c1cc727?w=400", alt: "Wallet" }, name: "Leather Wallet", price: "$79", rating: 4.7 },
-  { image: { url: "https://images.unsplash.com/photo-1625772452859-1c03d5bf1137?w=400", alt: "AirPods" }, name: "Wireless Earbuds", price: "$159", rating: 4.8 },
-  { image: { url: "https://images.unsplash.com/photo-1587467512961-120760940315?w=400", alt: "Smart Watch" }, name: "Smart Watch", price: "$349", originalPrice: "$399", rating: 4.9, badge: "Sale" },
-  { image: { url: "https://images.unsplash.com/photo-1606107557195-0e29a4b5b4aa?w=400", alt: "Sneakers 2" }, name: "Classic Sneakers", price: "$95", rating: 4.4 },
-  { image: { url: "https://images.unsplash.com/photo-1548036328-c9fa89d128fa?w=400", alt: "Backpack 2" }, name: "Travel Backpack", price: "$129", rating: 4.6, badge: "New" },
-  { image: { url: "https://images.unsplash.com/photo-1590874103328-eac38a683ce7?w=400", alt: "Handbag" }, name: "Designer Handbag", price: "$275", rating: 4.7 },
 ];
 
 const sampleMinimalProducts: ProductItem[] = [
@@ -32,36 +23,85 @@ const sampleMinimalProducts: ProductItem[] = [
   { image: { url: "https://images.unsplash.com/photo-1507473885765-e6ed057f782c?w=400", alt: "Mirror" }, name: "Round Mirror", price: "$165" },
   { image: { url: "https://images.unsplash.com/photo-1506439773649-6e0eb8cfb237?w=400", alt: "Plant" }, name: "Fiddle Leaf Fig", price: "$95" },
   { image: { url: "https://images.unsplash.com/photo-1540932239986-30128078f3c5?w=400", alt: "Clock" }, name: "Wall Clock", price: "$145" },
-  { image: { url: "https://images.unsplash.com/photo-1616486338812-3dadae4b4ace?w=400", alt: "Desk" }, name: "Writing Desk", price: "$680" },
-  { image: { url: "https://images.unsplash.com/photo-1556228453-efd6c1ff04f6?w=400", alt: "Bookshelf" }, name: "Floating Shelf", price: "$95" },
-  { image: { url: "https://images.unsplash.com/photo-1513506003901-1e6a229e2d15?w=400", alt: "Rug" }, name: "Woven Rug", price: "$320", originalPrice: "$400" },
-  { image: { url: "https://images.unsplash.com/photo-1592078615290-033ee584e267?w=400", alt: "Armchair" }, name: "Lounge Chair", price: "$890" },
-  { image: { url: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400", alt: "Art" }, name: "Abstract Print", price: "$240" },
-  { image: { url: "https://images.unsplash.com/photo-1583847268964-b28dc8f51f92?w=400", alt: "Planter" }, name: "Concrete Planter", price: "$65" },
-  { image: { url: "https://images.unsplash.com/photo-1534349762230-e0cadf78f5da?w=400", alt: "Throw" }, name: "Wool Throw", price: "$180" },
-  { image: { url: "https://images.unsplash.com/photo-1519710164239-da123dc03ef4?w=400", alt: "Side Table" }, name: "Side Table", price: "$275" },
 ];
+
+/** Renders product cards */
+function ProductCards({ products }: { products: ProductItem[] }) {
+  return (
+    <>
+      {products.map((product, i) => (
+        <div key={i} style={{ background: "#f9fafb", borderRadius: "0.5rem", overflow: "hidden" }}>
+          <div style={{ position: "relative" }}>
+            {product.image && (
+              <img src={product.image.url} alt={product.image.alt} style={{ width: "100%", height: "200px", objectFit: "cover" }} />
+            )}
+            {product.badge && (
+              <span style={{ position: "absolute", top: "0.5rem", left: "0.5rem", background: "#6366f1", color: "white", padding: "0.25rem 0.5rem", borderRadius: "0.25rem", fontSize: "0.75rem" }}>
+                {product.badge}
+              </span>
+            )}
+          </div>
+          <div style={{ padding: "1rem" }}>
+            <h3 style={{ fontWeight: 500, marginBottom: "0.25rem" }}>{product.name}</h3>
+            <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
+              <span style={{ fontWeight: 600 }}>{product.price}</span>
+              {product.originalPrice && (
+                <span style={{ textDecoration: "line-through", color: "#9ca3af", fontSize: "0.875rem" }}>{product.originalPrice}</span>
+              )}
+            </div>
+            {product.rating && (
+              <div style={{ fontSize: "0.875rem", color: "#6b7280", marginTop: "0.25rem" }}>
+                Rating:
+                {" "}
+                {product.rating}
+              </div>
+            )}
+          </div>
+        </div>
+      ))}
+    </>
+  );
+}
 
 type ProductsArgs = {
   headline: string
   subheadline: string
-  preset: string
+  variant: ProductsVariant
   itemCount: number
+  useMinimal: boolean
 };
 
 const meta: Meta<ProductsArgs> = {
   title: "Sections/Products",
   argTypes: {
-    preset: { table: { disable: true } },
+    variant: {
+      control: "select",
+      options: ["grid", "carousel"],
+    },
     headline: { control: "text" },
     subheadline: { control: "text" },
-    itemCount: { control: { type: "range", min: 2, max: 16, step: 1 } },
+    itemCount: { control: { type: "range", min: 2, max: 8, step: 1 } },
+    useMinimal: { control: "boolean" },
   },
   args: {
     headline: "Featured Products",
     subheadline: "Handpicked favorites from our collection",
-    preset: "products-grid",
+    variant: "grid",
     itemCount: 8,
+    useMinimal: false,
+  },
+  render: (args) => {
+    const products = args.useMinimal
+      ? sampleMinimalProducts.slice(0, args.itemCount)
+      : sampleProducts.slice(0, args.itemCount);
+    return (
+      <Products
+        headline={args.headline ? <h2>{args.headline}</h2> : undefined}
+        subheadline={args.subheadline ? <p>{args.subheadline}</p> : undefined}
+        items={<ProductCards products={products} />}
+        variant={args.variant}
+      />
+    );
   },
 };
 
@@ -69,18 +109,6 @@ export default meta;
 type Story = StoryObj<ProductsArgs>;
 
 export const Grid: Story = {
-  render: (args) => {
-    const section: ProductsSection = {
-      id: "story-products",
-      type: "products",
-      version: 1,
-      headline: args.headline || undefined,
-      subheadline: args.subheadline || undefined,
-      preset: args.preset,
-      items: sampleProducts.slice(0, args.itemCount),
-    };
-    return <Products section={section} onUpdate={console.log} />;
-  },
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
     await expect(canvas.getByRole("heading", { name: /featured products/i })).toBeVisible();
@@ -93,23 +121,7 @@ export const Featured: Story = {
   args: {
     headline: "Shop the Collection",
     subheadline: "Our best sellers this season",
-    preset: "products-featured",
     itemCount: 5,
-  },
-  argTypes: {
-    itemCount: { control: { type: "range", min: 3, max: 5, step: 1 } },
-  },
-  render: (args) => {
-    const section: ProductsSection = {
-      id: "story-products",
-      type: "products",
-      version: 1,
-      headline: args.headline || undefined,
-      subheadline: args.subheadline || undefined,
-      preset: args.preset,
-      items: sampleProducts.slice(0, args.itemCount),
-    };
-    return <Products section={section} onUpdate={console.log} />;
   },
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
@@ -121,23 +133,8 @@ export const Minimal: Story = {
   args: {
     headline: "New Arrivals",
     subheadline: "",
-    preset: "products-minimal",
     itemCount: 8,
-  },
-  argTypes: {
-    itemCount: { control: { type: "range", min: 2, max: 16, step: 1 } },
-  },
-  render: (args) => {
-    const section: ProductsSection = {
-      id: "story-products",
-      type: "products",
-      version: 1,
-      headline: args.headline || undefined,
-      subheadline: args.subheadline || undefined,
-      preset: args.preset,
-      items: sampleMinimalProducts.slice(0, args.itemCount),
-    };
-    return <Products section={section} onUpdate={console.log} />;
+    useMinimal: true,
   },
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);

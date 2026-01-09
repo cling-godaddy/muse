@@ -1,8 +1,7 @@
-import React from "react";
 import type { Meta, StoryObj } from "@storybook/react-vite";
 import { expect, within } from "storybook/test";
-import { Stats } from "@muse/sections";
-import type { StatsSection, StatItem } from "@muse/core";
+import { Stats, type StatsVariant } from "@muse/sections";
+import type { StatItem } from "@muse/core";
 
 const sampleStats: StatItem[] = [
   { value: "10K+", label: "Customers" },
@@ -11,16 +10,33 @@ const sampleStats: StatItem[] = [
   { value: "24/7", label: "Support" },
 ];
 
+/** Renders stat items as cards */
+function StatCards({ stats }: { stats: StatItem[] }) {
+  return (
+    <>
+      {stats.map((stat, i) => (
+        <div key={i} style={{ textAlign: "center", padding: "1rem" }}>
+          <div style={{ fontSize: "2.5rem", fontWeight: 700, color: "#6366f1" }}>{stat.value}</div>
+          <div style={{ fontSize: "0.875rem", color: "#6b7280", marginTop: "0.25rem" }}>{stat.label}</div>
+        </div>
+      ))}
+    </>
+  );
+}
+
 type StatsArgs = {
   headline: string
-  preset: string
+  variant: StatsVariant
   statCount: number
 };
 
 const meta: Meta<StatsArgs> = {
   title: "Sections/Stats",
   argTypes: {
-    preset: { table: { disable: true } },
+    variant: {
+      control: "select",
+      options: ["row", "grid", "counters"],
+    },
     headline: { control: "text" },
     statCount: {
       control: { type: "range", min: 2, max: 4, step: 1 },
@@ -28,19 +44,18 @@ const meta: Meta<StatsArgs> = {
   },
   args: {
     headline: "By the Numbers",
-    preset: "stats-row",
+    variant: "row",
     statCount: 4,
   },
   render: (args) => {
-    const section: StatsSection = {
-      id: "story-stats",
-      type: "stats",
-      version: 1,
-      headline: args.headline || undefined,
-      preset: args.preset,
-      stats: sampleStats.slice(0, args.statCount),
-    };
-    return <Stats section={section} onUpdate={console.log} />;
+    const stats = sampleStats.slice(0, args.statCount);
+    return (
+      <Stats
+        headline={args.headline ? <h2>{args.headline}</h2> : undefined}
+        stats={<StatCards stats={stats} />}
+        variant={args.variant}
+      />
+    );
   },
 };
 
@@ -57,7 +72,7 @@ export const Row: Story = {
 };
 
 export const Grid: Story = {
-  args: { preset: "stats-grid" },
+  args: { variant: "grid" },
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
     await expect(canvas.getByText(/99/)).toBeVisible();
@@ -66,7 +81,7 @@ export const Grid: Story = {
 };
 
 export const Counters: Story = {
-  args: { preset: "stats-counters" },
+  args: { variant: "counters" },
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
     await expect(canvas.getByText(/requests/i)).toBeVisible();

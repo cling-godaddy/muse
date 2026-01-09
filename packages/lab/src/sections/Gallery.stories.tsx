@@ -1,8 +1,7 @@
-import React from "react";
 import type { Meta, StoryObj } from "@storybook/react-vite";
 import { expect, within } from "storybook/test";
-import { Gallery } from "@muse/sections";
-import type { GallerySection, ImageSource } from "@muse/core";
+import { Gallery, type GalleryVariant } from "@muse/sections";
+import type { ImageSource } from "@muse/core";
 
 const sampleImages: ImageSource[] = [
   { url: "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=600", alt: "Mountain landscape" },
@@ -17,48 +16,56 @@ const sampleImages: ImageSource[] = [
   { url: "https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=600", alt: "Sunlit forest" },
 ];
 
+/** Renders gallery images */
+function GalleryImages({ images }: { images: ImageSource[] }) {
+  return (
+    <>
+      {images.map((image, i) => (
+        <img key={i} src={image.url} alt={image.alt} style={{ width: "100%", height: "auto", borderRadius: "0.5rem" }} />
+      ))}
+    </>
+  );
+}
+
 type GalleryArgs = {
   headline: string
   columns: 2 | 3 | 4
-  preset: string
+  variant: GalleryVariant
   imageCount: number
 };
 
 const meta: Meta<GalleryArgs> = {
   title: "Sections/Gallery",
   argTypes: {
-    preset: { table: { disable: true } },
-    headline: {
-      control: "text",
-      description: "Section headline",
+    variant: {
+      control: "select",
+      options: ["grid", "masonry", "carousel"],
     },
+    headline: { control: "text" },
     columns: {
       control: "inline-radio",
       options: [2, 3, 4],
-      description: "Number of columns",
     },
     imageCount: {
       control: { type: "range", min: 1, max: 10, step: 1 },
-      description: "Number of images",
     },
   },
   args: {
     headline: "Our Work",
     columns: 3,
-    preset: "gallery-grid",
+    variant: "grid",
     imageCount: 6,
   },
   render: (args) => {
-    const section: GallerySection = {
-      id: "story-gallery",
-      type: "gallery",
-      version: 1,
-      headline: args.headline || undefined,
-      columns: args.columns,
-      preset: args.preset,
-      images: sampleImages.slice(0, args.imageCount),
-    };
-    return <Gallery section={section} onUpdate={data => console.log("Update:", data)} />;
+    const images = sampleImages.slice(0, args.imageCount);
+    return (
+      <Gallery
+        headline={args.headline ? <h2>{args.headline}</h2> : undefined}
+        images={<GalleryImages images={images} />}
+        variant={args.variant}
+        columns={args.columns}
+      />
+    );
   },
 };
 
@@ -74,7 +81,7 @@ export const Grid: Story = {
 };
 
 export const Masonry: Story = {
-  args: { preset: "gallery-masonry", imageCount: 9 },
+  args: { variant: "masonry", imageCount: 9 },
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
     await expect(canvas.getAllByRole("img").length).toBeGreaterThanOrEqual(1);
@@ -82,9 +89,8 @@ export const Masonry: Story = {
 };
 
 export const Carousel: Story = {
-  args: { preset: "gallery-carousel", imageCount: 5 },
+  args: { variant: "carousel", imageCount: 5 },
   argTypes: {
-    preset: { table: { disable: true } },
     columns: { table: { disable: true } },
   },
   play: async ({ canvasElement }) => {

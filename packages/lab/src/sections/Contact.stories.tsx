@@ -1,8 +1,7 @@
-import React from "react";
 import type { Meta, StoryObj } from "@storybook/react-vite";
 import { expect, within } from "storybook/test";
-import { Contact } from "@muse/sections";
-import type { ContactSection, FormField } from "@muse/core";
+import { Contact, type ContactVariant } from "@muse/sections";
+import type { FormField } from "@muse/core";
 
 const sampleFields: FormField[] = [
   { name: "name", type: "text", label: "Name", placeholder: "Your name", required: true },
@@ -10,20 +9,87 @@ const sampleFields: FormField[] = [
   { name: "message", type: "textarea", label: "Message", placeholder: "How can we help?", required: true },
 ];
 
+/** Renders a simple form from field definitions */
+function ContactForm({ fields, submitText }: { fields: FormField[], submitText: string }) {
+  return (
+    <form style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
+      {fields.map(field => (
+        <div key={field.name}>
+          <label style={{ display: "block", fontSize: "0.875rem", fontWeight: 500, marginBottom: "0.25rem" }}>
+            {field.label}
+            {field.required && <span style={{ color: "#ef4444" }}> *</span>}
+          </label>
+          {field.type === "textarea"
+            ? (
+              <textarea
+                name={field.name}
+                placeholder={field.placeholder}
+                style={{ width: "100%", padding: "0.5rem", border: "1px solid #d1d5db", borderRadius: "0.375rem", minHeight: "6rem" }}
+              />
+            )
+            : (
+              <input
+                type={field.type}
+                name={field.name}
+                placeholder={field.placeholder}
+                style={{ width: "100%", padding: "0.5rem", border: "1px solid #d1d5db", borderRadius: "0.375rem" }}
+              />
+            )}
+        </div>
+      ))}
+      <button
+        type="submit"
+        style={{ padding: "0.75rem 1.5rem", background: "#6366f1", color: "white", borderRadius: "0.375rem", border: "none", cursor: "pointer" }}
+      >
+        {submitText}
+      </button>
+    </form>
+  );
+}
+
+/** Renders contact info */
+function ContactInfo({ email, phone, address }: { email?: string, phone?: string, address?: string }) {
+  return (
+    <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem" }}>
+      {email && (
+        <p>
+          Email:
+          {email}
+        </p>
+      )}
+      {phone && (
+        <p>
+          Phone:
+          {phone}
+        </p>
+      )}
+      {address && (
+        <p>
+          Address:
+          {address}
+        </p>
+      )}
+    </div>
+  );
+}
+
 type ContactArgs = {
   headline: string
   subheadline: string
   email: string
   phone: string
   address: string
-  preset: string
+  variant: ContactVariant
   showForm: boolean
 };
 
 const meta: Meta<ContactArgs> = {
   title: "Sections/Contact",
   argTypes: {
-    preset: { table: { disable: true } },
+    variant: {
+      control: "select",
+      options: ["form", "split-map"],
+    },
     headline: { control: "text" },
     subheadline: { control: "text" },
     email: { control: "text" },
@@ -37,24 +103,26 @@ const meta: Meta<ContactArgs> = {
     email: "hello@example.com",
     phone: "+1 (555) 123-4567",
     address: "",
-    preset: "contact-form",
+    variant: "form",
     showForm: true,
   },
   render: (args) => {
-    const section: ContactSection = {
-      id: "story-contact",
-      type: "contact",
-      version: 1,
-      headline: args.headline || undefined,
-      subheadline: args.subheadline || undefined,
-      email: args.email || undefined,
-      phone: args.phone || undefined,
-      address: args.address || undefined,
-      preset: args.preset,
-      formFields: args.showForm ? sampleFields : undefined,
-      submitText: "Send Message",
-    };
-    return <Contact section={section} onUpdate={console.log} />;
+    return (
+      <Contact
+        headline={args.headline ? <h2>{args.headline}</h2> : undefined}
+        subheadline={args.subheadline ? <p>{args.subheadline}</p> : undefined}
+        contactInfo={<ContactInfo email={args.email} phone={args.phone} address={args.address} />}
+        form={args.showForm ? <ContactForm fields={sampleFields} submitText="Send Message" /> : undefined}
+        map={args.variant === "split-map" && args.address
+          ? (
+            <div style={{ background: "#e5e7eb", height: "100%", minHeight: "300px", display: "flex", alignItems: "center", justifyContent: "center", borderRadius: "0.5rem" }}>
+              <span style={{ color: "#6b7280" }}>Map placeholder</span>
+            </div>
+          )
+          : undefined}
+        variant={args.variant}
+      />
+    );
   },
 };
 
@@ -72,7 +140,7 @@ export const Form: Story = {
 
 export const SplitMap: Story = {
   args: {
-    preset: "contact-split-map",
+    variant: "split-map",
     address: "1600 Amphitheatre Parkway, Mountain View, CA",
   },
   play: async ({ canvasElement }) => {

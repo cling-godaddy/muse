@@ -1,8 +1,7 @@
-import React from "react";
 import type { Meta, StoryObj } from "@storybook/react-vite";
 import { expect, within } from "storybook/test";
-import { Testimonials } from "@muse/sections";
-import type { TestimonialsSection, Quote } from "@muse/core";
+import { Testimonials, type TestimonialsVariant } from "@muse/sections";
+import type { Quote } from "@muse/core";
 
 const sampleQuotes: Quote[] = [
   {
@@ -28,16 +27,52 @@ const sampleQuotes: Quote[] = [
   },
 ];
 
+/** Renders quote items as testimonial cards */
+function QuoteCards({ quotes }: { quotes: Quote[] }) {
+  return (
+    <>
+      {quotes.map((quote, i) => (
+        <div key={i} style={{ padding: "1.5rem", background: "#f9fafb", borderRadius: "0.5rem" }}>
+          <p style={{ fontSize: "1rem", fontStyle: "italic", marginBottom: "1rem" }}>
+            "
+            {quote.text}
+            "
+          </p>
+          <div style={{ display: "flex", alignItems: "center", gap: "0.75rem" }}>
+            {quote.avatar && (
+              <img
+                src={quote.avatar.url}
+                alt={quote.avatar.alt}
+                style={{ width: "2.5rem", height: "2.5rem", borderRadius: "50%", objectFit: "cover" }}
+              />
+            )}
+            <div>
+              <div style={{ fontWeight: 600 }}>{quote.author}</div>
+              <div style={{ fontSize: "0.875rem", color: "#6b7280" }}>
+                {quote.role}
+                {quote.company && `, ${quote.company}`}
+              </div>
+            </div>
+          </div>
+        </div>
+      ))}
+    </>
+  );
+}
+
 type TestimonialsArgs = {
   headline: string
-  preset: string
+  variant: TestimonialsVariant
   quoteCount: number
 };
 
 const meta: Meta<TestimonialsArgs> = {
   title: "Sections/Testimonials",
   argTypes: {
-    preset: { table: { disable: true } },
+    variant: {
+      control: "select",
+      options: ["grid", "single", "carousel"],
+    },
     headline: { control: "text" },
     quoteCount: {
       control: { type: "range", min: 1, max: 3, step: 1 },
@@ -45,19 +80,18 @@ const meta: Meta<TestimonialsArgs> = {
   },
   args: {
     headline: "What Our Customers Say",
-    preset: "testimonials-grid",
+    variant: "grid",
     quoteCount: 3,
   },
   render: (args) => {
-    const section: TestimonialsSection = {
-      id: "story-testimonials",
-      type: "testimonials",
-      version: 1,
-      headline: args.headline || undefined,
-      preset: args.preset,
-      quotes: sampleQuotes.slice(0, args.quoteCount),
-    };
-    return <Testimonials section={section} onUpdate={console.log} />;
+    const quotes = sampleQuotes.slice(0, args.quoteCount);
+    return (
+      <Testimonials
+        headline={args.headline ? <h2>{args.headline}</h2> : undefined}
+        quotes={<QuoteCards quotes={quotes} />}
+        variant={args.variant}
+      />
+    );
   },
 };
 
@@ -74,7 +108,7 @@ export const Grid: Story = {
 };
 
 export const Carousel: Story = {
-  args: { preset: "testimonials-carousel" },
+  args: { variant: "carousel" },
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
     await expect(canvas.getByRole("heading", { name: /what our customers say/i })).toBeVisible();
@@ -82,7 +116,7 @@ export const Carousel: Story = {
 };
 
 export const Single: Story = {
-  args: { preset: "testimonials-single", quoteCount: 1 },
+  args: { variant: "single", quoteCount: 1 },
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
     await expect(canvas.getByText(/sarah chen/i)).toBeVisible();

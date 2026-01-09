@@ -1,8 +1,7 @@
-import React from "react";
 import type { Meta, StoryObj } from "@storybook/react-vite";
 import { expect, within } from "storybook/test";
-import { Faq } from "@muse/sections";
-import type { FaqSection, FaqItem } from "@muse/core";
+import { Faq, type FaqVariant } from "@muse/sections";
+import type { FaqItem } from "@muse/core";
 
 const sampleItems: FaqItem[] = [
   { question: "How do I get started?", answer: "Simply sign up for a free account and follow our quick setup guide." },
@@ -12,17 +11,36 @@ const sampleItems: FaqItem[] = [
   { question: "Do you offer refunds?", answer: "We offer a 30-day money-back guarantee on all plans." },
 ];
 
+/** Renders FAQ items as question/answer pairs */
+function FaqItems({ items }: { items: FaqItem[] }) {
+  return (
+    <>
+      {items.map((item, i) => (
+        <details key={i} style={{ borderBottom: "1px solid #e5e7eb", padding: "1rem 0" }}>
+          <summary style={{ cursor: "pointer", fontWeight: 500, fontSize: "1rem" }}>
+            {item.question}
+          </summary>
+          <p style={{ marginTop: "0.75rem", color: "#6b7280" }}>{item.answer}</p>
+        </details>
+      ))}
+    </>
+  );
+}
+
 type FaqArgs = {
   headline: string
   subheadline: string
-  preset: string
+  variant: FaqVariant
   itemCount: number
 };
 
 const meta: Meta<FaqArgs> = {
   title: "Sections/FAQ",
   argTypes: {
-    preset: { table: { disable: true } },
+    variant: {
+      control: "select",
+      options: ["accordion", "two-column"],
+    },
     headline: { control: "text" },
     subheadline: { control: "text" },
     itemCount: {
@@ -32,20 +50,19 @@ const meta: Meta<FaqArgs> = {
   args: {
     headline: "Frequently Asked Questions",
     subheadline: "Everything you need to know",
-    preset: "faq-accordion",
+    variant: "accordion",
     itemCount: 5,
   },
   render: (args) => {
-    const section: FaqSection = {
-      id: "story-faq",
-      type: "faq",
-      version: 1,
-      headline: args.headline || undefined,
-      subheadline: args.subheadline || undefined,
-      preset: args.preset,
-      items: sampleItems.slice(0, args.itemCount),
-    };
-    return <Faq section={section} onUpdate={console.log} />;
+    const items = sampleItems.slice(0, args.itemCount);
+    return (
+      <Faq
+        headline={args.headline ? <h2>{args.headline}</h2> : undefined}
+        subheadline={args.subheadline ? <p>{args.subheadline}</p> : undefined}
+        items={<FaqItems items={items} />}
+        variant={args.variant}
+      />
+    );
   },
 };
 
@@ -62,7 +79,7 @@ export const Accordion: Story = {
 };
 
 export const TwoColumn: Story = {
-  args: { preset: "faq-two-column" },
+  args: { variant: "two-column" },
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
     await expect(canvas.getByRole("heading", { name: /frequently asked questions/i })).toBeVisible();

@@ -1,8 +1,6 @@
-import React from "react";
 import type { Meta, StoryObj } from "@storybook/react-vite";
 import { expect, within } from "storybook/test";
-import { Subscribe } from "@muse/sections";
-import type { SubscribeSection } from "@muse/core";
+import { Subscribe, type SubscribeVariant } from "@muse/sections";
 
 type SubscribeArgs = {
   headline: string
@@ -10,13 +8,16 @@ type SubscribeArgs = {
   buttonText: string
   placeholderText: string
   disclaimer: string
-  preset: string
+  variant: SubscribeVariant
 };
 
 const meta: Meta<SubscribeArgs> = {
   title: "Sections/Subscribe",
   argTypes: {
-    preset: { table: { disable: true } },
+    variant: {
+      control: "select",
+      options: ["card", "inline", "banner"],
+    },
     headline: { control: "text" },
     subheadline: { control: "text" },
     buttonText: { control: "text" },
@@ -29,21 +30,32 @@ const meta: Meta<SubscribeArgs> = {
     buttonText: "Subscribe",
     placeholderText: "Enter your email",
     disclaimer: "We respect your privacy. Unsubscribe at any time.",
-    preset: "subscribe-inline",
+    variant: "inline",
   },
   render: (args) => {
-    const section: SubscribeSection = {
-      id: "story-subscribe",
-      type: "subscribe",
-      version: 1,
-      headline: args.headline || undefined,
-      subheadline: args.subheadline || undefined,
-      buttonText: args.buttonText,
-      placeholderText: args.placeholderText || undefined,
-      disclaimer: args.disclaimer || undefined,
-      preset: args.preset,
-    };
-    return <Subscribe section={section} onUpdate={console.log} />;
+    return (
+      <Subscribe
+        headline={args.headline ? <h2>{args.headline}</h2> : undefined}
+        subheadline={args.subheadline ? <p>{args.subheadline}</p> : undefined}
+        emailInput={(
+          <input
+            type="email"
+            placeholder={args.placeholderText}
+            style={{ padding: "0.75rem", border: "1px solid #d1d5db", borderRadius: "0.375rem", width: "100%", maxWidth: "300px" }}
+          />
+        )}
+        button={(
+          <button
+            type="submit"
+            style={{ padding: "0.75rem 1.5rem", background: "#6366f1", color: "white", borderRadius: "0.375rem", border: "none", cursor: "pointer" }}
+          >
+            {args.buttonText}
+          </button>
+        )}
+        disclaimer={args.disclaimer ? <p style={{ fontSize: "0.75rem", color: "#6b7280" }}>{args.disclaimer}</p> : undefined}
+        variant={args.variant}
+      />
+    );
   },
 };
 
@@ -60,7 +72,7 @@ export const Inline: Story = {
 };
 
 export const Card: Story = {
-  args: { preset: "subscribe-card" },
+  args: { variant: "card" },
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
     await expect(canvas.getByRole("heading", { name: /stay updated/i })).toBeVisible();
@@ -69,7 +81,7 @@ export const Card: Story = {
 };
 
 export const Banner: Story = {
-  args: { preset: "subscribe-banner" },
+  args: { variant: "banner" },
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
     await expect(canvas.getByRole("heading", { name: /stay updated/i })).toBeVisible();

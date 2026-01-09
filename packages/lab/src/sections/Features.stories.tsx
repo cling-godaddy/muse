@@ -1,8 +1,7 @@
-import React from "react";
 import type { Meta, StoryObj } from "@storybook/react-vite";
 import { expect, within } from "storybook/test";
-import { Features } from "@muse/sections";
-import type { FeaturesSection, FeatureItem } from "@muse/core";
+import { Features, type FeaturesVariant } from "@muse/sections";
+import type { FeatureItem } from "@muse/core";
 
 const sampleItems: FeatureItem[] = [
   { icon: "zap", title: "Lightning Fast", description: "Built for speed with optimized performance." },
@@ -28,36 +27,59 @@ const sampleItemsWithImages: FeatureItem[] = [
   { image: { url: "https://images.unsplash.com/photo-1551434678-e076c223a692?w=600", alt: "Mobile app" }, title: "Mobile Ready", description: "Native apps for iOS and Android." },
 ];
 
+/** Renders feature items as cards */
+function FeatureCards({ items }: { items: FeatureItem[] }) {
+  return (
+    <>
+      {items.map((item, i) => (
+        <div key={i} style={{ padding: "1.5rem", background: "#f9fafb", borderRadius: "0.5rem" }}>
+          {item.icon && <div style={{ fontSize: "1.5rem", marginBottom: "0.5rem" }}>⚡</div>}
+          {item.image && <img src={item.image.url} alt={item.image.alt} style={{ width: "100%", borderRadius: "0.25rem", marginBottom: "0.75rem" }} />}
+          <h3 style={{ fontSize: "1.125rem", fontWeight: 600, marginBottom: "0.5rem" }}>{item.title}</h3>
+          {item.description && <p style={{ color: "#6b7280", fontSize: "0.875rem" }}>{item.description}</p>}
+        </div>
+      ))}
+    </>
+  );
+}
+
 type FeaturesArgs = {
   headline: string
-  preset: string
+  variant: FeaturesVariant
   itemCount: number
+  useImages: boolean
 };
 
 const meta: Meta<FeaturesArgs> = {
   title: "Sections/Features",
   argTypes: {
-    preset: { table: { disable: true } },
+    variant: {
+      control: "select",
+      options: ["grid", "grid-images", "bento", "bento-spotlight", "bento-split", "numbered"],
+    },
     headline: { control: "text" },
     itemCount: {
       control: { type: "range", min: 2, max: 9, step: 1 },
     },
+    useImages: { control: "boolean" },
   },
   args: {
     headline: "Why Choose Us",
-    preset: "features-grid",
+    variant: "grid",
     itemCount: 6,
+    useImages: false,
   },
   render: (args) => {
-    const section: FeaturesSection = {
-      id: "story-features",
-      type: "features",
-      version: 1,
-      headline: args.headline || undefined,
-      preset: args.preset,
-      items: sampleItems.slice(0, args.itemCount),
-    };
-    return <Features section={section} onUpdate={console.log} />;
+    const items = args.useImages
+      ? sampleItemsWithImages.slice(0, args.itemCount)
+      : sampleItems.slice(0, args.itemCount);
+    return (
+      <Features
+        headline={args.headline ? <h2>{args.headline}</h2> : undefined}
+        items={<FeatureCards items={items} />}
+        variant={args.variant}
+      />
+    );
   },
 };
 
@@ -76,89 +98,49 @@ export const Cards: Story = {
 export const CardsWithImages: Story = {
   args: {
     headline: "Everything You Need",
-    preset: "features-grid-images",
+    variant: "grid-images",
     itemCount: 6,
-  },
-  render: (args) => {
-    const section: FeaturesSection = {
-      id: "story-features",
-      type: "features",
-      version: 1,
-      headline: args.headline || undefined,
-      preset: args.preset,
-      items: sampleItemsWithImages.slice(0, args.itemCount),
-    };
-    return <Features section={section} onUpdate={console.log} />;
+    useImages: true,
   },
 };
 
 export const BentoHero: Story = {
   args: {
     headline: "Platform Highlights",
-    preset: "features-bento",
+    variant: "bento",
     itemCount: 6,
-  },
-  render: (args) => {
-    const section: FeaturesSection = {
-      id: "story-features",
-      type: "features",
-      version: 1,
-      headline: args.headline || undefined,
-      preset: args.preset,
-      items: sampleItemsWithImages.slice(0, args.itemCount),
-    };
-    return <Features section={section} onUpdate={console.log} />;
+    useImages: true,
   },
 };
 
 export const BentoSpotlight: Story = {
   args: {
     headline: "Core Features",
-    preset: "features-bento-spotlight",
+    variant: "bento-spotlight",
     itemCount: 8,
+    useImages: true,
   },
   argTypes: {
     itemCount: { control: { type: "range", min: 7, max: 8, step: 1 } },
-  },
-  render: (args) => {
-    const section: FeaturesSection = {
-      id: "story-features",
-      type: "features",
-      version: 1,
-      headline: args.headline || undefined,
-      preset: args.preset,
-      items: sampleItemsWithImages.slice(0, args.itemCount),
-    };
-    return <Features section={section} onUpdate={console.log} />;
   },
 };
 
 export const BentoSplit: Story = {
   args: {
     headline: "Key Benefits",
-    preset: "features-bento-split",
+    variant: "bento-split",
     itemCount: 4,
+    useImages: true,
   },
   argTypes: {
     itemCount: { control: { type: "range", min: 2, max: 8, step: 1 } },
-  },
-  render: (args) => {
-    const section: FeaturesSection = {
-      id: "story-features",
-      type: "features",
-      version: 1,
-      headline: args.headline || undefined,
-      preset: args.preset,
-      items: sampleItemsWithImages.slice(0, args.itemCount),
-    };
-    return <Features section={section} onUpdate={console.log} />;
   },
 };
 
 export const Numbered: Story = {
   args: {
     headline: "How It Works",
-    preset: "features-numbered",
+    variant: "numbered",
     itemCount: 4,
   },
 };

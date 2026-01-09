@@ -1,8 +1,7 @@
-import React from "react";
 import type { Meta, StoryObj } from "@storybook/react-vite";
 import { expect, within } from "storybook/test";
 import { Footer } from "@muse/sections";
-import type { FooterSection, FooterLink, SocialLink } from "@muse/core";
+import type { FooterLink, SocialLink } from "@muse/core";
 
 const sampleLinks: FooterLink[] = [
   { label: "About", href: "#" },
@@ -19,10 +18,35 @@ const sampleSocials: SocialLink[] = [
   { platform: "linkedin", href: "#" },
 ];
 
+/** Renders footer links */
+function FooterLinks({ links }: { links: FooterLink[] }) {
+  return (
+    <>
+      {links.map((link, i) => (
+        <a key={i} href={link.href} style={{ color: "#6b7280", textDecoration: "none", fontSize: "0.875rem" }}>
+          {link.label}
+        </a>
+      ))}
+    </>
+  );
+}
+
+/** Renders social icons */
+function SocialIcons({ socials }: { socials: SocialLink[] }) {
+  return (
+    <>
+      {socials.map((social, i) => (
+        <a key={i} href={social.href} style={{ color: "#6b7280", textDecoration: "none" }}>
+          {social.platform}
+        </a>
+      ))}
+    </>
+  );
+}
+
 type FooterArgs = {
   companyName: string
   copyright: string
-  preset: string
   showLinks: boolean
   showSocials: boolean
 };
@@ -30,7 +54,6 @@ type FooterArgs = {
 const meta: Meta<FooterArgs> = {
   title: "Sections/Footer",
   argTypes: {
-    preset: { table: { disable: true } },
     companyName: { control: "text" },
     copyright: { control: "text" },
     showLinks: { control: "boolean" },
@@ -39,22 +62,18 @@ const meta: Meta<FooterArgs> = {
   args: {
     companyName: "Acme Inc",
     copyright: "2024 Acme Inc. All rights reserved.",
-    preset: "footer-simple",
     showLinks: true,
     showSocials: true,
   },
   render: (args) => {
-    const section: FooterSection = {
-      id: "story-footer",
-      type: "footer",
-      version: 1,
-      companyName: args.companyName || undefined,
-      copyright: args.copyright || undefined,
-      preset: args.preset,
-      links: args.showLinks ? sampleLinks : undefined,
-      socialLinks: args.showSocials ? sampleSocials : undefined,
-    };
-    return <Footer section={section} onUpdate={console.log} />;
+    return (
+      <Footer
+        companyName={args.companyName ? <span>{args.companyName}</span> : undefined}
+        links={args.showLinks ? <FooterLinks links={sampleLinks} /> : undefined}
+        socialLinks={args.showSocials ? <SocialIcons socials={sampleSocials} /> : undefined}
+        copyright={args.copyright ? <p>{args.copyright}</p> : undefined}
+      />
+    );
   },
 };
 
