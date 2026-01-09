@@ -4,6 +4,7 @@ export type {
   Task,
   TaskState,
   TaskStatus,
+  TaskError,
   // Messages
   Message,
   Role,
@@ -35,7 +36,7 @@ export type {
 export type {
   AgentCard,
   AgentProvider,
-  AgentInterface,
+  ProtocolBinding,
   AgentCapabilities,
   SecurityScheme,
   AgentSkill,
@@ -59,3 +60,12 @@ export {
 } from "./errors.js";
 
 export type { A2AErrorCodeType, JsonRpcErrorCodeType } from "./errors.js";
+
+// Task Store
+export type {
+  TaskStore,
+  TaskStoreOptions,
+  ListOptions,
+  CreateTaskOptions,
+} from "./task-store.js";
+export { createTaskStore } from "./task-store.js";

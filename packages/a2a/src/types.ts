@@ -1,26 +1,35 @@
-// A2A Protocol Types (v0.3)
+// A2A Protocol Types (v1.0)
 // https://a2a-protocol.org/latest/specification/
 
-// Task states
+// Task states (kebab-case per spec)
 export type TaskState
   = | "submitted"
     | "working"
     | "completed"
     | "failed"
-    | "canceled"
-    | "input_required"
+    | "cancelled"
+    | "input-required"
     | "rejected"
-    | "auth_required";
+    | "auth-required";
+
+export interface TaskError {
+  code?: string
+  message: string
+  stack?: string
+  cause?: unknown
+}
 
 export interface TaskStatus {
   state: TaskState
   message?: string
   timestamp: string
+  error?: TaskError
 }
 
 export interface Task {
   id: string
   contextId: string
+  version: number
   status: TaskStatus
   artifacts?: Artifact[]
   history?: Message[]
@@ -41,32 +50,26 @@ export interface Message {
   referenceTaskIds?: string[]
 }
 
-// Parts (union type - exactly one should be present)
+// Parts (v1.0: member name acts as discriminator, no "type"/"kind" field)
 export type Part = TextPart | FilePart | DataPart;
 
 export interface TextPart {
-  type: "text"
   text: string
 }
 
 export interface FilePart {
-  type: "file"
   file: FileContent
 }
 
 export interface FileContent {
   uri?: string
-  bytes?: string // base64 encoded
-  mimeType?: string
+  fileWithBytes?: string // base64 encoded (was "bytes" in v0.3)
+  mediaType?: string // (was "mimeType" in v0.3)
   name?: string
 }
 
 export interface DataPart {
-  type: "data"
-  data: {
-    mimeType: string
-    json: unknown
-  }
+  data: unknown // arbitrary JSON payload
 }
 
 // Artifacts

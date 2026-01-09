@@ -9,12 +9,14 @@
   },
   "scripts": {
     "lint": "eslint src",
+    "test": "vitest run",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
     "uuid": "^11.1.0"
   },
   "devDependencies": {
+    "@types/node": "^22",
     "@types/uuid": "^10.0.0"
   }
 }

@@ -222,6 +222,9 @@ importers:
         specifier: ^11.1.0
         version: 11.1.0
     devDependencies:
+      '@types/node':
+        specifier: ^22
+        version: 22.19.3
       '@types/uuid':
         specifier: ^10.0.0
         version: 10.0.0

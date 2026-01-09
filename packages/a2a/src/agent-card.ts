@@ -1,28 +1,25 @@
-// Agent Card types and Muse agent definition
+// Agent Card types and Muse agent definition (v1.0)
 
 export interface AgentCard {
-  protocolVersion?: string
+  protocolVersion: string
   name: string
   description: string
   version: string
+  url: string // Base URL for A2A endpoints
   provider?: AgentProvider
-  supportedInterfaces?: AgentInterface[]
+  protocolBinding?: ProtocolBinding
   capabilities?: AgentCapabilities
   securitySchemes?: Record<string, SecurityScheme>
   defaultInputModes?: string[]
   defaultOutputModes?: string[]
   skills?: AgentSkill[]
-  supportsExtendedAgentCard?: boolean
 }
+
+export type ProtocolBinding = "JSONRPC" | "GRPC" | "HTTP+JSON";
 
 export interface AgentProvider {
   organization: string
   url?: string
-}
-
-export interface AgentInterface {
-  protocol: string
-  url: string
 }
 
 export interface AgentCapabilities {
@@ -56,19 +53,15 @@ export interface JsonSchema {
 // Muse Site Generator agent card
 export function createMuseAgentCard(baseUrl: string): AgentCard {
   return {
-    protocolVersion: "0.3",
+    protocolVersion: "1.0",
     name: "Muse Site Generator",
     description: "Generate landing pages and multi-page websites from text prompts",
     version: "1.0.0",
+    url: `${baseUrl}/a2a`,
     provider: {
       organization: "Muse",
     },
-    supportedInterfaces: [
-      {
-        protocol: "https",
-        url: `${baseUrl}/a2a`,
-      },
-    ],
+    protocolBinding: "JSONRPC",
     capabilities: {
       streaming: true,
       pushNotifications: false,
