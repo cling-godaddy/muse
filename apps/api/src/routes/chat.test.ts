@@ -57,6 +57,10 @@ vi.mock("@muse/ai", async () => {
         usage: { input: 100, output: 50 },
       };
     }),
+    // Mock executeEditSection for edit_section tool tests
+    executeEditSection: vi.fn(async ({ sectionId, field, value }) => ({
+      section: { id: sectionId, type: "hero", [field]: value },
+    })),
     generateItemAgent: {
       config: { model: "gpt-4o-mini" },
       run: vi.fn(async () => mockItemResponse),
@@ -118,8 +122,15 @@ vi.mock("@muse/core", async () => {
       if (presetId === "features-bento") {
         return {
           id: "features-bento",
+          name: "Bento Grid",
           imageRequirements: { category: "subject", count: 6, orientation: "mixed" },
           imageInjection: { type: "nested", array: "items", field: "image" },
+        };
+      }
+      if (presetId === "hero-centered") {
+        return {
+          id: "hero-centered",
+          name: "Centered Hero",
         };
       }
       return undefined;
@@ -352,6 +363,177 @@ describe("chat routes", () => {
       const data = await res.json();
       expect(data.message).toBe("Done");
       expect(data.usage).toBeDefined();
+    });
+
+    describe("edit_section tool", () => {
+      async function invokeEditSection(sectionId: string, field: string, value: unknown) {
+        if (!capturedExecuteTool) throw new Error("executeTool not captured");
+        return capturedExecuteTool({
+          id: "call-1",
+          name: "edit_section",
+          input: { sectionId, field, value },
+        });
+      }
+
+      it("returns error when section not found", async () => {
+        await callRefine(baseRefineBody);
+        const result = await invokeEditSection("nonexistent", "headline", "New Title");
+
+        expect(result.result).toHaveProperty("error");
+        expect((result.result as { error: string }).error).toContain("Section not found");
+      });
+
+      it("returns error for invalid field", async () => {
+        await callRefine(baseRefineBody);
+        const result = await invokeEditSection("s1", "invalidField", "value");
+
+        expect(result.result).toHaveProperty("error");
+        expect((result.result as { error: string }).error).toContain("Invalid field");
+      });
+
+      it("returns success for valid section and field", async () => {
+        await callRefine(baseRefineBody);
+        const result = await invokeEditSection("s1", "headline", "New Headline");
+
+        expect(result.result).toHaveProperty("success", true);
+      });
+    });
+
+    describe("move_section tool", () => {
+      async function invokeMoveSection(sectionId: string, direction: "up" | "down") {
+        if (!capturedExecuteTool) throw new Error("executeTool not captured");
+        return capturedExecuteTool({
+          id: "call-1",
+          name: "move_section",
+          input: { sectionId, direction },
+        });
+      }
+
+      it("returns error when section not found", async () => {
+        await callRefine(baseRefineBody);
+        const result = await invokeMoveSection("nonexistent", "up");
+
+        expect(result.result).toHaveProperty("error");
+        expect((result.result as { error: string }).error).toContain("Section not found");
+      });
+
+      it("returns error when trying to move footer", async () => {
+        const bodyWithFooter = {
+          ...baseRefineBody,
+          sections: [{ id: "footer-1", type: "footer", preset: "footer-simple" }],
+        };
+        await callRefine(bodyWithFooter);
+        const result = await invokeMoveSection("footer-1", "up");
+
+        expect(result.result).toHaveProperty("error");
+        expect((result.result as { error: string }).error).toContain("Footer sections cannot be moved");
+      });
+
+      it("returns success with direction for valid section", async () => {
+        await callRefine(baseRefineBody);
+        const result = await invokeMoveSection("s1", "down");
+
+        expect(result.result).toHaveProperty("success", true);
+        expect(result.result).toHaveProperty("direction", "down");
+      });
+    });
+
+    describe("delete_section tool", () => {
+      async function invokeDeleteSection(sectionId: string) {
+        if (!capturedExecuteTool) throw new Error("executeTool not captured");
+        return capturedExecuteTool({
+          id: "call-1",
+          name: "delete_section",
+          input: { sectionId },
+        });
+      }
+
+      it("returns error when section not found", async () => {
+        await callRefine(baseRefineBody);
+        const result = await invokeDeleteSection("nonexistent");
+
+        expect(result.result).toHaveProperty("error");
+        expect((result.result as { error: string }).error).toContain("Section not found");
+      });
+
+      it("returns error when trying to delete navbar", async () => {
+        const bodyWithNavbar = {
+          ...baseRefineBody,
+          sections: [{ id: "nav-1", type: "navbar", preset: "navbar-simple" }],
+        };
+        await callRefine(bodyWithNavbar);
+        const result = await invokeDeleteSection("nav-1");
+
+        expect(result.result).toHaveProperty("error");
+        expect((result.result as { error: string }).error).toContain("Cannot delete navbar");
+      });
+
+      it("returns error when trying to delete footer", async () => {
+        const bodyWithFooter = {
+          ...baseRefineBody,
+          sections: [{ id: "footer-1", type: "footer", preset: "footer-simple" }],
+        };
+        await callRefine(bodyWithFooter);
+        const result = await invokeDeleteSection("footer-1");
+
+        expect(result.result).toHaveProperty("error");
+        expect((result.result as { error: string }).error).toContain("Cannot delete footer");
+      });
+
+      it("returns needsConfirmation for valid section", async () => {
+        await callRefine(baseRefineBody);
+        const result = await invokeDeleteSection("s1");
+
+        expect(result.result).toHaveProperty("needsConfirmation", true);
+      });
+    });
+
+    describe("add_section tool", () => {
+      async function invokeAddSection(input: { sectionType?: string, preset?: string, index?: number }) {
+        if (!capturedExecuteTool) throw new Error("executeTool not captured");
+        return capturedExecuteTool({
+          id: "call-1",
+          name: "add_section",
+          input,
+        });
+      }
+
+      it("returns needsConfirmation with select_type step when no params", async () => {
+        await callRefine(baseRefineBody);
+        const result = await invokeAddSection({});
+
+        expect(result.result).toHaveProperty("needsConfirmation", true);
+      });
+
+      it("returns error for invalid section type", async () => {
+        await callRefine(baseRefineBody);
+        const result = await invokeAddSection({ sectionType: "invalid-type" });
+
+        expect(result.result).toHaveProperty("error");
+        expect((result.result as { error: string }).error).toContain("Invalid section type");
+      });
+
+      it("returns needsConfirmation with select_preset step for valid type without preset", async () => {
+        await callRefine(baseRefineBody);
+        const result = await invokeAddSection({ sectionType: "hero" });
+
+        expect(result.result).toHaveProperty("needsConfirmation", true);
+      });
+
+      it("returns error for invalid preset", async () => {
+        await callRefine(baseRefineBody);
+        const result = await invokeAddSection({ sectionType: "hero", preset: "invalid-preset" });
+
+        expect(result.result).toHaveProperty("error");
+        expect((result.result as { error: string }).error).toContain("Invalid preset");
+      });
+
+      it("returns needsConfirmation for valid type and preset", async () => {
+        await callRefine(baseRefineBody);
+        const result = await invokeAddSection({ sectionType: "hero", preset: "hero-centered" });
+
+        expect(result.result).toHaveProperty("needsConfirmation", true);
+      });
     });
 
     describe("set_typography tool", () => {
