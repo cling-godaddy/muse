@@ -1,9 +1,10 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "@clerk/clerk-react";
+import { getConfig } from "@muse/config";
 import type { Site, Section } from "@muse/core";
 import type { Message } from "../hooks/useChat";
 
-const API_URL = "http://localhost:3001";
+const API_URL = getConfig().api.baseUrl;
 
 export function useSite(siteId: string | undefined) {
   const { getToken } = useAuth();

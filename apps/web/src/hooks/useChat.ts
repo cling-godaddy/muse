@@ -1,13 +1,15 @@
 import { useState, useCallback, useRef, useEffect } from "react";
 import { useAuth } from "@clerk/clerk-react";
 import { sumBy } from "lodash-es";
+import { getConfig } from "@muse/config";
 import type { Section } from "@muse/core";
 import type { Usage } from "@muse/ai";
 import type { ImageSelection } from "@muse/media";
 import { parseStream, type ParseState, type AgentState, type ThemeSelection, type PageInfo } from "../utils/streamParser";
 import { useLatest } from "@muse/react";
 
-const MESSAGES_URL = "http://localhost:3001/api/messages";
+const { api } = getConfig();
+const MESSAGES_URL = `${api.baseUrl}/api/messages`;
 
 export interface Message {
   id: string
@@ -101,8 +103,8 @@ export interface UseChat {
   trackUsage: (usage: Usage) => void
 }
 
-const API_URL = "http://localhost:3001/api/chat";
-const REFINE_URL = "http://localhost:3001/api/chat/refine";
+const API_URL = `${api.baseUrl}/api/chat`;
+const REFINE_URL = `${api.baseUrl}/api/chat/refine`;
 
 const emptyUsage: Usage = { input: 0, output: 0, cost: 0, model: "", timestamp: "" };
 

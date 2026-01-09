@@ -1,3 +1,4 @@
+import { getConfig } from "@muse/config";
 import { sectionFieldRegistry, getEditableFields, resolveField, type Section } from "@muse/core";
 import type { ToolDefinition } from "../types";
 
@@ -31,7 +32,7 @@ export async function executeEditSection(params: {
   authToken: string
 }): Promise<{ section: Section, pageId: string }> {
   const { siteId, sectionId, field, value, authToken } = params;
-  const apiUrl = `http://localhost:3001/api/sites/${siteId}/sections/${sectionId}`;
+  const apiUrl = `${getConfig().api.baseUrl}/api/sites/${siteId}/sections/${sectionId}`;
 
   const response = await fetch(apiUrl, {
     method: "PATCH",
