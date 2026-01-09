@@ -56,6 +56,8 @@ export interface UseChatOptions {
   siteContext?: SiteContext
   /** Current sections - when provided, chat switches to refine mode */
   sections?: Section[]
+  /** Current theme - needed for refine mode to preserve palette when changing typography */
+  theme?: { palette: string, typography: string }
   /** Existing costs from site for session tracking */
   siteCosts?: Usage[]
   onSectionParsed?: (section: Section) => void
@@ -218,6 +220,7 @@ export function useChat(options: UseChatOptions = {}): UseChat {
             siteId: opts.siteId,
             sections: opts.sections,
             messages: newMessages, // Send full conversation history
+            theme: opts.theme,
           }),
         });
 
@@ -235,6 +238,14 @@ export function useChat(options: UseChatOptions = {}): UseChat {
         // Handle moves from backend
         if (result.moves?.length > 0) {
           optionsRef.current.onMove?.(result.moves);
+        }
+
+        // Handle theme updates from backend
+        if (result.themeUpdate) {
+          optionsRef.current.onThemeSelected?.({
+            palette: result.themeUpdate.palette,
+            typography: result.themeUpdate.typography,
+          });
         }
 
         // Handle pending actions (e.g., delete confirmation)

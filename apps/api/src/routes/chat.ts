@@ -6,6 +6,8 @@ import { createLogger } from "@muse/logger";
 import { createMediaClient, createQueryNormalizer, getIamJwt, type MediaClient, type QueryNormalizer } from "@muse/media";
 import type { Section, SectionType, FeatureItem, Quote, TeamMember, StatItem, FaqItem } from "@muse/core";
 import { sectionNeedsImages, getPreset, getPresetsForType, getAllSectionMeta } from "@muse/core";
+import { isTypographyId, getTypographyIds } from "@muse/themes";
+import { getConfig } from "@muse/config";
 
 const logger = createLogger();
 let client: Provider | null = null;
@@ -89,15 +91,17 @@ interface PendingAction {
 }
 
 chatRoute.post("/refine", async (c) => {
-  const { siteId, sections, messages } = await c.req.json<{
+  const { siteId, sections, messages, theme } = await c.req.json<{
     siteId: string
     sections: Section[]
     messages: Message[]
+    theme?: { palette: string, typography: string }
   }>();
 
   const pendingActions: PendingAction[] = [];
   const updatedSections: Section[] = [];
   const moves: Array<{ sectionId: string, direction: "up" | "down" }> = [];
+  let themeUpdate: { palette: string, typography: string } | null = null;
 
   const executeTool = async (call: ToolCall) => {
     logger.info("tool_call", { name: call.name, input: call.input });
@@ -300,6 +304,56 @@ chatRoute.post("/refine", async (c) => {
       };
     }
 
+    if (call.name === "set_typography") {
+      const { typography } = call.input as { typography: string };
+
+      if (!isTypographyId(typography)) {
+        const validIds = getTypographyIds();
+        logger.warn("invalid_typography", { typography, validIds: validIds.slice(0, 10) });
+        return {
+          id: call.id,
+          result: { error: `Invalid typography "${typography}". Valid options: ${validIds.slice(0, 10).join(", ")}...` },
+        };
+      }
+
+      // Use current palette from request, update typography
+      const newTheme = { palette: theme?.palette ?? "slate", typography };
+      themeUpdate = newTheme;
+
+      // Persist to database
+      try {
+        const token = c.req.header("Authorization")?.replace("Bearer ", "");
+        const apiUrl = `${getConfig().api.baseUrl}/api/sites/${siteId}`;
+
+        const response = await fetch(apiUrl, {
+          method: "PATCH",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${token}`,
+          },
+          body: JSON.stringify({ theme: newTheme }),
+        });
+
+        if (!response.ok) {
+          const errorData = await response.json() as { error?: string };
+          throw new Error(errorData.error || `Failed to update theme: ${response.status}`);
+        }
+
+        logger.info("typography_updated", { typography, palette: newTheme.palette });
+        return {
+          id: call.id,
+          result: { success: true, theme: newTheme },
+        };
+      }
+      catch (err) {
+        logger.error("set_typography_failed", { error: err });
+        return {
+          id: call.id,
+          result: { error: err instanceof Error ? err.message : "Unknown error" },
+        };
+      }
+    }
+
     return { id: call.id, result: { success: true } };
   };
 
@@ -341,6 +395,7 @@ chatRoute.post("/refine", async (c) => {
     updatedSections,
     moves,
     pendingActions,
+    themeUpdate,
     usage: completeUsage,
   });
 });

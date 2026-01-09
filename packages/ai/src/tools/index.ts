@@ -9,3 +9,4 @@ export {
 export { moveSectionTool } from "./move-section";
 export { deleteSectionTool } from "./delete-section";
 export { addSectionTool } from "./add-section";
+export { setTypographyTool } from "./set-typography";

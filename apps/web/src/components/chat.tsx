@@ -28,6 +28,8 @@ interface ChatProps {
   siteContext?: SiteContext
   /** Current sections - enables refine mode when provided */
   sections?: Section[]
+  /** Current theme - needed for refine mode to preserve palette when changing typography */
+  theme?: { palette: string, typography: string }
   /** Existing costs from site for session tracking */
   siteCosts?: Usage[]
   /** Initial prompt to auto-send on mount (only if no existing messages/sections) */
@@ -60,8 +62,8 @@ interface ChatProps {
   onAgentsChange?: (agents: AgentState[]) => void
 }
 
-export function Chat({ siteId, siteContext, sections, siteCosts, autoSendPrompt, intakeContext, onSectionParsed, onThemeSelected, onImages, onPages, onRefine, onSectionsUpdated, onMove, onDelete, onAddSection, onGenerationComplete, onMessagesChange, onUsage, onTrackUsageReady, onAgentsChange }: ChatProps) {
-  const options = useMemo(() => ({ siteId, siteContext, sections, siteCosts, onSectionParsed, onThemeSelected, onImages, onPages, onRefine, onSectionsUpdated, onMove, onDelete, onAddSection, onGenerationComplete, onMessagesChange, onUsage }), [siteId, siteContext, sections, siteCosts, onSectionParsed, onThemeSelected, onImages, onPages, onRefine, onSectionsUpdated, onMove, onDelete, onAddSection, onGenerationComplete, onMessagesChange, onUsage]);
+export function Chat({ siteId, siteContext, sections, theme, siteCosts, autoSendPrompt, intakeContext, onSectionParsed, onThemeSelected, onImages, onPages, onRefine, onSectionsUpdated, onMove, onDelete, onAddSection, onGenerationComplete, onMessagesChange, onUsage, onTrackUsageReady, onAgentsChange }: ChatProps) {
+  const options = useMemo(() => ({ siteId, siteContext, sections, theme, siteCosts, onSectionParsed, onThemeSelected, onImages, onPages, onRefine, onSectionsUpdated, onMove, onDelete, onAddSection, onGenerationComplete, onMessagesChange, onUsage }), [siteId, siteContext, sections, theme, siteCosts, onSectionParsed, onThemeSelected, onImages, onPages, onRefine, onSectionsUpdated, onMove, onDelete, onAddSection, onGenerationComplete, onMessagesChange, onUsage]);
   const { messages, input, setInput, isLoading, error, send, sessionUsage, agents, agentsMessageIndex, pendingAction, confirmPendingAction, cancelPendingAction, selectOption, trackUsage } = useChat(options);
   const isRefineMode = sections && sections.length > 0;
   const messagesEndRef = useRef<HTMLDivElement>(null);
