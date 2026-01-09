@@ -82,6 +82,7 @@ function formatSSE(id: string | number, event: StreamResponse): string {
 // Method name aliases (v1.0 uses PascalCase, we also accept slash-style)
 const methodAliases: Record<string, string> = {
   SendMessage: "message/send",
+  SendStreamingMessage: "message/stream",
   GetTask: "tasks/get",
   CancelTask: "tasks/cancel",
 };
@@ -197,13 +198,13 @@ a2aRoute.post("/", async (c) => {
       return c.json(jsonRpcError(rpcId, invalidParams("Missing method")));
     }
 
-    // Handle streaming methods (v1.0: SendStreamingMessage, alias: message/stream)
-    if (body.method === "SendStreamingMessage" || body.method === "message/stream") {
-      return handleMessageStream(c, rpcId, body.params);
-    }
-
     // Normalize method names (v1.0 uses PascalCase, we also accept slash-style)
     const normalizedMethod = normalizeMethodName(body.method);
+
+    // Handle streaming methods
+    if (normalizedMethod === "message/stream") {
+      return handleMessageStream(c, rpcId, body.params);
+    }
 
     // Find and execute handler for other methods
     const handler = methods[normalizedMethod];
@@ -259,18 +260,24 @@ async function handleMessageStream(c: Context, rpcId: string | number, params: u
     });
 
     try {
+      // Emit initial task so clients can grab taskId/contextId immediately
+      emitter.emitTask(task);
+
       // Update task to working
       getTaskStore().update(task.id, { state: "working" });
 
       // Emit initial status
-      emitter.statusUpdate("starting", { skillId });
+      emitter.statusUpdate("starting", { skillId, description: "Starting generation" });
 
       // TODO: Route to actual orchestrator based on skillId
       // For now, emit stub events to demonstrate the flow
-      await simulateGeneration(emitter, skillId);
+      const completionMessage = await simulateGeneration(emitter, skillId);
 
-      // Mark complete and emit final task
-      getTaskStore().update(task.id, { state: "completed", message: "Generation complete" });
+      // Mark complete - use same message in store and stream
+      getTaskStore().update(task.id, { state: "completed", message: completionMessage });
+      emitter.complete(completionMessage);
+
+      // Emit final task
       const finalTask = getTaskStore().get(task.id);
       if (finalTask) {
         emitter.emitTask(finalTask);
@@ -278,17 +285,19 @@ async function handleMessageStream(c: Context, rpcId: string | number, params: u
     }
     catch (err) {
       logger.error("a2a_stream_error", { taskId: task.id, error: err });
+      const errorMessage = err instanceof Error ? err.message : "Unknown error";
       getTaskStore().update(task.id, {
         state: "failed",
-        error: { message: err instanceof Error ? err.message : "Unknown error" },
+        error: { message: errorMessage },
       });
-      emitter.fail(err instanceof Error ? err : String(err));
+      emitter.fail(err);
     }
   });
 }
 
 // Stub: simulate generation steps (replace with actual orchestrator)
-async function simulateGeneration(emitter: ReturnType<typeof createA2AEmitter>, skillId: string) {
+// Returns completion message to keep store and stream aligned
+async function simulateGeneration(emitter: ReturnType<typeof createA2AEmitter>, skillId: string): Promise<string> {
   // Simulate brief extraction
   emitter.statusUpdate("brief", { description: "Extracting brand context" });
   await sleep(100);
@@ -319,7 +328,7 @@ async function simulateGeneration(emitter: ReturnType<typeof createA2AEmitter>, 
     { lastChunk: true },
   );
 
-  emitter.complete(`Site generation complete (skill: ${skillId})`);
+  return `Site generation complete (skill: ${skillId})`;
 }
 
 function sleep(ms: number): Promise<void> {
