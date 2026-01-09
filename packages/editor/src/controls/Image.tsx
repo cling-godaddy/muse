@@ -2,6 +2,7 @@ import { useState } from "react";
 import * as Popover from "@radix-ui/react-popover";
 import { Search, Loader2, Trash2 } from "lucide-react";
 import type { ImageSource, Usage } from "@muse/core";
+import { useSiteContext } from "../context/Site";
 import styles from "./Image.module.css";
 
 // TODO: Upload is disabled until we switch auth patterns and integrate a proper
@@ -37,6 +38,7 @@ export function Image({
   searchUrl = DEFAULT_SEARCH_URL,
   trigger,
 }: Props) {
+  const { siteId } = useSiteContext();
   const [open, setOpen] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -84,7 +86,9 @@ export function Image({
     setSearching(true);
 
     try {
-      const res = await fetch(`${searchUrl}?q=${encodeURIComponent(query)}`);
+      const params = new URLSearchParams({ q: query });
+      if (siteId) params.set("siteId", siteId);
+      const res = await fetch(`${searchUrl}?${params}`);
       if (!res.ok) throw new Error("Search failed");
       const data = await res.json() as { results: SearchResult[], usage?: Usage };
       setResults(data.results);

@@ -1,6 +1,7 @@
 import { createContext, useContext, type ReactNode } from "react";
 
 interface SiteContextValue {
+  siteId?: string
   pageSlugs: string[]
   onGeneratePage?: (slug: string) => void
 }
@@ -8,14 +9,15 @@ interface SiteContextValue {
 const SiteContext = createContext<SiteContextValue>({ pageSlugs: [] });
 
 interface SiteProviderProps {
+  siteId?: string
   pageSlugs: string[]
   onGeneratePage?: (slug: string) => void
   children: ReactNode
 }
 
-export function SiteProvider({ pageSlugs, onGeneratePage, children }: SiteProviderProps) {
+export function SiteProvider({ siteId, pageSlugs, onGeneratePage, children }: SiteProviderProps) {
   return (
-    <SiteContext.Provider value={{ pageSlugs, onGeneratePage }}>
+    <SiteContext.Provider value={{ siteId, pageSlugs, onGeneratePage }}>
       {children}
     </SiteContext.Provider>
   );

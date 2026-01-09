@@ -235,7 +235,7 @@ function MainApp() {
   }, [site.pages]);
 
   return (
-    <SiteProvider pageSlugs={pageSlugs} onGeneratePage={handleGeneratePage}>
+    <SiteProvider siteId={site.id} pageSlugs={pageSlugs} onGeneratePage={handleGeneratePage}>
       <div className="flex flex-col h-full font-sans text-text bg-bg">
         <header className="px-6 py-3 border-b border-border bg-bg flex items-center gap-4">
           <Link to="/" className="text-xl font-semibold hover:text-primary transition-colors">
