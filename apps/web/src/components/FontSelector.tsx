@@ -93,7 +93,12 @@ export function FontSelector({ value, onChange, disabled }: FontSelectorProps) {
           className={styles.trigger}
           disabled={disabled}
         >
-          <span className={styles.triggerLabel}>{current?.name ?? "Select font"}</span>
+          <span
+            className={styles.triggerLabel}
+            style={current ? { fontFamily: current.fonts.heading } : undefined}
+          >
+            {current?.name ?? "Select font"}
+          </span>
           <ChevronDown size={14} />
         </button>
       </Popover.Trigger>
