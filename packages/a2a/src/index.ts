@@ -73,3 +73,6 @@ export { createTaskStore } from "./task-store.js";
 // Emitter
 export type { A2AEmitter, A2AEmitterOptions, StreamCallback } from "./emitter.js";
 export { createA2AEmitter } from "./emitter.js";
+
+// Marker Translator
+export { createMarkerTranslator } from "./marker-translator.js";

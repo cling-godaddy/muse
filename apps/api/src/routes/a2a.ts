@@ -4,6 +4,7 @@ import {
   createMuseAgentCard,
   createTaskStore,
   createA2AEmitter,
+  createMarkerTranslator,
   type TaskStore,
   type JsonRpcRequest,
   type JsonRpcResponse,
@@ -20,12 +21,16 @@ import {
   taskNotFound,
   taskNotCancelable,
 } from "@muse/a2a";
+import { createClient, orchestrate, orchestrateSite, type Provider, type Message as AIMessage } from "@muse/ai";
+import { createMediaClient, getIamJwt, type MediaClient } from "@muse/media";
 import { createLogger } from "@muse/logger";
 
 const logger = createLogger();
 
-// Singleton task store (in-memory for now)
+// Singletons
 let taskStore: TaskStore | null = null;
+let client: Provider | null = null;
+let mediaClient: MediaClient | null = null;
 
 function getTaskStore(): TaskStore {
   if (!taskStore) {
@@ -35,6 +40,27 @@ function getTaskStore(): TaskStore {
     });
   }
   return taskStore;
+}
+
+function getClient(): Provider {
+  if (!client) {
+    client = createClient({
+      provider: (process.env.AI_PROVIDER as "openai" | "anthropic") ?? "openai",
+      openaiKey: process.env.OPENAI_API_KEY,
+      anthropicKey: process.env.ANTHROPIC_API_KEY,
+    });
+  }
+  return client;
+}
+
+function getMediaClient(): MediaClient {
+  if (!mediaClient) {
+    mediaClient = createMediaClient({
+      gettyJwt: getIamJwt,
+      logger: logger.child({ agent: "media" }),
+    });
+  }
+  return mediaClient;
 }
 
 // Skill inference from message content
@@ -269,11 +295,29 @@ async function handleMessageStream(c: Context, rpcId: string | number, params: u
       // Emit initial status
       emitter.statusUpdate("starting", { skillId, description: "Starting generation" });
 
-      // TODO: Route to actual orchestrator based on skillId
-      // For now, emit stub events to demonstrate the flow
-      const completionMessage = await simulateGeneration(emitter, skillId);
+      // Convert A2A message to AI message format
+      const aiMessages = convertToAIMessages(message);
 
-      // Mark complete - use same message in store and stream
+      // Select orchestrator based on skill
+      const generator = skillId === "generate_site" ? orchestrateSite : orchestrate;
+
+      // Create marker translator to convert orchestrator output to A2A events
+      const translator = createMarkerTranslator(emitter, {
+        onParseError: (marker, error) => {
+          logger.warn("a2a_marker_parse_error", { taskId: task.id, marker: marker.slice(0, 100), error: error.message });
+        },
+      });
+
+      // Run orchestrator and translate markers to A2A events
+      const config = { mediaClient: getMediaClient(), logger };
+      const input = { messages: aiMessages };
+
+      for await (const chunk of generator(input, getClient(), { config })) {
+        translator.processChunk(chunk);
+      }
+
+      // Mark complete
+      const completionMessage = `Site generation complete (skill: ${skillId})`;
       getTaskStore().update(task.id, { state: "completed", message: completionMessage });
       emitter.complete(completionMessage);
 
@@ -295,44 +339,22 @@ async function handleMessageStream(c: Context, rpcId: string | number, params: u
   });
 }
 
-// Stub: simulate generation steps (replace with actual orchestrator)
-// Returns completion message to keep store and stream aligned
-async function simulateGeneration(emitter: ReturnType<typeof createA2AEmitter>, skillId: string): Promise<string> {
-  // Simulate brief extraction
-  emitter.statusUpdate("brief", { description: "Extracting brand context" });
-  await sleep(100);
+/**
+ * Convert A2A Message to AI Message format.
+ * Extracts text parts and converts to the format expected by orchestrators.
+ */
+function convertToAIMessages(message: Message): AIMessage[] {
+  // Extract text content from message parts
+  const textParts = message.parts
+    .filter((p): p is { text: string } => "text" in p)
+    .map(p => p.text);
 
-  // Simulate structure planning
-  emitter.statusUpdate("structure", { description: "Planning page layout" });
-  await sleep(100);
+  const content = textParts.join("\n");
 
-  // Simulate theme generation
-  emitter.statusUpdate("theme", { description: "Generating color scheme" });
-  await sleep(100);
-  emitter.artifactUpdate(
-    {
-      name: "theme",
-      parts: [{ data: { primaryColor: "#007bff", secondaryColor: "#6c757d" } }],
-    },
-    { lastChunk: true },
-  );
+  // Map A2A role to AI role
+  const role = message.role === "agent" ? "assistant" : "user";
 
-  // Simulate sections generation
-  emitter.statusUpdate("sections", { description: "Generating content" });
-  await sleep(100);
-  emitter.artifactUpdate(
-    {
-      name: "sections",
-      parts: [{ data: [{ type: "hero", headline: "Welcome", subheadline: "Your site is ready" }] }],
-    },
-    { lastChunk: true },
-  );
-
-  return `Site generation complete (skill: ${skillId})`;
-}
-
-function sleep(ms: number): Promise<void> {
-  return new Promise(resolve => setTimeout(resolve, ms));
+  return [{ role, content }];
 }
 
 // REST endpoint for listing tasks (not in JSON-RPC spec)
