@@ -1,0 +1,180 @@
+.section {
+  padding: 4rem 2rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  align-items: center;
+  text-align: center;
+}
+
+.primary {
+  background: var(--muse-theme-cta-bg, var(--muse-theme-primary, #6366f1));
+}
+
+.secondary {
+  background: var(--muse-theme-bg-alt, #f8fafc);
+  border: 2px solid var(--muse-theme-primary, #6366f1);
+}
+
+.headline {
+  font-family: var(--muse-theme-heading-font, inherit);
+  font-weight: var(--muse-theme-heading-weight, 700);
+  font-size: clamp(1.25rem, 4vw, 1.75rem);
+  background: transparent;
+  border: 1px dashed transparent;
+  padding: 0.5rem;
+  width: 100%;
+  max-width: 600px;
+  text-align: center;
+  resize: none;
+}
+
+.primary .headline {
+  color: var(--muse-theme-cta-text, white);
+}
+
+.primary .headline:focus {
+  border-color: rgba(255, 255, 255, 0.5);
+}
+
+.primary .headline::placeholder {
+  color: color-mix(in srgb, var(--muse-theme-cta-text, white) 60%, transparent);
+}
+
+.secondary .headline {
+  color: var(--muse-theme-text, #0f172a);
+}
+
+.secondary .headline:focus {
+  border-color: var(--muse-theme-primary, #6366f1);
+}
+
+.description {
+  font-family: var(--muse-theme-body-font, inherit);
+  font-size: 1rem;
+  background: transparent;
+  border: 1px dashed transparent;
+  padding: 0.5rem;
+  width: 100%;
+  max-width: 500px;
+  text-align: center;
+  resize: none;
+}
+
+.primary .description {
+  color: color-mix(in srgb, var(--muse-theme-cta-text, white) 90%, transparent);
+}
+
+.primary .description:focus {
+  border-color: rgba(255, 255, 255, 0.5);
+}
+
+.primary .description::placeholder {
+  color: color-mix(in srgb, var(--muse-theme-cta-text, white) 50%, transparent);
+}
+
+.secondary .description {
+  color: var(--muse-theme-text-muted, #64748b);
+}
+
+.secondary .description:focus {
+  border-color: var(--muse-theme-primary, #6366f1);
+}
+
+.button {
+  margin-top: 0.5rem;
+  padding: 0.75rem 1.5rem;
+  border-radius: var(--muse-theme-radius, 0.5rem);
+  border: none;
+  font-family: var(--muse-theme-body-font, sans-serif);
+  font-size: 0.875rem;
+  font-weight: 600;
+  text-decoration: none;
+  display: inline-block;
+  cursor: pointer;
+}
+
+.primary .button {
+  background: var(--muse-theme-bg, white);
+  color: var(--muse-theme-text, #111827);
+}
+
+.secondary .button {
+  background: var(--muse-theme-primary, #6366f1);
+  color: white;
+}
+
+.variantSelect {
+  padding: 0.25rem 0.5rem;
+  font-size: 0.75rem;
+  border-radius: 0.25rem;
+  border: 1px solid currentColor;
+  background: transparent;
+  margin-top: 0.5rem;
+}
+
+.primary .variantSelect {
+  color: color-mix(in srgb, var(--muse-theme-cta-text, white) 70%, transparent);
+}
+
+.secondary .variantSelect {
+  color: var(--muse-theme-text-muted, #64748b);
+}
+
+/* ============================================
+   CRT EFFECTS
+   Scanlines, glow for terminal/retro aesthetic
+   ============================================ */
+:global([data-effects="crt"]) .section {
+  position: relative;
+}
+
+:global([data-effects="crt"]) .section::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(
+    0deg,
+    rgba(var(--muse-theme-primary-rgb, 0, 255, 0), 0.03) 0px,
+    rgba(var(--muse-theme-primary-rgb, 0, 255, 0), 0.03) 1px,
+    transparent 1px,
+    transparent 2px
+  );
+  pointer-events: none;
+  z-index: 10;
+  border-radius: inherit;
+}
+
+:global([data-effects="crt"]) .headline {
+  text-shadow: 0 0 10px rgba(var(--muse-theme-primary-rgb, 0, 255, 0), 0.5);
+}
+
+:global([data-effects="crt"]) .description {
+  text-shadow: 0 0 8px rgba(var(--muse-theme-primary-rgb, 0, 255, 0), 0.3);
+}
+
+:global([data-effects="crt"]) .button {
+  box-shadow: 0 0 15px rgba(var(--muse-theme-primary-rgb, 0, 255, 0), 0.3);
+}
+
+/* ============================================
+   NEON EFFECTS
+   ============================================ */
+:global([data-effects="neon"]) .headline {
+  text-shadow:
+    0 0 10px rgba(var(--muse-theme-primary-rgb, 255, 42, 109), 0.8),
+    0 0 20px rgba(var(--muse-theme-primary-rgb, 255, 42, 109), 0.6),
+    0 0 40px rgba(var(--muse-theme-primary-rgb, 255, 42, 109), 0.4);
+}
+
+:global([data-effects="neon"]) .description {
+  text-shadow:
+    0 0 8px rgba(var(--muse-theme-primary-rgb, 255, 42, 109), 0.5),
+    0 0 16px rgba(var(--muse-theme-primary-rgb, 255, 42, 109), 0.3);
+}
+
+:global([data-effects="neon"]) .button {
+  box-shadow:
+    0 0 15px rgba(var(--muse-theme-primary-rgb, 255, 42, 109), 0.5),
+    0 0 30px rgba(var(--muse-theme-primary-rgb, 255, 42, 109), 0.3);
+}

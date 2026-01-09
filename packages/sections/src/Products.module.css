@@ -1,0 +1,333 @@
+.section {
+  padding: 3rem 2rem;
+  background: var(--muse-theme-bg, white);
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+.headline {
+  font-family: var(--muse-theme-heading-font, inherit);
+  font-weight: var(--muse-theme-heading-weight, 700);
+  font-size: clamp(1.5rem, 4vw, 2.5rem);
+  color: var(--muse-theme-text, #111827);
+  background: transparent;
+  border: 1px dashed transparent;
+  padding: 0.5rem;
+  text-align: center;
+  width: 100%;
+}
+
+.headline:focus {
+  border-color: var(--muse-theme-primary, #6366f1);
+  outline: none;
+}
+
+.subheadline {
+  font-family: var(--muse-theme-body-font, inherit);
+  font-size: 1.125rem;
+  color: var(--muse-theme-text-muted, #6b7280);
+  background: transparent;
+  border: 1px dashed transparent;
+  padding: 0.5rem;
+  text-align: center;
+  width: 100%;
+  resize: none;
+}
+
+.subheadline:focus {
+  border-color: var(--muse-theme-primary, #6366f1);
+  outline: none;
+}
+
+/* Cards container */
+.cards {
+  display: grid;
+  gap: 1.5rem;
+}
+
+/* Individual card */
+.card {
+  background: var(--muse-theme-bg-alt, #f8fafc);
+  border-radius: var(--muse-theme-radius, 0.75rem);
+  overflow: hidden;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+}
+
+.cardImage {
+  width: 100%;
+  aspect-ratio: 1;
+  object-fit: cover;
+}
+
+.cardImagePlaceholder {
+  width: 100%;
+  aspect-ratio: 1;
+  background: var(--muse-theme-border, #e5e7eb);
+}
+
+.badge {
+  position: absolute;
+  top: 0.75rem;
+  left: 0.75rem;
+  font-family: var(--muse-theme-body-font, inherit);
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.025em;
+  color: white;
+  background: var(--muse-theme-primary, #6366f1);
+  padding: 0.25rem 0.5rem;
+  border-radius: 0.25rem;
+}
+
+.cardContent {
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.cardName {
+  font-family: var(--muse-theme-body-font, inherit);
+  font-weight: 500;
+  font-size: 1rem;
+  color: var(--muse-theme-text, #111827);
+  background: transparent;
+  border: 1px dashed transparent;
+  padding: 0.125rem;
+}
+
+.cardName:focus {
+  border-color: var(--muse-theme-primary, #6366f1);
+  outline: none;
+}
+
+.cardPricing {
+  display: flex;
+  align-items: baseline;
+  gap: 0.5rem;
+}
+
+.cardPrice {
+  font-family: var(--muse-theme-body-font, inherit);
+  font-weight: 600;
+  font-size: 1.125rem;
+  color: var(--muse-theme-text, #111827);
+  background: transparent;
+  border: 1px dashed transparent;
+  padding: 0.125rem;
+}
+
+.cardPrice:focus {
+  border-color: var(--muse-theme-primary, #6366f1);
+  outline: none;
+}
+
+.cardOriginalPrice {
+  font-family: var(--muse-theme-body-font, inherit);
+  font-size: 0.875rem;
+  color: var(--muse-theme-text-muted, #9ca3af);
+  text-decoration: line-through;
+  background: transparent;
+  border: 1px dashed transparent;
+  padding: 0.125rem;
+}
+
+.cardOriginalPrice:focus {
+  border-color: var(--muse-theme-primary, #6366f1);
+  outline: none;
+}
+
+.cardRating {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  font-size: 0.875rem;
+}
+
+.stars {
+  color: #fbbf24;
+}
+
+.ratingValue {
+  font-family: var(--muse-theme-body-font, inherit);
+  color: var(--muse-theme-text-muted, #6b7280);
+}
+
+.removeButton {
+  position: absolute;
+  top: 0.5rem;
+  right: 0.5rem;
+  font-size: 1rem;
+  color: var(--muse-theme-text-muted, #9ca3af);
+  background: var(--muse-theme-bg, white);
+  border: none;
+  border-radius: 50%;
+  width: 1.5rem;
+  height: 1.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  z-index: 1;
+}
+
+.removeButton:hover {
+  color: var(--muse-theme-text, #111827);
+}
+
+.addButton {
+  align-self: center;
+  font-size: 0.875rem;
+  color: var(--muse-theme-primary, #6366f1);
+  background: transparent;
+  border: 1px dashed var(--muse-theme-primary, #6366f1);
+  padding: 0.5rem 1rem;
+  border-radius: 0.5rem;
+  cursor: pointer;
+}
+
+/* ============================================
+   GRID LAYOUT (default)
+   Standard product grid
+   ============================================ */
+.grid .cards {
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+}
+
+/* ============================================
+   FEATURED LAYOUT
+   Hero product + supporting grid
+   ============================================ */
+.featured .cards {
+  grid-template-columns: repeat(4, 1fr);
+  grid-template-rows: auto;
+}
+
+.featured .heroCard {
+  grid-column: span 2;
+  grid-row: span 2;
+}
+
+.featured .heroCard .cardImage {
+  aspect-ratio: auto;
+  height: 100%;
+  min-height: 300px;
+}
+
+.featured .heroCard .cardName {
+  font-size: 1.25rem;
+  font-weight: 600;
+}
+
+.featured .heroCard .cardPrice {
+  font-size: 1.5rem;
+}
+
+@media (max-width: 768px) {
+  .featured .cards {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .featured .heroCard {
+    grid-column: span 2;
+    grid-row: span 1;
+  }
+
+  .featured .heroCard .cardImage {
+    aspect-ratio: 16/9;
+    height: auto;
+    min-height: auto;
+  }
+}
+
+/* ============================================
+   MINIMAL LAYOUT
+   Image + price only, clean
+   ============================================ */
+.minimal .cards {
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 1rem;
+}
+
+.minimal .card {
+  background: transparent;
+}
+
+.minimal .cardImage {
+  border-radius: var(--muse-theme-radius, 0.75rem);
+}
+
+.minimal .cardContent {
+  padding: 0.5rem 0;
+}
+
+.minimal .cardPrice {
+  font-weight: 500;
+  font-size: 1rem;
+}
+
+/* ============================================
+   CRT EFFECTS
+   ============================================ */
+:global([data-effects="crt"]) .section {
+  position: relative;
+}
+
+:global([data-effects="crt"]) .section::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(
+    0deg,
+    rgba(var(--muse-theme-primary-rgb, 0, 255, 0), 0.03) 0px,
+    rgba(var(--muse-theme-primary-rgb, 0, 255, 0), 0.03) 1px,
+    transparent 1px,
+    transparent 2px
+  );
+  pointer-events: none;
+  z-index: 10;
+}
+
+:global([data-effects="crt"]) .headline {
+  text-shadow: 0 0 10px rgba(var(--muse-theme-primary-rgb, 0, 255, 0), 0.5);
+}
+
+:global([data-effects="crt"]) .card {
+  border: 1px solid rgba(var(--muse-theme-primary-rgb, 0, 255, 0), 0.2);
+  box-shadow: 0 0 15px rgba(var(--muse-theme-primary-rgb, 0, 255, 0), 0.1);
+}
+
+:global([data-effects="crt"]) .cardPrice {
+  text-shadow: 0 0 8px rgba(var(--muse-theme-primary-rgb, 0, 255, 0), 0.4);
+}
+
+/* ============================================
+   NEON EFFECTS
+   ============================================ */
+:global([data-effects="neon"]) .headline {
+  text-shadow:
+    0 0 10px rgba(var(--muse-theme-primary-rgb, 255, 42, 109), 0.8),
+    0 0 20px rgba(var(--muse-theme-primary-rgb, 255, 42, 109), 0.6),
+    0 0 40px rgba(var(--muse-theme-primary-rgb, 255, 42, 109), 0.4);
+}
+
+:global([data-effects="neon"]) .card {
+  border: 1px solid rgba(var(--muse-theme-primary-rgb, 255, 42, 109), 0.2);
+  box-shadow:
+    0 0 15px rgba(var(--muse-theme-primary-rgb, 255, 42, 109), 0.15),
+    inset 0 0 15px rgba(var(--muse-theme-primary-rgb, 255, 42, 109), 0.05);
+}
+
+:global([data-effects="neon"]) .badge {
+  box-shadow: 0 0 15px rgba(var(--muse-theme-primary-rgb, 255, 42, 109), 0.5);
+}
+
+:global([data-effects="neon"]) .cardPrice {
+  text-shadow:
+    0 0 8px rgba(var(--muse-theme-primary-rgb, 255, 42, 109), 0.6),
+    0 0 16px rgba(var(--muse-theme-primary-rgb, 255, 42, 109), 0.3);
+}

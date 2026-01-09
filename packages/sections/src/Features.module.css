@@ -1,0 +1,176 @@
+.section {
+  padding: 4rem 2rem;
+  background: var(--muse-theme-bg-alt, #f8fafc);
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+  overflow: hidden;
+}
+
+.headline {
+  font-family: var(--muse-theme-heading-font, inherit);
+  font-weight: var(--muse-theme-heading-weight, 700);
+  font-size: clamp(1.25rem, 4vw, 1.75rem);
+  color: var(--muse-theme-text, #0f172a);
+  background: transparent;
+  border: 1px dashed transparent;
+  padding: 0.5rem;
+  text-align: center;
+  width: 100%;
+  resize: none;
+}
+
+.headline:focus {
+  border-color: var(--muse-theme-primary, #6366f1);
+  outline: none;
+}
+
+.grid {
+  display: grid;
+  gap: 1.5rem;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+}
+
+.item {
+  background: var(--muse-theme-bg, white);
+  padding: 1.5rem;
+  border-radius: var(--muse-theme-radius, 0.5rem);
+  box-shadow: var(--muse-theme-shadow-card, 0 1px 3px rgba(0, 0, 0, 0.1));
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.item input,
+.item textarea {
+  background: transparent;
+  border: 1px dashed transparent;
+  padding: 0.25rem;
+  font-family: var(--muse-theme-body-font, inherit);
+  color: var(--muse-theme-text, #0f172a);
+  resize: none;
+}
+
+.item input:focus,
+.item textarea:focus {
+  border-color: var(--muse-theme-primary, #6366f1);
+  outline: none;
+}
+
+.itemImage {
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  object-fit: cover;
+  border-radius: var(--muse-theme-radius, 0.5rem);
+}
+
+.itemIcon {
+  font-size: 1.5rem;
+  text-align: center;
+}
+
+.itemTitle {
+  font-family: var(--muse-theme-heading-font, inherit);
+  font-weight: 600;
+  font-size: 1rem;
+  color: var(--muse-theme-text, #0f172a);
+}
+
+.itemDescription {
+  font-family: var(--muse-theme-body-font, inherit);
+  color: var(--muse-theme-text-muted, #64748b);
+  font-size: 0.875rem;
+  line-height: 1.5;
+}
+
+.removeButton {
+  font-size: 0.75rem;
+  color: var(--muse-theme-text-muted, #64748b);
+  background: transparent;
+  border: 1px solid currentColor;
+  padding: 0.25rem 0.5rem;
+  border-radius: 0.25rem;
+  cursor: pointer;
+  align-self: flex-end;
+}
+
+.addButton {
+  align-self: center;
+  padding: 0.5rem 1rem;
+  background: var(--muse-theme-primary, #6366f1);
+  color: white;
+  border: none;
+  border-radius: var(--muse-theme-radius, 0.5rem);
+  cursor: pointer;
+  font-size: 0.875rem;
+}
+
+/* ============================================
+   CRT EFFECTS
+   Scanlines, glow for terminal/retro aesthetic
+   ============================================ */
+:global([data-effects="crt"]) .section {
+  position: relative;
+}
+
+:global([data-effects="crt"]) .section::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(
+    0deg,
+    rgba(var(--muse-theme-primary-rgb, 0, 255, 0), 0.03) 0px,
+    rgba(var(--muse-theme-primary-rgb, 0, 255, 0), 0.03) 1px,
+    transparent 1px,
+    transparent 2px
+  );
+  pointer-events: none;
+  z-index: 10;
+  border-radius: inherit;
+}
+
+:global([data-effects="crt"]) .headline {
+  text-shadow: 0 0 10px rgba(var(--muse-theme-primary-rgb, 0, 255, 0), 0.5);
+}
+
+:global([data-effects="crt"]) .item {
+  border: 1px solid rgba(var(--muse-theme-primary-rgb, 0, 255, 0), 0.2);
+  box-shadow: 0 0 20px rgba(var(--muse-theme-primary-rgb, 0, 255, 0), 0.1);
+}
+
+:global([data-effects="crt"]) .itemTitle {
+  text-shadow: 0 0 8px rgba(var(--muse-theme-primary-rgb, 0, 255, 0), 0.3);
+}
+
+:global([data-effects="crt"]) .addButton {
+  box-shadow: 0 0 15px rgba(var(--muse-theme-primary-rgb, 0, 255, 0), 0.3);
+}
+
+/* ============================================
+   NEON EFFECTS
+   ============================================ */
+:global([data-effects="neon"]) .headline {
+  text-shadow:
+    0 0 10px rgba(var(--muse-theme-primary-rgb, 255, 42, 109), 0.8),
+    0 0 20px rgba(var(--muse-theme-primary-rgb, 255, 42, 109), 0.6),
+    0 0 40px rgba(var(--muse-theme-primary-rgb, 255, 42, 109), 0.4);
+}
+
+:global([data-effects="neon"]) .item {
+  border: 1px solid rgba(var(--muse-theme-primary-rgb, 255, 42, 109), 0.3);
+  box-shadow:
+    0 0 15px rgba(var(--muse-theme-primary-rgb, 255, 42, 109), 0.15),
+    inset 0 0 15px rgba(var(--muse-theme-primary-rgb, 255, 42, 109), 0.05);
+}
+
+:global([data-effects="neon"]) .itemTitle {
+  text-shadow:
+    0 0 8px rgba(var(--muse-theme-primary-rgb, 255, 42, 109), 0.6),
+    0 0 16px rgba(var(--muse-theme-primary-rgb, 255, 42, 109), 0.3);
+}
+
+:global([data-effects="neon"]) .addButton {
+  box-shadow:
+    0 0 15px rgba(var(--muse-theme-primary-rgb, 255, 42, 109), 0.5),
+    0 0 30px rgba(var(--muse-theme-primary-rgb, 255, 42, 109), 0.3);
+}
