@@ -1,9 +1,11 @@
 import { Hono } from "hono";
 import { streamText } from "hono/streaming";
-import { createClient, orchestrate, orchestrateSite, refine, resolveFieldAlias, getValidFields, executeEditSection, singleSectionAgent, generateItemAgent, imageAgent, parseImagePlan, calculateCost, type Message, type Provider, type ToolCall, type BrandBrief, type ImageSelection } from "@muse/ai";
+import { createClient, orchestrate, orchestrateSite, refine, resolveFieldAlias, getValidFields, executeEditSection, singleSectionAgent, generateItemAgent, imageAgent, parseImagePlan, type Message, type Provider, type ToolCall, type BrandBrief, type ImageSelection } from "@muse/ai";
+import { createSitesTable, type SitesTable } from "@muse/db";
 import { requireAuth } from "../middleware/auth";
 import { createLogger } from "@muse/logger";
 import { createMediaClient, createQueryNormalizer, getIamJwt, type MediaClient, type QueryNormalizer } from "@muse/media";
+import { trackUsage } from "../utils/usage";
 import type { Section, SectionType, FeatureItem, Quote, TeamMember, StatItem, FaqItem } from "@muse/core";
 import { sectionNeedsImages, getPreset, getPresetsForType, getAllSectionMeta } from "@muse/core";
 import { isTypographyId, getTypographyIds } from "@muse/themes";
@@ -13,6 +15,14 @@ const logger = createLogger();
 let client: Provider | null = null;
 let mediaClient: MediaClient | null = null;
 let normalizer: QueryNormalizer | null = null;
+let sitesTable: SitesTable | null = null;
+
+async function getSites(): Promise<SitesTable> {
+  if (!sitesTable) {
+    sitesTable = await createSitesTable();
+  }
+  return sitesTable;
+}
 
 function getNormalizer(): QueryNormalizer | undefined {
   const openaiKey = process.env.OPENAI_API_KEY;
@@ -359,19 +369,15 @@ chatRoute.post("/refine", async (c) => {
 
   const result = await refine({ sections, messages }, getClient(), executeTool);
 
-  // Complete the usage object with cost and model
   const toolNames = [...new Set(result.toolCalls.map(tc => tc.name))].join(",");
-  const completeUsage = result.usage
-    ? {
-      input: result.usage.input,
-      output: result.usage.output,
-      cost: calculateCost("gpt-4o-mini", result.usage.input, result.usage.output),
-      model: "gpt-4o-mini",
-      action: "refine" as const,
-      detail: toolNames || undefined,
-      timestamp: new Date().toISOString(),
-    }
-    : undefined;
+  const usage = await trackUsage(
+    await getSites(),
+    siteId,
+    result.usage,
+    "gpt-4o-mini",
+    "refine",
+    toolNames || undefined,
+  );
 
   if (result.failedCalls.length > 0) {
     for (const failed of result.failedCalls) {
@@ -396,7 +402,7 @@ chatRoute.post("/refine", async (c) => {
     moves,
     pendingActions,
     themeUpdate,
-    usage: completeUsage,
+    usage,
   });
 });
 
@@ -424,7 +430,8 @@ function deriveBriefFromContext(siteContext?: { name?: string, description?: str
 }
 
 chatRoute.post("/generate-section", async (c) => {
-  const { sectionType, preset, siteContext, existingSections, brief } = await c.req.json<{
+  const { siteId, sectionType, preset, siteContext, existingSections, brief } = await c.req.json<{
+    siteId: string
     sectionType: string
     preset: string
     siteContext?: { name?: string, description?: string, location?: string }
@@ -503,28 +510,20 @@ chatRoute.post("/generate-section", async (c) => {
     }
   }
 
-  // Complete the usage object with cost and model
   const modelName = singleSectionAgent.config.model ?? "unknown";
-  const completeUsage = sectionResult.usage
-    ? {
-      input: sectionResult.usage.input,
-      output: sectionResult.usage.output,
-      cost: calculateCost(
-        modelName,
-        sectionResult.usage.input,
-        sectionResult.usage.output,
-      ),
-      model: modelName,
-      action: "generate_section" as const,
-      detail: sectionType,
-      timestamp: new Date().toISOString(),
-    }
-    : undefined;
+  const usage = await trackUsage(
+    await getSites(),
+    siteId,
+    sectionResult.usage,
+    modelName,
+    "generate_section",
+    sectionType,
+  );
 
   return c.json({
     section: sectionWithUUID,
     images,
-    usage: completeUsage,
+    usage,
   });
 });
 
@@ -541,7 +540,8 @@ type ItemType = keyof ItemTypeMap;
 type GeneratedItem = ItemTypeMap[ItemType];
 
 chatRoute.post("/generate-item", async (c) => {
-  const { itemType, sectionContext, siteContext, brief } = await c.req.json<{
+  const { siteId, itemType, sectionContext, siteContext, brief } = await c.req.json<{
+    siteId: string
     itemType: ItemType
     sectionContext?: {
       preset?: string
@@ -636,32 +636,25 @@ chatRoute.post("/generate-item", async (c) => {
     finalItem = featureItem;
   }
 
-  // Complete the usage object with cost and model
   const modelName = generateItemAgent.config.model ?? "unknown";
-  const completeUsage = itemResult.usage
-    ? {
-      input: itemResult.usage.input,
-      output: itemResult.usage.output,
-      cost: calculateCost(
-        modelName,
-        itemResult.usage.input,
-        itemResult.usage.output,
-      ),
-      model: modelName,
-      action: "generate_item" as const,
-      detail: itemType,
-      timestamp: new Date().toISOString(),
-    }
-    : undefined;
+  const usage = await trackUsage(
+    await getSites(),
+    siteId,
+    itemResult.usage,
+    modelName,
+    "generate_item",
+    itemType,
+  );
 
   return c.json({
     item: finalItem,
-    usage: completeUsage,
+    usage,
   });
 });
 
 chatRoute.post("/rewrite-text", async (c) => {
-  const { text, prompt, presetId, siteContext } = await c.req.json<{
+  const { siteId, text, prompt, presetId, siteContext } = await c.req.json<{
+    siteId: string
     text: string
     prompt: string
     presetId?: string
@@ -699,17 +692,14 @@ IMPORTANT:
 
   logger.info("rewrite_text_complete", { presetId, outputLength: response.content.length });
 
-  const completeUsage = response.usage
-    ? {
-      input: response.usage.input,
-      output: response.usage.output,
-      cost: calculateCost("gpt-4o-mini", response.usage.input, response.usage.output),
-      model: "gpt-4o-mini",
-      action: "rewrite_text" as const,
-      detail: presetId,
-      timestamp: new Date().toISOString(),
-    }
-    : undefined;
+  const usage = await trackUsage(
+    await getSites(),
+    siteId,
+    response.usage,
+    "gpt-4o-mini",
+    "rewrite_text",
+    presetId,
+  );
 
   // Strip leading/trailing quotes if present (model sometimes ignores instructions)
   let rewritten = response.content;
@@ -719,12 +709,13 @@ IMPORTANT:
 
   return c.json({
     rewritten,
-    usage: completeUsage,
+    usage,
   });
 });
 
 chatRoute.post("/suggest-rewrites", async (c) => {
-  const { elementType, sectionType, businessContext, currentText } = await c.req.json<{
+  const { siteId, elementType, sectionType, businessContext, currentText } = await c.req.json<{
+    siteId: string
     elementType?: string
     sectionType?: string
     businessContext?: { name?: string, description?: string }
@@ -799,21 +790,18 @@ IMPORTANT:
       .filter((s): s is string => typeof s === "string" && s.length > 0)
       .slice(0, 4);
 
-    const completeUsage = response.usage
-      ? {
-        input: response.usage.input,
-        output: response.usage.output,
-        cost: calculateCost("gpt-4o-mini", response.usage.input, response.usage.output),
-        model: "gpt-4o-mini",
-        action: "suggest_rewrites" as const,
-        detail: `${sectionType || "*"}:${elementType || "*"}`,
-        timestamp: new Date().toISOString(),
-      }
-      : undefined;
+    const usage = await trackUsage(
+      await getSites(),
+      siteId,
+      response.usage,
+      "gpt-4o-mini",
+      "suggest_rewrites",
+      `${sectionType || "*"}:${elementType || "*"}`,
+    );
 
     return c.json({
       suggestions,
-      usage: completeUsage,
+      usage,
     });
   }
   catch (err) {

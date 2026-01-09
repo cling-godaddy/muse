@@ -1,7 +1,8 @@
 import { Hono } from "hono";
 import { createMediaClient, createQueryNormalizer, getIamJwt, type MediaClient, type QueryNormalizer } from "@muse/media";
-import { calculateCost } from "@muse/ai";
+import { createSitesTable, type SitesTable } from "@muse/db";
 import { requireAuth } from "../middleware/auth";
+import { trackUsage } from "../utils/usage";
 
 export const searchRoute = new Hono();
 
@@ -9,6 +10,14 @@ searchRoute.use("/*", requireAuth);
 
 let client: MediaClient | null = null;
 let normalizer: QueryNormalizer | null = null;
+let sitesTable: SitesTable | null = null;
+
+async function getSites(): Promise<SitesTable> {
+  if (!sitesTable) {
+    sitesTable = await createSitesTable();
+  }
+  return sitesTable;
+}
 
 function getClient(): MediaClient {
   if (!client) {
@@ -30,9 +39,14 @@ function getNormalizer(): QueryNormalizer {
 
 searchRoute.get("/images", async (c) => {
   const query = c.req.query("q");
+  const siteId = c.req.query("siteId");
 
   if (!query) {
     return c.json({ error: "Query parameter 'q' is required" }, 400);
+  }
+
+  if (!siteId) {
+    return c.json({ error: "Query parameter 'siteId' is required" }, 400);
   }
 
   // Normalize the query via LLM
@@ -45,17 +59,13 @@ searchRoute.get("/images", async (c) => {
     count: 12,
   });
 
-  // Calculate cost if we have usage
-  const usage = normalized.usage
-    ? {
-      input: normalized.usage.input,
-      output: normalized.usage.output,
-      cost: calculateCost("gpt-4o-mini", normalized.usage.input, normalized.usage.output),
-      model: "gpt-4o-mini",
-      action: "normalize_query" as const,
-      timestamp: new Date().toISOString(),
-    }
-    : undefined;
+  const usage = await trackUsage(
+    await getSites(),
+    siteId,
+    normalized.usage,
+    "gpt-4o-mini",
+    "normalize_query",
+  );
 
   return c.json({ results, usage });
 });
