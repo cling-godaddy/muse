@@ -110,6 +110,7 @@ const methodAliases: Record<string, string> = {
   SendMessage: "message/send",
   SendStreamingMessage: "message/stream",
   GetTask: "tasks/get",
+  ListTasks: "tasks/list",
   CancelTask: "tasks/cancel",
 };
 
@@ -164,6 +165,40 @@ const methods: Record<string, MethodHandler> = {
     return updated;
   },
 
+  "tasks/list": (params) => {
+    const {
+      contextId,
+      status,
+      pageSize,
+      historyLength,
+      includeArtifacts,
+    } = (params ?? {}) as ListTasksParams;
+
+    let tasks = getTaskStore().list({
+      contextId,
+      status,
+      limit: pageSize,
+    });
+
+    // Apply historyLength filter if specified
+    if (historyLength !== undefined) {
+      tasks = tasks.map(task => ({
+        ...task,
+        history: task.history?.slice(-historyLength),
+      }));
+    }
+
+    // Optionally strip artifacts for lighter payloads
+    if (includeArtifacts === false) {
+      tasks = tasks.map(task => ({
+        ...task,
+        artifacts: undefined,
+      }));
+    }
+
+    return { tasks };
+  },
+
   "message/send": async (params) => {
     const { message, metadata } = params as {
       message: Message
@@ -187,10 +222,7 @@ const methods: Record<string, MethodHandler> = {
 
     // TODO: Route to orchestrator based on skillId
     // For now, just mark as completed with a stub response
-    getTaskStore().update(task.id, {
-      state: "completed",
-      message: `Task completed (stub) - skill: ${skillId}`,
-    });
+    getTaskStore().update(task.id, { state: "completed" });
 
     return getTaskStore().get(task.id);
   },
@@ -384,9 +416,8 @@ async function handleGenerateSkill(
   }
 
   // Mark complete
-  const completionMessage = `Site generation complete (skill: ${skillId})`;
-  getTaskStore().update(task.id, { state: "completed", message: completionMessage });
-  emitter.complete(completionMessage);
+  getTaskStore().update(task.id, { state: "completed" });
+  emitter.complete("Site generation complete");
 }
 
 // Refine state stored in task.metadata.refine
@@ -436,10 +467,7 @@ async function handleRefineSkill(
 
     // For MVP, always ask for action selection
     // A smarter implementation would parse the user's intent from the message
-    getTaskStore().update(task.id, {
-      state: "input-required",
-      message: "What would you like to do?",
-    });
+    getTaskStore().update(task.id, { state: "input-required" });
 
     // Store state in namespaced metadata.refine
     updateTaskMetadata(task.id, {
@@ -469,10 +497,7 @@ async function handleRefineSkill(
 
       if (selectedAction.id === "add_section") {
         // Need to select section type
-        getTaskStore().update(task.id, {
-          state: "input-required",
-          message: "What type of section would you like to add?",
-        });
+        getTaskStore().update(task.id, { state: "input-required" });
         updateTaskMetadata(task.id, {
           refine: { step: "select_section_type", action: "add_section" } as RefineState,
         });
@@ -483,10 +508,7 @@ async function handleRefineSkill(
       }
 
       // For other actions, complete with a message (full implementation would do the action)
-      getTaskStore().update(task.id, {
-        state: "completed",
-        message: `Refinement action '${selectedAction.id}' acknowledged. Full implementation coming soon.`,
-      });
+      getTaskStore().update(task.id, { state: "completed" });
       updateTaskMetadata(task.id, { refine: undefined });
       emitter.complete(`Refinement action '${selectedAction.id}' acknowledged. Full implementation coming soon.`);
       return;
@@ -502,10 +524,7 @@ async function handleRefineSkill(
       }
 
       // For MVP, complete here. Full implementation would continue to preset selection.
-      getTaskStore().update(task.id, {
-        state: "completed",
-        message: `Adding ${selectedType.label} section. Full implementation coming soon.`,
-      });
+      getTaskStore().update(task.id, { state: "completed" });
       updateTaskMetadata(task.id, { refine: undefined });
       emitter.artifactUpdate(
         {
@@ -520,7 +539,7 @@ async function handleRefineSkill(
 
     default: {
       // Unknown state, reset
-      getTaskStore().update(task.id, { state: "failed", message: "Unknown refinement state" });
+      getTaskStore().update(task.id, { state: "failed" });
       updateTaskMetadata(task.id, { refine: undefined });
       emitter.fail("Unknown refinement state");
     }

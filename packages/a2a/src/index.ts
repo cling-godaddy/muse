@@ -36,7 +36,8 @@ export type {
 export type {
   AgentCard,
   AgentProvider,
-  ProtocolBinding,
+  AgentInterface,
+  Protocol,
   AgentCapabilities,
   SecurityScheme,
   AgentSkill,

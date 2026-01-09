@@ -21,7 +21,7 @@ export interface TaskError {
 
 export interface TaskStatus {
   state: TaskState
-  message?: string
+  message?: Message
   timestamp: string
   error?: TaskError
 }
@@ -55,21 +55,24 @@ export type Part = TextPart | FilePart | DataPart;
 
 export interface TextPart {
   text: string
+  metadata?: Record<string, unknown>
 }
 
 export interface FilePart {
   file: FileContent
+  metadata?: Record<string, unknown>
 }
 
 export interface FileContent {
-  uri?: string
-  fileWithBytes?: string // base64 encoded (was "bytes" in v0.3)
-  mediaType?: string // (was "mimeType" in v0.3)
+  fileWithUri?: string
+  fileWithBytes?: string // base64 encoded
+  mediaType?: string
   name?: string
 }
 
 export interface DataPart {
   data: unknown // arbitrary JSON payload
+  metadata?: Record<string, unknown>
 }
 
 // Artifacts

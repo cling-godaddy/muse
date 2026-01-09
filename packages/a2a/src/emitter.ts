@@ -110,7 +110,6 @@ export function createA2AEmitter(options: A2AEmitterOptions): A2AEmitter {
   function emitStatusUpdate(
     state: TaskState,
     opts: {
-      message?: string
       error?: TaskError
       final: boolean
       metadata?: Record<string, unknown>
@@ -119,7 +118,6 @@ export function createA2AEmitter(options: A2AEmitterOptions): A2AEmitter {
     const status: TaskStatus = {
       state,
       timestamp: new Date().toISOString(),
-      message: opts.message,
       error: opts.error,
     };
 
@@ -167,10 +165,8 @@ export function createA2AEmitter(options: A2AEmitterOptions): A2AEmitter {
     contextId,
 
     statusUpdate(step: string, metadata?: Record<string, unknown>): void {
-      // Use description for human-friendly message, keep step in metadata
-      const description = metadata?.description;
+      // Human-readable description goes in metadata, not TaskStatus.message
       emitStatusUpdate("working", {
-        message: typeof description === "string" ? description : undefined,
         final: false,
         metadata: { step, ...metadata },
       });
@@ -189,9 +185,8 @@ export function createA2AEmitter(options: A2AEmitterOptions): A2AEmitter {
 
     inputRequired(prompt: string, opts?: { metadata?: Record<string, unknown> }): void {
       emitStatusUpdate("input-required", {
-        message: prompt,
         final: false,
-        metadata: opts?.metadata,
+        metadata: { prompt, ...opts?.metadata },
       });
     },
 
@@ -209,8 +204,8 @@ export function createA2AEmitter(options: A2AEmitterOptions): A2AEmitter {
 
     complete(message?: string): void {
       emitStatusUpdate("completed", {
-        message: message ?? "Task completed",
         final: true,
+        metadata: message ? { description: message } : undefined,
       });
     },
 
@@ -228,7 +223,6 @@ export function createA2AEmitter(options: A2AEmitterOptions): A2AEmitter {
       };
 
       emitStatusUpdate("failed", {
-        message: errorMessage,
         error: taskError,
         final: true,
       });

@@ -5,9 +5,8 @@ export interface AgentCard {
   name: string
   description: string
   version: string
-  url: string // Base URL for A2A endpoints
   provider?: AgentProvider
-  protocolBinding?: ProtocolBinding
+  supportedInterfaces: AgentInterface[]
   capabilities?: AgentCapabilities
   securitySchemes?: Record<string, SecurityScheme>
   defaultInputModes?: string[]
@@ -15,7 +14,12 @@ export interface AgentCard {
   skills?: AgentSkill[]
 }
 
-export type ProtocolBinding = "JSONRPC" | "GRPC" | "HTTP+JSON";
+export type Protocol = "JSONRPC" | "GRPC" | "HTTP+JSON";
+
+export interface AgentInterface {
+  protocol: Protocol
+  url: string
+}
 
 export interface AgentProvider {
   organization: string
@@ -57,11 +61,12 @@ export function createMuseAgentCard(baseUrl: string): AgentCard {
     name: "Muse Site Generator",
     description: "Generate landing pages and multi-page websites from text prompts",
     version: "1.0.0",
-    url: `${baseUrl}/a2a`,
     provider: {
       organization: "Muse",
     },
-    protocolBinding: "JSONRPC",
+    supportedInterfaces: [
+      { protocol: "JSONRPC", url: `${baseUrl}/a2a` },
+    ],
     capabilities: {
       streaming: true,
       pushNotifications: false,

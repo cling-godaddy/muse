@@ -30,8 +30,9 @@ describe("createA2AEmitter", () => {
 
       const status = update.status as Record<string, unknown>;
       expect(status.state).toBe("working");
-      // message is description (human-friendly), step is in metadata
-      expect(status.message).toBe("Extracting brand context");
+      // Per spec, TaskStatus.message is a Message object, not a string.
+      // Human-readable description goes in metadata.
+      expect(status.message).toBeUndefined();
       expect(status.timestamp).toBeDefined();
     });
 
@@ -109,7 +110,12 @@ describe("createA2AEmitter", () => {
       const status = update.status as Record<string, unknown>;
 
       expect(status.state).toBe("input-required");
-      expect(status.message).toBe("Which section type would you like?");
+      // Prompt goes in metadata, not status.message (which is a Message object per spec)
+      expect(status.message).toBeUndefined();
+      expect(update.metadata).toMatchObject({
+        prompt: "Which section type would you like?",
+        options: ["hero", "features", "cta"],
+      });
       expect(update.final).toBe(false);
     });
   });
@@ -143,7 +149,9 @@ describe("createA2AEmitter", () => {
       const status = update.status as Record<string, unknown>;
 
       expect(status.state).toBe("completed");
-      expect(status.message).toBe("Site generation finished");
+      // Completion message goes in metadata.description, not status.message
+      expect(status.message).toBeUndefined();
+      expect(update.metadata).toEqual({ description: "Site generation finished" });
       expect(update.final).toBe(true);
     });
   });
@@ -159,7 +167,8 @@ describe("createA2AEmitter", () => {
       const status = update.status as Record<string, unknown>;
 
       expect(status.state).toBe("failed");
-      expect(status.message).toBe("API rate limit exceeded");
+      // Error message is in status.error.message, not status.message
+      expect(status.message).toBeUndefined();
       expect(update.final).toBe(true);
 
       const error = status.error as Record<string, unknown>;
@@ -176,7 +185,10 @@ describe("createA2AEmitter", () => {
       const status = update.status as Record<string, unknown>;
 
       expect(status.state).toBe("failed");
-      expect(status.message).toBe("Something went wrong");
+      // Error message is in status.error.message, not status.message
+      expect(status.message).toBeUndefined();
+      const error = status.error as Record<string, unknown>;
+      expect(error.message).toBe("Something went wrong");
     });
   });
 
