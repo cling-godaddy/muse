@@ -41,18 +41,10 @@ const DEFAULT_TTL = 60 * 60 * 1000; // 1 hour
 const DEFAULT_CLEANUP_INTERVAL = 5 * 60 * 1000; // 5 minutes
 
 /**
- * Create a shallow copy of a task that prevents common accidental mutations.
- * Copies: top-level task, status object, artifacts array, history array.
- * Does NOT deep copy artifacts/messages contents (rare to mutate those).
+ * Deep copy a task to prevent callers from mutating stored data.
  */
 function copyTask(task: Task): Task {
-  return {
-    ...task,
-    status: { ...task.status },
-    artifacts: task.artifacts ? [...task.artifacts] : [],
-    history: task.history ? [...task.history] : [],
-    metadata: task.metadata ? { ...task.metadata } : undefined,
-  };
+  return structuredClone(task);
 }
 
 /**
