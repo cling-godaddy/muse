@@ -9,7 +9,7 @@ export interface CreateTaskOptions {
 export interface TaskStore {
   create(options?: CreateTaskOptions): Task
   get(taskId: string): Task | undefined
-  update(taskId: string, status: Partial<TaskStatus>): Task | undefined
+  update(taskId: string, patch: Partial<TaskStatus>): Task | undefined
   addArtifact(taskId: string, artifact: Artifact): Task | undefined
   addMessage(taskId: string, message: Message): Task | undefined
   list(options?: ListOptions): Task[]
@@ -110,7 +110,8 @@ export function createTaskStore(options: TaskStoreOptions = {}): TaskStore {
         timestamp: now,
       },
       artifacts: [],
-      history: opts.initialMessage ? [opts.initialMessage] : [],
+      // Clone initialMessage to prevent caller mutations from affecting stored history
+      history: opts.initialMessage ? [structuredClone(opts.initialMessage)] : [],
     };
 
     tasks.set(task.id, {
@@ -137,14 +138,14 @@ export function createTaskStore(options: TaskStoreOptions = {}): TaskStore {
 
   function update(
     taskId: string,
-    status: Partial<TaskStatus>,
+    patch: Partial<TaskStatus>,
   ): Task | undefined {
     const stored = tasks.get(taskId);
     if (!stored) return undefined;
 
     stored.task.status = {
       ...stored.task.status,
-      ...status,
+      ...patch,
       timestamp: new Date().toISOString(),
     };
     stored.task.version++;
@@ -158,7 +159,8 @@ export function createTaskStore(options: TaskStoreOptions = {}): TaskStore {
     if (!stored) return undefined;
 
     stored.task.artifacts = stored.task.artifacts ?? [];
-    stored.task.artifacts.push(artifact);
+    // Clone to prevent caller mutations from affecting stored artifacts
+    stored.task.artifacts.push(structuredClone(artifact));
     stored.task.version++;
     stored.updatedAt = Date.now();
 
@@ -170,7 +172,8 @@ export function createTaskStore(options: TaskStoreOptions = {}): TaskStore {
     if (!stored) return undefined;
 
     stored.task.history = stored.task.history ?? [];
-    stored.task.history.push(message);
+    // Clone to prevent caller mutations from affecting stored history
+    stored.task.history.push(structuredClone(message));
     stored.task.version++;
     stored.updatedAt = Date.now();
 
