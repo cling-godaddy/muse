@@ -1,11 +1,19 @@
 import { describe, it, expect, beforeEach, vi } from "vitest";
 import { Hono } from "hono";
 import { chatRoute } from "./chat";
+import type { ToolCall, ToolResult } from "@muse/ai";
 
 // Mock auth middleware
 vi.mock("../middleware/auth", () => ({
   requireAuth: vi.fn(async (_c, next) => await next()),
 }));
+
+// Track executeTool callback for refine tests
+let capturedExecuteTool: ((call: ToolCall) => Promise<ToolResult>) | null = null;
+
+// Mock fetch for set_typography persistence
+const mockFetch = vi.fn();
+vi.stubGlobal("fetch", mockFetch);
 
 // Mock AI client - agents return incomplete usage (input/output only)
 const mockItemResponse = {
@@ -38,6 +46,16 @@ vi.mock("@muse/ai", async () => {
     ...actual,
     createClient: () => ({
       chat: vi.fn(async () => mockItemResponse),
+    }),
+    // Refine captures executeTool so tests can invoke tool handlers directly
+    refine: vi.fn(async (_input, _provider, executeTool) => {
+      capturedExecuteTool = executeTool;
+      return {
+        message: "Done",
+        toolCalls: [],
+        failedCalls: [],
+        usage: { input: 100, output: 50 },
+      };
     }),
     generateItemAgent: {
       config: { model: "gpt-4o-mini" },
@@ -115,6 +133,13 @@ describe("chat routes", () => {
   beforeEach(() => {
     app = new Hono();
     app.route("/api/chat", chatRoute);
+
+    // Reset fetch mock - default to success for PATCH requests
+    mockFetch.mockReset();
+    mockFetch.mockResolvedValue({
+      ok: true,
+      json: async () => ({ ok: true }),
+    });
   });
 
   describe("POST /api/chat/generate-item", () => {
@@ -297,6 +322,76 @@ describe("chat routes", () => {
       expect(data.usage.cost).toBeCloseTo(0.00009, 8);
       // Timestamp should be ISO 8601
       expect(new Date(data.usage.timestamp).toISOString()).toBe(data.usage.timestamp);
+    });
+  });
+
+  describe("POST /api/chat/refine", () => {
+    async function callRefine(body: Record<string, unknown>) {
+      const res = await app.request("/api/chat/refine", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": "Bearer mock-token",
+        },
+        body: JSON.stringify(body),
+      });
+      return res;
+    }
+
+    const baseRefineBody = {
+      siteId: "site-123",
+      sections: [{ id: "s1", type: "hero", preset: "hero-centered" }],
+      messages: [{ role: "user", content: "test" }],
+      theme: { palette: "ocean", typography: "inter" },
+    };
+
+    it("returns 200 for basic refine request", async () => {
+      const res = await callRefine(baseRefineBody);
+      expect(res.status).toBe(200);
+
+      const data = await res.json();
+      expect(data.message).toBe("Done");
+      expect(data.usage).toBeDefined();
+    });
+
+    describe("set_typography tool", () => {
+      async function invokeSetTypography(typography: string) {
+        if (!capturedExecuteTool) throw new Error("executeTool not captured");
+        return capturedExecuteTool({
+          id: "call-1",
+          name: "set_typography",
+          input: { typography },
+        });
+      }
+
+      it("returns error for invalid typography ID", async () => {
+        await callRefine(baseRefineBody);
+        const result = await invokeSetTypography("not-a-real-font");
+
+        expect(result.result).toHaveProperty("error");
+        expect((result.result as { error: string }).error).toContain("Invalid typography");
+      });
+
+      it("returns success with theme for valid typography ID", async () => {
+        await callRefine(baseRefineBody);
+        const result = await invokeSetTypography("oswald");
+
+        expect(result.result).toHaveProperty("success", true);
+        expect(result.result).toHaveProperty("theme");
+        const theme = (result.result as { theme: { palette: string, typography: string } }).theme;
+        expect(theme.typography).toBe("oswald");
+        expect(theme.palette).toBe("ocean"); // preserved from request
+      });
+
+      it("uses default palette when theme not provided", async () => {
+        await callRefine({ ...baseRefineBody, theme: undefined });
+        const result = await invokeSetTypography("playfair");
+
+        expect(result.result).toHaveProperty("success", true);
+        const theme = (result.result as { theme: { palette: string, typography: string } }).theme;
+        expect(theme.typography).toBe("playfair");
+        expect(theme.palette).toBe("slate"); // default fallback
+      });
     });
   });
 });
