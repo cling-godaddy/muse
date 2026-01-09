@@ -1,12 +1,15 @@
-import { Hono } from "hono";
+import { Hono, type Context } from "hono";
+import { streamSSE } from "hono/streaming";
 import {
   createMuseAgentCard,
   createTaskStore,
+  createA2AEmitter,
   type TaskStore,
   type JsonRpcRequest,
   type JsonRpcResponse,
   type Task,
   type Message,
+  type StreamResponse,
   type GetTaskParams,
   type CancelTaskParams,
   type ListTasksParams,
@@ -68,6 +71,12 @@ function jsonRpcError(id: string | number, error: A2AError): JsonRpcResponse {
     id,
     error: { code: error.code, message: error.message, data: error.data },
   };
+}
+
+// Format StreamResponse as JSON-RPC SSE event
+function formatSSE(id: string | number, event: StreamResponse): string {
+  const response = jsonRpcSuccess(id, event);
+  return JSON.stringify(response);
 }
 
 // Method handlers
@@ -177,7 +186,12 @@ a2aRoute.post("/", async (c) => {
       return c.json(jsonRpcError(rpcId, invalidParams("Missing method")));
     }
 
-    // Find and execute handler
+    // Handle message/stream with SSE
+    if (body.method === "message/stream") {
+      return handleMessageStream(c, rpcId, body.params);
+    }
+
+    // Find and execute handler for other methods
     const handler = methods[body.method];
     if (!handler) {
       logger.warn("a2a_method_not_found", { method: body.method });
@@ -198,6 +212,105 @@ a2aRoute.post("/", async (c) => {
     return c.json(jsonRpcError(rpcId, internalError(err instanceof Error ? err.message : "Unknown error")));
   }
 });
+
+// SSE streaming handler for message/stream
+async function handleMessageStream(c: Context, rpcId: string | number, params: unknown) {
+  const { message, metadata } = params as {
+    message: Message
+    metadata?: { skillId?: string }
+  };
+
+  if (!message) {
+    return c.json(jsonRpcError(rpcId, invalidParams("Missing required parameter: message")));
+  }
+
+  const skillId = metadata?.skillId ?? inferSkillFromMessage(message);
+  const contextId = message.contextId;
+
+  // Create task
+  const task = getTaskStore().create({
+    contextId,
+    initialMessage: message,
+  });
+
+  logger.info("a2a_message_stream", { taskId: task.id, contextId, skillId });
+
+  return streamSSE(c, async (stream) => {
+    const emitter = createA2AEmitter({
+      taskId: task.id,
+      contextId: task.contextId,
+      onEvent: (event: StreamResponse) => {
+        stream.writeSSE({ data: formatSSE(rpcId, event) });
+      },
+    });
+
+    try {
+      // Update task to working
+      getTaskStore().update(task.id, { state: "working" });
+
+      // Emit initial status
+      emitter.statusUpdate("starting", { skillId });
+
+      // TODO: Route to actual orchestrator based on skillId
+      // For now, emit stub events to demonstrate the flow
+      await simulateGeneration(emitter, skillId);
+
+      // Mark complete and emit final task
+      getTaskStore().update(task.id, { state: "completed", message: "Generation complete" });
+      const finalTask = getTaskStore().get(task.id);
+      if (finalTask) {
+        emitter.emitTask(finalTask);
+      }
+    }
+    catch (err) {
+      logger.error("a2a_stream_error", { taskId: task.id, error: err });
+      getTaskStore().update(task.id, {
+        state: "failed",
+        error: { message: err instanceof Error ? err.message : "Unknown error" },
+      });
+      emitter.fail(err instanceof Error ? err : String(err));
+    }
+  });
+}
+
+// Stub: simulate generation steps (replace with actual orchestrator)
+async function simulateGeneration(emitter: ReturnType<typeof createA2AEmitter>, skillId: string) {
+  // Simulate brief extraction
+  emitter.statusUpdate("brief", { description: "Extracting brand context" });
+  await sleep(100);
+
+  // Simulate structure planning
+  emitter.statusUpdate("structure", { description: "Planning page layout" });
+  await sleep(100);
+
+  // Simulate theme generation
+  emitter.statusUpdate("theme", { description: "Generating color scheme" });
+  await sleep(100);
+  emitter.artifactUpdate(
+    {
+      name: "theme",
+      parts: [{ data: { primaryColor: "#007bff", secondaryColor: "#6c757d" } }],
+    },
+    { lastChunk: true },
+  );
+
+  // Simulate sections generation
+  emitter.statusUpdate("sections", { description: "Generating content" });
+  await sleep(100);
+  emitter.artifactUpdate(
+    {
+      name: "sections",
+      parts: [{ data: [{ type: "hero", headline: "Welcome", subheadline: "Your site is ready" }] }],
+    },
+    { lastChunk: true },
+  );
+
+  emitter.complete(`Site generation complete (skill: ${skillId})`);
+}
+
+function sleep(ms: number): Promise<void> {
+  return new Promise(resolve => setTimeout(resolve, ms));
+}
 
 // REST endpoint for listing tasks (not in JSON-RPC spec)
 a2aRoute.get("/tasks", (c) => {
