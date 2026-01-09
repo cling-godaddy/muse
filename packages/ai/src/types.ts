@@ -1,20 +1,10 @@
+export type { Usage, UsageAction } from "@muse/core";
+
 export type Role = "user" | "assistant" | "system";
 
 export interface Message {
   role: Role
   content: string
-}
-
-export type UsageAction = "generate_site" | "generate_section" | "generate_item" | "refine" | "normalize_query" | "rewrite_text" | "suggest_rewrites";
-
-export interface Usage {
-  input: number
-  output: number
-  cost: number
-  model: string
-  action?: UsageAction
-  detail?: string
-  timestamp: string
 }
 
 export interface ResponseSchema {

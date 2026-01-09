@@ -1,7 +1,6 @@
 import type { Page } from "../page/types";
 import type { NavbarSection } from "../sections/types";
 
-// AI usage tracking (duplicated from @muse/ai to avoid circular dependency)
 export type UsageAction = "generate_site" | "generate_section" | "generate_item" | "refine" | "normalize_query" | "rewrite_text" | "suggest_rewrites";
 
 export interface Usage {

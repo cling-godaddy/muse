@@ -1,4 +1,4 @@
-import type { Site, Section } from "@muse/core";
+import type { Site, Section, UsageAction } from "@muse/core";
 
 export interface SiteSummary {
   id: string
@@ -44,7 +44,7 @@ export interface StoredAgentState {
   }
 }
 
-export type UsageAction = "generate_site" | "generate_section" | "generate_item" | "refine" | "rewrite_text";
+export type { UsageAction };
 
 export interface StoredUsage {
   input: number
