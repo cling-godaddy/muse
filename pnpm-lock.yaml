@@ -87,6 +87,9 @@ importers:
       '@hono/node-server':
         specifier: ^1
         version: 1.19.7(hono@4.11.3)
+      '@muse/a2a':
+        specifier: workspace:*
+        version: link:../../packages/a2a
       '@muse/ai':
         specifier: workspace:*
         version: link:../../packages/ai

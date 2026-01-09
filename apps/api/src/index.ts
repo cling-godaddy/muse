@@ -11,6 +11,7 @@ import { generateRoute } from "./routes/generate";
 import { searchRoute } from "./routes/search";
 import { sitesRoute } from "./routes/sites";
 import { messagesRoute } from "./routes/messages";
+import { a2aRoute, agentCardRoute } from "./routes/a2a";
 
 const app = new Hono();
 
@@ -24,6 +25,10 @@ app.route("/api/generate", generateRoute);
 app.route("/api/search", searchRoute);
 app.route("/api/sites", sitesRoute);
 app.route("/api/messages", messagesRoute);
+
+// A2A Protocol endpoints (no auth - uses protocol-level auth)
+app.route("/.well-known", agentCardRoute);
+app.route("/a2a", a2aRoute);
 
 const port = Number(process.env.PORT) || 3001;
 
