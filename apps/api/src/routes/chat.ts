@@ -61,7 +61,8 @@ export const chatRoute = new Hono();
 chatRoute.use("/*", requireAuth);
 
 chatRoute.post("/", async (c) => {
-  const { messages, stream, siteContext } = await c.req.json<{
+  const { siteId, messages, stream, siteContext } = await c.req.json<{
+    siteId: string
     messages: Message[]
     stream?: boolean
     siteContext?: { name?: string, description?: string, location?: string, siteType?: "landing" | "full" }
@@ -70,19 +71,24 @@ chatRoute.post("/", async (c) => {
   const config = { mediaClient: getMediaClient(), logger };
   const input = { messages, siteContext };
 
+  // Callback to persist usage when orchestrator completes
+  const onUsage = async (usage: { input: number, output: number, model: string, action?: string, detail?: string }) => {
+    await trackUsage(await getSites(), siteId, usage, usage.model, usage.action as "generate_site", usage.detail);
+  };
+
   // use single-page orchestrator for landing pages, multi-page for full sites
   const generator = siteContext?.siteType === "full" ? orchestrateSite : orchestrate;
 
   if (stream) {
     return streamText(c, async (textStream) => {
-      for await (const chunk of generator(input, getClient(), { config })) {
+      for await (const chunk of generator(input, getClient(), { config, events: { onUsage } })) {
         await textStream.write(chunk);
       }
     });
   }
 
   let content = "";
-  for await (const chunk of generator(input, getClient(), { config })) {
+  for await (const chunk of generator(input, getClient(), { config, events: { onUsage } })) {
     content += chunk;
   }
   return c.json({ content });

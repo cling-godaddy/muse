@@ -2,9 +2,9 @@ import type { MediaClient, ImageSelection } from "@muse/media";
 import { createLogger, type Logger } from "@muse/logger";
 import { getMinimumImages, getImageRequirements, allPresets, type Section, type Page, createPage, type ThemeBackground } from "@muse/core";
 import { resolveTheme } from "@muse/themes";
-import type { Message, Provider, UsageAction } from "../types";
+import type { Message, Provider, Usage, UsageAction } from "../types";
 import { runWithRetry } from "../retry";
-import { calculateCost } from "../pricing";
+import { createUsage } from "../usage";
 import { briefAgent, briefSystemPrompt, parseBrief } from "./brief";
 import { structureAgent, parseStructure } from "./structure";
 import { themeAgent, themeSystemPrompt, parseThemeSelection, type ThemeSelection } from "./theme";
@@ -18,20 +18,17 @@ interface UsageAccumulator {
   output: number
 }
 
-function formatUsageMarker(
+function buildUsage(
   provider: Provider,
   usage: UsageAccumulator,
   action: UsageAction,
-): string {
+): Usage {
   const model = provider.name === "anthropic" ? "claude-3-5-sonnet-20241022" : "gpt-4o-mini";
-  return `[USAGE:${JSON.stringify({
-    input: usage.input,
-    output: usage.output,
-    cost: calculateCost(model, usage.input, usage.output),
-    model,
-    action,
-    timestamp: new Date().toISOString(),
-  })}]\n`;
+  return createUsage(usage, model, action);
+}
+
+function formatUsageMarker(usage: Usage): string {
+  return `[USAGE:${JSON.stringify(usage)}]\n`;
 }
 
 // Simple JSON parser for schema-validated responses
@@ -103,6 +100,7 @@ export interface OrchestratorEvents {
   onTheme?: (theme: ThemeSelection) => void
   onSections?: (sections: Section[]) => void
   onImages?: (images: ImageSelection[]) => void
+  onUsage?: (usage: Usage) => void | Promise<void>
 }
 
 function buildAugmentedPrompt(userPrompt: string, siteContext?: SiteContext): string {
@@ -322,7 +320,9 @@ export async function* orchestrate(
   }
 
   // Emit total usage for cost tracking
-  yield formatUsageMarker(provider, totalUsage, "generate_site");
+  const usage = buildUsage(provider, totalUsage, "generate_site");
+  await events?.onUsage?.(usage);
+  yield formatUsageMarker(usage);
 }
 
 // ============================================
@@ -599,5 +599,7 @@ export async function* orchestrateSite(
   }
 
   // Emit total usage
-  yield formatUsageMarker(provider, totalUsage, "generate_site");
+  const usage = buildUsage(provider, totalUsage, "generate_site");
+  await events?.onUsage?.(usage);
+  yield formatUsageMarker(usage);
 }
