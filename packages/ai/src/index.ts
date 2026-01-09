@@ -9,6 +9,8 @@ export { createAnthropicProvider } from "./providers/anthropic";
 
 export { calculateCost, MODEL_PRICING } from "./pricing";
 
+export { createUsage } from "./usage";
+
 export { runWithRetry } from "./retry";
 export type { RetryOptions, RetryResult } from "./retry";
 
@@ -46,6 +48,7 @@ export type {
   Provider,
   ProviderName,
   Usage,
+  UsageAction,
   ToolDefinition,
   ToolCall,
   ToolResult,
