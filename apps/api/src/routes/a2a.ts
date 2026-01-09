@@ -22,6 +22,7 @@ import {
   taskNotCancelable,
 } from "@muse/a2a";
 import { createClient, orchestrate, orchestrateSite, type Provider, type Message as AIMessage } from "@muse/ai";
+import { getAllSectionMeta } from "@muse/core";
 import { createMediaClient, getIamJwt, type MediaClient } from "@muse/media";
 import { createLogger } from "@muse/logger";
 
@@ -435,18 +436,13 @@ const REFINE_ACTIONS = [
   { id: "move_section", label: "Move Section", description: "Reorder sections on the page" },
 ];
 
-// Section types for add_section (numbered for easy selection)
-const SECTION_TYPES = [
-  { id: "hero", label: "Hero", description: "Large header with headline and call-to-action" },
-  { id: "features", label: "Features", description: "Showcase product features" },
-  { id: "cta", label: "Call to Action", description: "Drive users to take action" },
-  { id: "testimonials", label: "Testimonials", description: "Customer reviews and quotes" },
-  { id: "pricing", label: "Pricing", description: "Pricing tables and plans" },
-  { id: "faq", label: "FAQ", description: "Frequently asked questions" },
-  { id: "gallery", label: "Gallery", description: "Image gallery or portfolio" },
-  { id: "stats", label: "Stats", description: "Key metrics and statistics" },
-  { id: "contact", label: "Contact", description: "Contact form and information" },
-];
+// Section types derived from @muse/core metadata (single source of truth)
+const SECTION_TYPES = getAllSectionMeta().map(meta => ({
+  id: meta.type,
+  label: meta.label,
+  icon: meta.icon,
+  description: meta.description,
+}));
 
 /**
  * Handle refine skill with INPUT_REQUIRED flow.

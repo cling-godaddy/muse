@@ -5,7 +5,7 @@ import { requireAuth } from "../middleware/auth";
 import { createLogger } from "@muse/logger";
 import { createMediaClient, createQueryNormalizer, getIamJwt, type MediaClient, type QueryNormalizer } from "@muse/media";
 import type { Section, SectionType, FeatureItem, Quote, TeamMember, StatItem, FaqItem } from "@muse/core";
-import { sectionNeedsImages, getPreset, getPresetsForType } from "@muse/core";
+import { sectionNeedsImages, getPreset, getPresetsForType, getAllSectionMeta } from "@muse/core";
 
 const logger = createLogger();
 let client: Provider | null = null;
@@ -227,20 +227,12 @@ chatRoute.post("/refine", async (c) => {
 
       // Step 1: Need section type
       if (!sectionType) {
-        const sectionTypes = [
-          { id: "hero", label: "Hero", description: "Large header with headline and call-to-action" },
-          { id: "features", label: "Features", description: "Showcase product features in a grid or list" },
-          { id: "cta", label: "Call to Action", description: "Drive users to take action" },
-          { id: "testimonials", label: "Testimonials", description: "Customer reviews and quotes" },
-          { id: "pricing", label: "Pricing", description: "Pricing tables and plans" },
-          { id: "faq", label: "FAQ", description: "Frequently asked questions" },
-          { id: "gallery", label: "Gallery", description: "Image gallery or portfolio" },
-          { id: "stats", label: "Stats", description: "Key metrics and statistics" },
-          { id: "contact", label: "Contact", description: "Contact form and information" },
-          { id: "about", label: "About", description: "About us or company story" },
-          { id: "logos", label: "Logos", description: "Client or partner logos" },
-          { id: "subscribe", label: "Subscribe", description: "Newsletter signup form" },
-        ];
+        const sectionTypes = getAllSectionMeta().map(meta => ({
+          id: meta.type,
+          label: meta.label,
+          icon: meta.icon,
+          description: meta.description,
+        }));
 
         logger.info("add_section_select_type", { availableTypes: sectionTypes.length });
         pendingActions.push({

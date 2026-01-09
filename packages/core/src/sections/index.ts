@@ -240,7 +240,6 @@ export {
 // Metadata
 export {
   type SectionMeta,
-  registerSectionMeta,
   getSectionMeta,
   getAllSectionMeta,
 } from "./metadata";

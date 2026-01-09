@@ -3,8 +3,12 @@ import type { Section } from "@muse/core";
 import type { ImageSelection } from "@muse/media";
 import type { Usage } from "@muse/ai";
 import { Spinner } from "@muse/editor";
-import { Building2, MapPin } from "lucide-react";
+import { Building2, MapPin, PanelTop, Grid3x3, MousePointerClick, Quote, DollarSign, HelpCircle, Images, BarChart3, Mail, Users, Shapes, Bell, ShoppingBag, UtensilsCrossed, PanelTopOpen, PanelBottom, type LucideIcon } from "lucide-react";
 import { getPalette } from "@muse/themes";
+
+const iconMap: Record<string, LucideIcon> = {
+  PanelTop, Grid3x3, MousePointerClick, Quote, DollarSign, HelpCircle, Images, BarChart3, Mail, Users, Shapes, Bell, ShoppingBag, UtensilsCrossed, PanelTopOpen, PanelBottom,
+};
 import { useChat, type Message, type RefineUpdate, type MoveUpdate, type SiteContext } from "../hooks/useChat";
 import { useAutosaveMessages } from "../hooks/useAutosaveMessages";
 import type { AgentState, ThemeSelection, PageInfo } from "../utils/streamParser";
@@ -143,20 +147,24 @@ export function Chat({ siteId, siteContext, sections, siteCosts, autoSendPrompt,
           {pendingAction.options && pendingAction.options.length > 0
             ? (
               <div className="space-y-2">
-                {pendingAction.options.map(option => (
-                  <button
-                    key={option.id}
-                    className="w-full p-2 text-left border border-border rounded hover:bg-bg-subtle cursor-pointer"
-                    onClick={() => selectOption(option.id)}
-                  >
-                    <div className="font-medium text-sm text-text">{option.label}</div>
-                    {option.description && (
-                      <div className="text-xs text-text-muted mt-0.5">{option.description}</div>
-                    )}
-                  </button>
-                ))}
+                <div className={pendingAction.options[0]?.icon ? "grid grid-cols-2 gap-2" : "space-y-2"}>
+                  {pendingAction.options.map((option) => {
+                    const Icon = option.icon ? iconMap[option.icon] : null;
+                    return (
+                      <button
+                        key={option.id}
+                        className={`p-2 text-left border border-border rounded hover:bg-bg-subtle cursor-pointer ${Icon ? "flex items-center gap-2" : "w-full"}`}
+                        onClick={() => selectOption(option.id)}
+                        title={option.description}
+                      >
+                        {Icon && <Icon size={16} className="text-text-muted shrink-0" />}
+                        <span className="font-medium text-sm text-text">{option.label}</span>
+                      </button>
+                    );
+                  })}
+                </div>
                 <button
-                  className="w-full px-3 py-1.5 text-sm border border-border rounded hover:bg-bg-subtle cursor-pointer mt-2"
+                  className="w-full px-3 py-1.5 text-sm border border-border rounded hover:bg-bg-subtle cursor-pointer"
                   onClick={cancelPendingAction}
                 >
                   Cancel

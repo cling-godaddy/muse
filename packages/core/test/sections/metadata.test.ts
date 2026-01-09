@@ -1,10 +1,6 @@
 import { describe, expect, it } from "vitest";
-import {
-  registerSectionMeta,
-  getSectionMeta,
-  getAllSectionMeta,
-  type SectionMeta,
-} from "../../src/sections/metadata";
+import { getSectionMeta, getAllSectionMeta } from "../../src/sections/metadata";
+import { DEFAULT_PRESETS } from "../../src/sections";
 
 describe("section metadata registry", () => {
   describe("default registrations", () => {
@@ -62,18 +58,14 @@ describe("section metadata registry", () => {
     });
   });
 
-  describe("registerSectionMeta", () => {
-    it("registers and retrieves custom metadata", () => {
-      const customMeta: SectionMeta = {
-        type: "hero",
-        label: "Custom Hero",
-        icon: "custom-icon",
-        category: "layout",
-        description: "Custom hero section",
-      };
-      registerSectionMeta(customMeta);
-      const retrieved = getSectionMeta("hero");
-      expect(retrieved?.label).toBe("Custom Hero");
+  describe("sync with presets", () => {
+    it("has metadata for every section type with presets", () => {
+      const sectionTypes = Object.keys(DEFAULT_PRESETS);
+      const metadataTypes = getAllSectionMeta().map(m => m.type);
+
+      for (const type of sectionTypes) {
+        expect(metadataTypes, `missing metadata for section type: ${type}`).toContain(type);
+      }
     });
   });
 });

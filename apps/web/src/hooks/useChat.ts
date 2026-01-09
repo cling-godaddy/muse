@@ -35,6 +35,7 @@ export interface PendingAction {
   options?: Array<{
     id: string
     label: string
+    icon?: string
     description?: string
   }>
 }
