@@ -137,10 +137,10 @@
   position: absolute;
   top: 0.5rem;
   right: 0.5rem;
-  font-size: 1rem;
+  font-size: 0.875rem;
   color: var(--muse-theme-text-muted, #9ca3af);
   background: var(--muse-theme-bg, white);
-  border: none;
+  border: 1px solid var(--muse-theme-border, #e5e7eb);
   border-radius: 50%;
   width: 1.5rem;
   height: 1.5rem;
@@ -148,18 +148,12 @@
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  opacity: 0;
-  transition: opacity 0.15s ease;
-}
-
-.item:hover [data-feature-remove],
-.item:hover .removeButton {
-  opacity: 1;
 }
 
 .item [data-feature-remove]:hover,
 .removeButton:hover {
   color: var(--muse-theme-text, #111827);
+  border-color: var(--muse-theme-text-muted, #9ca3af);
 }
 
 /* ============================================
