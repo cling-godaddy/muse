@@ -4,7 +4,7 @@ interface CtaValue {
 }
 
 interface Props {
-  value: CtaValue
+  value: CtaValue | undefined
   onChange: (value: CtaValue) => void
   className?: string
   placeholder?: string
@@ -16,12 +16,15 @@ export function EditableCta({
   className,
   placeholder,
 }: Props) {
+  const text = value?.text ?? "";
+  const href = value?.href ?? "";
+
   return (
     <input
       type="text"
       className={className}
-      value={value.text}
-      onChange={e => onChange({ ...value, text: e.target.value })}
+      value={text}
+      onChange={e => onChange({ text: e.target.value, href })}
       placeholder={placeholder}
     />
   );
