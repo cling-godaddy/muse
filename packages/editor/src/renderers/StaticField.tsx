@@ -1,5 +1,5 @@
 import { type ReactNode, useCallback } from "react";
-import type { FieldSchema } from "@muse/sections";
+import type { FieldType } from "@muse/sections";
 import type { TextOrRich, ImageSource, RichContent } from "@muse/core";
 import { getPlainText } from "@muse/core";
 import { SmartLink } from "../ux/SmartLink";
@@ -7,7 +7,7 @@ import { InlineTextEditor } from "../ux/InlineTextEditor";
 import { useOptionalEditActivation } from "../context/EditActivation";
 
 interface Props {
-  schema: FieldSchema
+  schema: { type: FieldType }
   value: unknown
   className?: string
   /** Data path for edit detection (e.g., "headline", "items[0].title") */

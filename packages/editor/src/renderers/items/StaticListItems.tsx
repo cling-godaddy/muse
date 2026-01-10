@@ -7,20 +7,12 @@ import type {
   NavItem,
   ProductItem,
 } from "@muse/core";
-import { getPlainText } from "@muse/core";
+import { StaticField } from "../StaticField";
 
 interface ItemProps {
   sectionId: string
   basePath: string
   index: number
-}
-
-function editAttrs(sectionId: string, path: string, fieldType: string) {
-  return {
-    "data-editable-path": path,
-    "data-section-id": sectionId,
-    "data-field-type": fieldType,
-  };
 }
 
 /**
@@ -36,19 +28,31 @@ export function StaticFeatureItem({
   return (
     <>
       {item.icon && (
-        <span {...editAttrs(sectionId, `${path}.icon`, "text")}>{item.icon}</span>
-      )}
-      {item.image?.url && (
-        <img
-          src={item.image.url}
-          alt={item.image.alt}
-          {...editAttrs(sectionId, `${path}.image`, "image")}
+        <StaticField
+          schema={{ type: "text" }}
+          value={item.icon}
+          path={`${path}.icon`}
+          sectionId={sectionId}
         />
       )}
-      <span {...editAttrs(sectionId, `${path}.title`, "text")}>{item.title}</span>
-      <span {...editAttrs(sectionId, `${path}.description`, "rich-text")}>
-        {getPlainText(item.description)}
-      </span>
+      <StaticField
+        schema={{ type: "image" }}
+        value={item.image}
+        path={`${path}.image`}
+        sectionId={sectionId}
+      />
+      <StaticField
+        schema={{ type: "text" }}
+        value={item.title}
+        path={`${path}.title`}
+        sectionId={sectionId}
+      />
+      <StaticField
+        schema={{ type: "rich-text" }}
+        value={item.description}
+        path={`${path}.description`}
+        sectionId={sectionId}
+      />
     </>
   );
 }
@@ -65,8 +69,18 @@ export function StaticStatItem({
   const path = `${basePath}[${index}]`;
   return (
     <>
-      <span {...editAttrs(sectionId, `${path}.value`, "text")}>{item.value}</span>
-      <span {...editAttrs(sectionId, `${path}.label`, "text")}>{item.label}</span>
+      <StaticField
+        schema={{ type: "text" }}
+        value={item.value}
+        path={`${path}.value`}
+        sectionId={sectionId}
+      />
+      <StaticField
+        schema={{ type: "text" }}
+        value={item.label}
+        path={`${path}.label`}
+        sectionId={sectionId}
+      />
     </>
   );
 }
@@ -83,23 +97,36 @@ export function StaticQuoteItem({
   const path = `${basePath}[${index}]`;
   return (
     <>
-      <span {...editAttrs(sectionId, `${path}.text`, "rich-text")}>
-        {getPlainText(item.text)}
-      </span>
-      {item.avatar?.url && (
-        <img
-          src={item.avatar.url}
-          alt={item.author}
-          {...editAttrs(sectionId, `${path}.avatar`, "image")}
-        />
-      )}
-      <span {...editAttrs(sectionId, `${path}.author`, "text")}>{item.author}</span>
-      {item.role && (
-        <span {...editAttrs(sectionId, `${path}.role`, "text")}>{item.role}</span>
-      )}
-      {item.company && (
-        <span {...editAttrs(sectionId, `${path}.company`, "text")}>{item.company}</span>
-      )}
+      <StaticField
+        schema={{ type: "rich-text" }}
+        value={item.text}
+        path={`${path}.text`}
+        sectionId={sectionId}
+      />
+      <StaticField
+        schema={{ type: "image" }}
+        value={item.avatar}
+        path={`${path}.avatar`}
+        sectionId={sectionId}
+      />
+      <StaticField
+        schema={{ type: "text" }}
+        value={item.author}
+        path={`${path}.author`}
+        sectionId={sectionId}
+      />
+      <StaticField
+        schema={{ type: "text" }}
+        value={item.role}
+        path={`${path}.role`}
+        sectionId={sectionId}
+      />
+      <StaticField
+        schema={{ type: "text" }}
+        value={item.company}
+        path={`${path}.company`}
+        sectionId={sectionId}
+      />
     </>
   );
 }
@@ -116,25 +143,36 @@ export function StaticProductItem({
   const path = `${basePath}[${index}]`;
   return (
     <>
-      {item.image?.url && (
-        <img
-          src={item.image.url}
-          alt={item.name}
-          {...editAttrs(sectionId, `${path}.image`, "image")}
-        />
-      )}
-      <span {...editAttrs(sectionId, `${path}.name`, "text")}>{item.name}</span>
-      <span {...editAttrs(sectionId, `${path}.price`, "text")}>{item.price}</span>
-      {item.originalPrice && (
-        <span {...editAttrs(sectionId, `${path}.originalPrice`, "text")}>
-          {item.originalPrice}
-        </span>
-      )}
-      {item.badge && (
-        <span {...editAttrs(sectionId, `${path}.badge`, "text")}>
-          {item.badge}
-        </span>
-      )}
+      <StaticField
+        schema={{ type: "image" }}
+        value={item.image}
+        path={`${path}.image`}
+        sectionId={sectionId}
+      />
+      <StaticField
+        schema={{ type: "text" }}
+        value={item.name}
+        path={`${path}.name`}
+        sectionId={sectionId}
+      />
+      <StaticField
+        schema={{ type: "text" }}
+        value={item.price}
+        path={`${path}.price`}
+        sectionId={sectionId}
+      />
+      <StaticField
+        schema={{ type: "text" }}
+        value={item.originalPrice}
+        path={`${path}.originalPrice`}
+        sectionId={sectionId}
+      />
+      <StaticField
+        schema={{ type: "text" }}
+        value={item.badge}
+        path={`${path}.badge`}
+        sectionId={sectionId}
+      />
     </>
   );
 }
@@ -149,13 +187,14 @@ export function StaticNavItem({
   index,
 }: ItemProps & { item: NavItem }) {
   const path = `${basePath}[${index}]`;
+  // NavItem is a CTA-like field with label + href
   return (
-    <a
-      href={item.href}
-      {...editAttrs(sectionId, `${path}.label`, "text")}
-    >
-      {item.label}
-    </a>
+    <StaticField
+      schema={{ type: "cta" }}
+      value={{ text: item.label, href: item.href }}
+      path={path}
+      sectionId={sectionId}
+    />
   );
 }
 
@@ -170,10 +209,11 @@ export function StaticGalleryImage({
 }: ItemProps & { image: ImageSource }) {
   const path = `${basePath}[${index}]`;
   return (
-    <img
-      src={image.url}
-      alt={image.alt}
-      {...editAttrs(sectionId, path, "image")}
+    <StaticField
+      schema={{ type: "image" }}
+      value={image}
+      path={path}
+      sectionId={sectionId}
     />
   );
 }
@@ -189,10 +229,11 @@ export function StaticLogoItem({
 }: ItemProps & { item: { image: ImageSource, href?: string } }) {
   const path = `${basePath}[${index}]`;
   return (
-    <img
-      src={item.image.url}
-      alt={item.image.alt}
-      {...editAttrs(sectionId, `${path}.image`, "image")}
+    <StaticField
+      schema={{ type: "image" }}
+      value={item.image}
+      path={`${path}.image`}
+      sectionId={sectionId}
     />
   );
 }
