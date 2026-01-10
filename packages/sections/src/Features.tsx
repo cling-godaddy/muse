@@ -31,13 +31,15 @@ export function Features({
   backgroundColor,
   className,
 }: FeaturesProps) {
-  const isBento = variant.startsWith("bento");
-  const isNumbered = variant === "numbered";
-  const variantClass = isBento
-    ? styles.bento
-    : isNumbered
-      ? styles.numbered
-      : styles.grid;
+  const variantClassMap: Record<FeaturesVariant, string> = {
+    "grid": styles.grid ?? "",
+    "grid-images": styles.gridImages ?? "",
+    "bento": styles.bentoHero ?? "",
+    "bento-spotlight": styles.bentoSpotlight ?? "",
+    "bento-split": styles.bentoSplit ?? "",
+    "numbered": styles.numbered ?? "",
+  };
+  const variantClass = variantClassMap[variant] || "";
 
   return (
     <section

@@ -114,11 +114,8 @@ export const BentoSpotlight: Story = {
   args: {
     headline: "Core Features",
     variant: "bento-spotlight",
-    itemCount: 8,
+    itemCount: 6,
     useImages: true,
-  },
-  argTypes: {
-    itemCount: { control: { type: "range", min: 7, max: 8, step: 1 } },
   },
 };
 
