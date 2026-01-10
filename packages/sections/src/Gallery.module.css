@@ -70,6 +70,8 @@
 .carouselWrapper {
   position: relative;
   width: 100%;
+  display: flex;
+  align-items: center;
 }
 
 .navButton {
@@ -114,9 +116,11 @@
   overflow-x: auto;
   scroll-snap-type: x mandatory;
   gap: 1rem;
-  padding: 0 10%;
+  padding-left: 10%;
+  padding-right: 10%;
   grid-template-columns: none;
   scrollbar-width: none; /* Firefox */
+  flex: 1;
 }
 
 .carousel .images::-webkit-scrollbar {
