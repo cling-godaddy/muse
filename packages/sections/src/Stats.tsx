@@ -1,6 +1,9 @@
 import type { ReactNode } from "react";
 import type { SectionSchema } from "./schema";
 import styles from "./Stats.module.css";
+import { wrapChildren } from "./utils";
+import { Value } from "./Stats/Value";
+import { Label } from "./Stats/Label";
 
 export type StatsVariant = "row" | "grid" | "counters";
 
@@ -39,7 +42,7 @@ export function Stats({
       style={{ backgroundColor }}
     >
       {headline && <div className={styles.headline}>{headline}</div>}
-      <div className={styles.stats}>{stats}</div>
+      <div className={styles.stats}>{wrapChildren(stats, styles.stat)}</div>
     </section>
   );
 }
@@ -50,3 +53,7 @@ Stats.schema = {
 } satisfies SectionSchema;
 
 Stats.displayName = "Stats";
+
+// Primitives for theme-aware content
+Stats.Value = Value;
+Stats.Label = Label;

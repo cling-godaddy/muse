@@ -1,6 +1,7 @@
 import type { ReactNode } from "react";
 import type { SectionSchema } from "./schema";
 import styles from "./Products.module.css";
+import { wrapChildren } from "./utils";
 
 export type ProductsVariant = "grid" | "carousel";
 
@@ -40,7 +41,7 @@ export function Products({
     >
       {headline && <div className={styles.headline}>{headline}</div>}
       {subheadline && <div className={styles.subheadline}>{subheadline}</div>}
-      <div className={styles.items}>{items}</div>
+      <div className={styles.items}>{wrapChildren(items, styles.card)}</div>
     </section>
   );
 }

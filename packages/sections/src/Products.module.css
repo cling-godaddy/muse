@@ -40,10 +40,11 @@
   outline: none;
 }
 
-/* Cards container */
-.cards {
+/* Items/cards container */
+.items {
   display: grid;
   gap: 1.5rem;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
 }
 
 /* Individual card */
@@ -194,7 +195,7 @@
    GRID LAYOUT (default)
    Standard product grid
    ============================================ */
-.grid .cards {
+.grid .items {
   grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
 }
 
@@ -202,7 +203,7 @@
    FEATURED LAYOUT
    Hero product + supporting grid
    ============================================ */
-.featured .cards {
+.featured .items {
   grid-template-columns: repeat(4, 1fr);
   grid-template-rows: auto;
 }
@@ -228,7 +229,7 @@
 }
 
 @media (max-width: 768px) {
-  .featured .cards {
+  .featured .items {
     grid-template-columns: repeat(2, 1fr);
   }
 
@@ -248,7 +249,7 @@
    MINIMAL LAYOUT
    Image + price only, clean
    ============================================ */
-.minimal .cards {
+.minimal .items {
   grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
   gap: 1rem;
 }

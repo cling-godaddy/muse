@@ -26,40 +26,36 @@ const sampleMinimalProducts: ProductItem[] = [
   { image: { url: "https://images.unsplash.com/photo-1540932239986-30128078f3c5?w=400", alt: "Clock" }, name: "Wall Clock", price: "$145" },
 ];
 
-/** Renders product cards */
-function ProductCards({ products }: { products: ProductItem[] }) {
+/** Renders product content - section provides card wrapper */
+function ProductContent({ product }: { product: ProductItem }) {
   return (
     <>
-      {products.map((product, i) => (
-        <div key={i} style={{ background: "#f9fafb", borderRadius: "0.5rem", overflow: "hidden" }}>
-          <div style={{ position: "relative" }}>
-            {product.image && (
-              <img src={product.image.url} alt={product.image.alt} style={{ width: "100%", height: "200px", objectFit: "cover" }} />
-            )}
-            {product.badge && (
-              <span style={{ position: "absolute", top: "0.5rem", left: "0.5rem", background: "#6366f1", color: "white", padding: "0.25rem 0.5rem", borderRadius: "0.25rem", fontSize: "0.75rem" }}>
-                {product.badge}
-              </span>
-            )}
-          </div>
-          <div style={{ padding: "1rem" }}>
-            <h3 style={{ fontWeight: 500, marginBottom: "0.25rem" }}>{product.name}</h3>
-            <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
-              <span style={{ fontWeight: 600 }}>{product.price}</span>
-              {product.originalPrice && (
-                <span style={{ textDecoration: "line-through", color: "#9ca3af", fontSize: "0.875rem" }}>{product.originalPrice}</span>
-              )}
-            </div>
-            {product.rating && (
-              <div style={{ fontSize: "0.875rem", color: "#6b7280", marginTop: "0.25rem" }}>
-                Rating:
-                {" "}
-                {product.rating}
-              </div>
-            )}
-          </div>
+      <div style={{ position: "relative" }}>
+        {product.image && (
+          <img src={product.image.url} alt={product.image.alt} style={{ width: "100%", height: "200px", objectFit: "cover" }} />
+        )}
+        {product.badge && (
+          <span style={{ position: "absolute", top: "0.5rem", left: "0.5rem", background: "#6366f1", color: "white", padding: "0.25rem 0.5rem", borderRadius: "0.25rem", fontSize: "0.75rem" }}>
+            {product.badge}
+          </span>
+        )}
+      </div>
+      <div style={{ padding: "1rem" }}>
+        <h3 style={{ fontWeight: 500, marginBottom: "0.25rem" }}>{product.name}</h3>
+        <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
+          <span style={{ fontWeight: 600 }}>{product.price}</span>
+          {product.originalPrice && (
+            <span style={{ textDecoration: "line-through", color: "#9ca3af", fontSize: "0.875rem" }}>{product.originalPrice}</span>
+          )}
         </div>
-      ))}
+        {product.rating && (
+          <div style={{ fontSize: "0.875rem", color: "#6b7280", marginTop: "0.25rem" }}>
+            Rating:
+            {" "}
+            {product.rating}
+          </div>
+        )}
+      </div>
     </>
   );
 }
@@ -99,7 +95,7 @@ const meta: Meta<ProductsArgs> = {
       <Products
         headline={args.headline ? <h2>{args.headline}</h2> : undefined}
         subheadline={args.subheadline ? <p>{args.subheadline}</p> : undefined}
-        items={<ProductCards products={products} />}
+        items={products.map((p, i) => <ProductContent key={i} product={p} />)}
         variant={args.variant}
       />
     );

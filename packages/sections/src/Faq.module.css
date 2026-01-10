@@ -126,6 +126,31 @@
   outline: none;
 }
 
+/* Two-column variant */
+.twoColumn .items {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1.5rem;
+  border: none;
+  border-radius: 0;
+}
+
+.twoColumn .item {
+  border: 1px solid var(--muse-theme-border, #e5e7eb);
+  border-radius: var(--muse-theme-radius-lg, 0.75rem);
+  overflow: hidden;
+}
+
+.twoColumn .item:last-child {
+  border-bottom: 1px solid var(--muse-theme-border, #e5e7eb);
+}
+
+@media (max-width: 640px) {
+  .twoColumn .items {
+    grid-template-columns: 1fr;
+  }
+}
+
 /* ============================================
    CRT EFFECTS
    ============================================ */

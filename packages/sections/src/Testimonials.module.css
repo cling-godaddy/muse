@@ -28,18 +28,52 @@
   outline: none;
 }
 
-.container {
+/* Quotes container */
+.quotes {
   margin: 0 auto;
   width: 100%;
   display: grid;
   grid-template-columns: 1fr;
-  gap: 0.25rem;
+  gap: 1.5rem;
+}
+
+/* Grid variant - multi-column layout */
+.grid .quotes {
+  gap: 1.5rem;
 }
 
 @media (min-width: 768px) {
-  .container {
+  .grid .quotes {
     grid-template-columns: repeat(2, 1fr);
   }
+}
+
+@media (min-width: 1024px) {
+  .grid .quotes {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+/* Single variant - centered single quote */
+.single .quotes {
+  max-width: 42rem;
+  grid-template-columns: 1fr;
+}
+
+/* Carousel variant - horizontal scroll */
+.carousel .quotes {
+  display: flex;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  gap: 1.5rem;
+  padding-bottom: 1rem;
+}
+
+.carousel .quotes > * {
+  flex: 0 0 auto;
+  width: 80%;
+  max-width: 28rem;
+  scroll-snap-align: center;
 }
 
 .card {

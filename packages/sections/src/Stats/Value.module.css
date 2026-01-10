@@ -1,0 +1,16 @@
+.value {
+  font-family: var(--muse-theme-heading-font, inherit);
+  font-size: clamp(1.5rem, 5vw, 2.5rem);
+  font-weight: 700;
+  color: var(--muse-theme-primary, #6366f1);
+}
+
+:global([data-effects="crt"]) .value {
+  text-shadow: 0 0 10px rgba(var(--muse-theme-primary-rgb, 0, 255, 0), 0.5);
+}
+
+:global([data-effects="neon"]) .value {
+  text-shadow:
+    0 0 10px rgba(var(--muse-theme-primary-rgb, 255, 42, 109), 0.8),
+    0 0 20px rgba(var(--muse-theme-primary-rgb, 255, 42, 109), 0.6);
+}

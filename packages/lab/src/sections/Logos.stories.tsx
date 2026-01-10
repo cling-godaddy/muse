@@ -20,16 +20,12 @@ const sampleLogos: LogoItem[] = [
   makeLogo("Cyberdyne", "#6366f1"),
 ];
 
-/** Renders logo items */
-function LogoImages({ logos }: { logos: LogoItem[] }) {
+/** Renders logo content - section provides logo wrapper */
+function LogoContent({ logo }: { logo: LogoItem }) {
   return (
-    <>
-      {logos.map((logo, i) => (
-        <a key={i} href={logo.href} style={{ display: "block" }}>
-          <img src={logo.image.url} alt={logo.image.alt} style={{ height: "40px", width: "auto" }} />
-        </a>
-      ))}
-    </>
+    <a href={logo.href} style={{ display: "block" }}>
+      <img src={logo.image.url} alt={logo.image.alt} style={{ height: "40px", width: "auto" }} />
+    </a>
   );
 }
 
@@ -61,7 +57,7 @@ const meta: Meta<LogosArgs> = {
     return (
       <Logos
         headline={args.headline ? <h2>{args.headline}</h2> : undefined}
-        logos={<LogoImages logos={logos} />}
+        logos={logos.map((logo, i) => <LogoContent key={i} logo={logo} />)}
         variant={args.variant}
       />
     );

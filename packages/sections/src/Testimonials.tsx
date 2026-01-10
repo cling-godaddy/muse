@@ -1,6 +1,7 @@
 import type { ReactNode } from "react";
 import type { SectionSchema } from "./schema";
 import styles from "./Testimonials.module.css";
+import { wrapChildren } from "./utils";
 
 export type TestimonialsVariant = "grid" | "single" | "carousel";
 
@@ -39,7 +40,7 @@ export function Testimonials({
       style={{ backgroundColor }}
     >
       {headline && <div className={styles.headline}>{headline}</div>}
-      <div className={styles.quotes}>{quotes}</div>
+      <div className={styles.quotes}>{wrapChildren(quotes, styles.card)}</div>
     </section>
   );
 }

@@ -1,0 +1,15 @@
+.label {
+  font-family: var(--muse-theme-body-font, inherit);
+  font-size: 0.75rem;
+  color: var(--muse-theme-text-muted, #64748b);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+:global([data-effects="crt"]) .label {
+  text-shadow: 0 0 5px rgba(var(--muse-theme-primary-rgb, 0, 255, 0), 0.3);
+}
+
+:global([data-effects="neon"]) .label {
+  text-shadow: 0 0 5px rgba(var(--muse-theme-primary-rgb, 255, 42, 109), 0.4);
+}

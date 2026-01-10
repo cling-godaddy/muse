@@ -56,57 +56,45 @@ const sampleSimpleItems: MenuItem[] = [
   { name: "Latte", price: "$5" },
 ];
 
-/** Renders menu categories */
-function MenuCategories({ categories }: { categories: MenuCategory[] }) {
+/** Renders menu category content - section provides item wrapper */
+function MenuCategoryContent({ category }: { category: MenuCategory }) {
   return (
     <>
-      {categories.map((category, i) => (
-        <div key={i} style={{ marginBottom: "2rem" }}>
-          <h3 style={{ fontSize: "1.25rem", fontWeight: 600, marginBottom: "1rem" }}>{category.name}</h3>
-          {category.items.map((item, j) => (
-            <div key={j} style={{ display: "flex", justifyContent: "space-between", padding: "0.75rem 0", borderBottom: "1px solid #e5e7eb" }}>
-              <div>
-                <div style={{ fontWeight: 500 }}>{item.name}</div>
-                {item.description && <div style={{ fontSize: "0.875rem", color: "#6b7280" }}>{item.description}</div>}
-              </div>
-              <div style={{ fontWeight: 600 }}>{item.price}</div>
-            </div>
-          ))}
-        </div>
-      ))}
-    </>
-  );
-}
-
-/** Renders menu items as cards */
-function MenuCards({ items }: { items: MenuItem[] }) {
-  return (
-    <>
-      {items.map((item, i) => (
-        <div key={i} style={{ background: "#f9fafb", borderRadius: "0.5rem", overflow: "hidden" }}>
-          {item.image && <img src={item.image.url} alt={item.image.alt} style={{ width: "100%", height: "150px", objectFit: "cover" }} />}
-          <div style={{ padding: "1rem" }}>
+      <h3 style={{ fontSize: "1.25rem", fontWeight: 600, marginBottom: "1rem" }}>{category.name}</h3>
+      {category.items.map((item, j) => (
+        <div key={j} style={{ display: "flex", justifyContent: "space-between", padding: "0.75rem 0", borderBottom: "1px solid #e5e7eb" }}>
+          <div>
             <div style={{ fontWeight: 500 }}>{item.name}</div>
-            {item.description && <div style={{ fontSize: "0.875rem", color: "#6b7280", marginTop: "0.25rem" }}>{item.description}</div>}
-            <div style={{ fontWeight: 600, marginTop: "0.5rem" }}>{item.price}</div>
+            {item.description && <div style={{ fontSize: "0.875rem", color: "#6b7280" }}>{item.description}</div>}
           </div>
+          <div style={{ fontWeight: 600 }}>{item.price}</div>
         </div>
       ))}
     </>
   );
 }
 
-/** Renders simple menu items */
-function SimpleMenuItems({ items }: { items: MenuItem[] }) {
+/** Renders menu card content - section provides item wrapper */
+function MenuCardContent({ item }: { item: MenuItem }) {
   return (
     <>
-      {items.map((item, i) => (
-        <div key={i} style={{ display: "flex", justifyContent: "space-between", padding: "0.5rem 0" }}>
-          <span>{item.name}</span>
-          <span style={{ fontWeight: 500 }}>{item.price}</span>
-        </div>
-      ))}
+      {item.image && <img src={item.image.url} alt={item.image.alt} style={{ width: "100%", height: "150px", objectFit: "cover" }} />}
+      <div style={{ padding: "1rem" }}>
+        <div style={{ fontWeight: 500 }}>{item.name}</div>
+        {item.description && <div style={{ fontSize: "0.875rem", color: "#6b7280", marginTop: "0.25rem" }}>{item.description}</div>}
+        <div style={{ fontWeight: 600, marginTop: "0.5rem" }}>{item.price}</div>
+      </div>
     </>
+  );
+}
+
+/** Renders simple menu item content - section provides item wrapper */
+function SimpleMenuContent({ item }: { item: MenuItem }) {
+  return (
+    <div style={{ display: "flex", justifyContent: "space-between", width: "100%" }}>
+      <span>{item.name}</span>
+      <span style={{ fontWeight: 500 }}>{item.price}</span>
+    </div>
   );
 }
 
@@ -142,7 +130,7 @@ export const List: Story = {
       <Menu
         headline={args.headline ? <h2>{args.headline}</h2> : undefined}
         subheadline={args.subheadline ? <p>{args.subheadline}</p> : undefined}
-        items={<MenuCategories categories={sampleCategories} />}
+        items={sampleCategories.map((cat, i) => <MenuCategoryContent key={i} category={cat} />)}
         variant={args.variant}
       />
     );
@@ -166,7 +154,7 @@ export const Cards: Story = {
       <Menu
         headline={args.headline ? <h2>{args.headline}</h2> : undefined}
         subheadline={args.subheadline ? <p>{args.subheadline}</p> : undefined}
-        items={<MenuCards items={sampleItemsWithImages} />}
+        items={sampleItemsWithImages.map((item, i) => <MenuCardContent key={i} item={item} />)}
         variant={args.variant}
       />
     );
@@ -189,7 +177,7 @@ export const Simple: Story = {
       <Menu
         headline={args.headline ? <h2>{args.headline}</h2> : undefined}
         subheadline={args.subheadline ? <p>{args.subheadline}</p> : undefined}
-        items={<SimpleMenuItems items={sampleSimpleItems} />}
+        items={sampleSimpleItems.map((item, i) => <SimpleMenuContent key={i} item={item} />)}
         variant={args.variant}
       />
     );

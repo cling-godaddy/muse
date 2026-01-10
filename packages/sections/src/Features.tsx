@@ -1,6 +1,7 @@
 import type { ReactNode } from "react";
 import type { SectionSchema } from "./schema";
 import styles from "./Features.module.css";
+import { wrapChildren } from "./utils";
 
 export type FeaturesVariant = "grid" | "grid-images" | "bento" | "bento-spotlight" | "bento-split" | "numbered";
 
@@ -48,7 +49,7 @@ export function Features({
         className={styles.items}
         style={{ "--columns": columns } as React.CSSProperties}
       >
-        {items}
+        {wrapChildren(items, styles.item)}
       </div>
     </section>
   );

@@ -28,18 +28,14 @@ const sampleItemsWithImages: FeatureItem[] = [
   { image: { url: "https://images.unsplash.com/photo-1551434678-e076c223a692?w=600", alt: "Mobile app" }, title: "Mobile Ready", description: "Native apps for iOS and Android." },
 ];
 
-/** Renders feature items as cards */
-function FeatureCards({ items }: { items: FeatureItem[] }) {
+/** Renders feature content - section provides item wrapper */
+function FeatureContent({ item }: { item: FeatureItem }) {
   return (
     <>
-      {items.map((item, i) => (
-        <div key={i} style={{ padding: "1.5rem", background: "#f9fafb", borderRadius: "0.5rem" }}>
-          {item.icon && <div style={{ fontSize: "1.5rem", marginBottom: "0.5rem" }}>⚡</div>}
-          {item.image && <img src={item.image.url} alt={item.image.alt} style={{ width: "100%", borderRadius: "0.25rem", marginBottom: "0.75rem" }} />}
-          <h3 style={{ fontSize: "1.125rem", fontWeight: 600, marginBottom: "0.5rem" }}>{item.title}</h3>
-          {item.description && <p style={{ color: "#6b7280", fontSize: "0.875rem" }}>{item.description}</p>}
-        </div>
-      ))}
+      {item.icon && <div style={{ fontSize: "1.5rem", marginBottom: "0.5rem" }}>⚡</div>}
+      {item.image && <img src={item.image.url} alt={item.image.alt} style={{ width: "100%", borderRadius: "0.25rem", marginBottom: "0.75rem" }} />}
+      <h3 style={{ fontSize: "1.125rem", fontWeight: 600, marginBottom: "0.5rem" }}>{item.title}</h3>
+      {item.description && <p style={{ color: "#6b7280", fontSize: "0.875rem" }}>{item.description}</p>}
     </>
   );
 }
@@ -77,7 +73,7 @@ const meta: Meta<FeaturesArgs> = {
     return (
       <Features
         headline={args.headline ? <h2>{args.headline}</h2> : undefined}
-        items={<FeatureCards items={items} />}
+        items={items.map((item, i) => <FeatureContent key={i} item={item} />)}
         variant={args.variant}
       />
     );

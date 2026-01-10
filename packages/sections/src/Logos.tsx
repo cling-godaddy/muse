@@ -1,6 +1,7 @@
 import type { ReactNode } from "react";
 import type { SectionSchema } from "./schema";
 import styles from "./Logos.module.css";
+import { wrapChildren } from "./utils";
 
 export type LogosVariant = "grid" | "marquee";
 
@@ -35,8 +36,8 @@ export function Logos({
       >
         {headline && <div className={styles.headline}>{headline}</div>}
         <div className={styles.marqueeTrack}>
-          <div className={styles.marqueeContent}>{logos}</div>
-          <div className={styles.marqueeContent} aria-hidden="true">{logos}</div>
+          <div className={styles.marqueeContent}>{wrapChildren(logos, styles.logo)}</div>
+          <div className={styles.marqueeContent} aria-hidden="true">{wrapChildren(logos, styles.logo)}</div>
         </div>
       </section>
     );
@@ -49,7 +50,7 @@ export function Logos({
       style={{ backgroundColor }}
     >
       {headline && <div className={styles.headline}>{headline}</div>}
-      <div className={styles.grid}>{logos}</div>
+      <div className={styles.grid}>{wrapChildren(logos, styles.logo)}</div>
     </section>
   );
 }

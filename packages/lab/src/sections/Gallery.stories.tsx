@@ -17,15 +17,9 @@ const sampleImages: ImageSource[] = [
   { url: "https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=600", alt: "Sunlit forest" },
 ];
 
-/** Renders gallery images */
-function GalleryImages({ images }: { images: ImageSource[] }) {
-  return (
-    <>
-      {images.map((image, i) => (
-        <img key={i} src={image.url} alt={image.alt} style={{ width: "100%", height: "auto", borderRadius: "0.5rem" }} />
-      ))}
-    </>
-  );
+/** Renders gallery image content - section provides item wrapper */
+function GalleryImage({ image }: { image: ImageSource }) {
+  return <img src={image.url} alt={image.alt} style={{ width: "100%", height: "100%", objectFit: "cover" }} />;
 }
 
 type GalleryArgs = {
@@ -62,7 +56,7 @@ const meta: Meta<GalleryArgs> = {
     return (
       <Gallery
         headline={args.headline ? <h2>{args.headline}</h2> : undefined}
-        images={<GalleryImages images={images} />}
+        images={images.map((img, i) => <GalleryImage key={i} image={img} />)}
         variant={args.variant}
         columns={args.columns}
       />

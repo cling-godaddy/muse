@@ -1,6 +1,7 @@
 import type { ReactNode } from "react";
 import type { SectionSchema } from "./schema";
 import styles from "./Pricing.module.css";
+import { wrapChildren } from "./utils";
 
 export interface PricingProps {
   /** Headline slot */
@@ -32,7 +33,7 @@ export function Pricing({
     >
       {headline && <div className={styles.headline}>{headline}</div>}
       {subheadline && <div className={styles.subheadline}>{subheadline}</div>}
-      <div className={styles.plans}>{plans}</div>
+      <div className={styles.plans}>{wrapChildren(plans, styles.plan)}</div>
     </section>
   );
 }

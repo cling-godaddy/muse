@@ -28,35 +28,31 @@ const sampleQuotes: Quote[] = [
   },
 ];
 
-/** Renders quote items as testimonial cards */
-function QuoteCards({ quotes }: { quotes: Quote[] }) {
+/** Renders quote content - section provides card wrapper */
+function QuoteContent({ quote }: { quote: Quote }) {
   return (
     <>
-      {quotes.map((quote, i) => (
-        <div key={i} style={{ padding: "1.5rem", background: "#f9fafb", borderRadius: "0.5rem" }}>
-          <p style={{ fontSize: "1rem", fontStyle: "italic", marginBottom: "1rem" }}>
-            "
-            {quote.text}
-            "
-          </p>
-          <div style={{ display: "flex", alignItems: "center", gap: "0.75rem" }}>
-            {quote.avatar && (
-              <img
-                src={quote.avatar.url}
-                alt={quote.avatar.alt}
-                style={{ width: "2.5rem", height: "2.5rem", borderRadius: "50%", objectFit: "cover" }}
-              />
-            )}
-            <div>
-              <div style={{ fontWeight: 600 }}>{quote.author}</div>
-              <div style={{ fontSize: "0.875rem", color: "#6b7280" }}>
-                {quote.role}
-                {quote.company && `, ${quote.company}`}
-              </div>
-            </div>
+      <p style={{ fontStyle: "italic", marginBottom: "1rem" }}>
+        "
+        {quote.text}
+        "
+      </p>
+      <div style={{ display: "flex", alignItems: "center", gap: "0.75rem" }}>
+        {quote.avatar && (
+          <img
+            src={quote.avatar.url}
+            alt={quote.avatar.alt}
+            style={{ width: "2.5rem", height: "2.5rem", borderRadius: "50%", objectFit: "cover" }}
+          />
+        )}
+        <div>
+          <div style={{ fontWeight: 600 }}>{quote.author}</div>
+          <div style={{ fontSize: "0.875rem", color: "#6b7280" }}>
+            {quote.role}
+            {quote.company && `, ${quote.company}`}
           </div>
         </div>
-      ))}
+      </div>
     </>
   );
 }
@@ -89,7 +85,7 @@ const meta: Meta<TestimonialsArgs> = {
     return (
       <Testimonials
         headline={args.headline ? <h2>{args.headline}</h2> : undefined}
-        quotes={<QuoteCards quotes={quotes} />}
+        quotes={quotes.map((q, i) => <QuoteContent key={i} quote={q} />)}
         variant={args.variant}
       />
     );

@@ -32,54 +32,40 @@ const samplePlans: PricingPlan[] = [
   },
 ];
 
-/** Renders pricing plan cards */
-function PlanCards({ plans }: { plans: PricingPlan[] }) {
+/** Renders pricing plan content - section provides plan wrapper */
+function PlanContent({ plan }: { plan: PricingPlan }) {
   return (
     <>
-      {plans.map((plan, i) => (
-        <div
-          key={i}
-          style={{
-            padding: "1.5rem",
-            background: plan.highlighted ? "#6366f1" : "#f9fafb",
-            color: plan.highlighted ? "white" : "inherit",
-            borderRadius: "0.5rem",
-            display: "flex",
-            flexDirection: "column",
-          }}
-        >
-          <h3 style={{ fontSize: "1.25rem", fontWeight: 600, marginBottom: "0.5rem" }}>{plan.name}</h3>
-          <div style={{ marginBottom: "0.5rem" }}>
-            <span style={{ fontSize: "2rem", fontWeight: 700 }}>{plan.price}</span>
-            <span style={{ opacity: 0.7 }}>{plan.period}</span>
-          </div>
-          {plan.description && (
-            <p style={{ fontSize: "0.875rem", opacity: 0.8, marginBottom: "1rem" }}>{plan.description}</p>
-          )}
-          <ul style={{ listStyle: "none", padding: 0, margin: "0 0 1.5rem 0", flex: 1 }}>
-            {plan.features.map((feature, j) => (
-              <li key={j} style={{ padding: "0.25rem 0", fontSize: "0.875rem" }}>
-                {feature}
-              </li>
-            ))}
-          </ul>
-          <a
-            href={plan.cta.href}
-            style={{
-              display: "block",
-              textAlign: "center",
-              padding: "0.75rem",
-              background: plan.highlighted ? "white" : "#6366f1",
-              color: plan.highlighted ? "#6366f1" : "white",
-              borderRadius: "0.375rem",
-              textDecoration: "none",
-              fontWeight: 500,
-            }}
-          >
-            {plan.cta.text}
-          </a>
-        </div>
-      ))}
+      <h3 style={{ fontSize: "1.25rem", fontWeight: 600, marginBottom: "0.5rem" }}>{plan.name}</h3>
+      <div style={{ marginBottom: "0.5rem" }}>
+        <span style={{ fontSize: "2rem", fontWeight: 700 }}>{plan.price}</span>
+        <span style={{ opacity: 0.7 }}>{plan.period}</span>
+      </div>
+      {plan.description && (
+        <p style={{ fontSize: "0.875rem", opacity: 0.8, marginBottom: "1rem" }}>{plan.description}</p>
+      )}
+      <ul style={{ listStyle: "none", padding: 0, margin: "0 0 1.5rem 0", flex: 1 }}>
+        {plan.features.map((feature, j) => (
+          <li key={j} style={{ padding: "0.25rem 0", fontSize: "0.875rem" }}>
+            {feature}
+          </li>
+        ))}
+      </ul>
+      <a
+        href={plan.cta.href}
+        style={{
+          display: "block",
+          textAlign: "center",
+          padding: "0.75rem",
+          background: plan.highlighted ? "white" : "#6366f1",
+          color: plan.highlighted ? "#6366f1" : "white",
+          borderRadius: "0.375rem",
+          textDecoration: "none",
+          fontWeight: 500,
+        }}
+      >
+        {plan.cta.text}
+      </a>
     </>
   );
 }
@@ -110,7 +96,7 @@ const meta: Meta<PricingArgs> = {
       <Pricing
         headline={args.headline ? <h2>{args.headline}</h2> : undefined}
         subheadline={args.subheadline ? <p>{args.subheadline}</p> : undefined}
-        plans={<PlanCards plans={plans} />}
+        plans={plans.map((plan, i) => <PlanContent key={i} plan={plan} />)}
       />
     );
   },

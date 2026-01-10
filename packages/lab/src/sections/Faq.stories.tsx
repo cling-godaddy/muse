@@ -12,19 +12,15 @@ const sampleItems: FaqItem[] = [
   { question: "Do you offer refunds?", answer: "We offer a 30-day money-back guarantee on all plans." },
 ];
 
-/** Renders FAQ items as question/answer pairs */
-function FaqItems({ items }: { items: FaqItem[] }) {
+/** Renders FAQ content - section provides item wrapper */
+function FaqContent({ item }: { item: FaqItem }) {
   return (
-    <>
-      {items.map((item, i) => (
-        <details key={i} style={{ borderBottom: "1px solid #e5e7eb", padding: "1rem 0" }}>
-          <summary style={{ cursor: "pointer", fontWeight: 500, fontSize: "1rem" }}>
-            {item.question}
-          </summary>
-          <p style={{ marginTop: "0.75rem", color: "#6b7280" }}>{item.answer}</p>
-        </details>
-      ))}
-    </>
+    <details style={{ width: "100%" }}>
+      <summary style={{ cursor: "pointer", fontWeight: 500, fontSize: "1rem" }}>
+        {item.question}
+      </summary>
+      <p style={{ marginTop: "0.75rem", color: "#6b7280" }}>{item.answer}</p>
+    </details>
   );
 }
 
@@ -60,7 +56,7 @@ const meta: Meta<FaqArgs> = {
       <Faq
         headline={args.headline ? <h2>{args.headline}</h2> : undefined}
         subheadline={args.subheadline ? <p>{args.subheadline}</p> : undefined}
-        items={<FaqItems items={items} />}
+        items={items.map((item, i) => <FaqContent key={i} item={item} />)}
         variant={args.variant}
       />
     );

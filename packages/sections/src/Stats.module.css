@@ -25,6 +25,49 @@
   outline: none;
 }
 
+/* Stats container */
+.stats {
+  display: flex;
+  gap: 3rem;
+  justify-content: center;
+  align-items: flex-start;
+  flex-wrap: wrap;
+  width: 100%;
+  max-width: 900px;
+}
+
+.row .stats {
+  flex-wrap: nowrap;
+}
+
+@media (max-width: 640px) {
+  .row .stats {
+    flex-wrap: wrap;
+    gap: 2rem;
+  }
+}
+
+.grid .stats {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 2rem;
+}
+
+@media (min-width: 768px) {
+  .grid .stats {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+.grid .stat {
+  max-width: none;
+}
+
+.counters .stats {
+  flex-wrap: nowrap;
+}
+
+/* Old .row class - keeping for reference, now handled via .stats */
 .row {
   display: flex;
   gap: 3rem;

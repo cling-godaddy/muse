@@ -11,20 +11,6 @@ const sampleStats: StatItem[] = [
   { value: "24/7", label: "Support" },
 ];
 
-/** Renders stat items as cards */
-function StatCards({ stats }: { stats: StatItem[] }) {
-  return (
-    <>
-      {stats.map((stat, i) => (
-        <div key={i} style={{ textAlign: "center", padding: "1rem" }}>
-          <div style={{ fontSize: "2.5rem", fontWeight: 700, color: "#6366f1" }}>{stat.value}</div>
-          <div style={{ fontSize: "0.875rem", color: "#6b7280", marginTop: "0.25rem" }}>{stat.label}</div>
-        </div>
-      ))}
-    </>
-  );
-}
-
 type StatsArgs = {
   headline: string
   variant: StatsVariant
@@ -50,10 +36,16 @@ const meta: Meta<StatsArgs> = {
   },
   render: (args) => {
     const stats = sampleStats.slice(0, args.statCount);
+    const animate = args.variant === "counters";
     return (
       <Stats
         headline={args.headline ? <h2>{args.headline}</h2> : undefined}
-        stats={<StatCards stats={stats} />}
+        stats={stats.map((stat, i) => (
+          <React.Fragment key={i}>
+            <Stats.Value animate={animate}>{stat.value}</Stats.Value>
+            <Stats.Label>{stat.label}</Stats.Label>
+          </React.Fragment>
+        ))}
         variant={args.variant}
       />
     );

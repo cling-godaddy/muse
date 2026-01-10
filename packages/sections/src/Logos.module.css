@@ -25,6 +25,38 @@
   outline: none;
 }
 
+/* Marquee variant */
+.marquee {
+  overflow: hidden;
+}
+
+.marqueeTrack {
+  display: flex;
+  width: max-content;
+  animation: marquee 30s linear infinite;
+}
+
+.marqueeContent {
+  display: flex;
+  gap: 3rem;
+  padding: 0 1.5rem;
+}
+
+@keyframes marquee {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+/* Pause on hover */
+.marquee:hover .marqueeTrack {
+  animation-play-state: paused;
+}
+
+/* Grid variant */
 .grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));

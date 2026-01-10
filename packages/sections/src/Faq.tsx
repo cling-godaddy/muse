@@ -1,6 +1,7 @@
 import type { ReactNode } from "react";
 import type { SectionSchema } from "./schema";
 import styles from "./Faq.module.css";
+import { wrapChildren } from "./utils";
 
 export type FaqVariant = "accordion" | "two-column";
 
@@ -42,7 +43,7 @@ export function Faq({
     >
       {headline && <div className={styles.headline}>{headline}</div>}
       {subheadline && <div className={styles.subheadline}>{subheadline}</div>}
-      <div className={styles.items}>{items}</div>
+      <div className={styles.items}>{wrapChildren(items, styles.item)}</div>
     </section>
   );
 }
