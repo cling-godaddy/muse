@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeEach } from "vitest";
 import { useSiteStore } from "./siteStore";
-import { createSite } from "@muse/core";
+import { createSite, type Section } from "@muse/core";
 import { resolveTheme } from "@muse/themes";
 
 const defaultResolved = resolveTheme({ palette: "slate", typography: "inter" });
@@ -184,6 +184,31 @@ describe("siteStore", () => {
       expect(section).toMatchObject({
         id: sectionId,
         headline: "New Headline",
+      });
+      expect(state.dirty).toBe(true);
+    });
+
+    it("should update section in sharedSections", () => {
+      const site = createSite("Test Site");
+      const navbarId = crypto.randomUUID();
+
+      site.sharedSections = [
+        {
+          id: navbarId,
+          type: "navbar",
+          preset: "navbar-simple",
+          items: [{ label: "Home", href: "/" }],
+        } as Section,
+      ];
+
+      useSiteStore.getState().hydrateDraft(site);
+      useSiteStore.getState().updateSection(navbarId, { items: [{ label: "About", href: "/about" }] });
+
+      const state = useSiteStore.getState();
+      const navbar = state.draft?.sharedSections?.[0];
+      expect(navbar).toMatchObject({
+        id: navbarId,
+        items: [{ label: "About", href: "/about" }],
       });
       expect(state.dirty).toBe(true);
     });

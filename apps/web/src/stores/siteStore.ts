@@ -1,7 +1,7 @@
 import { create } from "zustand";
 import { devtools } from "zustand/middleware";
 import { produceWithPatches, applyPatches, enablePatches, type Patch } from "immer";
-import type { Site, Section, NavbarSection } from "@muse/core";
+import type { Site, Section } from "@muse/core";
 import { resolveTheme, type Theme } from "@muse/themes";
 
 // Enable Immer patches plugin
@@ -45,8 +45,8 @@ interface SiteState {
   updatePageSections: (pageId: string, sections: Section[]) => void
   setCurrentPage: (pageId: string) => void
   setTheme: (palette: string, typography: string, effects?: string) => void
-  updateNavbar: (data: Partial<NavbarSection>) => void
-  setNavbar: (navbar: NavbarSection | null) => void
+  addSharedSection: (section: Section) => void
+  setSharedSections: (sections: Section[]) => void
   clearSite: () => void
   updateSiteName: (name: string) => void
   addNewPage: (slug: string, title: string, parentId?: string | null) => string
@@ -133,6 +133,16 @@ export const useSiteStore = create<SiteState>()(
         const { applyDraftOp } = get();
 
         applyDraftOp((draft) => {
+          // Check sharedSections first
+          if (draft.sharedSections) {
+            const sharedSection = draft.sharedSections.find(s => s.id === id);
+            if (sharedSection) {
+              Object.assign(sharedSection, data);
+              draft.updatedAt = new Date().toISOString();
+              return;
+            }
+          }
+
           // Find section across all pages
           for (const page of Object.values(draft.pages)) {
             const section = page.sections.find(s => s.id === id);
@@ -217,21 +227,23 @@ export const useSiteStore = create<SiteState>()(
         });
       },
 
-      updateNavbar: (data) => {
+      addSharedSection: (section) => {
         const { applyDraftOp } = get();
 
         applyDraftOp((draft) => {
-          if (!draft.navbar) return;
-          Object.assign(draft.navbar, data);
+          if (!draft.sharedSections) {
+            draft.sharedSections = [];
+          }
+          draft.sharedSections.push(section);
           draft.updatedAt = new Date().toISOString();
         });
       },
 
-      setNavbar: (navbar) => {
+      setSharedSections: (sections) => {
         const { applyDraftOp } = get();
 
         applyDraftOp((draft) => {
-          draft.navbar = navbar ?? undefined;
+          draft.sharedSections = sections;
           draft.updatedAt = new Date().toISOString();
         });
       },
@@ -240,9 +252,9 @@ export const useSiteStore = create<SiteState>()(
         const { applyDraftOp } = get();
 
         applyDraftOp((draft) => {
-          // Clear pages but preserve site metadata
+          // Clear pages and shared sections but preserve site metadata
           draft.pages = {};
-          draft.navbar = undefined;
+          draft.sharedSections = [];
           draft.updatedAt = new Date().toISOString();
         });
       },
