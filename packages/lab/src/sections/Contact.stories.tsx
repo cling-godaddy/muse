@@ -13,10 +13,10 @@ const sampleFields: FormField[] = [
 /** Renders a simple form from field definitions */
 function ContactForm({ fields, submitText }: { fields: FormField[], submitText: string }) {
   return (
-    <form style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
+    <form style={{ display: "flex", flexDirection: "column", gap: "1rem", fontFamily: "var(--muse-theme-body-font)" }}>
       {fields.map(field => (
         <div key={field.name}>
-          <label style={{ display: "block", fontSize: "0.875rem", fontWeight: 500, marginBottom: "0.25rem" }}>
+          <label style={{ display: "block", fontSize: "0.875rem", fontWeight: 500, marginBottom: "0.25rem", color: "var(--muse-theme-text)" }}>
             {field.label}
             {field.required && <span style={{ color: "#ef4444" }}> *</span>}
           </label>
@@ -25,7 +25,7 @@ function ContactForm({ fields, submitText }: { fields: FormField[], submitText: 
               <textarea
                 name={field.name}
                 placeholder={field.placeholder}
-                style={{ width: "100%", padding: "0.5rem", border: "1px solid #d1d5db", borderRadius: "0.375rem", minHeight: "6rem" }}
+                style={{ width: "100%", padding: "0.5rem", border: "1px solid var(--muse-theme-text-muted)", borderRadius: "var(--muse-theme-radius)", minHeight: "6rem", fontFamily: "inherit" }}
               />
             )
             : (
@@ -33,14 +33,14 @@ function ContactForm({ fields, submitText }: { fields: FormField[], submitText: 
                 type={field.type}
                 name={field.name}
                 placeholder={field.placeholder}
-                style={{ width: "100%", padding: "0.5rem", border: "1px solid #d1d5db", borderRadius: "0.375rem" }}
+                style={{ width: "100%", padding: "0.5rem", border: "1px solid var(--muse-theme-text-muted)", borderRadius: "var(--muse-theme-radius)", fontFamily: "inherit" }}
               />
             )}
         </div>
       ))}
       <button
         type="submit"
-        style={{ padding: "0.75rem 1.5rem", background: "#6366f1", color: "white", borderRadius: "0.375rem", border: "none", cursor: "pointer" }}
+        style={{ padding: "0.75rem 1.5rem", background: "var(--muse-theme-cta-bg)", color: "var(--muse-theme-cta-text)", borderRadius: "var(--muse-theme-radius)", border: "none", cursor: "pointer", fontFamily: "inherit" }}
       >
         {submitText}
       </button>
@@ -51,7 +51,7 @@ function ContactForm({ fields, submitText }: { fields: FormField[], submitText: 
 /** Renders contact info */
 function ContactInfo({ email, phone, address }: { email?: string, phone?: string, address?: string }) {
   return (
-    <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem" }}>
+    <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem", fontFamily: "var(--muse-theme-body-font)", color: "var(--muse-theme-text)" }}>
       {email && (
         <p>
           Email:
@@ -116,8 +116,8 @@ const meta: Meta<ContactArgs> = {
         form={args.showForm ? <ContactForm fields={sampleFields} submitText="Send Message" /> : undefined}
         map={args.variant === "split-map" && args.address
           ? (
-            <div style={{ background: "#e5e7eb", height: "100%", minHeight: "300px", display: "flex", alignItems: "center", justifyContent: "center", borderRadius: "0.5rem" }}>
-              <span style={{ color: "#6b7280" }}>Map placeholder</span>
+            <div style={{ background: "var(--muse-theme-bg-alt)", height: "100%", minHeight: "300px", display: "flex", alignItems: "center", justifyContent: "center", borderRadius: "var(--muse-theme-radius)" }}>
+              <span style={{ color: "var(--muse-theme-text-muted)", fontFamily: "var(--muse-theme-body-font)" }}>Map placeholder</span>
             </div>
           )
           : undefined}

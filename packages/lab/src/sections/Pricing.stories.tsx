@@ -36,17 +36,17 @@ const samplePlans: PricingPlan[] = [
 function PlanContent({ plan }: { plan: PricingPlan }) {
   return (
     <>
-      <h3 style={{ fontSize: "1.25rem", fontWeight: 600, marginBottom: "0.5rem" }}>{plan.name}</h3>
-      <div style={{ marginBottom: "0.5rem" }}>
+      <h3 style={{ fontFamily: "var(--muse-theme-heading-font)", fontSize: "1.25rem", fontWeight: 600, marginBottom: "0.5rem", color: "var(--muse-theme-text)" }}>{plan.name}</h3>
+      <div style={{ fontFamily: "var(--muse-theme-body-font)", marginBottom: "0.5rem", color: "var(--muse-theme-text)" }}>
         <span style={{ fontSize: "2rem", fontWeight: 700 }}>{plan.price}</span>
-        <span style={{ opacity: 0.7 }}>{plan.period}</span>
+        <span style={{ color: "var(--muse-theme-text-muted)" }}>{plan.period}</span>
       </div>
       {plan.description && (
-        <p style={{ fontSize: "0.875rem", opacity: 0.8, marginBottom: "1rem" }}>{plan.description}</p>
+        <p style={{ fontFamily: "var(--muse-theme-body-font)", fontSize: "0.875rem", color: "var(--muse-theme-text-muted)", marginBottom: "1rem" }}>{plan.description}</p>
       )}
       <ul style={{ listStyle: "none", padding: 0, margin: "0 0 1.5rem 0", flex: 1 }}>
         {plan.features.map((feature, j) => (
-          <li key={j} style={{ padding: "0.25rem 0", fontSize: "0.875rem" }}>
+          <li key={j} style={{ fontFamily: "var(--muse-theme-body-font)", padding: "0.25rem 0", fontSize: "0.875rem", color: "var(--muse-theme-text)" }}>
             {feature}
           </li>
         ))}
@@ -57,9 +57,10 @@ function PlanContent({ plan }: { plan: PricingPlan }) {
           display: "block",
           textAlign: "center",
           padding: "0.75rem",
-          background: plan.highlighted ? "white" : "#6366f1",
-          color: plan.highlighted ? "#6366f1" : "white",
-          borderRadius: "0.375rem",
+          fontFamily: "var(--muse-theme-body-font)",
+          background: plan.highlighted ? "var(--muse-theme-on-primary)" : "var(--muse-theme-cta-bg)",
+          color: plan.highlighted ? "var(--muse-theme-primary)" : "var(--muse-theme-cta-text)",
+          borderRadius: "var(--muse-theme-radius)",
           textDecoration: "none",
           fontWeight: 500,
         }}

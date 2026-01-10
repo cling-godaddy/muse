@@ -15,11 +15,11 @@ const sampleItems: FaqItem[] = [
 /** Renders FAQ content - section provides item wrapper */
 function FaqContent({ item }: { item: FaqItem }) {
   return (
-    <details style={{ width: "100%" }}>
-      <summary style={{ cursor: "pointer", fontWeight: 500, fontSize: "1rem" }}>
+    <details style={{ width: "100%", fontFamily: "var(--muse-theme-body-font)" }}>
+      <summary style={{ cursor: "pointer", fontWeight: 500, fontSize: "1rem", color: "var(--muse-theme-text)" }}>
         {item.question}
       </summary>
-      <p style={{ marginTop: "0.75rem", color: "#6b7280" }}>{item.answer}</p>
+      <p style={{ marginTop: "0.75rem", color: "var(--muse-theme-text-muted)" }}>{item.answer}</p>
     </details>
   );
 }

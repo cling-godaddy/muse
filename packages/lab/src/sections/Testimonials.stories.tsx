@@ -32,7 +32,7 @@ const sampleQuotes: Quote[] = [
 function QuoteContent({ quote }: { quote: Quote }) {
   return (
     <>
-      <p style={{ fontStyle: "italic", marginBottom: "1rem" }}>
+      <p style={{ fontFamily: "var(--muse-theme-body-font)", fontStyle: "italic", marginBottom: "1rem", color: "var(--muse-theme-text)" }}>
         "
         {quote.text}
         "
@@ -46,8 +46,8 @@ function QuoteContent({ quote }: { quote: Quote }) {
           />
         )}
         <div>
-          <div style={{ fontWeight: 600 }}>{quote.author}</div>
-          <div style={{ fontSize: "0.875rem", color: "#6b7280" }}>
+          <div style={{ fontFamily: "var(--muse-theme-body-font)", fontWeight: 600, color: "var(--muse-theme-text)" }}>{quote.author}</div>
+          <div style={{ fontFamily: "var(--muse-theme-body-font)", fontSize: "0.875rem", color: "var(--muse-theme-text-muted)" }}>
             {quote.role}
             {quote.company && `, ${quote.company}`}
           </div>

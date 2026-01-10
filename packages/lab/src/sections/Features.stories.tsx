@@ -33,9 +33,9 @@ function FeatureContent({ item }: { item: FeatureItem }) {
   return (
     <>
       {item.icon && <div style={{ fontSize: "1.5rem", marginBottom: "0.5rem" }}>⚡</div>}
-      {item.image && <img src={item.image.url} alt={item.image.alt} style={{ width: "100%", borderRadius: "0.25rem", marginBottom: "0.75rem" }} />}
-      <h3 style={{ fontSize: "1.125rem", fontWeight: 600, marginBottom: "0.5rem" }}>{item.title}</h3>
-      {item.description && <p style={{ color: "#6b7280", fontSize: "0.875rem" }}>{item.description}</p>}
+      {item.image && <img src={item.image.url} alt={item.image.alt} style={{ width: "100%", borderRadius: "var(--muse-theme-radius)", marginBottom: "0.75rem" }} />}
+      <h3 style={{ fontFamily: "var(--muse-theme-heading-font)", fontSize: "1.125rem", fontWeight: 600, marginBottom: "0.5rem", color: "var(--muse-theme-text)" }}>{item.title}</h3>
+      {item.description && <p style={{ fontFamily: "var(--muse-theme-body-font)", color: "var(--muse-theme-text-muted)", fontSize: "0.875rem" }}>{item.description}</p>}
     </>
   );
 }

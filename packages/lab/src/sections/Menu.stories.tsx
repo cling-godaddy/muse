@@ -60,14 +60,14 @@ const sampleSimpleItems: MenuItem[] = [
 function MenuCategoryContent({ category }: { category: MenuCategory }) {
   return (
     <>
-      <h3 style={{ fontSize: "1.25rem", fontWeight: 600, marginBottom: "1rem" }}>{category.name}</h3>
+      <h3 style={{ fontFamily: "var(--muse-theme-heading-font)", fontSize: "1.25rem", fontWeight: 600, marginBottom: "1rem", color: "var(--muse-theme-text)" }}>{category.name}</h3>
       {category.items.map((item, j) => (
-        <div key={j} style={{ display: "flex", justifyContent: "space-between", padding: "0.75rem 0", borderBottom: "1px solid #e5e7eb" }}>
+        <div key={j} style={{ display: "flex", justifyContent: "space-between", padding: "0.75rem 0", borderBottom: "1px solid var(--muse-theme-text-muted)" }}>
           <div>
-            <div style={{ fontWeight: 500 }}>{item.name}</div>
-            {item.description && <div style={{ fontSize: "0.875rem", color: "#6b7280" }}>{item.description}</div>}
+            <div style={{ fontFamily: "var(--muse-theme-body-font)", fontWeight: 500, color: "var(--muse-theme-text)" }}>{item.name}</div>
+            {item.description && <div style={{ fontFamily: "var(--muse-theme-body-font)", fontSize: "0.875rem", color: "var(--muse-theme-text-muted)" }}>{item.description}</div>}
           </div>
-          <div style={{ fontWeight: 600 }}>{item.price}</div>
+          <div style={{ fontFamily: "var(--muse-theme-body-font)", fontWeight: 600, color: "var(--muse-theme-text)" }}>{item.price}</div>
         </div>
       ))}
     </>
@@ -80,9 +80,9 @@ function MenuCardContent({ item }: { item: MenuItem }) {
     <>
       {item.image && <img src={item.image.url} alt={item.image.alt} style={{ width: "100%", height: "150px", objectFit: "cover" }} />}
       <div style={{ padding: "1rem" }}>
-        <div style={{ fontWeight: 500 }}>{item.name}</div>
-        {item.description && <div style={{ fontSize: "0.875rem", color: "#6b7280", marginTop: "0.25rem" }}>{item.description}</div>}
-        <div style={{ fontWeight: 600, marginTop: "0.5rem" }}>{item.price}</div>
+        <div style={{ fontFamily: "var(--muse-theme-body-font)", fontWeight: 500, color: "var(--muse-theme-text)" }}>{item.name}</div>
+        {item.description && <div style={{ fontFamily: "var(--muse-theme-body-font)", fontSize: "0.875rem", color: "var(--muse-theme-text-muted)", marginTop: "0.25rem" }}>{item.description}</div>}
+        <div style={{ fontFamily: "var(--muse-theme-body-font)", fontWeight: 600, marginTop: "0.5rem", color: "var(--muse-theme-text)" }}>{item.price}</div>
       </div>
     </>
   );
@@ -91,7 +91,7 @@ function MenuCardContent({ item }: { item: MenuItem }) {
 /** Renders simple menu item content - section provides item wrapper */
 function SimpleMenuContent({ item }: { item: MenuItem }) {
   return (
-    <div style={{ display: "flex", justifyContent: "space-between", width: "100%" }}>
+    <div style={{ display: "flex", justifyContent: "space-between", width: "100%", fontFamily: "var(--muse-theme-body-font)", color: "var(--muse-theme-text)" }}>
       <span>{item.name}</span>
       <span style={{ fontWeight: 500 }}>{item.price}</span>
     </div>

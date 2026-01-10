@@ -32,7 +32,7 @@ const meta: Meta<CtaArgs> = {
       <Cta
         headline={<h2>{args.headline}</h2>}
         description={args.description ? <p>{args.description}</p> : undefined}
-        button={<a href="#" style={{ padding: "0.75rem 1.5rem", background: "#6366f1", color: "white", borderRadius: "0.375rem", textDecoration: "none" }}>{args.buttonText}</a>}
+        button={<a href="#" style={{ padding: "0.75rem 1.5rem", background: "var(--muse-theme-cta-bg)", color: "var(--muse-theme-cta-text)", borderRadius: "var(--muse-theme-radius)", textDecoration: "none", fontFamily: "var(--muse-theme-body-font)" }}>{args.buttonText}</a>}
         variant={args.variant}
       />
     );

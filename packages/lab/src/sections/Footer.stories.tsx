@@ -24,7 +24,7 @@ function FooterLinks({ links }: { links: FooterLink[] }) {
   return (
     <>
       {links.map((link, i) => (
-        <a key={i} href={link.href} style={{ color: "#6b7280", textDecoration: "none", fontSize: "0.875rem" }}>
+        <a key={i} href={link.href} style={{ fontFamily: "var(--muse-theme-body-font)", color: "var(--muse-theme-text-muted)", textDecoration: "none", fontSize: "0.875rem" }}>
           {link.label}
         </a>
       ))}
@@ -37,7 +37,7 @@ function SocialIcons({ socials }: { socials: SocialLink[] }) {
   return (
     <>
       {socials.map((social, i) => (
-        <a key={i} href={social.href} style={{ color: "#6b7280", textDecoration: "none" }}>
+        <a key={i} href={social.href} style={{ fontFamily: "var(--muse-theme-body-font)", color: "var(--muse-theme-text-muted)", textDecoration: "none" }}>
           {social.platform}
         </a>
       ))}

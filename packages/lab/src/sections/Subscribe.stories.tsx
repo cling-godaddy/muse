@@ -42,18 +42,18 @@ const meta: Meta<SubscribeArgs> = {
           <input
             type="email"
             placeholder={args.placeholderText}
-            style={{ padding: "0.75rem", border: "1px solid #d1d5db", borderRadius: "0.375rem", width: "100%", maxWidth: "300px" }}
+            style={{ padding: "0.75rem", border: "1px solid var(--muse-theme-text-muted)", borderRadius: "var(--muse-theme-radius)", width: "100%", maxWidth: "300px", fontFamily: "var(--muse-theme-body-font)" }}
           />
         )}
         button={(
           <button
             type="submit"
-            style={{ padding: "0.75rem 1.5rem", background: "#6366f1", color: "white", borderRadius: "0.375rem", border: "none", cursor: "pointer" }}
+            style={{ padding: "0.75rem 1.5rem", background: "var(--muse-theme-cta-bg)", color: "var(--muse-theme-cta-text)", borderRadius: "var(--muse-theme-radius)", border: "none", cursor: "pointer", fontFamily: "var(--muse-theme-body-font)" }}
           >
             {args.buttonText}
           </button>
         )}
-        disclaimer={args.disclaimer ? <p style={{ fontSize: "0.75rem", color: "#6b7280" }}>{args.disclaimer}</p> : undefined}
+        disclaimer={args.disclaimer ? <p style={{ fontSize: "0.75rem", color: "var(--muse-theme-text-muted)", fontFamily: "var(--muse-theme-body-font)" }}>{args.disclaimer}</p> : undefined}
         variant={args.variant}
       />
     );

@@ -35,21 +35,21 @@ function ProductContent({ product }: { product: ProductItem }) {
           <img src={product.image.url} alt={product.image.alt} style={{ width: "100%", height: "200px", objectFit: "cover" }} />
         )}
         {product.badge && (
-          <span style={{ position: "absolute", top: "0.5rem", left: "0.5rem", background: "#6366f1", color: "white", padding: "0.25rem 0.5rem", borderRadius: "0.25rem", fontSize: "0.75rem" }}>
+          <span style={{ position: "absolute", top: "0.5rem", left: "0.5rem", background: "var(--muse-theme-primary)", color: "var(--muse-theme-on-primary)", padding: "0.25rem 0.5rem", borderRadius: "var(--muse-theme-radius)", fontSize: "0.75rem", fontFamily: "var(--muse-theme-body-font)" }}>
             {product.badge}
           </span>
         )}
       </div>
       <div style={{ padding: "1rem" }}>
-        <h3 style={{ fontWeight: 500, marginBottom: "0.25rem" }}>{product.name}</h3>
-        <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
-          <span style={{ fontWeight: 600 }}>{product.price}</span>
+        <h3 style={{ fontFamily: "var(--muse-theme-heading-font)", fontWeight: 500, marginBottom: "0.25rem", color: "var(--muse-theme-text)" }}>{product.name}</h3>
+        <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", fontFamily: "var(--muse-theme-body-font)" }}>
+          <span style={{ fontWeight: 600, color: "var(--muse-theme-text)" }}>{product.price}</span>
           {product.originalPrice && (
-            <span style={{ textDecoration: "line-through", color: "#9ca3af", fontSize: "0.875rem" }}>{product.originalPrice}</span>
+            <span style={{ textDecoration: "line-through", color: "var(--muse-theme-text-muted)", fontSize: "0.875rem" }}>{product.originalPrice}</span>
           )}
         </div>
         {product.rating && (
-          <div style={{ fontSize: "0.875rem", color: "#6b7280", marginTop: "0.25rem" }}>
+          <div style={{ fontFamily: "var(--muse-theme-body-font)", fontSize: "0.875rem", color: "var(--muse-theme-text-muted)", marginTop: "0.25rem" }}>
             Rating:
             {" "}
             {product.rating}
