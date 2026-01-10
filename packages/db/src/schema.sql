@@ -8,7 +8,7 @@ CREATE TABLE sites (
   location TEXT,
   site_type TEXT DEFAULT 'landing',
   theme JSONB NOT NULL,
-  navbar JSONB,
+  shared_sections JSONB,
   costs JSONB,
   domain TEXT UNIQUE,
   published_at TIMESTAMPTZ,

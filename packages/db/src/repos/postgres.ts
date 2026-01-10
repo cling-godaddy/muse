@@ -1,4 +1,4 @@
-import type { Site, SiteTheme, Page, Section, NavbarSection } from "@muse/core";
+import type { Site, SiteTheme, Page, Section } from "@muse/core";
 import type { SitesTable, SiteSummary, SiteUpdatableFields, MessagesTable, StoredMessage, StoredUsage, StoredAgentState } from "./types";
 import { getDb } from "../db";
 
@@ -10,7 +10,7 @@ interface SiteRow {
   location: string | null
   site_type: string | null
   theme: SiteTheme
-  navbar: NavbarSection | null
+  shared_sections: Section[] | null
   costs: Site["costs"] | null
   domain: string | null
   published_at: string | null
@@ -51,15 +51,15 @@ export function createPostgresSitesTable(): SitesTable {
 
       try {
         await sql`
-          INSERT INTO sites (id, user_id, name, description, location, site_type, theme, navbar, costs, created_at, updated_at)
-          VALUES (${site.id}, ${userId}, ${site.name}, ${site.description ?? null}, ${site.location ?? null}, ${site.siteType ?? "landing"}, ${JSON.stringify(site.theme)}, ${site.navbar ? JSON.stringify(site.navbar) : null}, ${site.costs ? JSON.stringify(site.costs) : null}, ${site.createdAt}, ${now})
+          INSERT INTO sites (id, user_id, name, description, location, site_type, theme, shared_sections, costs, created_at, updated_at)
+          VALUES (${site.id}, ${userId}, ${site.name}, ${site.description ?? null}, ${site.location ?? null}, ${site.siteType ?? "landing"}, ${JSON.stringify(site.theme)}, ${site.sharedSections ? JSON.stringify(site.sharedSections) : null}, ${site.costs ? JSON.stringify(site.costs) : null}, ${site.createdAt}, ${now})
           ON CONFLICT (id) DO UPDATE SET
             name = EXCLUDED.name,
             description = EXCLUDED.description,
             location = EXCLUDED.location,
             site_type = EXCLUDED.site_type,
             theme = EXCLUDED.theme,
-            navbar = EXCLUDED.navbar,
+            shared_sections = EXCLUDED.shared_sections,
             costs = EXCLUDED.costs,
             updated_at = EXCLUDED.updated_at
         `;
@@ -165,7 +165,7 @@ export function createPostgresSitesTable(): SitesTable {
         location: siteRow.location ?? void 0,
         siteType: (siteRow.site_type as "landing" | "full") ?? void 0,
         theme: siteRow.theme,
-        navbar: siteRow.navbar ?? void 0,
+        sharedSections: siteRow.shared_sections ?? void 0,
         costs: siteRow.costs ?? void 0,
         pages,
         createdAt: siteRow.created_at,
@@ -219,7 +219,7 @@ export function createPostgresSitesTable(): SitesTable {
         location: siteRow.location ?? void 0,
         siteType: (siteRow.site_type as "landing" | "full") ?? void 0,
         theme: siteRow.theme,
-        navbar: siteRow.navbar ?? void 0,
+        sharedSections: siteRow.shared_sections ?? void 0,
         costs: siteRow.costs ?? void 0,
         pages,
         createdAt: siteRow.created_at,
@@ -255,6 +255,7 @@ export function createPostgresSitesTable(): SitesTable {
       const now = new Date().toISOString();
       void id; // extracted to exclude from content
 
+      // Update in sections table (page sections)
       await sql`
         UPDATE sections
         SET type = ${type},
@@ -262,6 +263,23 @@ export function createPostgresSitesTable(): SitesTable {
             content = ${JSON.stringify(content)},
             updated_at = ${now}
         WHERE id = ${sectionId}
+      `;
+
+      // Also update in shared_sections JSONB (only affects rows where section exists)
+      await sql`
+        UPDATE sites
+        SET shared_sections = (
+          SELECT jsonb_agg(
+            CASE
+              WHEN elem->>'id' = ${sectionId}
+              THEN ${JSON.stringify(section)}::jsonb
+              ELSE elem
+            END
+          )
+          FROM jsonb_array_elements(shared_sections) AS elem
+        ),
+        updated_at = ${now}
+        WHERE shared_sections @> ${JSON.stringify([{ id: sectionId }])}::jsonb
       `;
     },
 

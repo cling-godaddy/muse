@@ -50,6 +50,16 @@ export function createMemorySitesTable(): SitesTable {
 
     async updateSection(sectionId: string, section: Section): Promise<void> {
       for (const entry of store.values()) {
+        // Check sharedSections first
+        if (entry.site.sharedSections) {
+          const index = entry.site.sharedSections.findIndex(s => s.id === sectionId);
+          if (index !== -1) {
+            entry.site.sharedSections[index] = structuredClone(section);
+            return;
+          }
+        }
+
+        // Then check page sections
         for (const page of Object.values(entry.site.pages)) {
           const index = page.sections.findIndex(s => s.id === sectionId);
           if (index !== -1) {
