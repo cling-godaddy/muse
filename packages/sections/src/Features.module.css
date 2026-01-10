@@ -52,6 +52,7 @@
   display: flex;
   flex-direction: column;
   gap: 0.75rem;
+  position: relative;
 }
 
 .item input,
@@ -70,6 +71,14 @@
   outline: none;
 }
 
+/* Image in item (from EditableImage) */
+.item > img {
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  object-fit: cover;
+  border-radius: var(--muse-theme-radius, 0.5rem);
+}
+
 .itemImage {
   width: 100%;
   aspect-ratio: 16 / 9;
@@ -77,9 +86,35 @@
   border-radius: var(--muse-theme-radius, 0.5rem);
 }
 
+/* Icon wrapper */
+.item [data-feature-icon],
 .itemIcon {
   font-size: 1.5rem;
   text-align: center;
+}
+
+/* Content wrapper - groups title + description with tight spacing */
+.item [data-feature-content] {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+/* Title - first textarea in content */
+.item [data-feature-content] > textarea {
+  font-family: var(--muse-theme-heading-font, inherit);
+  font-weight: 600;
+  font-size: 1rem;
+  color: var(--muse-theme-text, #0f172a);
+  width: 100%;
+}
+
+/* Description - rich text div in content */
+.item [data-feature-content] > div {
+  font-family: var(--muse-theme-body-font, inherit);
+  color: var(--muse-theme-text-muted, #64748b);
+  font-size: 0.875rem;
+  line-height: 1.5;
 }
 
 .itemTitle {
@@ -96,15 +131,35 @@
   line-height: 1.5;
 }
 
+/* Remove button */
+.item [data-feature-remove],
 .removeButton {
-  font-size: 0.75rem;
-  color: var(--muse-theme-text-muted, #64748b);
-  background: transparent;
-  border: 1px solid currentColor;
-  padding: 0.25rem 0.5rem;
-  border-radius: 0.25rem;
+  position: absolute;
+  top: 0.5rem;
+  right: 0.5rem;
+  font-size: 1rem;
+  color: var(--muse-theme-text-muted, #9ca3af);
+  background: var(--muse-theme-bg, white);
+  border: none;
+  border-radius: 50%;
+  width: 1.5rem;
+  height: 1.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   cursor: pointer;
-  align-self: flex-end;
+  opacity: 0;
+  transition: opacity 0.15s ease;
+}
+
+.item:hover [data-feature-remove],
+.item:hover .removeButton {
+  opacity: 1;
+}
+
+.item [data-feature-remove]:hover,
+.removeButton:hover {
+  color: var(--muse-theme-text, #111827);
 }
 
 /* ============================================

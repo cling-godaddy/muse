@@ -8,7 +8,6 @@ interface Props {
   onChange: (item: FeatureItem) => void
   onRemove?: () => void
   onUsage?: (usage: Usage) => void
-  className?: string
 }
 
 export function EditableFeatureItem({
@@ -16,14 +15,15 @@ export function EditableFeatureItem({
   onChange,
   onRemove,
   onUsage,
-  className,
 }: Props) {
   const handleFieldChange = <K extends keyof FeatureItem>(field: K, value: FeatureItem[K]) => {
     onChange({ ...item, [field]: value });
   };
 
+  // Structure uses data attributes for CSS targeting (cross-package)
+  // Features.module.css styles these via [data-feature-*] selectors
   return (
-    <div className={className}>
+    <>
       {item.image
         ? (
           <EditableImage
@@ -34,28 +34,32 @@ export function EditableFeatureItem({
           />
         )
         : (
-          <EditablePlainText
-            value={item.icon ?? ""}
-            onChange={v => handleFieldChange("icon", v || undefined)}
-            placeholder="Icon..."
-          />
+          <div data-feature-icon="">
+            <EditablePlainText
+              value={item.icon ?? ""}
+              onChange={v => handleFieldChange("icon", v || undefined)}
+              placeholder="Icon..."
+            />
+          </div>
         )}
-      <EditablePlainText
-        value={item.title}
-        onChange={v => handleFieldChange("title", v)}
-        placeholder="Feature title..."
-      />
-      <EditableRichText
-        value={item.description}
-        onChange={v => handleFieldChange("description", v)}
-        placeholder="Feature description..."
-        elementType="description"
-      />
+      <div data-feature-content="">
+        <EditablePlainText
+          value={item.title}
+          onChange={v => handleFieldChange("title", v)}
+          placeholder="Feature title..."
+        />
+        <EditableRichText
+          value={item.description}
+          onChange={v => handleFieldChange("description", v)}
+          placeholder="Feature description..."
+          elementType="description"
+        />
+      </div>
       {onRemove && (
-        <button type="button" onClick={onRemove}>
-          Remove
+        <button type="button" data-feature-remove="" onClick={onRemove}>
+          ×
         </button>
       )}
-    </div>
+    </>
   );
 }
