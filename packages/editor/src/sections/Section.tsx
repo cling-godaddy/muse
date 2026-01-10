@@ -8,8 +8,7 @@ import { ColorPicker } from "../controls/ColorPicker";
 import { Image } from "../controls/Image";
 import { supportsPresets } from "../controls/presets";
 import { useIsEditable } from "../context/EditorMode";
-import { Dialog } from "../ux/Dialog";
-import dialogStyles from "../ux/Dialog.module.css";
+import { Dialog } from "../ux";
 
 interface Props {
   section: SectionType
@@ -162,16 +161,33 @@ export function Section({ section, onUpdate, onDelete, onMoveUp, onMoveDown, can
             {" "}
             section? This cannot be undone.
           </p>
-          <div className={dialogStyles.actions}>
-            <button type="button" className={dialogStyles.button} onClick={() => setShowDeleteConfirm(false)}>
+          <div style={{ display: "flex", gap: "0.75rem", justifyContent: "flex-end", marginTop: "1.25rem" }}>
+            <button
+              type="button"
+              onClick={() => setShowDeleteConfirm(false)}
+              style={{
+                padding: "0.5rem 1rem",
+                borderRadius: "0.5rem",
+                border: "1px solid var(--muse-border)",
+                background: "var(--muse-bg, #fff)",
+                cursor: "pointer",
+              }}
+            >
               Cancel
             </button>
             <button
               type="button"
-              className={dialogStyles.buttonDanger}
               onClick={() => {
                 onDelete();
                 setShowDeleteConfirm(false);
+              }}
+              style={{
+                padding: "0.5rem 1rem",
+                borderRadius: "0.5rem",
+                border: "none",
+                background: "#ef4444",
+                color: "white",
+                cursor: "pointer",
               }}
             >
               Delete

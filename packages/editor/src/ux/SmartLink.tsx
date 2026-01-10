@@ -1,6 +1,6 @@
 import { useState, useCallback, type ReactNode, type MouseEvent } from "react";
 import { useSiteContext } from "../context/Site";
-import { MissingPage } from "./MissingPage";
+import { MissingPage } from "@muse/ui";
 
 interface SmartLinkProps {
   href: string

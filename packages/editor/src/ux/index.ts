@@ -1,10 +1,6 @@
-export { Avatar } from "./Avatar";
-export { Dialog } from "./Dialog";
+// Re-export from @muse/ui for backwards compatibility
+export { Avatar, Dialog, Ellipsis, ImageLoader, MissingPage, Progress, Skeleton, Spinner } from "@muse/ui";
+
+// Editor-specific components stay here
 export { EditableText, EditableLink } from "./Editable";
-export { Ellipsis } from "./Ellipsis";
-export { ImageLoader } from "./ImageLoader";
-export { MissingPage } from "./MissingPage";
-export { Progress } from "./Progress";
-export { Skeleton } from "./Skeleton";
 export { SmartLink } from "./SmartLink";
-export { Spinner } from "./Spinner";
