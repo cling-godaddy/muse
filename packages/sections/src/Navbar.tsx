@@ -11,6 +11,8 @@ export interface NavbarProps {
   cta?: ReactNode
   /** Whether navbar is sticky */
   sticky?: boolean
+  /** Background color */
+  backgroundColor?: string
   /** Additional class name */
   className?: string
 }
@@ -25,6 +27,7 @@ export function Navbar({
   items,
   cta,
   sticky,
+  backgroundColor,
   className,
 }: NavbarProps) {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -33,6 +36,7 @@ export function Navbar({
     <nav
       className={`${styles.navbar} ${className ?? ""}`}
       data-sticky={sticky}
+      style={{ backgroundColor }}
     >
       <div className={styles.container}>
         {/* Logo */}
