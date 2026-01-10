@@ -1,7 +1,7 @@
 import { useCallback } from "react";
 import type { RichContent, TextOrRich, ImageSource } from "@muse/core";
+import { getPlainText } from "@muse/core";
 import { useEditActivation } from "../context/EditActivation";
-import { PlainTextOverlay } from "./PlainTextOverlay";
 import { RichTextOverlay } from "./RichTextOverlay";
 import { ImageOverlay } from "./ImageOverlay";
 import { CtaOverlay } from "./CtaOverlay";
@@ -18,9 +18,11 @@ interface CtaValue {
 export function EditOverlay() {
   const { activeEdit, deactivate, saveField, getFieldValue } = useEditActivation();
 
-  const handleTextSave = useCallback((value: string) => {
+  // For plain text fields, extract text from RichContent
+  const handleTextSave = useCallback((value: RichContent) => {
     if (!activeEdit) return;
-    saveField(activeEdit.sectionId, activeEdit.path, value);
+    const plainText = getPlainText(value);
+    saveField(activeEdit.sectionId, activeEdit.path, plainText);
     deactivate();
   }, [activeEdit, saveField, deactivate]);
 
@@ -51,15 +53,18 @@ export function EditOverlay() {
   const { fieldType, element, sectionId, path } = activeEdit;
 
   switch (fieldType) {
-    case "text":
+    case "text": {
+      // Plain text uses Lexical too, but saves as string
+      const textValue = getFieldValue(sectionId, path) as string ?? "";
       return (
-        <PlainTextOverlay
+        <RichTextOverlay
           targetElement={element}
-          value={element.textContent ?? ""}
+          value={textValue}
           onSave={handleTextSave}
           onCancel={handleCancel}
         />
       );
+    }
 
     case "rich-text": {
       const richValue = getFieldValue(sectionId, path) as TextOrRich ?? "";
