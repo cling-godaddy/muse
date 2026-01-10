@@ -73,6 +73,9 @@ export function Field({
     return null;
   }
 
+  // Derive element type from path for AI suggestions (e.g., "items[0].title" -> "title")
+  const elementType = path?.split(".").pop()?.replace(/\[\d+\]$/, "");
+
   switch (type) {
     case "text": {
       // Handle object values like navbar logo {text?, image?}
@@ -98,6 +101,7 @@ export function Field({
             path={path}
             sectionId={sectionId}
             fieldType={type}
+            elementType={elementType}
           />
         );
       }
@@ -121,6 +125,7 @@ export function Field({
             path={path}
             sectionId={sectionId}
             fieldType={type}
+            elementType={elementType}
           />
         );
       }
