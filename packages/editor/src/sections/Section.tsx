@@ -8,7 +8,7 @@ import { ColorPicker } from "../controls/ColorPicker";
 import { Image } from "../controls/Image";
 import { supportsPresets } from "../controls/presets";
 import { useIsEditable } from "../context/EditorMode";
-import { Dialog } from "../ux";
+import { Dialog } from "@muse/ui";
 
 interface Props {
   section: SectionType

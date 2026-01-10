@@ -3,7 +3,7 @@ import { useNavigate, Link } from "react-router-dom";
 import { UserButton } from "@clerk/clerk-react";
 import { Trash2, Upload } from "lucide-react";
 import { useAuthFetch } from "../hooks/useAuthFetch";
-import { Dialog, Spinner } from "@muse/editor";
+import { Dialog, Spinner } from "@muse/ui";
 import { useSiteStore } from "../stores/siteStore";
 
 const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB

@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import { Dialog, Spinner } from "@muse/editor";
+import { Dialog, Spinner } from "@muse/ui";
 import type { AgentState } from "../../utils/streamParser";
 
 interface TimelineModalProps {

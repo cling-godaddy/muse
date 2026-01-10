@@ -20,6 +20,7 @@
     "@muse/media": "workspace:*",
     "@muse/react": "workspace:*",
     "@muse/themes": "workspace:*",
+    "@muse/ui": "workspace:*",
     "@radix-ui/react-popover": "^1.1.15",
     "@tanstack/react-query": "^5.90.16",
     "chroma-js": "^3.2.0",

@@ -1,5 +1,5 @@
 import type { Usage } from "@muse/core";
-import { Dialog } from "@muse/editor";
+import { Dialog } from "@muse/ui";
 import { formatAction } from "../../utils/formatAction";
 import { formatRelativeTime } from "../../utils/formatTime";
 

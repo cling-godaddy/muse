@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from "react";
 import { useAuth } from "@clerk/clerk-react";
-import { Spinner } from "@muse/editor";
+import { Spinner } from "@muse/ui";
 import { AccuracyReview } from "./AccuracyReview";
 
 interface EntryData {

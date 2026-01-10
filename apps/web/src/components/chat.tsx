@@ -2,7 +2,7 @@ import { useRef, useEffect, useMemo, useState } from "react";
 import type { Section } from "@muse/core";
 import type { ImageSelection } from "@muse/media";
 import type { Usage } from "@muse/ai";
-import { Spinner } from "@muse/editor";
+import { Spinner } from "@muse/ui";
 import { Building2, MapPin, PanelTop, Grid3x3, MousePointerClick, Quote, DollarSign, HelpCircle, Images, BarChart3, Mail, Users, Shapes, Bell, ShoppingBag, UtensilsCrossed, PanelTopOpen, PanelBottom, type LucideIcon } from "lucide-react";
 import { getPalette } from "@muse/themes";
 
