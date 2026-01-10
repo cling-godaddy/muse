@@ -42,6 +42,8 @@ export function StaticSection({
         key={fieldName}
         schema={fieldSchema}
         value={value}
+        path={fieldName}
+        sectionId={section.id}
       />
     );
   }

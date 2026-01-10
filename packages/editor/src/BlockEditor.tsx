@@ -6,6 +6,8 @@ import { SectionGap } from "./sections/SectionGap";
 import { createSectionFromPreset } from "./sections/sectionFactory";
 import { SelectionProvider } from "./context/Selection";
 import { EditorServicesProvider } from "./context/EditorServices";
+import { EditActivationProvider } from "./context/EditActivation";
+import { EditOverlay } from "./overlays/EditOverlay";
 import { useIsEditable } from "./context/EditorMode";
 
 interface SectionEditorProps {
@@ -20,6 +22,8 @@ interface SectionEditorProps {
   onDeleteSection?: (sectionId: string) => void
   getToken?: () => Promise<string | null>
   trackUsage?: (usage: Usage) => void
+  /** Use static rendering with click-to-edit (experimental) */
+  useStaticMode?: boolean
 }
 
 export function SectionEditor({
@@ -34,6 +38,7 @@ export function SectionEditor({
   onDeleteSection,
   getToken,
   trackUsage,
+  useStaticMode,
 }: SectionEditorProps) {
   const isEditable = useIsEditable();
 
@@ -95,63 +100,72 @@ export function SectionEditor({
   // only show gaps if site and currentPage are provided
   const canAddSections = isEditable && site && currentPage;
 
+  // Handler for static mode field updates
+  const handleSaveField = useCallback((sectionId: string, path: string, value: unknown) => {
+    onUpdateSection(sectionId, { [path]: value } as Partial<Section>);
+  }, [onUpdateSection]);
+
   return (
     <EditorServicesProvider getToken={getToken} trackUsage={trackUsage} site={site}>
       <SelectionProvider>
-        <div className="muse-section-editor">
-          {allSections.length === 0 && isEditable && (
-            <div className="muse-section-editor-empty">
-              No sections yet. Use AI to generate content.
-            </div>
-          )}
-          {canAddSections && (
-            <SectionGap
-              index={0}
-              site={site}
-              currentPage={currentPage}
-              onAdd={handleAddSection}
-            />
-          )}
-          {allSections.map((section) => {
-            const isShared = isSharedSection(section.id);
-            const isFooter = section.type === "footer";
-            const sectionIndex = isShared ? -1 : sections.findIndex(s => s.id === section.id);
-            const showMoveControls = !isShared && !isFooter;
+        <EditActivationProvider onSaveField={handleSaveField}>
+          <EditOverlay />
+          <div className="muse-section-editor">
+            {allSections.length === 0 && isEditable && (
+              <div className="muse-section-editor-empty">
+                No sections yet. Use AI to generate content.
+              </div>
+            )}
+            {canAddSections && (
+              <SectionGap
+                index={0}
+                site={site}
+                currentPage={currentPage}
+                onAdd={handleAddSection}
+              />
+            )}
+            {allSections.map((section) => {
+              const isShared = isSharedSection(section.id);
+              const isFooter = section.type === "footer";
+              const sectionIndex = isShared ? -1 : sections.findIndex(s => s.id === section.id);
+              const showMoveControls = !isShared && !isFooter;
 
-            return (
-              <Fragment key={section.id}>
-                <SectionWrapper
-                  section={section}
-                  onUpdate={data => onUpdateSection(section.id, data)}
-                  onDelete={() => deleteSection(section.id)}
-                  onMoveUp={showMoveControls
-                    ? () => {
-                      onMoveSection?.(section.id, "up");
-                      moveSection(sectionIndex, sectionIndex - 1);
-                    }
-                    : void 0}
-                  onMoveDown={showMoveControls
-                    ? () => {
-                      onMoveSection?.(section.id, "down");
-                      moveSection(sectionIndex, sectionIndex + 1);
-                    }
-                    : void 0}
-                  canMoveUp={showMoveControls && sectionIndex > 0}
-                  canMoveDown={showMoveControls && sectionIndex < lastMoveableIndex}
-                  trackUsage={trackUsage}
-                />
-                {canAddSections && !isShared && (
-                  <SectionGap
-                    index={sectionIndex + 1}
-                    site={site}
-                    currentPage={currentPage}
-                    onAdd={handleAddSection}
+              return (
+                <Fragment key={section.id}>
+                  <SectionWrapper
+                    section={section}
+                    onUpdate={data => onUpdateSection(section.id, data)}
+                    onDelete={() => deleteSection(section.id)}
+                    onMoveUp={showMoveControls
+                      ? () => {
+                        onMoveSection?.(section.id, "up");
+                        moveSection(sectionIndex, sectionIndex - 1);
+                      }
+                      : void 0}
+                    onMoveDown={showMoveControls
+                      ? () => {
+                        onMoveSection?.(section.id, "down");
+                        moveSection(sectionIndex, sectionIndex + 1);
+                      }
+                      : void 0}
+                    canMoveUp={showMoveControls && sectionIndex > 0}
+                    canMoveDown={showMoveControls && sectionIndex < lastMoveableIndex}
+                    trackUsage={trackUsage}
+                    useStaticMode={useStaticMode}
                   />
-                )}
-              </Fragment>
-            );
-          })}
-        </div>
+                  {canAddSections && !isShared && (
+                    <SectionGap
+                      index={sectionIndex + 1}
+                      site={site}
+                      currentPage={currentPage}
+                      onAdd={handleAddSection}
+                    />
+                  )}
+                </Fragment>
+              );
+            })}
+          </div>
+        </EditActivationProvider>
       </SelectionProvider>
     </EditorServicesProvider>
   );

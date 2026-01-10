@@ -8,18 +8,33 @@ interface Props {
   schema: FieldSchema
   value: unknown
   className?: string
+  /** Data path for edit detection (e.g., "headline", "items[0].title") */
+  path?: string
+  /** Section ID for edit detection */
+  sectionId?: string
 }
 
 /**
  * Renders static (non-editable) content based on field type.
- * Used for preview/publish modes.
+ * When path and sectionId are provided, adds data attributes for click-to-edit.
  */
 export function StaticField({
   schema,
   value,
   className,
+  path,
+  sectionId,
 }: Props): ReactNode {
   const { type } = schema;
+
+  // Data attributes for edit detection (only when in editor context)
+  const editAttrs = path && sectionId
+    ? {
+      "data-editable-path": path,
+      "data-section-id": sectionId,
+      "data-field-type": type,
+    }
+    : {};
 
   if (value === undefined || value === null) {
     return null;
@@ -29,7 +44,7 @@ export function StaticField({
     case "text": {
       const text = value as string;
       if (!text) return null;
-      return <span className={className}>{text}</span>;
+      return <span className={className} {...editAttrs}>{text}</span>;
     }
 
     case "rich-text": {
@@ -38,7 +53,7 @@ export function StaticField({
       if (!text) return null;
       // TODO: properly render rich content (bold, links, etc.)
       // For now, just render plain text
-      return <span className={className}>{text}</span>;
+      return <span className={className} {...editAttrs}>{text}</span>;
     }
 
     case "image": {
@@ -49,6 +64,7 @@ export function StaticField({
           src={image.url}
           alt={image.alt}
           className={className}
+          {...editAttrs}
         />
       );
     }
@@ -57,7 +73,7 @@ export function StaticField({
       const cta = value as { text: string, href: string };
       if (!cta?.text) return null;
       return (
-        <SmartLink href={cta.href} className={className}>
+        <SmartLink href={cta.href} className={className} {...editAttrs}>
           {cta.text}
         </SmartLink>
       );

@@ -2,7 +2,7 @@ import { useMemo, useCallback, useState, useEffect, useRef } from "react";
 import { Trash2, Image as ImageIcon } from "lucide-react";
 import { motion } from "framer-motion";
 import type { Section as SectionType, Usage, ImageSource } from "@muse/core";
-import { getLayoutComponent, EditableSection } from "../renderers";
+import { getLayoutComponent, EditableSection, StaticSection } from "../renderers";
 import { PresetPicker } from "../controls/PresetPicker";
 import { ColorPicker } from "../controls/ColorPicker";
 import { Image } from "../controls/Image";
@@ -19,6 +19,8 @@ interface Props {
   canMoveUp?: boolean
   canMoveDown?: boolean
   trackUsage?: (usage: Usage) => void
+  /** Use static rendering with click-to-edit (experimental) */
+  useStaticMode?: boolean
 }
 
 function ChevronUpIcon() {
@@ -37,7 +39,7 @@ function ChevronDownIcon() {
   );
 }
 
-export function Section({ section, onUpdate, onDelete, onMoveUp, onMoveDown, canMoveUp, canMoveDown, trackUsage }: Props) {
+export function Section({ section, onUpdate, onDelete, onMoveUp, onMoveDown, canMoveUp, canMoveDown, trackUsage, useStaticMode }: Props) {
   const LayoutComponent = useMemo(
     () => getLayoutComponent(section.type),
     [section.type],
@@ -196,14 +198,21 @@ export function Section({ section, onUpdate, onDelete, onMoveUp, onMoveDown, can
         </div>
       </Dialog>
       {LayoutComponent
-        ? (
-          <EditableSection
-            Component={LayoutComponent}
-            section={section}
-            onUpdate={onUpdate}
-            onUsage={trackUsage}
-          />
-        )
+        ? useStaticMode
+          ? (
+            <StaticSection
+              Component={LayoutComponent}
+              section={section}
+            />
+          )
+          : (
+            <EditableSection
+              Component={LayoutComponent}
+              section={section}
+              onUpdate={onUpdate}
+              onUsage={trackUsage}
+            />
+          )
         : (
           <div className="muse-section muse-section--unknown">
             Unknown section type:
