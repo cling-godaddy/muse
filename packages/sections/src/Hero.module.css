@@ -95,6 +95,14 @@
   text-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
 }
 
+.overlay .ctaSecondary button,
+.overlay .ctaSecondary a,
+.overlay .ctaSecondary input {
+  background: rgba(255, 255, 255, 0.9);
+  color: var(--muse-theme-text, #1a1a1a);
+  border-color: transparent;
+}
+
 .overlayBg {
   position: absolute;
   inset: 0;
@@ -206,10 +214,13 @@
   display: inline-block;
   cursor: pointer;
   background: transparent;
+  background-color: transparent;
   color: var(--muse-theme-hero-text, white);
   transition: border-color 0.15s ease, background 0.15s ease, transform 0.15s ease;
   text-align: center;
+  appearance: none;
   -webkit-appearance: none;
+  -moz-appearance: none;
 }
 
 .ctaSecondary button:hover,
