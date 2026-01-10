@@ -6,6 +6,8 @@ import type {
   ImageSource,
   NavItem,
   ProductItem,
+  FooterLink,
+  SocialLink,
 } from "@muse/core";
 import { Field } from "../Field";
 
@@ -239,6 +241,54 @@ export function LogoItemRenderer({
 }
 
 /**
+ * Renderer for FooterLink
+ */
+export function FooterLinkRenderer({
+  item,
+  sectionId,
+  basePath,
+  index,
+}: ItemProps & { item: FooterLink }) {
+  const path = `${basePath}[${index}]`;
+  return (
+    <Field
+      schema={{ type: "cta" }}
+      value={{ text: item.label, href: item.href }}
+      path={path}
+      sectionId={sectionId}
+    />
+  );
+}
+
+/**
+ * Renderer for SocialLink
+ */
+export function SocialLinkRenderer({
+  item,
+  sectionId,
+  basePath,
+  index,
+}: ItemProps & { item: SocialLink }) {
+  const path = `${basePath}[${index}]`;
+  return (
+    <>
+      <Field
+        schema={{ type: "text" }}
+        value={item.platform}
+        path={`${path}.platform`}
+        sectionId={sectionId}
+      />
+      <Field
+        schema={{ type: "text" }}
+        value={item.href}
+        path={`${path}.href`}
+        sectionId={sectionId}
+      />
+    </>
+  );
+}
+
+/**
  * Registry of list item renderers by "sectionType:fieldName" key.
  */
 type ListRenderer = (
@@ -317,6 +367,28 @@ export const listRenderers: Record<string, ListRenderer> = {
   "products:items": (items, sectionId, fieldName) =>
     (items as ProductItem[]).map((item, i) => (
       <ProductItemRenderer
+        key={i}
+        item={item}
+        sectionId={sectionId}
+        basePath={fieldName}
+        index={i}
+      />
+    )),
+
+  "footer:links": (items, sectionId, fieldName) =>
+    (items as FooterLink[]).map((item, i) => (
+      <FooterLinkRenderer
+        key={i}
+        item={item}
+        sectionId={sectionId}
+        basePath={fieldName}
+        index={i}
+      />
+    )),
+
+  "footer:socialLinks": (items, sectionId, fieldName) =>
+    (items as SocialLink[]).map((item, i) => (
+      <SocialLinkRenderer
         key={i}
         item={item}
         sectionId={sectionId}
