@@ -23,8 +23,6 @@ interface SectionEditorProps {
   onDeleteSection?: (sectionId: string) => void
   getToken?: () => Promise<string | null>
   trackUsage?: (usage: Usage) => void
-  /** Use static rendering with click-to-edit (experimental) */
-  useStaticMode?: boolean
 }
 
 export function SectionEditor({
@@ -39,7 +37,6 @@ export function SectionEditor({
   onDeleteSection,
   getToken,
   trackUsage,
-  useStaticMode,
 }: SectionEditorProps) {
   const isEditable = useIsEditable();
 
@@ -183,7 +180,6 @@ export function SectionEditor({
                     canMoveUp={showMoveControls && sectionIndex > 0}
                     canMoveDown={showMoveControls && sectionIndex < lastMoveableIndex}
                     trackUsage={trackUsage}
-                    useStaticMode={useStaticMode}
                   />
                   {canAddSections && !isShared && (
                     <SectionGap
