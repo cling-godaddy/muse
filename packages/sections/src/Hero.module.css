@@ -109,6 +109,38 @@
   pointer-events: none;
 }
 
+.overlayContent {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+  background: rgba(0, 0, 0, 0.4);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  border-radius: 1rem;
+  padding: 2.5rem 3rem;
+  max-width: 800px;
+}
+
+/* Force light text inside overlay content for contrast */
+.overlayContent .headline,
+.overlayContent .subheadline {
+  color: white;
+  text-shadow: none;
+}
+
+/* Reset margins and font-size on nested elements */
+.headline h1,
+.headline h2,
+.headline p,
+.subheadline p {
+  margin: 0;
+  font-size: inherit;
+  font-weight: inherit;
+}
+
 .headline {
   font-family: var(--muse-theme-heading-font, inherit);
   font-weight: var(--muse-theme-heading-weight, 700);

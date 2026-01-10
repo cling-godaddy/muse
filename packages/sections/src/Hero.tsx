@@ -88,14 +88,16 @@ export function Hero({
           className={styles.overlayBg}
           style={{ backgroundColor: `rgba(0, 0, 0, ${overlayOpacity / 100})` }}
         />
-        <div className={styles.headline}>{headline}</div>
-        {subheadline && <div className={styles.subheadline}>{subheadline}</div>}
-        {(cta || secondaryCta) && (
-          <div className={styles.ctas}>
-            {cta && <div className={styles.cta}>{cta}</div>}
-            {secondaryCta && <div className={styles.ctaSecondary}>{secondaryCta}</div>}
-          </div>
-        )}
+        <div className={styles.overlayContent}>
+          <div className={styles.headline}>{headline}</div>
+          {subheadline && <div className={styles.subheadline}>{subheadline}</div>}
+          {(cta || secondaryCta) && (
+            <div className={styles.ctas}>
+              {cta && <div className={styles.cta}>{cta}</div>}
+              {secondaryCta && <div className={styles.ctaSecondary}>{secondaryCta}</div>}
+            </div>
+          )}
+        </div>
       </section>
     );
   }
