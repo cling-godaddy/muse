@@ -39,7 +39,7 @@ const meta: Meta<HeroArgs> = {
     secondaryCtaText: "Learn More",
     variant: "centered",
     overlayOpacity: 50,
-    backgroundColor: "#6366f1",
+    backgroundColor: undefined,
   },
   render: (args) => {
     const needsImage = args.variant !== "centered";

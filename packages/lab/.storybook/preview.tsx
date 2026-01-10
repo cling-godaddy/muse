@@ -24,7 +24,7 @@ function ThemeWrapper({
   // If palette is selected, use it with default typography/style
   // Otherwise use the bundle
   const resolved = paletteId
-    ? resolveThemeFromSelection({ palette: paletteId, typography: "inter", style: "rounded" })
+    ? { theme: resolveThemeFromSelection(paletteId, "inter", "rounded"), effects: null }
     : resolveThemeFromBundle(bundleId || "terminal");
 
   const cssVars = resolved?.theme ? themeToCssVars(resolved.theme) : {};
@@ -100,7 +100,7 @@ const preview: Preview = {
       toolbar: {
         icon: "paintbrush",
         items: [
-          { value: "none", title: "Bundle" },
+          { value: "none", title: "Palette" },
           ...getPaletteIds().map(id => ({ value: id, title: id })),
         ],
         dynamicTitle: true,
