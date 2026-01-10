@@ -1,1 +1,1 @@
-export { staticListRenderers } from "./StaticListItems";
+export { listRenderers } from "./ListItems";

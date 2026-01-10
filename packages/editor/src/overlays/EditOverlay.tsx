@@ -39,7 +39,7 @@ export function EditOverlay() {
   switch (fieldType) {
     case "text":
     case "rich-text":
-      // Text fields are handled by inline InlineTextEditor in StaticField
+      // Text fields are handled by inline InlineTextEditor in Field
       return null;
 
     case "image": {

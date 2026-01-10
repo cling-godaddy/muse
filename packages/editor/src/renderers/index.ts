@@ -1,3 +1,3 @@
 export { Field } from "./Field";
-export { StaticSection } from "./StaticSection";
+export { SectionRenderer } from "./SectionRenderer";
 export { getLayoutComponent, hasLayoutComponent, getRegisteredTypes, type LayoutComponent } from "./sectionRegistry";

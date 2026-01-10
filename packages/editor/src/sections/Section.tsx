@@ -2,7 +2,7 @@ import { useMemo, useCallback, useState, useEffect, useRef } from "react";
 import { Trash2, Image as ImageIcon } from "lucide-react";
 import { motion } from "framer-motion";
 import type { Section as SectionType, Usage, ImageSource } from "@muse/core";
-import { getLayoutComponent, StaticSection } from "../renderers";
+import { getLayoutComponent, SectionRenderer } from "../renderers";
 import { PresetPicker } from "../controls/PresetPicker";
 import { ColorPicker } from "@muse/ui";
 import { Image } from "../controls/Image";
@@ -197,7 +197,7 @@ export function Section({ section, onUpdate, onDelete, onMoveUp, onMoveDown, can
       </Dialog>
       {LayoutComponent
         ? (
-          <StaticSection
+          <SectionRenderer
             Component={LayoutComponent}
             section={section}
           />

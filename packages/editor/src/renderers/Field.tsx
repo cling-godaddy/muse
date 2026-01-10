@@ -156,12 +156,12 @@ export function Field({
       return null;
 
     case "list":
-      // List fields need special handling - render children with StaticField
-      console.warn("StaticField: list type not yet implemented");
+      // List fields need special handling - render children with Field
+      console.warn("Field: list type not yet implemented");
       return null;
 
     default:
-      console.warn(`StaticField: unknown type "${type}"`);
+      console.warn(`Field: unknown type "${type}"`);
       return null;
   }
 }

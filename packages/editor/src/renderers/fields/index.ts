@@ -1,1 +1,1 @@
-// Field renderers are now handled by StaticField + overlays
+// Field renderers are now handled by Field + overlays

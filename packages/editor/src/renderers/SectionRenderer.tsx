@@ -2,7 +2,7 @@ import type { ReactNode } from "react";
 import type { Section } from "@muse/core";
 import type { LayoutComponent } from "./sectionRegistry";
 import { Field } from "./Field";
-import { staticListRenderers } from "./items/StaticListItems";
+import { listRenderers } from "./items/ListItems";
 
 interface Props {
   /** The section component to render */
@@ -14,14 +14,10 @@ interface Props {
 }
 
 /**
- * Renders a section in static (non-editable) mode.
- * Used for preview and published pages.
- *
- * For each field defined in the section's schema:
- * 1. Creates a Field with the current value
- * 2. Passes it to the section component via the slot prop
+ * Renders a section by mapping data fields to layout slots.
+ * Handles both static preview and interactive editing via Field component.
  */
-export function StaticSection({
+export function SectionRenderer({
   Component,
   section,
   className,
@@ -39,10 +35,10 @@ export function StaticSection({
     }
 
     if (fieldSchema.type === "list") {
-      // Handle list fields with static item renderers
+      // Handle list fields with item renderers
       const items = (value as unknown[]) ?? [];
       const key = `${section.type}:${fieldName}`;
-      const renderer = staticListRenderers[key];
+      const renderer = listRenderers[key];
 
       if (renderer) {
         slots[fieldSchema.slot] = renderer(items, section.id, fieldName);
@@ -51,7 +47,7 @@ export function StaticSection({
         // Fallback: render placeholder
         slots[fieldSchema.slot] = (
           <div style={{ padding: "1rem", background: "#f0f0f0", borderRadius: "4px" }}>
-            Static list rendering not implemented for
+            List rendering not implemented for
             {" "}
             {section.type}
             .

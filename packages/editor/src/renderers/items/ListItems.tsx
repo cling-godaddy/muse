@@ -16,9 +16,9 @@ interface ItemProps {
 }
 
 /**
- * Static renderer for FeatureItem
+ * Renderer for FeatureItem
  */
-export function StaticFeatureItem({
+export function FeatureItemRenderer({
   item,
   sectionId,
   basePath,
@@ -58,9 +58,9 @@ export function StaticFeatureItem({
 }
 
 /**
- * Static renderer for StatItem
+ * Renderer for StatItem
  */
-export function StaticStatItem({
+export function StatItemRenderer({
   item,
   sectionId,
   basePath,
@@ -86,9 +86,9 @@ export function StaticStatItem({
 }
 
 /**
- * Static renderer for Quote (Testimonial)
+ * Renderer for Quote (Testimonial)
  */
-export function StaticQuoteItem({
+export function QuoteItemRenderer({
   item,
   sectionId,
   basePath,
@@ -132,9 +132,9 @@ export function StaticQuoteItem({
 }
 
 /**
- * Static renderer for ProductItem
+ * Renderer for ProductItem
  */
-export function StaticProductItem({
+export function ProductItemRenderer({
   item,
   sectionId,
   basePath,
@@ -178,9 +178,9 @@ export function StaticProductItem({
 }
 
 /**
- * Static renderer for NavItem
+ * Renderer for NavItem
  */
-export function StaticNavItem({
+export function NavItemRenderer({
   item,
   sectionId,
   basePath,
@@ -199,9 +199,9 @@ export function StaticNavItem({
 }
 
 /**
- * Static renderer for gallery images
+ * Renderer for gallery images
  */
-export function StaticGalleryImage({
+export function GalleryImageRenderer({
   image,
   sectionId,
   basePath,
@@ -219,9 +219,9 @@ export function StaticGalleryImage({
 }
 
 /**
- * Static renderer for logo items
+ * Renderer for logo items
  */
-export function StaticLogoItem({
+export function LogoItemRenderer({
   item,
   sectionId,
   basePath,
@@ -239,18 +239,18 @@ export function StaticLogoItem({
 }
 
 /**
- * Registry of static list item renderers by "sectionType:fieldName" key.
+ * Registry of list item renderers by "sectionType:fieldName" key.
  */
-type StaticListRenderer = (
+type ListRenderer = (
   items: unknown[],
   sectionId: string,
   fieldName: string,
 ) => ReactNode;
 
-export const staticListRenderers: Record<string, StaticListRenderer> = {
+export const listRenderers: Record<string, ListRenderer> = {
   "features:items": (items, sectionId, fieldName) =>
     (items as FeatureItem[]).map((item, i) => (
-      <StaticFeatureItem
+      <FeatureItemRenderer
         key={i}
         item={item}
         sectionId={sectionId}
@@ -261,7 +261,7 @@ export const staticListRenderers: Record<string, StaticListRenderer> = {
 
   "stats:stats": (items, sectionId, fieldName) =>
     (items as StatItem[]).map((item, i) => (
-      <StaticStatItem
+      <StatItemRenderer
         key={i}
         item={item}
         sectionId={sectionId}
@@ -272,7 +272,7 @@ export const staticListRenderers: Record<string, StaticListRenderer> = {
 
   "testimonials:quotes": (items, sectionId, fieldName) =>
     (items as Quote[]).map((item, i) => (
-      <StaticQuoteItem
+      <QuoteItemRenderer
         key={i}
         item={item}
         sectionId={sectionId}
@@ -283,7 +283,7 @@ export const staticListRenderers: Record<string, StaticListRenderer> = {
 
   "gallery:images": (items, sectionId, fieldName) =>
     (items as ImageSource[]).map((image, i) => (
-      <StaticGalleryImage
+      <GalleryImageRenderer
         key={i}
         image={image}
         sectionId={sectionId}
@@ -294,7 +294,7 @@ export const staticListRenderers: Record<string, StaticListRenderer> = {
 
   "logos:logos": (items, sectionId, fieldName) =>
     (items as { image: ImageSource, href?: string }[]).map((item, i) => (
-      <StaticLogoItem
+      <LogoItemRenderer
         key={i}
         item={item}
         sectionId={sectionId}
@@ -305,7 +305,7 @@ export const staticListRenderers: Record<string, StaticListRenderer> = {
 
   "navbar:items": (items, sectionId, fieldName) =>
     (items as NavItem[]).map((item, i) => (
-      <StaticNavItem
+      <NavItemRenderer
         key={i}
         item={item}
         sectionId={sectionId}
@@ -316,7 +316,7 @@ export const staticListRenderers: Record<string, StaticListRenderer> = {
 
   "products:items": (items, sectionId, fieldName) =>
     (items as ProductItem[]).map((item, i) => (
-      <StaticProductItem
+      <ProductItemRenderer
         key={i}
         item={item}
         sectionId={sectionId}
