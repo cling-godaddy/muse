@@ -49,7 +49,7 @@ function GradientSwatch({ name, cssVar }: { name: string, cssVar: string }) {
   );
 }
 
-function PaletteDemo() {
+function ThemeDemo() {
   return (
     <div
       style={{
@@ -67,10 +67,10 @@ function PaletteDemo() {
           marginBottom: 8,
         }}
       >
-        Palette Demo
+        Theme Demo
       </h1>
       <p style={{ color: "var(--muse-theme-text-muted)", marginBottom: 32 }}>
-        Use the palette dropdown in the toolbar to see changes.
+        Select a theme, then optionally override palette or typography in the toolbar.
       </p>
 
       <h2
@@ -238,8 +238,8 @@ function PaletteDemo() {
 }
 
 const meta: Meta = {
-  title: "Theme/Palette Demo",
-  component: PaletteDemo,
+  title: "Theme/Theme Demo",
+  component: ThemeDemo,
   parameters: {
     layout: "fullscreen",
   },

@@ -2,53 +2,68 @@ import React, { useEffect } from "react";
 import type { Preview, Decorator } from "@storybook/react-vite";
 import { action } from "storybook/actions";
 import {
-  resolveThemeFromBundle,
-  resolveThemeFromSelection,
+  resolveLayeredTheme,
   themeToCssVars,
   loadFonts,
   getTypography,
+  getBundle,
   getBundleIds,
   getPaletteIds,
+  getTypographyIds,
 } from "@muse/themes";
 import { EditorModeProvider } from "@muse/editor";
 
 function ThemeWrapper({
   bundleId,
-  paletteId,
+  paletteOverride,
+  typographyOverride,
   children,
 }: {
-  bundleId?: string
-  paletteId?: string
+  bundleId: string
+  paletteOverride?: string
+  typographyOverride?: string
   children: React.ReactNode
 }) {
-  // If palette is selected, use it with default typography/style
-  // Otherwise use the bundle
-  const resolved = paletteId
-    ? { theme: resolveThemeFromSelection(paletteId, "inter", "rounded"), effects: null }
-    : resolveThemeFromBundle(bundleId || "terminal");
+  const resolved = resolveLayeredTheme({
+    bundle: bundleId,
+    paletteOverride,
+    typographyOverride,
+  });
 
-  const cssVars = resolved?.theme ? themeToCssVars(resolved.theme) : {};
+  const cssVars = themeToCssVars(resolved.theme);
 
   useEffect(() => {
-    if (resolved) {
-      const typo = getTypography(resolved.typography);
-      if (typo) loadFonts(typo);
-    }
-  }, [resolved]);
+    const bundle = getBundle(bundleId);
+    const typoId = typographyOverride ?? bundle?.typography ?? "inter";
+    const typo = getTypography(typoId);
+    if (typo) loadFonts(typo);
+  }, [bundleId, typographyOverride]);
+
+  const effectsId = resolved.effects?.id;
 
   return (
     <EditorModeProvider mode="preview">
-      <div style={cssVars as React.CSSProperties}>{children}</div>
+      <div style={cssVars as React.CSSProperties} data-effects={effectsId}>
+        {children}
+      </div>
     </EditorModeProvider>
   );
 }
 
+const isDefault = (v: unknown) => !v || v === "none" || v === "_reset";
+
 const withTheme: Decorator = (Story, context) => {
-  const paletteId = context.globals.palette !== "none" ? context.globals.palette : undefined;
-  const bundleId = context.globals.theme || "terminal";
+  const { theme, palette, typography } = context.globals;
+  const bundleId = isDefault(theme) ? "terminal" : theme;
+  const paletteOverride = isDefault(palette) ? undefined : palette;
+  const typographyOverride = isDefault(typography) ? undefined : typography;
 
   return (
-    <ThemeWrapper bundleId={bundleId} paletteId={paletteId}>
+    <ThemeWrapper
+      bundleId={bundleId}
+      paletteOverride={paletteOverride}
+      typographyOverride={typographyOverride}
+    >
       <Story />
     </ThemeWrapper>
   );
@@ -93,27 +108,32 @@ const preview: Preview = {
   },
   decorators: [withTheme, withLinkHandler],
   globalTypes: {
-    palette: {
-      name: "Palette",
-      description: "Color palette (overrides bundle)",
-      defaultValue: "none",
-      toolbar: {
-        icon: "paintbrush",
-        items: [
-          { value: "none", title: "Palette" },
-          ...getPaletteIds().map(id => ({ value: id, title: id })),
-        ],
-        dynamicTitle: true,
-      },
-    },
     theme: {
-      name: "Bundle",
-      description: "Theme bundle (ignored if palette selected)",
+      name: "Theme",
+      description: "Base theme (palette + typography + style + effects)",
       defaultValue: "terminal",
       toolbar: {
         icon: "box",
+        title: "Theme",
         items: getBundleIds().map(id => ({ value: id, title: id })),
-        dynamicTitle: true,
+      },
+    },
+    palette: {
+      name: "Palette",
+      description: "Override theme palette",
+      toolbar: {
+        icon: "paintbrush",
+        title: "Palette",
+        items: getPaletteIds().map(id => ({ value: id, title: id })),
+      },
+    },
+    typography: {
+      name: "Typography",
+      description: "Override theme typography",
+      toolbar: {
+        icon: "document",
+        title: "Typography",
+        items: getTypographyIds().map(id => ({ value: id, title: id })),
       },
     },
   },

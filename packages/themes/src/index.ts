@@ -51,8 +51,10 @@ export {
   resolveThemeFromSelection,
   resolveThemeWithEffects,
   resolveThemeFromBundle,
+  resolveLayeredTheme,
   type ThemeConfig,
   type ResolvedTheme,
+  type LayeredThemeConfig,
 } from "./resolve";
 
 // font loading

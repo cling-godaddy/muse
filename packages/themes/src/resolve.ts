@@ -63,3 +63,23 @@ export function resolveThemeFromBundle(bundleId: string): ResolvedTheme | undefi
     effects: bundle.effects,
   });
 }
+
+export interface LayeredThemeConfig {
+  bundle: string
+  paletteOverride?: string
+  typographyOverride?: string
+}
+
+export function resolveLayeredTheme(config: LayeredThemeConfig): ResolvedTheme {
+  const bundle = getBundle(config.bundle);
+  if (!bundle) {
+    return resolveThemeWithEffects({ palette: "slate", typography: "inter" });
+  }
+
+  return resolveThemeWithEffects({
+    palette: config.paletteOverride ?? bundle.palette,
+    typography: config.typographyOverride ?? bundle.typography,
+    style: bundle.style,
+    effects: bundle.effects,
+  });
+}
