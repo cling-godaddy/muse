@@ -44,9 +44,22 @@ export function useAutosaveSection() {
         return;
       }
 
-      // Find changed sections by comparing prev vs current
-      const changedSections: Array<{ sectionId: string, pageId: string, updates: Section }> = [];
+      // Collect all changed sections (both shared and page sections)
+      const changedSections: Array<{ sectionId: string, updates: Section }> = [];
 
+      // Check sharedSections
+      if (draft.sharedSections && prev.sharedSections) {
+        for (const section of draft.sharedSections) {
+          const prevSection = prev.sharedSections.find(s => s.id === section.id);
+          if (!prevSection) continue; // New section, skip for now
+
+          if (JSON.stringify(prevSection) !== JSON.stringify(section)) {
+            changedSections.push({ sectionId: section.id, updates: section });
+          }
+        }
+      }
+
+      // Check page sections
       for (const [pageId, page] of Object.entries(draft.pages)) {
         const prevPage = prev.pages[pageId];
         if (!prevPage) continue; // New page, skip for now
@@ -55,13 +68,8 @@ export function useAutosaveSection() {
           const prevSection = prevPage.sections.find(s => s.id === section.id);
           if (!prevSection) continue; // New section, skip for now
 
-          // Simple deep equality check - if sections differ, PATCH it
           if (JSON.stringify(prevSection) !== JSON.stringify(section)) {
-            changedSections.push({
-              sectionId: section.id,
-              pageId,
-              updates: section,
-            });
+            changedSections.push({ sectionId: section.id, updates: section });
           }
         }
       }
@@ -70,7 +78,7 @@ export function useAutosaveSection() {
         // Update baseline IMMEDIATELY before async PATCH to prevent race condition
         prevDraftRef.current = draft;
 
-        // Send PATCH for each changed section
+        // Send PATCH for each changed section (same endpoint for all)
         for (const { sectionId, updates } of changedSections) {
           try {
             await patchSection.mutateAsync({ siteId, sectionId, updates });

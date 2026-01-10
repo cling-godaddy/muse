@@ -49,8 +49,8 @@ export function useSiteEditor(siteId: string | undefined) {
   const setSections = useSiteStore(state => state.setSections);
   const setCurrentPage = useSiteStore(state => state.setCurrentPage);
   const setTheme = useSiteStore(state => state.setTheme);
-  const updateNavbar = useSiteStore(state => state.updateNavbar);
-  const setNavbar = useSiteStore(state => state.setNavbar);
+  const addSharedSection = useSiteStore(state => state.addSharedSection);
+  const setSharedSections = useSiteStore(state => state.setSharedSections);
   const clearSite = useSiteStore(state => state.clearSite);
   const updateSiteName = useSiteStore(state => state.updateSiteName);
   const addNewPage = useSiteStore(state => state.addNewPage);
@@ -127,7 +127,8 @@ export function useSiteEditor(siteId: string | undefined) {
     currentPageId && site?.pages?.[currentPageId] ? site.pages[currentPageId].sections : [],
   [currentPageId, site?.pages],
   );
-  const navbar = draft?.navbar ?? null;
+  const sharedSections = draft?.sharedSections ?? [];
+  const navbar = sharedSections.find(s => s.type === "navbar") ?? null;
   const pageSlugs = useMemo(() => site?.pages ? Object.values(site.pages).map(p => p.slug) : [], [site?.pages]);
   const currentPage = currentPageId && site?.pages?.[currentPageId] ? site.pages[currentPageId] : undefined;
   const isGenerationComplete = site?.pages ? Object.values(site.pages).some(p => p.sections.length > 0) : false;
@@ -318,21 +319,21 @@ export function useSiteEditor(siteId: string | undefined) {
       }
 
       if (pages.length > 1) {
-        setNavbar({
+        addSharedSection({
           id: crypto.randomUUID(),
           type: "navbar",
           logo: { text: site.name },
           items: pages.map(p => ({ label: p.title, href: p.slug })),
           sticky: true,
           preset: "navbar-minimal",
-        });
+        } as Section);
       }
 
       if (firstPageId) {
         setCurrentPage(firstPageId);
       }
     });
-  }, [clearSite, addNewPage, updatePageSections, setCurrentPage, setNavbar, site, setTheme, hydrateDraft, addPendingImageSection]);
+  }, [clearSite, addNewPage, updatePageSections, setCurrentPage, addSharedSection, site, setTheme, hydrateDraft, addPendingImageSection]);
 
   const handleRefine = useCallback((updates: RefineUpdate[]) => {
     for (const { sectionId, updates: sectionUpdates } of updates) {
@@ -465,6 +466,7 @@ export function useSiteEditor(siteId: string | undefined) {
     // State
     site,
     sections,
+    sharedSections,
     navbar,
     currentPage,
     currentPageId,
@@ -487,8 +489,8 @@ export function useSiteEditor(siteId: string | undefined) {
     updateSiteName,
     addNewPage: (slug: string, title: string) => addNewPage(slug, title),
     deletePage,
-    setNavbar,
-    updateNavbar,
+    addSharedSection,
+    setSharedSections,
     undo,
     redo,
     handleSave,
