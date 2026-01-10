@@ -1,11 +1,12 @@
 import type { ReactNode } from "react";
-import type { Section, Usage, FeatureItem, StatItem, Quote, ImageSource, NavItem } from "@muse/core";
+import type { Section, Usage, FeatureItem, StatItem, Quote, ImageSource, NavItem, ProductItem } from "@muse/core";
 import type { LayoutComponent } from "./sectionRegistry";
 import { EditableField } from "./EditableField";
 import { EditableFeatureItem } from "./items/EditableFeatureItem";
 import { EditableStatItem } from "./items/EditableStatItem";
 import { EditableQuoteItem } from "./items/EditableQuoteItem";
 import { EditableNavItem } from "./items/EditableNavItem";
+import { EditableProductItem } from "./items/EditableProductItem";
 
 interface Props {
   /** The section component to render */
@@ -111,6 +112,19 @@ function renderListItems(
         item={item}
         onChange={newItem => updateItem(i, newItem)}
         onRemove={() => removeItem(i)}
+      />
+    ));
+  }
+
+  // Product items
+  if (fieldName === "items" && sectionType === "products") {
+    return (items as ProductItem[]).map((item, i) => (
+      <EditableProductItem
+        key={i}
+        item={item}
+        onChange={newItem => updateItem(i, newItem)}
+        onRemove={() => removeItem(i)}
+        onUsage={onUsage}
       />
     ));
   }
