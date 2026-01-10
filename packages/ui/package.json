@@ -8,10 +8,12 @@
   "scripts": {
     "typecheck": "tsc --noEmit"
   },
+  "peerDependencies": {
+    "react": "^19"
+  },
   "dependencies": {
     "@muse/core": "workspace:*",
-    "@radix-ui/react-dialog": "^1.1.14",
-    "react": "^19"
+    "@radix-ui/react-dialog": "^1.1.14"
   },
   "devDependencies": {
     "@types/react": "^19",
