@@ -126,7 +126,7 @@
 }
 
 .item details p {
-  padding: 0 1.25rem 1rem;
+  padding: 0.5rem 1.25rem 1rem;
   font-family: var(--muse-theme-body-font, inherit);
   font-size: 0.9375rem;
   line-height: 1.6;
