@@ -11,8 +11,6 @@ import {
   getPaletteIds,
   getTypographyIds,
 } from "@muse/themes";
-import { EditorModeProvider } from "@muse/editor";
-
 function ThemeWrapper({
   bundleId,
   paletteOverride,
@@ -42,11 +40,9 @@ function ThemeWrapper({
   const effectsId = resolved.effects?.id;
 
   return (
-    <EditorModeProvider mode="preview">
-      <div style={cssVars as React.CSSProperties} data-effects={effectsId}>
-        {children}
-      </div>
-    </EditorModeProvider>
+    <div style={cssVars as React.CSSProperties} data-effects={effectsId}>
+      {children}
+    </div>
   );
 }
 
