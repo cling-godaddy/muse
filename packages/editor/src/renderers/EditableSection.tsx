@@ -148,6 +148,11 @@ export function EditableSection({
   for (const [fieldName, fieldSchema] of Object.entries(schema)) {
     const value = (section as unknown as Record<string, unknown>)[fieldName];
 
+    // Skip optional fields with no value
+    if (fieldSchema.optional && (value === undefined || value === null)) {
+      continue;
+    }
+
     if (fieldSchema.type === "list") {
       // Handle list fields with specialized item renderers
       const items = (value as unknown[]) ?? [];
