@@ -86,9 +86,10 @@
   margin-top: 0.5rem;
 }
 
-/* Actual button/link element inside wrapper */
+/* Actual button/link/input element inside wrapper */
 .button button,
-.button a {
+.button a,
+.button input {
   padding: 0.75rem 1.5rem;
   border-radius: var(--muse-theme-radius, 0.5rem);
   border: none;
@@ -98,32 +99,46 @@
   text-decoration: none;
   display: inline-block;
   cursor: pointer;
+  text-align: center;
 }
 
 .primary .button button,
-.primary .button a {
+.primary .button a,
+.primary .button input {
   background: var(--muse-theme-bg, white);
   color: var(--muse-theme-text, #111827);
   transition: transform 0.15s ease, box-shadow 0.15s ease;
 }
 
 .primary .button button:hover,
-.primary .button a:hover {
+.primary .button a:hover,
+.primary .button input:hover {
   transform: translateY(-2px);
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
 }
 
+.primary .button input::placeholder {
+  color: var(--muse-theme-text-muted, #64748b);
+}
+
 .secondary .button button,
-.secondary .button a {
+.secondary .button a,
+.secondary .button input {
   background: var(--muse-theme-primary, #6366f1);
   color: var(--muse-theme-on-primary, white);
   transition: transform 0.15s ease, box-shadow 0.15s ease;
 }
 
 .secondary .button button:hover,
-.secondary .button a:hover {
+.secondary .button a:hover,
+.secondary .button input:hover {
   transform: translateY(-2px);
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.secondary .button input::placeholder {
+  color: var(--muse-theme-on-primary, white);
+  opacity: 0.7;
 }
 
 .variantSelect {
@@ -176,7 +191,8 @@
 }
 
 :global([data-effects="crt"]) .button button,
-:global([data-effects="crt"]) .button a {
+:global([data-effects="crt"]) .button a,
+:global([data-effects="crt"]) .button input {
   box-shadow: 0 0 15px rgba(var(--muse-theme-primary-rgb, 0, 255, 0), 0.3);
 }
 
@@ -197,7 +213,8 @@
 }
 
 :global([data-effects="neon"]) .button button,
-:global([data-effects="neon"]) .button a {
+:global([data-effects="neon"]) .button a,
+:global([data-effects="neon"]) .button input {
   box-shadow:
     0 0 15px rgba(var(--muse-theme-primary-rgb, 255, 42, 109), 0.5),
     0 0 30px rgba(var(--muse-theme-primary-rgb, 255, 42, 109), 0.3);

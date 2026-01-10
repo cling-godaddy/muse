@@ -90,6 +90,11 @@
   justify-content: center;
 }
 
+.overlay .headline,
+.overlay .subheadline {
+  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
+}
+
 .overlayBg {
   position: absolute;
   inset: 0;
@@ -157,9 +162,10 @@
   /* Wrapper divs, visual styles on actual elements */
 }
 
-/* Actual button/link elements inside wrappers */
+/* Actual button/link/input elements inside wrappers */
 .cta button,
-.cta a {
+.cta a,
+.cta input {
   font-family: var(--muse-theme-body-font, sans-serif);
   padding: 0.75rem 1rem;
   border-radius: var(--muse-theme-radius, 0.5rem);
@@ -172,16 +178,24 @@
   background: var(--muse-theme-primary, #6366f1);
   color: var(--muse-theme-on-primary, white);
   transition: transform 0.15s ease, box-shadow 0.15s ease;
+  text-align: center;
 }
 
 .cta button:hover,
-.cta a:hover {
+.cta a:hover,
+.cta input:hover {
   transform: translateY(-2px);
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
 }
 
+.cta input::placeholder {
+  color: var(--muse-theme-on-primary, white);
+  opacity: 0.7;
+}
+
 .ctaSecondary button,
-.ctaSecondary a {
+.ctaSecondary a,
+.ctaSecondary input {
   font-family: var(--muse-theme-body-font, sans-serif);
   padding: 0.75rem 1rem;
   border-radius: var(--muse-theme-radius, 0.5rem);
@@ -194,13 +208,20 @@
   background: transparent;
   color: var(--muse-theme-hero-text, white);
   transition: border-color 0.15s ease, background 0.15s ease, transform 0.15s ease;
+  text-align: center;
 }
 
 .ctaSecondary button:hover,
-.ctaSecondary a:hover {
+.ctaSecondary a:hover,
+.ctaSecondary input:hover {
   border-color: rgba(255, 255, 255, 0.8);
   background: rgba(255, 255, 255, 0.1);
   transform: translateY(-2px);
+}
+
+.ctaSecondary input::placeholder {
+  color: var(--muse-theme-hero-text, white);
+  opacity: 0.7;
 }
 
 /* ============================================
@@ -232,12 +253,14 @@
 }
 
 :global([data-effects="crt"]) .cta button,
-:global([data-effects="crt"]) .cta a {
+:global([data-effects="crt"]) .cta a,
+:global([data-effects="crt"]) .cta input {
   box-shadow: 0 0 15px rgba(var(--muse-theme-primary-rgb, 0, 255, 0), 0.3);
 }
 
 :global([data-effects="crt"]) .ctaSecondary button,
-:global([data-effects="crt"]) .ctaSecondary a {
+:global([data-effects="crt"]) .ctaSecondary a,
+:global([data-effects="crt"]) .ctaSecondary input {
   box-shadow: 0 0 10px rgba(var(--muse-theme-primary-rgb, 0, 255, 0), 0.2);
 }
 
@@ -264,14 +287,16 @@
 }
 
 :global([data-effects="neon"]) .cta button,
-:global([data-effects="neon"]) .cta a {
+:global([data-effects="neon"]) .cta a,
+:global([data-effects="neon"]) .cta input {
   box-shadow:
     0 0 15px rgba(var(--muse-theme-primary-rgb, 255, 42, 109), 0.5),
     0 0 30px rgba(var(--muse-theme-primary-rgb, 255, 42, 109), 0.3);
 }
 
 :global([data-effects="neon"]) .ctaSecondary button,
-:global([data-effects="neon"]) .ctaSecondary a {
+:global([data-effects="neon"]) .ctaSecondary a,
+:global([data-effects="neon"]) .ctaSecondary input {
   border: 1px solid rgba(var(--muse-theme-primary-rgb, 255, 42, 109), 0.5);
   box-shadow: 0 0 10px rgba(var(--muse-theme-primary-rgb, 255, 42, 109), 0.2);
 }
