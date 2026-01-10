@@ -1,14 +1,14 @@
 import type { ReactNode } from "react";
-import type { Section } from "@muse/core";
+import type { Section as SectionData } from "@muse/core";
 import type { LayoutComponent } from "./sectionRegistry";
 import { Field } from "./Field";
-import { listRenderers } from "./items/ListItems";
+import { listRenderers } from "./items/List";
 
 interface Props {
   /** The section component to render */
   Component: LayoutComponent
   /** Section data */
-  section: Section
+  section: SectionData
   /** Additional class name */
   className?: string
 }
@@ -17,7 +17,7 @@ interface Props {
  * Renders a section by mapping data fields to layout slots.
  * Handles both static preview and interactive editing via Field component.
  */
-export function SectionRenderer({
+export function Section({
   Component,
   section,
   className,

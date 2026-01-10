@@ -1,2 +1,2 @@
-export * from "./Section";
+export * from "./SectionEditor";
 export * from "./sectionFactory";

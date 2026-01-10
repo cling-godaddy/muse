@@ -2,7 +2,7 @@ import { useMemo, useCallback, Fragment } from "react";
 import type { Section, Site, Page, Usage } from "@muse/core";
 import { getPreset } from "@muse/core";
 import { getByPath, setByPath } from "./utils/pathValue";
-import { Section as SectionWrapper } from "./sections";
+import { SectionEditor } from "./sections";
 import { SectionGap } from "./sections/SectionGap";
 import { createSectionFromPreset } from "./sections/sectionFactory";
 import { SelectionProvider } from "./context/Selection";
@@ -11,7 +11,7 @@ import { EditActivationProvider } from "./context/EditActivation";
 import { EditOverlay } from "./overlays/EditOverlay";
 import { useIsEditable } from "./context/EditorMode";
 
-interface SectionEditorProps {
+interface BlockEditorProps {
   sections: Section[]
   onChange: (sections: Section[]) => void
   sharedSections?: Section[]
@@ -25,7 +25,7 @@ interface SectionEditorProps {
   trackUsage?: (usage: Usage) => void
 }
 
-export function SectionEditor({
+export function BlockEditor({
   sections,
   onChange,
   sharedSections = [],
@@ -37,7 +37,7 @@ export function SectionEditor({
   onDeleteSection,
   getToken,
   trackUsage,
-}: SectionEditorProps) {
+}: BlockEditorProps) {
   const isEditable = useIsEditable();
 
   // Combine shared sections (navbar at top, footer at bottom) with page sections
@@ -161,7 +161,7 @@ export function SectionEditor({
 
               return (
                 <Fragment key={section.id}>
-                  <SectionWrapper
+                  <SectionEditor
                     section={section}
                     onUpdate={data => onUpdateSection(section.id, data)}
                     onDelete={() => deleteSection(section.id)}

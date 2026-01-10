@@ -2,7 +2,7 @@ import { useMemo, useCallback, useState, useEffect, useRef } from "react";
 import { Trash2, Image as ImageIcon } from "lucide-react";
 import { motion } from "framer-motion";
 import type { Section as SectionType, Usage, ImageSource } from "@muse/core";
-import { getLayoutComponent, SectionRenderer } from "../renderers";
+import { getLayoutComponent, Section } from "../renderers";
 import { PresetPicker } from "../controls/PresetPicker";
 import { ColorPicker } from "@muse/ui";
 import { Image } from "../controls/Image";
@@ -37,7 +37,7 @@ function ChevronDownIcon() {
   );
 }
 
-export function Section({ section, onUpdate, onDelete, onMoveUp, onMoveDown, canMoveUp, canMoveDown, trackUsage }: Props) {
+export function SectionEditor({ section, onUpdate, onDelete, onMoveUp, onMoveDown, canMoveUp, canMoveDown, trackUsage }: Props) {
   const LayoutComponent = useMemo(
     () => getLayoutComponent(section.type),
     [section.type],
@@ -197,7 +197,7 @@ export function Section({ section, onUpdate, onDelete, onMoveUp, onMoveDown, can
       </Dialog>
       {LayoutComponent
         ? (
-          <SectionRenderer
+          <Section
             Component={LayoutComponent}
             section={section}
           />

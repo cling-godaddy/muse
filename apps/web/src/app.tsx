@@ -3,7 +3,7 @@ import { BrowserRouter, Routes, Route, useParams, useNavigate, useLocation, Link
 import { UserButton } from "@clerk/clerk-react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
-import { SectionEditor, SiteProvider, EditorModeProvider, createSectionFromPreset } from "@muse/editor";
+import { BlockEditor, SiteProvider, EditorModeProvider, createSectionFromPreset } from "@muse/editor";
 import type { PreviewDevice } from "@muse/core";
 import { resolveThemeWithEffects, themeToCssVars, getTypography, loadFonts } from "@muse/themes";
 import { getPreset } from "@muse/core";
@@ -277,7 +277,7 @@ function MainApp() {
                   <PreviewLinkInterceptor pageMap={pageMap} onNavigate={setCurrentPage}>
                     <div style={themeStyle} data-effects={effectsId} data-preview-device={previewDevice} data-site-preview>
                       <EditorModeProvider mode={editorMode}>
-                        <SectionEditor sections={sections} onChange={setSections} sharedSections={sharedSections} site={site} currentPage={currentPage} onAddSection={handleAddSection} onUpdateSection={updateSection} onMoveSection={handleMoveSection} onDeleteSection={handleDelete} getToken={getToken} trackUsage={trackUsage ?? undefined} />
+                        <BlockEditor sections={sections} onChange={setSections} sharedSections={sharedSections} site={site} currentPage={currentPage} onAddSection={handleAddSection} onUpdateSection={updateSection} onMoveSection={handleMoveSection} onDeleteSection={handleDelete} getToken={getToken} trackUsage={trackUsage ?? undefined} />
                       </EditorModeProvider>
                     </div>
                   </PreviewLinkInterceptor>
@@ -290,7 +290,7 @@ function MainApp() {
                 : (
                   <div className="h-full overflow-y-auto" style={themeStyle} data-effects={effectsId} data-site-preview>
                     <EditorModeProvider mode={editorMode}>
-                      <SectionEditor sections={sections} onChange={setSections} sharedSections={sharedSections} site={site} currentPage={currentPage} onAddSection={handleAddSection} onUpdateSection={updateSection} onMoveSection={handleMoveSection} onDeleteSection={handleDelete} getToken={getToken} trackUsage={trackUsage ?? undefined} />
+                      <BlockEditor sections={sections} onChange={setSections} sharedSections={sharedSections} site={site} currentPage={currentPage} onAddSection={handleAddSection} onUpdateSection={updateSection} onMoveSection={handleMoveSection} onDeleteSection={handleDelete} getToken={getToken} trackUsage={trackUsage ?? undefined} />
                     </EditorModeProvider>
                   </div>
                 )}
