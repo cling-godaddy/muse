@@ -99,15 +99,30 @@
   font-size: 1.25rem;
   font-weight: 300;
   color: var(--muse-theme-text-muted, #6b7280);
-  transition: transform 0.2s ease;
+  transition: transform 0.25s ease;
 }
 
 .item details[open] summary::after {
-  content: "−";
+  transform: rotate(45deg);
 }
 
 .item summary:hover {
   background: var(--muse-theme-bg-alt, #f9fafb);
+}
+
+/* Smooth expand/collapse animation using grid */
+.item details > div {
+  display: grid;
+  grid-template-rows: 0fr;
+  transition: grid-template-rows 0.25s ease-out;
+}
+
+.item details[open] > div {
+  grid-template-rows: 1fr;
+}
+
+.item details > div > * {
+  overflow: hidden;
 }
 
 .item details p {

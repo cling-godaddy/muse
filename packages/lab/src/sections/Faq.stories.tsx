@@ -17,7 +17,9 @@ function FaqContent({ item }: { item: FaqItem }) {
   return (
     <details>
       <summary>{item.question}</summary>
-      <p>{item.answer}</p>
+      <div className="faq-content">
+        <p>{item.answer}</p>
+      </div>
     </details>
   );
 }
