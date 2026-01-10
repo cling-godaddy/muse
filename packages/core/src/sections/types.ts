@@ -71,6 +71,16 @@ export type ImageInjection
     | { type: "single", field: string }
     | { type: "nested", array: string, field: string };
 
+/** Metadata defining section behavior and constraints */
+export interface SectionMeta {
+  /** Where this section type can be placed */
+  scope: "shared" | "page"
+  /** Position within the page layout */
+  position: "top" | "inline" | "bottom" | "floating"
+  /** Maximum instances allowed (undefined = unlimited) */
+  maxCount?: number
+}
+
 // Semantic keys that map to theme.colors
 export type ThemeBackground = "background" | "backgroundAlt";
 

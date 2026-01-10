@@ -1,5 +1,5 @@
 import type { Page } from "../page/types";
-import type { NavbarSection } from "../sections/types";
+import type { Section } from "../sections/types";
 
 export type UsageAction = "generate_site" | "generate_section" | "generate_item" | "refine" | "normalize_query" | "rewrite_text" | "suggest_rewrites";
 
@@ -28,7 +28,7 @@ export interface Site {
   siteType?: SiteType
   pages: Record<string, Page>
   theme: SiteTheme
-  navbar?: NavbarSection
+  sharedSections?: Section[]
   costs?: Usage[]
   createdAt: string
   updatedAt: string

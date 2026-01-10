@@ -1,6 +1,6 @@
 import { z } from "zod";
 import { pageSchema } from "../page/schemas";
-import { navbarSectionSchema } from "../sections/schemas";
+import { sectionSchema } from "../sections/schemas";
 
 export const siteThemeSchema = z.object({
   palette: z.string(),
@@ -12,7 +12,7 @@ export const siteSchema = z.object({
   name: z.string(),
   pages: z.record(z.string().uuid(), pageSchema),
   theme: siteThemeSchema,
-  navbar: navbarSectionSchema.optional(),
+  sharedSections: z.array(sectionSchema).optional(),
   createdAt: z.string(),
   updatedAt: z.string(),
 });
