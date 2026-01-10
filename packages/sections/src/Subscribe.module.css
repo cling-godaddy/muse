@@ -110,15 +110,9 @@
   outline: none;
 }
 
+/* Button wrapper - layout only */
 .button {
-  background: var(--muse-theme-primary, #6366f1);
-  color: white;
-  border: none;
-  border-radius: var(--muse-theme-radius, 0.5rem);
-  padding: 0.75rem 1.5rem;
-  font-family: var(--muse-theme-body-font, inherit);
-  font-weight: 600;
-  cursor: pointer;
+  /* Visual styles moved to .button button */
 }
 
 .button input {
@@ -137,13 +131,14 @@
 
 /* Actual button element inside wrapper */
 .button button {
-  background: transparent;
+  background: var(--muse-theme-primary, #6366f1);
+  color: white;
   border: none;
-  color: inherit;
-  font: inherit;
+  border-radius: var(--muse-theme-radius, 0.5rem);
+  padding: 0.75rem 1.5rem;
+  font-family: var(--muse-theme-body-font, inherit);
+  font-weight: 600;
   cursor: pointer;
-  width: 100%;
-  height: 100%;
 }
 
 .disclaimer {
@@ -194,7 +189,7 @@
   text-shadow: 0 0 10px rgba(var(--muse-theme-primary-rgb, 0, 255, 0), 0.5);
 }
 
-:global([data-effects="crt"]) .button {
+:global([data-effects="crt"]) .button button {
   box-shadow: 0 0 15px rgba(var(--muse-theme-primary-rgb, 0, 255, 0), 0.4);
 }
 
@@ -223,7 +218,7 @@
     0 0 40px rgba(var(--muse-theme-primary-rgb, 255, 42, 109), 0.4);
 }
 
-:global([data-effects="neon"]) .button {
+:global([data-effects="neon"]) .button button {
   box-shadow:
     0 0 15px rgba(var(--muse-theme-primary-rgb, 255, 42, 109), 0.7),
     0 0 30px rgba(var(--muse-theme-primary-rgb, 255, 42, 109), 0.4);
