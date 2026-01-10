@@ -4,6 +4,7 @@ import type { Site, PreviewDevice } from "@muse/core";
 import { getPagesFlattened } from "@muse/core";
 import { useSiteStore } from "../stores/siteStore";
 import { FontSelector } from "./FontSelector";
+import { PaletteSelector } from "./PaletteSelector";
 
 type EditorMode = "edit" | "preview";
 
@@ -188,8 +189,13 @@ export function EditorToolbar({
         </div>
       )}
 
-      {/* Font selector */}
-      <div className={`flex items-center border-r border-border pr-2 mr-2 ${!isPreview ? "ml-auto" : ""}`}>
+      {/* Theme selectors */}
+      <div className={`flex items-center gap-1 border-r border-border pr-2 mr-2 ${!isPreview ? "ml-auto" : ""}`}>
+        <PaletteSelector
+          value={theme.palette}
+          onChange={palette => setTheme(palette, theme.typography, theme.effects)}
+          disabled={isPreview}
+        />
         <FontSelector
           value={theme.typography}
           onChange={typography => setTheme(theme.palette, typography, theme.effects)}
