@@ -38,9 +38,9 @@ function TeamCards({ members }: { members: TeamMember[] }) {
               style={{ width: "8rem", height: "8rem", borderRadius: "50%", objectFit: "cover", marginBottom: "1rem" }}
             />
           )}
-          <h3 style={{ fontWeight: 600, marginBottom: "0.25rem" }}>{member.name}</h3>
-          <p style={{ color: "#6b7280", fontSize: "0.875rem" }}>{member.role}</p>
-          {member.bio && <p style={{ fontSize: "0.875rem", marginTop: "0.5rem" }}>{member.bio}</p>}
+          <h3 style={{ fontFamily: "var(--muse-theme-heading-font)", fontWeight: 600, marginBottom: "0.25rem", color: "var(--muse-theme-text)" }}>{member.name}</h3>
+          <p style={{ fontFamily: "var(--muse-theme-body-font)", color: "var(--muse-theme-text-muted)", fontSize: "0.875rem" }}>{member.role}</p>
+          {member.bio && <p style={{ fontFamily: "var(--muse-theme-body-font)", fontSize: "0.875rem", marginTop: "0.5rem", color: "var(--muse-theme-text-muted)" }}>{member.bio}</p>}
         </div>
       ))}
     </>
