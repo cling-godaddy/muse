@@ -3,25 +3,38 @@ import type { Preview, Decorator } from "@storybook/react-vite";
 import { action } from "storybook/actions";
 import {
   resolveThemeFromBundle,
+  resolveThemeFromSelection,
   themeToCssVars,
   loadFonts,
   getTypography,
-  getBundle,
   getBundleIds,
+  getPaletteIds,
 } from "@muse/themes";
 import { EditorModeProvider } from "@muse/editor";
 
-function ThemeWrapper({ bundleId, children }: { bundleId: string, children: React.ReactNode }) {
-  const bundle = getBundle(bundleId);
-  const resolved = resolveThemeFromBundle(bundleId);
-  const cssVars = resolved ? themeToCssVars(resolved.theme) : {};
+function ThemeWrapper({
+  bundleId,
+  paletteId,
+  children,
+}: {
+  bundleId?: string
+  paletteId?: string
+  children: React.ReactNode
+}) {
+  // If palette is selected, use it with default typography/style
+  // Otherwise use the bundle
+  const resolved = paletteId
+    ? resolveThemeFromSelection({ palette: paletteId, typography: "inter", style: "rounded" })
+    : resolveThemeFromBundle(bundleId || "terminal");
+
+  const cssVars = resolved?.theme ? themeToCssVars(resolved.theme) : {};
 
   useEffect(() => {
-    if (bundle) {
-      const typo = getTypography(bundle.typography);
+    if (resolved) {
+      const typo = getTypography(resolved.typography);
       if (typo) loadFonts(typo);
     }
-  }, [bundle]);
+  }, [resolved]);
 
   return (
     <EditorModeProvider mode="preview">
@@ -31,9 +44,11 @@ function ThemeWrapper({ bundleId, children }: { bundleId: string, children: Reac
 }
 
 const withTheme: Decorator = (Story, context) => {
+  const paletteId = context.globals.palette !== "none" ? context.globals.palette : undefined;
   const bundleId = context.globals.theme || "terminal";
+
   return (
-    <ThemeWrapper bundleId={bundleId}>
+    <ThemeWrapper bundleId={bundleId} paletteId={paletteId}>
       <Story />
     </ThemeWrapper>
   );
@@ -78,12 +93,25 @@ const preview: Preview = {
   },
   decorators: [withTheme, withLinkHandler],
   globalTypes: {
-    theme: {
-      name: "Theme",
-      description: "Theme bundle for components",
-      defaultValue: "terminal",
+    palette: {
+      name: "Palette",
+      description: "Color palette (overrides bundle)",
+      defaultValue: "none",
       toolbar: {
         icon: "paintbrush",
+        items: [
+          { value: "none", title: "Bundle" },
+          ...getPaletteIds().map(id => ({ value: id, title: id })),
+        ],
+        dynamicTitle: true,
+      },
+    },
+    theme: {
+      name: "Bundle",
+      description: "Theme bundle (ignored if palette selected)",
+      defaultValue: "terminal",
+      toolbar: {
+        icon: "box",
         items: getBundleIds().map(id => ({ value: id, title: id })),
         dynamicTitle: true,
       },
