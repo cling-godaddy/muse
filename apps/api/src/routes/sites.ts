@@ -217,27 +217,40 @@ sitesRoute.patch("/:siteId/sections/:sectionId", async (c) => {
     return c.json({ error: "Site not found" }, 404);
   }
 
-  // Find the section and its page
+  // Find the section - first check sharedSections, then page sections
   let foundSection: Section | null = null;
   let foundPageId: string | null = null;
+  let isShared = false;
 
-  for (const [pageId, page] of Object.entries(site.pages)) {
-    const existingSection = page.sections.find(s => s.id === sectionId);
+  // Check sharedSections first
+  if (site.sharedSections) {
+    const existingSection = site.sharedSections.find(s => s.id === sectionId);
     if (existingSection) {
-      foundPageId = pageId;
       foundSection = { ...existingSection, ...updates } as Section;
-      break;
+      isShared = true;
     }
   }
 
-  if (!foundSection || !foundPageId) {
+  // If not found in sharedSections, check page sections
+  if (!foundSection) {
+    for (const [pageId, page] of Object.entries(site.pages)) {
+      const existingSection = page.sections.find(s => s.id === sectionId);
+      if (existingSection) {
+        foundPageId = pageId;
+        foundSection = { ...existingSection, ...updates } as Section;
+        break;
+      }
+    }
+  }
+
+  if (!foundSection) {
     return c.json({ error: "Section not found" }, 404);
   }
 
   // Update only the section row (not the whole site) to avoid race conditions
   await sites.updateSection(sectionId, foundSection);
 
-  return c.json({ section: foundSection, pageId: foundPageId });
+  return c.json({ section: foundSection, pageId: foundPageId, isShared });
 });
 
 // PATCH /sites/:siteId/pages/:pageId - Update sections order for a page

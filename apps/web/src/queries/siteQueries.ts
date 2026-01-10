@@ -140,14 +140,27 @@ export function usePatchSection() {
         throw new Error(data.error ?? "Failed to update section");
       }
 
-      const result = await res.json() as { section: Section, pageId: string };
+      const result = await res.json() as { section: Section, pageId: string | null, isShared: boolean };
       return { ...result, siteId };
     },
-    onSuccess: ({ section, pageId, siteId }) => {
+    onSuccess: ({ section, pageId, isShared, siteId }) => {
       // Update the query cache so serverSite stays fresh
       queryClient.setQueryData<Site>(["site", siteId], (oldSite) => {
         if (!oldSite) return oldSite;
 
+        // Handle shared section update
+        if (isShared) {
+          return {
+            ...oldSite,
+            sharedSections: oldSite.sharedSections?.map(s =>
+              s.id === section.id ? section : s,
+            ),
+            updatedAt: new Date().toISOString(),
+          };
+        }
+
+        // Handle page section update
+        if (!pageId) return oldSite;
         const page = oldSite.pages[pageId];
         if (!page) return oldSite;
 
