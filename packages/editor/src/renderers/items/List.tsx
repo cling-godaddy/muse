@@ -8,8 +8,28 @@ import type {
   ProductItem,
   FooterLink,
   SocialLink,
+  SocialPlatform,
 } from "@muse/core";
+import {
+  Twitter,
+  Facebook,
+  Instagram,
+  Linkedin,
+  Youtube,
+  Github,
+} from "lucide-react";
+import type { LucideIcon } from "lucide-react";
 import { Field } from "../Field";
+
+const socialIcons: Record<SocialPlatform, LucideIcon> = {
+  twitter: Twitter,
+  facebook: Facebook,
+  instagram: Instagram,
+  linkedin: Linkedin,
+  youtube: Youtube,
+  github: Github,
+  tiktok: Twitter, // fallback - lucide doesn't have tiktok
+};
 
 interface ItemProps {
   sectionId: string
@@ -262,6 +282,7 @@ export function FooterLinkRenderer({
 
 /**
  * Renderer for SocialLink
+ * Renders as a link with the appropriate social platform icon
  */
 export function SocialLinkRenderer({
   item,
@@ -270,21 +291,19 @@ export function SocialLinkRenderer({
   index,
 }: ItemProps & { item: SocialLink }) {
   const path = `${basePath}[${index}]`;
+  const Icon = socialIcons[item.platform];
   return (
-    <>
-      <Field
-        schema={{ type: "text" }}
-        value={item.platform}
-        path={`${path}.platform`}
-        sectionId={sectionId}
-      />
-      <Field
-        schema={{ type: "text" }}
-        value={item.href}
-        path={`${path}.href`}
-        sectionId={sectionId}
-      />
-    </>
+    <a
+      href={item.href}
+      data-editable-path={path}
+      data-section-id={sectionId}
+      data-field-type="cta"
+      target="_blank"
+      rel="noopener noreferrer"
+      aria-label={item.platform}
+    >
+      <Icon size={20} />
+    </a>
   );
 }
 

@@ -2,7 +2,9 @@ import React from "react";
 import type { Meta, StoryObj } from "@storybook/react-vite";
 import { expect, within } from "storybook/test";
 import { Footer } from "@muse/sections";
-import type { FooterLink, SocialLink } from "@muse/core";
+import type { FooterLink, SocialLink, SocialPlatform } from "@muse/core";
+import { Twitter, Facebook, Instagram, Linkedin, Youtube, Github } from "lucide-react";
+import type { LucideIcon } from "lucide-react";
 
 const sampleLinks: FooterLink[] = [
   { label: "About", href: "#" },
@@ -32,15 +34,28 @@ function FooterLinks({ links }: { links: FooterLink[] }) {
   );
 }
 
+const socialIcons: Record<SocialPlatform, LucideIcon> = {
+  twitter: Twitter,
+  facebook: Facebook,
+  instagram: Instagram,
+  linkedin: Linkedin,
+  youtube: Youtube,
+  github: Github,
+  tiktok: Twitter,
+};
+
 /** Renders social icons */
 function SocialIcons({ socials }: { socials: SocialLink[] }) {
   return (
     <>
-      {socials.map((social, i) => (
-        <a key={i} href={social.href} style={{ fontFamily: "var(--muse-theme-body-font)", color: "var(--muse-theme-text-muted)", textDecoration: "none" }}>
-          {social.platform}
-        </a>
-      ))}
+      {socials.map((social, i) => {
+        const Icon = socialIcons[social.platform];
+        return (
+          <a key={i} href={social.href} style={{ color: "var(--muse-theme-text-muted)" }} aria-label={social.platform}>
+            <Icon size={20} />
+          </a>
+        );
+      })}
     </>
   );
 }
