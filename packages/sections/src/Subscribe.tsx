@@ -48,8 +48,12 @@ export function Subscribe({
       style={{ backgroundColor }}
     >
       <div className={styles.content}>
-        {headline && <div className={styles.headline}>{headline}</div>}
-        {subheadline && <div className={styles.subheadline}>{subheadline}</div>}
+        {(headline || subheadline) && (
+          <header className={styles.header}>
+            {headline && <div className={styles.headline}>{headline}</div>}
+            {subheadline && <div className={styles.subheadline}>{subheadline}</div>}
+          </header>
+        )}
         <div className={styles.form}>
           {emailInput && <div className={styles.emailInput}>{emailInput}</div>}
           <div className={styles.button}>{button}</div>

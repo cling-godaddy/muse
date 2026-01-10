@@ -39,8 +39,12 @@ export function Products({
       className={`${styles.section} ${variantClass} ${className ?? ""}`}
       style={{ backgroundColor }}
     >
-      {headline && <div className={styles.headline}>{headline}</div>}
-      {subheadline && <div className={styles.subheadline}>{subheadline}</div>}
+      {(headline || subheadline) && (
+        <header className={styles.header}>
+          {headline && <div className={styles.headline}>{headline}</div>}
+          {subheadline && <div className={styles.subheadline}>{subheadline}</div>}
+        </header>
+      )}
       <div className={styles.items}>{wrapChildren(items, styles.card)}</div>
     </section>
   );

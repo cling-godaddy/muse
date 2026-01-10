@@ -108,8 +108,10 @@ export function Hero({
       className={`${styles.section} ${className ?? ""}`}
       style={{ backgroundColor }}
     >
-      <div className={styles.headline}>{headline}</div>
-      {subheadline && <div className={styles.subheadline}>{subheadline}</div>}
+      <header className={styles.header}>
+        <div className={styles.headline}>{headline}</div>
+        {subheadline && <div className={styles.subheadline}>{subheadline}</div>}
+      </header>
       {(cta || secondaryCta) && (
         <div className={styles.ctas}>
           {cta && <div className={styles.cta}>{cta}</div>}

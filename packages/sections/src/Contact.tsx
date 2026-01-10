@@ -43,8 +43,12 @@ export function Contact({
         style={{ backgroundColor }}
       >
         <div className={styles.content}>
-          {headline && <div className={styles.headline}>{headline}</div>}
-          {subheadline && <div className={styles.subheadline}>{subheadline}</div>}
+          {(headline || subheadline) && (
+            <header className={styles.header}>
+              {headline && <div className={styles.headline}>{headline}</div>}
+              {subheadline && <div className={styles.subheadline}>{subheadline}</div>}
+            </header>
+          )}
           {contactInfo && <div className={styles.contactInfo}>{contactInfo}</div>}
           {form && <div className={styles.form}>{form}</div>}
         </div>
@@ -59,8 +63,12 @@ export function Contact({
       className={`${styles.section} ${className ?? ""}`}
       style={{ backgroundColor }}
     >
-      {headline && <div className={styles.headline}>{headline}</div>}
-      {subheadline && <div className={styles.subheadline}>{subheadline}</div>}
+      {(headline || subheadline) && (
+        <header className={styles.header}>
+          {headline && <div className={styles.headline}>{headline}</div>}
+          {subheadline && <div className={styles.subheadline}>{subheadline}</div>}
+        </header>
+      )}
       {contactInfo && <div className={styles.contactInfo}>{contactInfo}</div>}
       {form && <div className={styles.form}>{form}</div>}
     </section>

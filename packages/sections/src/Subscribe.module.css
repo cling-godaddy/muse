@@ -6,6 +6,14 @@
   align-items: center;
 }
 
+.header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  text-align: center;
+}
+
 /* Content wrapper - base styles */
 .content {
   display: flex;
