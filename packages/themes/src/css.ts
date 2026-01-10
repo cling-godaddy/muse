@@ -20,6 +20,8 @@ export function themeToCssVars(theme: Theme): Record<string, string> {
     "--muse-theme-text": theme.colors.text,
     "--muse-theme-text-muted": theme.colors.textMuted,
     "--muse-theme-hero-gradient": theme.colors.heroGradient ?? theme.colors.primary,
+    "--muse-theme-hero-text": theme.colors.heroText ?? "#ffffff",
+    "--muse-theme-hero-text-muted": theme.colors.heroTextMuted ?? "rgba(255, 255, 255, 0.9)",
     "--muse-theme-cta-bg": theme.colors.ctaBackground ?? theme.colors.primary,
     "--muse-theme-cta-text": theme.colors.ctaText ?? "#ffffff",
     "--muse-theme-heading-font": theme.typography.headingFont,

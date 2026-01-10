@@ -3,6 +3,8 @@ export type PaletteMood = "energetic" | "calm" | "professional" | "playful" | "l
 export type PaletteTemperature = "warm" | "cool" | "neutral";
 export type PaletteContrast = "light" | "dark";
 
+// TODO: Migrate to semantic design tokens (onPrimary, onSurface, etc.)
+// for better scalability. Current approach uses per-component text colors.
 export interface PaletteColors {
   primary: string
   primaryHover: string
@@ -12,6 +14,8 @@ export interface PaletteColors {
   text: string
   textMuted: string
   heroGradient?: string
+  heroText?: string
+  heroTextMuted?: string
   ctaBackground?: string
   ctaText?: string
 }

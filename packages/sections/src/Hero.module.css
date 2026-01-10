@@ -34,20 +34,28 @@
 .splitContent {
   display: flex;
   flex-direction: column;
-  gap: 1rem;
+  gap: 0.25rem;
   align-items: flex-start;
   justify-content: center;
-  padding: 2rem 0;
 }
 
 .splitImage {
   position: relative;
-  min-height: 400px;
+  min-height: 350px;
   border-radius: var(--muse-theme-radius, 0.5rem);
   overflow: hidden;
 }
 
 .splitImg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* Style images passed as slots */
+.splitImage img {
   position: absolute;
   inset: 0;
   width: 100%;
@@ -66,11 +74,11 @@
 
   .splitImage {
     order: -1;
-    min-height: 300px;
+    min-height: 250px;
   }
 
   .splitContent {
-    padding: 2rem;
+    padding: 2rem 1.5rem;
   }
 }
 
@@ -92,10 +100,9 @@
   font-family: var(--muse-theme-heading-font, inherit);
   font-weight: var(--muse-theme-heading-weight, 700);
   font-size: clamp(1.5rem, 5vw, 2.5rem);
-  color: white;
+  color: var(--muse-theme-hero-text, white);
   background: transparent;
   border: 1px dashed transparent;
-  padding: 0.5rem;
   width: 100%;
   max-width: 800px;
   text-align: inherit;
@@ -116,10 +123,9 @@
 .subheadline {
   font-family: var(--muse-theme-body-font, inherit);
   font-size: clamp(1rem, 3vw, 1.25rem);
-  color: rgba(255, 255, 255, 0.9);
+  color: var(--muse-theme-hero-text-muted, rgba(255, 255, 255, 0.9));
   background: transparent;
   border: 1px dashed transparent;
-  padding: 0.5rem;
   width: 100%;
   max-width: 600px;
   text-align: inherit;
@@ -140,13 +146,35 @@
 .ctas {
   display: flex;
   gap: 0.5rem;
-  margin-top: 1rem;
+  margin-top: 0.5rem;
   position: relative;
   z-index: 1;
 }
 
+/* CTA wrappers - layout only */
 .cta,
 .ctaSecondary {
+  /* Wrapper divs, visual styles on actual elements */
+}
+
+/* Actual button/link elements inside wrappers */
+.cta button,
+.cta a {
+  font-family: var(--muse-theme-body-font, sans-serif);
+  padding: 0.75rem 1rem;
+  border-radius: var(--muse-theme-radius, 0.5rem);
+  border: none;
+  font-size: 0.875rem;
+  font-weight: 600;
+  text-decoration: none;
+  display: inline-block;
+  cursor: pointer;
+  background: white;
+  color: var(--muse-theme-primary, #6366f1);
+}
+
+.ctaSecondary button,
+.ctaSecondary a {
   font-family: var(--muse-theme-body-font, sans-serif);
   padding: 0.75rem 1rem;
   border-radius: var(--muse-theme-radius, 0.5rem);
@@ -154,15 +182,7 @@
   font-size: 0.875rem;
   text-decoration: none;
   display: inline-block;
-}
-
-.cta {
-  background: white;
-  color: var(--muse-theme-primary, #6366f1);
-  font-weight: 600;
-}
-
-.ctaSecondary {
+  cursor: pointer;
   background: rgba(255, 255, 255, 0.2);
   color: white;
 }
@@ -195,11 +215,13 @@
   text-shadow: 0 0 8px rgba(var(--muse-theme-primary-rgb, 0, 255, 0), 0.3);
 }
 
-:global([data-effects="crt"]) .cta {
+:global([data-effects="crt"]) .cta button,
+:global([data-effects="crt"]) .cta a {
   box-shadow: 0 0 15px rgba(var(--muse-theme-primary-rgb, 0, 255, 0), 0.3);
 }
 
-:global([data-effects="crt"]) .ctaSecondary {
+:global([data-effects="crt"]) .ctaSecondary button,
+:global([data-effects="crt"]) .ctaSecondary a {
   box-shadow: 0 0 10px rgba(var(--muse-theme-primary-rgb, 0, 255, 0), 0.2);
 }
 
@@ -225,13 +247,15 @@
     0 0 16px rgba(var(--muse-theme-primary-rgb, 255, 42, 109), 0.3);
 }
 
-:global([data-effects="neon"]) .cta {
+:global([data-effects="neon"]) .cta button,
+:global([data-effects="neon"]) .cta a {
   box-shadow:
     0 0 15px rgba(var(--muse-theme-primary-rgb, 255, 42, 109), 0.5),
     0 0 30px rgba(var(--muse-theme-primary-rgb, 255, 42, 109), 0.3);
 }
 
-:global([data-effects="neon"]) .ctaSecondary {
+:global([data-effects="neon"]) .ctaSecondary button,
+:global([data-effects="neon"]) .ctaSecondary a {
   border: 1px solid rgba(var(--muse-theme-primary-rgb, 255, 42, 109), 0.5);
   box-shadow: 0 0 10px rgba(var(--muse-theme-primary-rgb, 255, 42, 109), 0.2);
 }

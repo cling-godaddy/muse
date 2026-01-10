@@ -39,7 +39,7 @@ export function Cta({
     >
       <div className={styles.headline}>{headline}</div>
       {description && <div className={styles.description}>{description}</div>}
-      <div className={styles.buttonWrapper}>{button}</div>
+      <div className={styles.button}>{button}</div>
     </section>
   );
 }

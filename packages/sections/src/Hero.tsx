@@ -61,8 +61,8 @@ export function Hero({
           {subheadline && <div className={styles.subheadline}>{subheadline}</div>}
           {(cta || secondaryCta) && (
             <div className={styles.ctas}>
-              {cta}
-              {secondaryCta}
+              {cta && <div className={styles.cta}>{cta}</div>}
+              {secondaryCta && <div className={styles.ctaSecondary}>{secondaryCta}</div>}
             </div>
           )}
         </div>
@@ -92,8 +92,8 @@ export function Hero({
         {subheadline && <div className={styles.subheadline}>{subheadline}</div>}
         {(cta || secondaryCta) && (
           <div className={styles.ctas}>
-            {cta}
-            {secondaryCta}
+            {cta && <div className={styles.cta}>{cta}</div>}
+            {secondaryCta && <div className={styles.ctaSecondary}>{secondaryCta}</div>}
           </div>
         )}
       </section>
@@ -110,8 +110,8 @@ export function Hero({
       {subheadline && <div className={styles.subheadline}>{subheadline}</div>}
       {(cta || secondaryCta) && (
         <div className={styles.ctas}>
-          {cta}
-          {secondaryCta}
+          {cta && <div className={styles.cta}>{cta}</div>}
+          {secondaryCta && <div className={styles.ctaSecondary}>{secondaryCta}</div>}
         </div>
       )}
     </section>

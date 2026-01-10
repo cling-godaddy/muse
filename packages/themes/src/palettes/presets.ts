@@ -657,6 +657,8 @@ export const bubblegum: ColorPalette = {
     text: "#581C4A",
     textMuted: "#A3627D",
     heroGradient: "linear-gradient(135deg, #FFE8F0 0%, #E0F7FF 100%)",
+    heroText: "#581C4A",
+    heroTextMuted: "#A3627D",
     ctaBackground: "#FF6B9D",
     ctaText: "#ffffff",
   },

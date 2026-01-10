@@ -81,8 +81,14 @@
   border-color: var(--muse-theme-primary, #6366f1);
 }
 
+/* Button wrapper - layout only */
 .button {
   margin-top: 0.5rem;
+}
+
+/* Actual button/link element inside wrapper */
+.button button,
+.button a {
   padding: 0.75rem 1.5rem;
   border-radius: var(--muse-theme-radius, 0.5rem);
   border: none;
@@ -94,12 +100,14 @@
   cursor: pointer;
 }
 
-.primary .button {
+.primary .button button,
+.primary .button a {
   background: var(--muse-theme-bg, white);
   color: var(--muse-theme-text, #111827);
 }
 
-.secondary .button {
+.secondary .button button,
+.secondary .button a {
   background: var(--muse-theme-primary, #6366f1);
   color: white;
 }
@@ -153,7 +161,8 @@
   text-shadow: 0 0 8px rgba(var(--muse-theme-primary-rgb, 0, 255, 0), 0.3);
 }
 
-:global([data-effects="crt"]) .button {
+:global([data-effects="crt"]) .button button,
+:global([data-effects="crt"]) .button a {
   box-shadow: 0 0 15px rgba(var(--muse-theme-primary-rgb, 0, 255, 0), 0.3);
 }
 
@@ -173,7 +182,8 @@
     0 0 16px rgba(var(--muse-theme-primary-rgb, 255, 42, 109), 0.3);
 }
 
-:global([data-effects="neon"]) .button {
+:global([data-effects="neon"]) .button button,
+:global([data-effects="neon"]) .button a {
   box-shadow:
     0 0 15px rgba(var(--muse-theme-primary-rgb, 255, 42, 109), 0.5),
     0 0 30px rgba(var(--muse-theme-primary-rgb, 255, 42, 109), 0.3);
