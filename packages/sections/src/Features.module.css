@@ -108,6 +108,19 @@
 }
 
 /* ============================================
+   TODO: BENTO LAYOUTS need visual review
+   The layouts are implemented but may need tweaking
+   ============================================ */
+
+/* ============================================
+   TODO: NUMBERED LAYOUT
+   Should display step numbers (1, 2, 3...) prominently
+   with each card - common for "How It Works" sections.
+   Consider: CSS counters, horizontal timeline, or
+   vertical stepper layout.
+   ============================================ */
+
+/* ============================================
    BENTO LAYOUTS
    Asymmetric grid layouts with varying card sizes
    ============================================ */
