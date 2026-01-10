@@ -37,6 +37,24 @@ interface RichEditableProps {
   hideLists?: boolean
   /** Element type for smart rewrite suggestions (e.g., "headline", "description", "cta") */
   elementType?: string
+  /** Auto-focus editor on mount */
+  autoFocus?: boolean
+}
+
+// Lexical's built-in AutoFocusPlugin focuses synchronously before other plugins
+// register their command listeners. We need to defer focus to the next tick
+// so FloatingToolbar's FOCUS_COMMAND listener is registered first.
+function AutoFocusPlugin() {
+  const [editor] = useLexicalComposerContext();
+
+  useEffect(() => {
+    const timeout = setTimeout(() => {
+      editor.focus();
+    }, 0);
+    return () => clearTimeout(timeout);
+  }, [editor]);
+
+  return null;
 }
 
 function SyncPlugin({
@@ -94,6 +112,7 @@ export function RichEditable({
   className,
   hideLists,
   elementType,
+  autoFocus,
 }: RichEditableProps) {
   const initialConfig = {
     namespace: "muse-rich-editable",
@@ -131,6 +150,7 @@ export function RichEditable({
       <LinkEditorPlugin />
       <SyncPlugin value={value} />
       <OnChangePlugin onChange={handleChange} ignoreSelectionChange />
+      {autoFocus && <AutoFocusPlugin />}
     </LexicalComposer>
   );
 }

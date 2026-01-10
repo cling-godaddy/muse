@@ -467,6 +467,7 @@ export function FloatingToolbarPlugin({ hideLists }: FloatingToolbarPluginProps 
   return createPortal(
     <div
       ref={toolbarRef}
+      data-floating-toolbar=""
       className={styles.toolbar}
       style={{
         top: `${position.top}px`,

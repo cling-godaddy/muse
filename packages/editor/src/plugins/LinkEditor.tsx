@@ -104,6 +104,7 @@ export function LinkEditorPlugin() {
 
   return createPortal(
     <div
+      data-link-editor=""
       className={styles.popover}
       style={{
         top: `${position.top}px`,

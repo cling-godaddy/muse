@@ -62,18 +62,27 @@ export function RichTextOverlay({
     return () => document.removeEventListener("keydown", handleKeyDown);
   }, [onCancel]);
 
-  // Save on blur (click outside)
-  const handleBlur = useCallback((e: React.FocusEvent) => {
-    // Check if focus moved outside the overlay
-    const relatedTarget = e.relatedTarget as HTMLElement | null;
-    if (containerRef.current && !containerRef.current.contains(relatedTarget)) {
-      if (currentValue) {
-        onSave(currentValue);
+  // Save on click outside - use mousedown to avoid race with opening click
+  useEffect(() => {
+    const handleMouseDown = (e: MouseEvent) => {
+      const target = e.target as HTMLElement;
+      // Check if click is outside our container AND outside the floating toolbar
+      const isInContainer = containerRef.current?.contains(target);
+      const isInToolbar = target.closest("[data-floating-toolbar]");
+      const isInLinkEditor = target.closest("[data-link-editor]");
+
+      if (!isInContainer && !isInToolbar && !isInLinkEditor) {
+        if (currentValue) {
+          onSave(currentValue);
+        }
+        else {
+          onCancel();
+        }
       }
-      else {
-        onCancel();
-      }
-    }
+    };
+
+    document.addEventListener("mousedown", handleMouseDown);
+    return () => document.removeEventListener("mousedown", handleMouseDown);
   }, [currentValue, onSave, onCancel]);
 
   const handleChange = useCallback((newValue: RichContent) => {
@@ -86,7 +95,6 @@ export function RichTextOverlay({
   return createPortal(
     <div
       ref={containerRef}
-      onBlur={handleBlur}
       style={{
         position: "absolute",
         top: position.top,
@@ -102,6 +110,7 @@ export function RichTextOverlay({
       <RichEditable
         value={value}
         onChange={handleChange}
+        autoFocus
       />
     </div>,
     document.body,
