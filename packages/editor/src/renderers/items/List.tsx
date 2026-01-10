@@ -9,6 +9,11 @@ import type {
   FooterLink,
   SocialLink,
   SocialPlatform,
+  PricingPlan,
+  FaqItem,
+  FormField,
+  TeamMember,
+  MenuItem,
 } from "@muse/core";
 import {
   Twitter,
@@ -308,6 +313,194 @@ export function SocialLinkRenderer({
 }
 
 /**
+ * Renderer for PricingPlan
+ */
+export function PricingPlanRenderer({
+  item,
+  sectionId,
+  basePath,
+  index,
+}: ItemProps & { item: PricingPlan }) {
+  const path = `${basePath}[${index}]`;
+  return (
+    <>
+      <Field
+        schema={{ type: "text" }}
+        value={item.name}
+        path={`${path}.name`}
+        sectionId={sectionId}
+      />
+      <Field
+        schema={{ type: "text" }}
+        value={item.price}
+        path={`${path}.price`}
+        sectionId={sectionId}
+      />
+      {item.period && (
+        <Field
+          schema={{ type: "text" }}
+          value={item.period}
+          path={`${path}.period`}
+          sectionId={sectionId}
+        />
+      )}
+      {item.description && (
+        <Field
+          schema={{ type: "rich-text" }}
+          value={item.description}
+          path={`${path}.description`}
+          sectionId={sectionId}
+        />
+      )}
+      {item.cta && (
+        <Field
+          schema={{ type: "cta" }}
+          value={item.cta}
+          path={`${path}.cta`}
+          sectionId={sectionId}
+        />
+      )}
+    </>
+  );
+}
+
+/**
+ * Renderer for FaqItem
+ */
+export function FaqItemRenderer({
+  item,
+  sectionId,
+  basePath,
+  index,
+}: ItemProps & { item: FaqItem }) {
+  const path = `${basePath}[${index}]`;
+  return (
+    <>
+      <Field
+        schema={{ type: "text" }}
+        value={item.question}
+        path={`${path}.question`}
+        sectionId={sectionId}
+      />
+      <Field
+        schema={{ type: "rich-text" }}
+        value={item.answer}
+        path={`${path}.answer`}
+        sectionId={sectionId}
+      />
+    </>
+  );
+}
+
+/**
+ * Renderer for TeamMember
+ */
+export function TeamMemberRenderer({
+  item,
+  sectionId,
+  basePath,
+  index,
+}: ItemProps & { item: TeamMember }) {
+  const path = `${basePath}[${index}]`;
+  return (
+    <>
+      <Field
+        schema={{ type: "text" }}
+        value={item.name}
+        path={`${path}.name`}
+        sectionId={sectionId}
+      />
+      <Field
+        schema={{ type: "text" }}
+        value={item.role}
+        path={`${path}.role`}
+        sectionId={sectionId}
+      />
+      {item.image && (
+        <Field
+          schema={{ type: "image" }}
+          value={item.image}
+          path={`${path}.image`}
+          sectionId={sectionId}
+        />
+      )}
+      {item.bio && (
+        <Field
+          schema={{ type: "rich-text" }}
+          value={item.bio}
+          path={`${path}.bio`}
+          sectionId={sectionId}
+        />
+      )}
+    </>
+  );
+}
+
+/**
+ * Renderer for MenuItem
+ */
+export function MenuItemRenderer({
+  item,
+  sectionId,
+  basePath,
+  index,
+}: ItemProps & { item: MenuItem }) {
+  const path = `${basePath}[${index}]`;
+  return (
+    <>
+      <Field
+        schema={{ type: "text" }}
+        value={item.name}
+        path={`${path}.name`}
+        sectionId={sectionId}
+      />
+      {item.description && (
+        <Field
+          schema={{ type: "rich-text" }}
+          value={item.description}
+          path={`${path}.description`}
+          sectionId={sectionId}
+        />
+      )}
+      <Field
+        schema={{ type: "text" }}
+        value={item.price}
+        path={`${path}.price`}
+        sectionId={sectionId}
+      />
+      {item.image && (
+        <Field
+          schema={{ type: "image" }}
+          value={item.image}
+          path={`${path}.image`}
+          sectionId={sectionId}
+        />
+      )}
+    </>
+  );
+}
+
+/**
+ * Renderer for FormField (contact forms)
+ */
+export function FormFieldRenderer({
+  item,
+  sectionId,
+  basePath,
+  index,
+}: ItemProps & { item: FormField }) {
+  const path = `${basePath}[${index}]`;
+  return (
+    <Field
+      schema={{ type: "text" }}
+      value={item.label}
+      path={`${path}.label`}
+      sectionId={sectionId}
+    />
+  );
+}
+
+/**
  * Registry of list item renderers by "sectionType:fieldName" key.
  */
 type ListRenderer = (
@@ -408,6 +601,61 @@ export const listRenderers: Record<string, ListRenderer> = {
   "footer:socialLinks": (items, sectionId, fieldName) =>
     (items as SocialLink[]).map((item, i) => (
       <SocialLinkRenderer
+        key={i}
+        item={item}
+        sectionId={sectionId}
+        basePath={fieldName}
+        index={i}
+      />
+    )),
+
+  "pricing:plans": (items, sectionId, fieldName) =>
+    (items as PricingPlan[]).map((item, i) => (
+      <PricingPlanRenderer
+        key={i}
+        item={item}
+        sectionId={sectionId}
+        basePath={fieldName}
+        index={i}
+      />
+    )),
+
+  "faq:items": (items, sectionId, fieldName) =>
+    (items as FaqItem[]).map((item, i) => (
+      <FaqItemRenderer
+        key={i}
+        item={item}
+        sectionId={sectionId}
+        basePath={fieldName}
+        index={i}
+      />
+    )),
+
+  "about:teamMembers": (items, sectionId, fieldName) =>
+    (items as TeamMember[]).map((item, i) => (
+      <TeamMemberRenderer
+        key={i}
+        item={item}
+        sectionId={sectionId}
+        basePath={fieldName}
+        index={i}
+      />
+    )),
+
+  "menu:items": (items, sectionId, fieldName) =>
+    (items as MenuItem[]).map((item, i) => (
+      <MenuItemRenderer
+        key={i}
+        item={item}
+        sectionId={sectionId}
+        basePath={fieldName}
+        index={i}
+      />
+    )),
+
+  "contact:formFields": (items, sectionId, fieldName) =>
+    (items as FormField[]).map((item, i) => (
+      <FormFieldRenderer
         key={i}
         item={item}
         sectionId={sectionId}
