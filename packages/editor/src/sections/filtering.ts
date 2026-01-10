@@ -5,9 +5,9 @@ export function getAvailablePresets(site: Site, page: Page): SectionPreset[] {
   const presets = Object.values(allPresets);
 
   return presets.filter((preset) => {
-    // navbar: only one per site
+    // navbar: only one per site (in sharedSections)
     if (preset.sectionType === "navbar") {
-      return site.navbar === void 0;
+      return !site.sharedSections?.some(s => s.type === "navbar");
     }
 
     // hero: only one per page (hard constraint)

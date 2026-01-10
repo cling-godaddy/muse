@@ -1,5 +1,5 @@
 import { useMemo, useCallback, Fragment } from "react";
-import type { Section, NavbarSection, Site, Page, Usage } from "@muse/core";
+import type { Section, Site, Page, Usage } from "@muse/core";
 import { getPreset } from "@muse/core";
 import { Section as SectionWrapper } from "./sections";
 import { SectionGap } from "./sections/SectionGap";
@@ -11,8 +11,7 @@ import { useIsEditable } from "./context/EditorMode";
 interface SectionEditorProps {
   sections: Section[]
   onChange: (sections: Section[]) => void
-  navbar?: NavbarSection
-  onNavbarChange?: (navbar: NavbarSection) => void
+  sharedSections?: Section[]
   site?: Site
   currentPage?: Page
   onAddSection?: (section: Section, index: number, generateWithAI?: boolean) => void
@@ -26,8 +25,7 @@ interface SectionEditorProps {
 export function SectionEditor({
   sections,
   onChange,
-  navbar,
-  onNavbarChange,
+  sharedSections = [],
   site,
   currentPage,
   onAddSection,
@@ -39,26 +37,21 @@ export function SectionEditor({
 }: SectionEditorProps) {
   const isEditable = useIsEditable();
 
-  // Combine navbar with sections for unified rendering
-  // Ensure navbar has required fields (handles legacy data without type)
+  // Combine shared sections (navbar at top, footer at bottom) with page sections
   const allSections = useMemo(() => {
-    if (navbar && navbar.type === "navbar") {
-      return [navbar as Section, ...sections];
-    }
-    return sections;
-  }, [navbar, sections]);
+    const topSections = sharedSections.filter(s => s.type === "navbar");
+    const bottomSections = sharedSections.filter(s => s.type === "footer");
+    return [...topSections, ...sections, ...bottomSections];
+  }, [sharedSections, sections]);
 
-  const updateSection = (id: string, data: Partial<Section>) => {
-    // Check if updating navbar
-    if (navbar && id === navbar.id) {
-      onNavbarChange?.({ ...navbar, ...data } as NavbarSection);
-      return;
-    }
-    onUpdateSection(id, data);
-  };
+  // Check if a section is shared (not deletable/movable by user in page context)
+  const isSharedSection = useCallback((id: string) => {
+    return sharedSections.some(s => s.id === id);
+  }, [sharedSections]);
 
   const deleteSection = (id: string) => {
-    if (navbar && id === navbar.id) return;
+    // Don't allow deleting shared sections from page context
+    if (isSharedSection(id)) return;
 
     // Call parent's delete handler if provided (triggers API call)
     if (onDeleteSection) {
@@ -120,16 +113,16 @@ export function SectionEditor({
             />
           )}
           {allSections.map((section) => {
-            const isNavbar = navbar && section.id === navbar.id;
+            const isShared = isSharedSection(section.id);
             const isFooter = section.type === "footer";
-            const sectionIndex = isNavbar ? -1 : sections.findIndex(s => s.id === section.id);
-            const showMoveControls = !isNavbar && !isFooter;
+            const sectionIndex = isShared ? -1 : sections.findIndex(s => s.id === section.id);
+            const showMoveControls = !isShared && !isFooter;
 
             return (
               <Fragment key={section.id}>
                 <SectionWrapper
                   section={section}
-                  onUpdate={data => updateSection(section.id, data)}
+                  onUpdate={data => onUpdateSection(section.id, data)}
                   onDelete={() => deleteSection(section.id)}
                   onMoveUp={showMoveControls
                     ? () => {
@@ -147,7 +140,7 @@ export function SectionEditor({
                   canMoveDown={showMoveControls && sectionIndex < lastMoveableIndex}
                   trackUsage={trackUsage}
                 />
-                {canAddSections && !isNavbar && (
+                {canAddSections && !isShared && (
                   <SectionGap
                     index={sectionIndex + 1}
                     site={site}
