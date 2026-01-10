@@ -112,6 +112,7 @@ export function ColorPicker({
           align="start"
           role="dialog"
           aria-label="Color picker"
+          data-color-picker=""
           onPointerDown={e => e.stopPropagation()}
           onMouseDown={e => e.stopPropagation()}
           onFocusOutside={e => e.preventDefault()}

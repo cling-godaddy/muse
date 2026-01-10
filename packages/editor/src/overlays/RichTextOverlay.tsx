@@ -66,12 +66,13 @@ export function RichTextOverlay({
   useEffect(() => {
     const handleMouseDown = (e: MouseEvent) => {
       const target = e.target as HTMLElement;
-      // Check if click is outside our container AND outside the floating toolbar
+      // Check if click is outside our container AND outside edit UI portals
       const isInContainer = containerRef.current?.contains(target);
       const isInToolbar = target.closest("[data-floating-toolbar]");
       const isInLinkEditor = target.closest("[data-link-editor]");
+      const isInColorPicker = target.closest("[data-color-picker]");
 
-      if (!isInContainer && !isInToolbar && !isInLinkEditor) {
+      if (!isInContainer && !isInToolbar && !isInLinkEditor && !isInColorPicker) {
         if (currentValue) {
           onSave(currentValue);
         }
@@ -95,6 +96,7 @@ export function RichTextOverlay({
   return createPortal(
     <div
       ref={containerRef}
+      data-edit-overlay=""
       style={{
         position: "absolute",
         top: position.top,

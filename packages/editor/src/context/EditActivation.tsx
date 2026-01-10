@@ -80,9 +80,10 @@ export function EditActivationProvider({ children, containerRef, onSaveField, on
       const editable = target.closest("[data-editable-path]") as HTMLElement | null;
 
       if (!editable) {
-        // Clicked outside any editable - deactivate
-        // But only if we're not clicking inside the active edit overlay
-        if (!isClickInsideRef.current) {
+        // Clicked outside any editable - but don't deactivate if clicking edit UI
+        // (toolbar, color picker, link editor, etc.)
+        const isEditUI = target.closest("[data-floating-toolbar], [data-link-editor], [data-color-picker], [data-edit-overlay]");
+        if (!isEditUI && !isClickInsideRef.current) {
           deactivate();
         }
         return;
@@ -97,9 +98,6 @@ export function EditActivationProvider({ children, containerRef, onSaveField, on
         return;
       }
 
-      // Activate this field
-      // TODO: remove debug log once overlays are implemented
-      console.log("[EditActivation] click detected:", { sectionId, path, fieldType });
       activate({
         sectionId,
         path,
@@ -128,6 +126,14 @@ export function useEditActivation() {
     throw new Error("useEditActivation must be used within EditActivationProvider");
   }
   return ctx;
+}
+
+/**
+ * Optional hook that returns null if not in EditActivationProvider.
+ * Useful for components that work both inside and outside editor context.
+ */
+export function useOptionalEditActivation() {
+  return useContext(EditActivationContext);
 }
 
 /**

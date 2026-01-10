@@ -1,8 +1,10 @@
-import type { ReactNode } from "react";
+import { type ReactNode, useCallback } from "react";
 import type { FieldSchema } from "@muse/sections";
-import type { TextOrRich, ImageSource } from "@muse/core";
+import type { TextOrRich, ImageSource, RichContent } from "@muse/core";
 import { getPlainText } from "@muse/core";
 import { SmartLink } from "../ux/SmartLink";
+import { InlineTextEditor } from "../ux/InlineTextEditor";
+import { useOptionalEditActivation } from "../context/EditActivation";
 
 interface Props {
   schema: FieldSchema
@@ -15,7 +17,8 @@ interface Props {
 }
 
 /**
- * Renders static (non-editable) content based on field type.
+ * Renders content based on field type.
+ * For text/rich-text fields in editor context, renders inline Lexical editor.
  * When path and sectionId are provided, adds data attributes for click-to-edit.
  */
 export function StaticField({
@@ -26,9 +29,39 @@ export function StaticField({
   sectionId,
 }: Props): ReactNode {
   const { type } = schema;
+  const isEditorContext = !!(path && sectionId);
+
+  // Get edit activation context (null if not in editor)
+  const editContext = useOptionalEditActivation();
+
+  const isEditing = editContext?.activeEdit?.sectionId === sectionId
+    && editContext?.activeEdit?.path === path;
+
+  const handleActivate = useCallback(() => {
+    if (editContext && path && sectionId) {
+      editContext.activate({
+        sectionId,
+        path,
+        fieldType: type,
+        element: document.body as HTMLElement, // Not used for inline editing
+      });
+    }
+  }, [editContext, path, sectionId, type]);
+
+  const handleTextChange = useCallback((richValue: RichContent) => {
+    if (editContext && sectionId && path) {
+      // For plain text fields, extract the text; for rich-text, keep the full value
+      if (type === "text") {
+        editContext.saveField(sectionId, path, getPlainText(richValue));
+      }
+      else {
+        editContext.saveField(sectionId, path, richValue);
+      }
+    }
+  }, [editContext, sectionId, path, type]);
 
   // Data attributes for edit detection (only when in editor context)
-  const editAttrs = path && sectionId
+  const editAttrs = isEditorContext
     ? {
       "data-editable-path": path,
       "data-section-id": sectionId,
@@ -51,6 +84,23 @@ export function StaticField({
         text = (value as { text?: string }).text ?? "";
       }
       if (!text) return null;
+
+      // Use inline editor in editor context
+      if (isEditorContext && editContext) {
+        return (
+          <InlineTextEditor
+            value={text}
+            onChange={handleTextChange}
+            className={className}
+            isEditing={isEditing}
+            onActivate={handleActivate}
+            hideLists
+            path={path}
+            sectionId={sectionId}
+            fieldType={type}
+          />
+        );
+      }
       return <span className={className} {...editAttrs}>{text}</span>;
     }
 
@@ -58,8 +108,23 @@ export function StaticField({
       const richValue = value as TextOrRich;
       const text = getPlainText(richValue);
       if (!text) return null;
-      // TODO: properly render rich content (bold, links, etc.)
-      // For now, just render plain text
+
+      // Use inline editor in editor context
+      if (isEditorContext && editContext) {
+        return (
+          <InlineTextEditor
+            value={richValue}
+            onChange={handleTextChange}
+            className={className}
+            isEditing={isEditing}
+            onActivate={handleActivate}
+            path={path}
+            sectionId={sectionId}
+            fieldType={type}
+          />
+        );
+      }
+      // Static: render plain text (TODO: properly render rich content)
       return <span className={className} {...editAttrs}>{text}</span>;
     }
 
