@@ -71,22 +71,12 @@ const listRenderers: Record<string, ListItemRenderer> = {
 
   "gallery:images": items =>
     (items as ImageSource[]).map((image, i) => (
-      <img
-        key={i}
-        src={image.url}
-        alt={image.alt}
-        style={{ maxWidth: "100%", height: "auto" }}
-      />
+      <img key={i} src={image.url} alt={image.alt} />
     )),
 
   "logos:logos": items =>
     (items as { image: ImageSource, href?: string }[]).map((logo, i) => (
-      <img
-        key={i}
-        src={logo.image.url}
-        alt={logo.image.alt}
-        style={{ maxWidth: "100px", height: "auto" }}
-      />
+      <img key={i} src={logo.image.url} alt={logo.image.alt} />
     )),
 
   "navbar:items": (items, updateItem, removeItem) =>

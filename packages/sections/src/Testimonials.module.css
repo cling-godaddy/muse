@@ -77,6 +77,7 @@
 }
 
 .card {
+  position: relative;
   padding: 1.5rem;
   min-width: 0;
   background: var(--muse-theme-bg-alt, #f8fafc);
@@ -148,6 +149,147 @@
 .role:focus {
   border-color: var(--muse-theme-primary, #6366f1);
   outline: none;
+}
+
+/* ============================================
+   EDITABLE ITEM STYLES (via data attributes)
+   ============================================ */
+
+/* Quote text wrapper */
+.card [data-quote-text] {
+  margin-bottom: 1rem;
+}
+
+.card [data-quote-text] textarea {
+  font-family: var(--muse-theme-body-font, inherit);
+  font-style: italic;
+  width: 100%;
+  line-height: 1.625;
+  overflow-wrap: break-word;
+  color: var(--muse-theme-text, #0f172a);
+  background: transparent;
+  border: 1px dashed transparent;
+  resize: none;
+}
+
+.card [data-quote-text] textarea:focus {
+  border-color: var(--muse-theme-primary, #6366f1);
+  outline: none;
+}
+
+/* Author section */
+.card [data-quote-author] {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+/* Avatar wrapper */
+.card [data-quote-avatar] {
+  flex-shrink: 0;
+}
+
+.card [data-quote-avatar] img {
+  height: 2.5rem;
+  width: 2.5rem;
+  border-radius: 9999px;
+  object-fit: cover;
+}
+
+/* Avatar placeholder (shows initial, clickable to add image) */
+.card [data-quote-avatar-placeholder] {
+  height: 2.5rem;
+  width: 2.5rem;
+  border-radius: 9999px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--muse-theme-body-font, inherit);
+  font-size: 0.875rem;
+  font-weight: 500;
+  background: var(--muse-theme-bg-muted, #e5e7eb);
+  color: var(--muse-theme-text-muted, #64748b);
+  border: 1px dashed transparent;
+  cursor: pointer;
+  transition: border-color 0.15s;
+}
+
+.card [data-quote-avatar-placeholder]:hover {
+  border-color: var(--muse-theme-primary, #6366f1);
+}
+
+/* Info wrapper (name + meta) */
+.card [data-quote-info] {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+/* Author name - first textarea in info */
+.card [data-quote-info] > textarea {
+  font-family: var(--muse-theme-body-font, inherit);
+  font-weight: 600;
+  font-size: 0.875rem;
+  color: var(--muse-theme-text, #0f172a);
+  background: transparent;
+  border: 1px dashed transparent;
+  padding: 0;
+}
+
+.card [data-quote-info] > textarea:focus {
+  border-color: var(--muse-theme-primary, #6366f1);
+  outline: none;
+}
+
+/* Meta row (role, company) */
+.card [data-quote-meta] {
+  display: flex;
+  align-items: center;
+  gap: 0;
+}
+
+.card [data-quote-meta] input {
+  font-family: var(--muse-theme-body-font, inherit);
+  font-size: 0.875rem;
+  color: var(--muse-theme-text-muted, #52525b);
+  background: transparent;
+  border: 1px dashed transparent;
+  padding: 0;
+}
+
+.card [data-quote-meta] input:focus {
+  border-color: var(--muse-theme-primary, #6366f1);
+  outline: none;
+}
+
+/* Comma separator between role and company */
+.card [data-quote-separator] {
+  font-size: 0.875rem;
+  color: var(--muse-theme-text-muted, #52525b);
+}
+
+/* Remove button */
+.card [data-quote-remove] {
+  position: absolute;
+  top: 0.5rem;
+  right: 0.5rem;
+  font-size: 0.875rem;
+  color: var(--muse-theme-text-muted, #9ca3af);
+  background: var(--muse-theme-bg, white);
+  border: 1px solid var(--muse-theme-border, #e5e7eb);
+  border-radius: 50%;
+  width: 1.5rem;
+  height: 1.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  z-index: 1;
+}
+
+.card [data-quote-remove]:hover {
+  color: var(--muse-theme-text, #111827);
+  border-color: var(--muse-theme-text-muted, #9ca3af);
 }
 
 /* ============================================

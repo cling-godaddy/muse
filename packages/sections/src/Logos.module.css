@@ -87,7 +87,9 @@
   justify-content: center;
 }
 
-.logoImage {
+/* Logo image - both class and direct img (from editor) */
+.logoImage,
+.logo img {
   height: 40px;
   width: auto;
   max-width: 100px;
@@ -97,7 +99,8 @@
   transition: all 0.2s;
 }
 
-.logo:hover .logoImage {
+.logo:hover .logoImage,
+.logo:hover img {
   filter: grayscale(0%);
   opacity: 1;
 }
@@ -142,11 +145,13 @@
   border: 1px solid rgba(var(--muse-theme-primary-rgb, 0, 255, 0), 0.1);
 }
 
-:global([data-effects="crt"]) .logoImage {
+:global([data-effects="crt"]) .logoImage,
+:global([data-effects="crt"]) .logo img {
   filter: grayscale(100%) drop-shadow(0 0 2px rgba(var(--muse-theme-primary-rgb, 0, 255, 0), 0.3));
 }
 
-:global([data-effects="crt"]) .logo:hover .logoImage {
+:global([data-effects="crt"]) .logo:hover .logoImage,
+:global([data-effects="crt"]) .logo:hover img {
   filter: grayscale(0%) drop-shadow(0 0 4px rgba(var(--muse-theme-primary-rgb, 0, 255, 0), 0.5));
 }
 
@@ -157,6 +162,7 @@
     0 0 12px rgba(var(--muse-theme-primary-rgb, 255, 42, 109), 0.3);
 }
 
-:global([data-effects="neon"]) .logo:hover .logoImage {
+:global([data-effects="neon"]) .logo:hover .logoImage,
+:global([data-effects="neon"]) .logo:hover img {
   filter: grayscale(0%) drop-shadow(0 0 8px rgba(var(--muse-theme-primary-rgb, 255, 42, 109), 0.5));
 }

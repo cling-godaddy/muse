@@ -84,6 +84,7 @@
 }
 
 .stat {
+  position: relative;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -130,14 +131,78 @@
   outline: none;
 }
 
-.removeButton {
-  font-size: 0.625rem;
-  color: var(--muse-theme-text-muted, #94a3b8);
+/* Value wrapper - from EditableStatItem */
+.stat [data-stat-value] {
+  display: contents;
+}
+
+.stat [data-stat-value] textarea {
+  font-family: var(--muse-theme-heading-font, inherit);
+  font-size: clamp(1.5rem, 5vw, 2.5rem);
+  font-weight: 700;
+  color: var(--muse-theme-primary, #6366f1);
   background: transparent;
-  border: 1px solid currentColor;
-  padding: 0.125rem 0.375rem;
-  border-radius: 0.25rem;
+  border: 1px dashed transparent;
+  text-align: center;
+  padding: 0;
+  width: 100%;
+}
+
+.stat [data-stat-value] textarea:focus {
+  border-color: var(--muse-theme-primary, #6366f1);
+  outline: none;
+}
+
+/* Label wrapper - from EditableStatItem */
+.stat [data-stat-label] {
+  display: contents;
+}
+
+.stat [data-stat-label] textarea {
+  font-family: var(--muse-theme-body-font, inherit);
+  font-size: 0.75rem;
+  color: var(--muse-theme-text-muted, #64748b);
+  background: transparent;
+  border: 1px dashed transparent;
+  text-align: center;
+  padding: 0.125rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  width: 100%;
+  resize: none;
+  overflow: hidden;
+  field-sizing: content;
+}
+
+.stat [data-stat-label] textarea:focus {
+  border-color: var(--muse-theme-primary, #6366f1);
+  outline: none;
+}
+
+/* Remove button - from EditableStatItem */
+.stat [data-stat-remove],
+.removeButton {
+  position: absolute;
+  top: 0.25rem;
+  right: 0.25rem;
+  font-size: 0.875rem;
+  color: var(--muse-theme-text-muted, #9ca3af);
+  background: var(--muse-theme-bg, white);
+  border: 1px solid var(--muse-theme-border, #e5e7eb);
+  border-radius: 50%;
+  width: 1.5rem;
+  height: 1.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   cursor: pointer;
+  z-index: 1;
+}
+
+.stat [data-stat-remove]:hover,
+.removeButton:hover {
+  color: var(--muse-theme-text, #111827);
+  border-color: var(--muse-theme-text-muted, #9ca3af);
 }
 
 .addButton {
