@@ -58,11 +58,11 @@ function PlanContent({ plan }: { plan: PricingPlan }) {
           textAlign: "center",
           padding: "0.75rem",
           fontFamily: "var(--muse-theme-body-font)",
-          background: plan.highlighted ? "var(--muse-theme-on-primary)" : "var(--muse-theme-cta-bg)",
-          color: plan.highlighted ? "var(--muse-theme-primary)" : "var(--muse-theme-cta-text)",
+          background: "var(--muse-theme-primary)",
+          color: "var(--muse-theme-on-primary)",
           borderRadius: "var(--muse-theme-radius)",
           textDecoration: "none",
-          fontWeight: 500,
+          fontWeight: 600,
         }}
       >
         {plan.cta.text}
