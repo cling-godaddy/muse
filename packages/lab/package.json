@@ -12,6 +12,7 @@
     "@muse/editor": "workspace:*",
     "@muse/sections": "workspace:*",
     "@muse/themes": "workspace:*",
+    "@muse/ui": "workspace:*",
     "react": "^19",
     "react-dom": "^19"
   },

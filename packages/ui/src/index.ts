@@ -6,3 +6,4 @@ export { MissingPage } from "./MissingPage";
 export { Progress } from "./Progress";
 export { Skeleton } from "./Skeleton";
 export { Spinner } from "./Spinner";
+export { StarRating } from "./StarRating";

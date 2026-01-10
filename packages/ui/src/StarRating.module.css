@@ -1,0 +1,26 @@
+.container {
+  position: relative;
+  display: inline-block;
+  line-height: 1;
+}
+
+.empty,
+.filled {
+  display: block;
+  letter-spacing: 0.1em;
+  white-space: nowrap;
+}
+
+.empty {
+  color: var(--muse-theme-text-muted, #d1d5db);
+  opacity: 0.3;
+}
+
+.filled {
+  position: absolute;
+  top: 0;
+  left: 0;
+  overflow: hidden;
+  width: var(--star-fill-percent, 100%);
+  color: var(--muse-theme-primary, #fbbf24);
+}

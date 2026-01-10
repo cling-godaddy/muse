@@ -3,6 +3,7 @@ import type { Meta, StoryObj } from "@storybook/react-vite";
 import { expect, within } from "storybook/test";
 import { Products, type ProductsVariant } from "@muse/sections";
 import type { ProductItem } from "@muse/core";
+import { StarRating } from "@muse/ui";
 
 const sampleProducts: ProductItem[] = [
   { image: { url: "https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=400", alt: "Watch" }, name: "Classic Watch", price: "$249", rating: 4.8 },
@@ -49,10 +50,11 @@ function ProductContent({ product }: { product: ProductItem }) {
           )}
         </div>
         {product.rating && (
-          <div style={{ fontFamily: "var(--muse-theme-body-font)", fontSize: "0.875rem", color: "var(--muse-theme-text-muted)", marginTop: "0.25rem" }}>
-            Rating:
-            {" "}
-            {product.rating}
+          <div style={{ display: "flex", alignItems: "center", gap: "0.375rem", marginTop: "0.375rem" }}>
+            <StarRating rating={product.rating} size={14} />
+            <span style={{ fontFamily: "var(--muse-theme-body-font)", fontSize: "0.75rem", color: "var(--muse-theme-text-muted)" }}>
+              {product.rating}
+            </span>
           </div>
         )}
       </div>

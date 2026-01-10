@@ -406,6 +406,9 @@ importers:
       '@muse/themes':
         specifier: workspace:*
         version: link:../themes
+      '@muse/ui':
+        specifier: workspace:*
+        version: link:../ui
       react:
         specifier: ^19
         version: 19.2.3
