@@ -2,6 +2,7 @@ import type { ReactNode } from "react";
 import type { Section } from "@muse/core";
 import type { LayoutComponent } from "./sectionRegistry";
 import { StaticField } from "./StaticField";
+import { staticListRenderers } from "./items/StaticListItems";
 
 interface Props {
   /** The section component to render */
@@ -37,15 +38,39 @@ export function StaticSection({
       continue;
     }
 
-    slots[fieldSchema.slot] = (
-      <StaticField
-        key={fieldName}
-        schema={fieldSchema}
-        value={value}
-        path={fieldName}
-        sectionId={section.id}
-      />
-    );
+    if (fieldSchema.type === "list") {
+      // Handle list fields with static item renderers
+      const items = (value as unknown[]) ?? [];
+      const key = `${section.type}:${fieldName}`;
+      const renderer = staticListRenderers[key];
+
+      if (renderer) {
+        slots[fieldSchema.slot] = renderer(items, section.id, fieldName);
+      }
+      else {
+        // Fallback: render placeholder
+        slots[fieldSchema.slot] = (
+          <div style={{ padding: "1rem", background: "#f0f0f0", borderRadius: "4px" }}>
+            Static list rendering not implemented for
+            {" "}
+            {section.type}
+            .
+            {fieldName}
+          </div>
+        );
+      }
+    }
+    else {
+      slots[fieldSchema.slot] = (
+        <StaticField
+          key={fieldName}
+          schema={fieldSchema}
+          value={value}
+          path={fieldName}
+          sectionId={section.id}
+        />
+      );
+    }
   }
 
   // Pass non-schema props (variant, className, etc.) directly

@@ -1,6 +1,7 @@
 import { useMemo, useCallback, Fragment } from "react";
 import type { Section, Site, Page, Usage } from "@muse/core";
 import { getPreset } from "@muse/core";
+import { getByPath, setByPath } from "./utils/pathValue";
 import { Section as SectionWrapper } from "./sections";
 import { SectionGap } from "./sections/SectionGap";
 import { createSectionFromPreset } from "./sections/sectionFactory";
@@ -100,16 +101,40 @@ export function SectionEditor({
   // only show gaps if site and currentPage are provided
   const canAddSections = isEditable && site && currentPage;
 
-  // Handler for static mode field updates
+  // Handler for static mode field updates (supports nested paths like "items[0].title")
   const handleSaveField = useCallback((sectionId: string, path: string, value: unknown) => {
-    onUpdateSection(sectionId, { [path]: value } as Partial<Section>);
-  }, [onUpdateSection]);
+    const section = allSections.find(s => s.id === sectionId);
+    if (!section) return;
 
-  // Handler to get current field value (for rich text editing)
+    // Check if path is nested (contains [ for array access or . for nested props)
+    const isNested = path.includes("[") || (path.includes(".") && !path.startsWith("."));
+
+    if (isNested) {
+      // For nested paths like "items[0].title", extract root field and update
+      const match = path.match(/^([^.[]+)/);
+      const rootField = match?.[1] ?? path;
+      const remainingPath = path.slice(rootField.length);
+
+      // Get current value of root field
+      const currentRoot = (section as unknown as Record<string, unknown>)[rootField];
+
+      // Parse remaining path - remove leading . or [ and use setByPath
+      const cleanPath = remainingPath.replace(/^\./, "");
+      const updatedRoot = setByPath(currentRoot, cleanPath, value);
+
+      onUpdateSection(sectionId, { [rootField]: updatedRoot } as Partial<Section>);
+    }
+    else {
+      // For simple paths, update directly
+      onUpdateSection(sectionId, { [path]: value } as Partial<Section>);
+    }
+  }, [allSections, onUpdateSection]);
+
+  // Handler to get current field value (supports nested paths)
   const handleGetFieldValue = useCallback((sectionId: string, path: string) => {
     const section = allSections.find(s => s.id === sectionId);
     if (!section) return undefined;
-    return (section as unknown as Record<string, unknown>)[path];
+    return getByPath(section, path);
   }, [allSections]);
 
   return (
