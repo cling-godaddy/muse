@@ -1,4 +1,4 @@
-import { ColorPicker } from "../../controls/ColorPicker";
+import { ColorPicker } from "@muse/ui";
 
 interface Props {
   value: string | undefined

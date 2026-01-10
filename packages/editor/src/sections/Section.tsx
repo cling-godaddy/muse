@@ -4,7 +4,7 @@ import { motion } from "framer-motion";
 import type { Section as SectionType, Usage, ImageSource } from "@muse/core";
 import { getLayoutComponent, EditableSection, StaticSection } from "../renderers";
 import { PresetPicker } from "../controls/PresetPicker";
-import { ColorPicker } from "../controls/ColorPicker";
+import { ColorPicker } from "@muse/ui";
 import { Image } from "../controls/Image";
 import { supportsPresets } from "../controls/presets";
 import { useIsEditable } from "../context/EditorMode";

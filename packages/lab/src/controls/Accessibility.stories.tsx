@@ -1,8 +1,8 @@
 import React, { useState, useRef, useEffect } from "react";
 import type { Meta, StoryObj } from "@storybook/react-vite";
 import chroma from "chroma-js";
+import { ColorPicker } from "@muse/ui";
 import {
-  ColorPicker,
   getContrastRatio,
   meetsContrastThreshold,
   getNearestAccessibleColor,
@@ -10,7 +10,7 @@ import {
   getAccessibilityCurve,
   CONTRAST_AA_NORMAL,
   CONTRAST_AA_LARGE,
-} from "@muse/editor";
+} from "@muse/core";
 
 const meta: Meta = {
   title: "Controls/Accessibility",

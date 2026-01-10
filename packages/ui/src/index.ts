@@ -1,4 +1,5 @@
 export { Avatar } from "./Avatar";
+export { ColorPicker, ColorSwatch, type ColorPickerProps } from "./ColorPicker";
 export { Dialog } from "./Dialog";
 export { Ellipsis } from "./Ellipsis";
 export { ImageLoader } from "./ImageLoader";

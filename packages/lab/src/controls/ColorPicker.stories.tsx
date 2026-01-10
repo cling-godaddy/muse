@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import type { Meta, StoryObj } from "@storybook/react-vite";
-import { ColorPicker } from "@muse/editor";
+import { ColorPicker } from "@muse/ui";
 
 const meta: Meta<typeof ColorPicker> = {
   title: "Controls/ColorPicker",

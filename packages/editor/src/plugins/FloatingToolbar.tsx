@@ -38,7 +38,7 @@ import {
   ListOrdered,
   X,
 } from "lucide-react";
-import { ColorPicker } from "../controls/ColorPicker";
+import { ColorPicker } from "@muse/ui";
 import { RewriteMenu } from "./RewriteMenu";
 import { useEditorServices } from "../context/EditorServices";
 import { markProgrammaticUpdate } from "../ux/RichEditable";

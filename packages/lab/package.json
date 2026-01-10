@@ -9,7 +9,6 @@
   },
   "dependencies": {
     "@muse/core": "workspace:*",
-    "@muse/editor": "workspace:*",
     "@muse/sections": "workspace:*",
     "@muse/themes": "workspace:*",
     "@muse/ui": "workspace:*",

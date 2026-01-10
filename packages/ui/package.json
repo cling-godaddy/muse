@@ -13,7 +13,8 @@
   },
   "dependencies": {
     "@muse/core": "workspace:*",
-    "@radix-ui/react-dialog": "^1.1.14"
+    "@radix-ui/react-dialog": "^1.1.14",
+    "@radix-ui/react-popover": "^1.1.14"
   },
   "devDependencies": {
     "@types/react": "^19",
