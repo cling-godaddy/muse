@@ -105,10 +105,17 @@ export function SectionEditor({
     onUpdateSection(sectionId, { [path]: value } as Partial<Section>);
   }, [onUpdateSection]);
 
+  // Handler to get current field value (for rich text editing)
+  const handleGetFieldValue = useCallback((sectionId: string, path: string) => {
+    const section = allSections.find(s => s.id === sectionId);
+    if (!section) return undefined;
+    return (section as unknown as Record<string, unknown>)[path];
+  }, [allSections]);
+
   return (
     <EditorServicesProvider getToken={getToken} trackUsage={trackUsage} site={site}>
       <SelectionProvider>
-        <EditActivationProvider onSaveField={handleSaveField}>
+        <EditActivationProvider onSaveField={handleSaveField} onGetFieldValue={handleGetFieldValue}>
           <EditOverlay />
           <div className="muse-section-editor">
             {allSections.length === 0 && isEditable && (

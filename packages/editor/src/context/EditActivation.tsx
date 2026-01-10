@@ -28,6 +28,8 @@ interface EditActivationContextValue {
   deactivate: () => void
   /** Save a field value change */
   saveField: (sectionId: string, path: string, value: unknown) => void
+  /** Get the current value of a field */
+  getFieldValue: (sectionId: string, path: string) => unknown
 }
 
 const EditActivationContext = createContext<EditActivationContextValue | null>(null);
@@ -38,13 +40,15 @@ interface ProviderProps {
   containerRef?: React.RefObject<HTMLElement>
   /** Callback to save field changes */
   onSaveField?: (sectionId: string, path: string, value: unknown) => void
+  /** Callback to get current field value */
+  onGetFieldValue?: (sectionId: string, path: string) => unknown
 }
 
 /**
  * Provider that handles click-to-edit detection.
  * Listens for clicks on elements with data-editable-path attribute.
  */
-export function EditActivationProvider({ children, containerRef, onSaveField }: ProviderProps) {
+export function EditActivationProvider({ children, containerRef, onSaveField, onGetFieldValue }: ProviderProps) {
   const [activeEdit, setActiveEdit] = useState<ActiveEdit | null>(null);
   const isClickInsideRef = useRef(false);
 
@@ -59,6 +63,10 @@ export function EditActivationProvider({ children, containerRef, onSaveField }: 
   const saveField = useCallback((sectionId: string, path: string, value: unknown) => {
     onSaveField?.(sectionId, path, value);
   }, [onSaveField]);
+
+  const getFieldValue = useCallback((sectionId: string, path: string) => {
+    return onGetFieldValue?.(sectionId, path);
+  }, [onGetFieldValue]);
 
   // Click handler to detect editable field clicks
   useEffect(() => {
@@ -105,7 +113,7 @@ export function EditActivationProvider({ children, containerRef, onSaveField }: 
   }, [containerRef, activate, deactivate]);
 
   return (
-    <EditActivationContext.Provider value={{ activeEdit, activate, deactivate, saveField }}>
+    <EditActivationContext.Provider value={{ activeEdit, activate, deactivate, saveField, getFieldValue }}>
       {children}
     </EditActivationContext.Provider>
   );

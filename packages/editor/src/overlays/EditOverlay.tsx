@@ -1,15 +1,42 @@
 import { useCallback } from "react";
+import type { RichContent, TextOrRich, ImageSource } from "@muse/core";
 import { useEditActivation } from "../context/EditActivation";
 import { PlainTextOverlay } from "./PlainTextOverlay";
+import { RichTextOverlay } from "./RichTextOverlay";
+import { ImageOverlay } from "./ImageOverlay";
+import { CtaOverlay } from "./CtaOverlay";
+
+interface CtaValue {
+  text: string
+  href: string
+}
 
 /**
  * Main overlay dispatcher.
  * Renders the appropriate editor overlay based on the active edit's field type.
  */
 export function EditOverlay() {
-  const { activeEdit, deactivate, saveField } = useEditActivation();
+  const { activeEdit, deactivate, saveField, getFieldValue } = useEditActivation();
 
-  const handleSave = useCallback((value: string) => {
+  const handleTextSave = useCallback((value: string) => {
+    if (!activeEdit) return;
+    saveField(activeEdit.sectionId, activeEdit.path, value);
+    deactivate();
+  }, [activeEdit, saveField, deactivate]);
+
+  const handleRichSave = useCallback((value: RichContent) => {
+    if (!activeEdit) return;
+    saveField(activeEdit.sectionId, activeEdit.path, value);
+    deactivate();
+  }, [activeEdit, saveField, deactivate]);
+
+  const handleImageSave = useCallback((value: ImageSource) => {
+    if (!activeEdit) return;
+    saveField(activeEdit.sectionId, activeEdit.path, value);
+    deactivate();
+  }, [activeEdit, saveField, deactivate]);
+
+  const handleCtaSave = useCallback((value: CtaValue) => {
     if (!activeEdit) return;
     saveField(activeEdit.sectionId, activeEdit.path, value);
     deactivate();
@@ -21,7 +48,7 @@ export function EditOverlay() {
 
   if (!activeEdit) return null;
 
-  const { fieldType, element } = activeEdit;
+  const { fieldType, element, sectionId, path } = activeEdit;
 
   switch (fieldType) {
     case "text":
@@ -29,25 +56,46 @@ export function EditOverlay() {
         <PlainTextOverlay
           targetElement={element}
           value={element.textContent ?? ""}
-          onSave={handleSave}
+          onSave={handleTextSave}
           onCancel={handleCancel}
         />
       );
 
-    case "rich-text":
-      // TODO: Phase 3 - implement RichTextOverlay
-      console.log("[EditOverlay] rich-text editing not yet implemented");
-      return null;
+    case "rich-text": {
+      const richValue = getFieldValue(sectionId, path) as TextOrRich ?? "";
+      return (
+        <RichTextOverlay
+          targetElement={element}
+          value={richValue}
+          onSave={handleRichSave}
+          onCancel={handleCancel}
+        />
+      );
+    }
 
-    case "image":
-      // TODO: Phase 4 - implement ImagePickerOverlay
-      console.log("[EditOverlay] image editing not yet implemented");
-      return null;
+    case "image": {
+      const imageValue = getFieldValue(sectionId, path) as ImageSource | undefined;
+      return (
+        <ImageOverlay
+          targetElement={element}
+          value={imageValue}
+          onSave={handleImageSave}
+          onCancel={handleCancel}
+        />
+      );
+    }
 
-    case "cta":
-      // TODO: Phase 4 - implement CtaOverlay
-      console.log("[EditOverlay] cta editing not yet implemented");
-      return null;
+    case "cta": {
+      const ctaValue = getFieldValue(sectionId, path) as CtaValue ?? { text: "", href: "" };
+      return (
+        <CtaOverlay
+          targetElement={element}
+          value={ctaValue}
+          onSave={handleCtaSave}
+          onCancel={handleCancel}
+        />
+      );
+    }
 
     case "color":
       // Color fields are config, not content - handled by section controls
