@@ -109,7 +109,7 @@
 .secondary .button button,
 .secondary .button a {
   background: var(--muse-theme-primary, #6366f1);
-  color: white;
+  color: var(--muse-theme-on-primary, white);
 }
 
 .variantSelect {

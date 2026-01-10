@@ -3,8 +3,16 @@ export type PaletteMood = "energetic" | "calm" | "professional" | "playful" | "l
 export type PaletteTemperature = "warm" | "cool" | "neutral";
 export type PaletteContrast = "light" | "dark";
 
-// TODO: Migrate to semantic design tokens (onPrimary, onSurface, etc.)
-// for better scalability. Current approach uses per-component text colors.
+/**
+ * Color Token Architecture:
+ *
+ * Tier 1 - Core Palette: primary, background, text, etc.
+ * Tier 2 - Semantic Tokens: onPrimary (text on primary backgrounds)
+ * Tier 3 - Component Tokens: heroText, ctaText (specific overrides)
+ *
+ * Add semantic tokens (onAccent, surface/onSurface) as components need them.
+ * Follow Material Design 3 naming: on{Surface} = text color for that surface.
+ */
 export interface PaletteColors {
   primary: string
   primaryHover: string
@@ -13,6 +21,7 @@ export interface PaletteColors {
   backgroundAlt: string
   text: string
   textMuted: string
+  onPrimary?: string
   heroGradient?: string
   heroText?: string
   heroTextMuted?: string

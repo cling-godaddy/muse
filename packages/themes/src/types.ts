@@ -6,6 +6,7 @@ export interface ThemeColors {
   backgroundAlt: string
   text: string
   textMuted: string
+  onPrimary?: string
   heroGradient?: string
   heroText?: string
   heroTextMuted?: string

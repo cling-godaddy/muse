@@ -1,4 +1,5 @@
 import type { Theme } from "./types";
+import { resolveThemeColors } from "./colors";
 
 function hexToRgb(hex: string): string {
   const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
@@ -10,20 +11,23 @@ function hexToRgb(hex: string): string {
 }
 
 export function themeToCssVars(theme: Theme): Record<string, string> {
+  const colors = resolveThemeColors(theme.colors);
+
   return {
-    "--muse-theme-primary": theme.colors.primary,
-    "--muse-theme-primary-rgb": hexToRgb(theme.colors.primary),
-    "--muse-theme-primary-hover": theme.colors.primaryHover,
-    "--muse-theme-accent": theme.colors.accent,
-    "--muse-theme-bg": theme.colors.background,
-    "--muse-theme-bg-alt": theme.colors.backgroundAlt,
-    "--muse-theme-text": theme.colors.text,
-    "--muse-theme-text-muted": theme.colors.textMuted,
-    "--muse-theme-hero-gradient": theme.colors.heroGradient ?? theme.colors.primary,
-    "--muse-theme-hero-text": theme.colors.heroText ?? "#ffffff",
-    "--muse-theme-hero-text-muted": theme.colors.heroTextMuted ?? "rgba(255, 255, 255, 0.9)",
-    "--muse-theme-cta-bg": theme.colors.ctaBackground ?? theme.colors.primary,
-    "--muse-theme-cta-text": theme.colors.ctaText ?? "#ffffff",
+    "--muse-theme-primary": colors.primary,
+    "--muse-theme-primary-rgb": hexToRgb(colors.primary),
+    "--muse-theme-primary-hover": colors.primaryHover,
+    "--muse-theme-accent": colors.accent,
+    "--muse-theme-bg": colors.background,
+    "--muse-theme-bg-alt": colors.backgroundAlt,
+    "--muse-theme-text": colors.text,
+    "--muse-theme-text-muted": colors.textMuted,
+    "--muse-theme-on-primary": colors.onPrimary,
+    "--muse-theme-hero-gradient": colors.heroGradient,
+    "--muse-theme-hero-text": colors.heroText,
+    "--muse-theme-hero-text-muted": colors.heroTextMuted,
+    "--muse-theme-cta-bg": colors.ctaBackground,
+    "--muse-theme-cta-text": colors.ctaText,
     "--muse-theme-heading-font": theme.typography.headingFont,
     "--muse-theme-body-font": theme.typography.bodyFont,
     "--muse-theme-heading-weight": String(theme.typography.headingWeight),

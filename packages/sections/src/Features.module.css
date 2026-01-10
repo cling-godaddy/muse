@@ -111,7 +111,7 @@
   align-self: center;
   padding: 0.5rem 1rem;
   background: var(--muse-theme-primary, #6366f1);
-  color: white;
+  color: var(--muse-theme-on-primary, white);
   border: none;
   border-radius: var(--muse-theme-radius, 0.5rem);
   cursor: pointer;
