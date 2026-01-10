@@ -32,15 +32,32 @@ export function EditableField({
   const fieldPlaceholder = placeholder ?? label ?? "";
 
   switch (type) {
-    case "text":
+    case "text": {
+      // Handle object values like navbar logo {text?, image?}
+      let textValue = "";
+      if (typeof value === "string") {
+        textValue = value;
+      }
+      else if (value && typeof value === "object" && "text" in value) {
+        textValue = (value as { text?: string }).text ?? "";
+      }
       return (
         <EditablePlainText
-          value={value as string ?? ""}
-          onChange={onChange as (v: string) => void}
+          value={textValue}
+          onChange={(v) => {
+            // If original value was object, preserve structure
+            if (value && typeof value === "object") {
+              onChange({ ...value, text: v });
+            }
+            else {
+              onChange(v);
+            }
+          }}
           className={className}
           placeholder={fieldPlaceholder}
         />
       );
+    }
 
     case "rich-text":
       return (

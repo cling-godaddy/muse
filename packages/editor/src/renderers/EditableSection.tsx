@@ -1,10 +1,11 @@
 import type { ReactNode } from "react";
-import type { Section, Usage, FeatureItem, StatItem, Quote, ImageSource } from "@muse/core";
+import type { Section, Usage, FeatureItem, StatItem, Quote, ImageSource, NavItem } from "@muse/core";
 import type { LayoutComponent } from "./sectionRegistry";
 import { EditableField } from "./EditableField";
 import { EditableFeatureItem } from "./items/EditableFeatureItem";
 import { EditableStatItem } from "./items/EditableStatItem";
 import { EditableQuoteItem } from "./items/EditableQuoteItem";
+import { EditableNavItem } from "./items/EditableNavItem";
 
 interface Props {
   /** The section component to render */
@@ -98,6 +99,18 @@ function renderListItems(
         src={logo.image.url}
         alt={logo.image.alt}
         style={{ maxWidth: "100px", height: "auto" }}
+      />
+    ));
+  }
+
+  // Navbar items - editable nav links
+  if (fieldName === "items" && sectionType === "navbar") {
+    return (items as NavItem[]).map((item, i) => (
+      <EditableNavItem
+        key={i}
+        item={item}
+        onChange={newItem => updateItem(i, newItem)}
+        onRemove={() => removeItem(i)}
       />
     ));
   }
