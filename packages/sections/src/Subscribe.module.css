@@ -84,9 +84,15 @@
   width: 100%;
 }
 
+/* Email input wrapper - layout only */
 .emailInput {
   flex: 1;
   min-width: 180px;
+}
+
+/* Actual input element inside wrapper */
+.emailInput input {
+  width: 100%;
   padding: 0.75rem 1rem;
   border: 1px solid var(--muse-theme-border, #e2e8f0);
   border-radius: var(--muse-theme-radius, 0.5rem);
@@ -95,11 +101,11 @@
   font-family: var(--muse-theme-body-font, inherit);
 }
 
-.emailInput::placeholder {
+.emailInput input::placeholder {
   color: var(--muse-theme-text-muted, #94a3b8);
 }
 
-.emailInput:focus {
+.emailInput input:focus {
   border-color: var(--muse-theme-primary, #6366f1);
   outline: none;
 }
@@ -127,6 +133,17 @@
 
 .button input:focus {
   outline: none;
+}
+
+/* Actual button element inside wrapper */
+.button button {
+  background: transparent;
+  border: none;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+  width: 100%;
+  height: 100%;
 }
 
 .disclaimer {
@@ -181,6 +198,16 @@
   box-shadow: 0 0 15px rgba(var(--muse-theme-primary-rgb, 0, 255, 0), 0.4);
 }
 
+:global([data-effects="crt"]) .emailInput input {
+  border-color: rgba(var(--muse-theme-primary-rgb, 0, 255, 0), 0.5);
+  background: var(--muse-theme-bg, #000);
+  color: var(--muse-theme-text, #0f0);
+}
+
+:global([data-effects="crt"]) .emailInput input::placeholder {
+  color: rgba(var(--muse-theme-primary-rgb, 0, 255, 0), 0.5);
+}
+
 /* ============================================
    NEON EFFECTS
    ============================================ */
@@ -200,4 +227,9 @@
   box-shadow:
     0 0 15px rgba(var(--muse-theme-primary-rgb, 255, 42, 109), 0.7),
     0 0 30px rgba(var(--muse-theme-primary-rgb, 255, 42, 109), 0.4);
+}
+
+:global([data-effects="neon"]) .emailInput input {
+  border-color: rgba(var(--muse-theme-primary-rgb, 255, 42, 109), 0.5);
+  box-shadow: 0 0 10px rgba(var(--muse-theme-primary-rgb, 255, 42, 109), 0.2);
 }

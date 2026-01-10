@@ -51,7 +51,7 @@ export function Subscribe({
         {headline && <div className={styles.headline}>{headline}</div>}
         {subheadline && <div className={styles.subheadline}>{subheadline}</div>}
         <div className={styles.form}>
-          {emailInput && <div className={styles.input}>{emailInput}</div>}
+          {emailInput && <div className={styles.emailInput}>{emailInput}</div>}
           <div className={styles.button}>{button}</div>
         </div>
         {disclaimer && <div className={styles.disclaimer}>{disclaimer}</div>}
