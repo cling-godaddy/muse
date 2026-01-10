@@ -1,5 +1,11 @@
 # CLAUDE.md
 
+## Verification
+
+To verify code changes, use: `pnpm typecheck && pnpm lint && pnpm test`
+
+Don't use `pnpm build` for verification—it only produces deployment artifacts (Storybook + web SPA) and doesn't catch anything typecheck wouldn't already catch.
+
 ## State Management
 
 Stack: React Query (server), Zustand + Immer (client)
