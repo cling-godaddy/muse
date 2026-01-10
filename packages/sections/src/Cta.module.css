@@ -104,12 +104,26 @@
 .primary .button a {
   background: var(--muse-theme-bg, white);
   color: var(--muse-theme-text, #111827);
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.primary .button button:hover,
+.primary .button a:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
 }
 
 .secondary .button button,
 .secondary .button a {
   background: var(--muse-theme-primary, #6366f1);
   color: var(--muse-theme-on-primary, white);
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.secondary .button button:hover,
+.secondary .button a:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
 }
 
 .variantSelect {
