@@ -21,7 +21,7 @@ interface Props {
  * For text/rich-text fields in editor context, renders inline Lexical editor.
  * When path and sectionId are provided, adds data attributes for click-to-edit.
  */
-export function StaticField({
+export function Field({
   schema,
   value,
   className,

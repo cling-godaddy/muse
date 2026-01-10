@@ -7,7 +7,7 @@ import type {
   NavItem,
   ProductItem,
 } from "@muse/core";
-import { StaticField } from "../StaticField";
+import { Field } from "../Field";
 
 interface ItemProps {
   sectionId: string
@@ -28,26 +28,26 @@ export function StaticFeatureItem({
   return (
     <>
       {item.icon && (
-        <StaticField
+        <Field
           schema={{ type: "text" }}
           value={item.icon}
           path={`${path}.icon`}
           sectionId={sectionId}
         />
       )}
-      <StaticField
+      <Field
         schema={{ type: "image" }}
         value={item.image}
         path={`${path}.image`}
         sectionId={sectionId}
       />
-      <StaticField
+      <Field
         schema={{ type: "text" }}
         value={item.title}
         path={`${path}.title`}
         sectionId={sectionId}
       />
-      <StaticField
+      <Field
         schema={{ type: "rich-text" }}
         value={item.description}
         path={`${path}.description`}
@@ -69,13 +69,13 @@ export function StaticStatItem({
   const path = `${basePath}[${index}]`;
   return (
     <>
-      <StaticField
+      <Field
         schema={{ type: "text" }}
         value={item.value}
         path={`${path}.value`}
         sectionId={sectionId}
       />
-      <StaticField
+      <Field
         schema={{ type: "text" }}
         value={item.label}
         path={`${path}.label`}
@@ -97,31 +97,31 @@ export function StaticQuoteItem({
   const path = `${basePath}[${index}]`;
   return (
     <>
-      <StaticField
+      <Field
         schema={{ type: "rich-text" }}
         value={item.text}
         path={`${path}.text`}
         sectionId={sectionId}
       />
-      <StaticField
+      <Field
         schema={{ type: "image" }}
         value={item.avatar}
         path={`${path}.avatar`}
         sectionId={sectionId}
       />
-      <StaticField
+      <Field
         schema={{ type: "text" }}
         value={item.author}
         path={`${path}.author`}
         sectionId={sectionId}
       />
-      <StaticField
+      <Field
         schema={{ type: "text" }}
         value={item.role}
         path={`${path}.role`}
         sectionId={sectionId}
       />
-      <StaticField
+      <Field
         schema={{ type: "text" }}
         value={item.company}
         path={`${path}.company`}
@@ -143,31 +143,31 @@ export function StaticProductItem({
   const path = `${basePath}[${index}]`;
   return (
     <>
-      <StaticField
+      <Field
         schema={{ type: "image" }}
         value={item.image}
         path={`${path}.image`}
         sectionId={sectionId}
       />
-      <StaticField
+      <Field
         schema={{ type: "text" }}
         value={item.name}
         path={`${path}.name`}
         sectionId={sectionId}
       />
-      <StaticField
+      <Field
         schema={{ type: "text" }}
         value={item.price}
         path={`${path}.price`}
         sectionId={sectionId}
       />
-      <StaticField
+      <Field
         schema={{ type: "text" }}
         value={item.originalPrice}
         path={`${path}.originalPrice`}
         sectionId={sectionId}
       />
-      <StaticField
+      <Field
         schema={{ type: "text" }}
         value={item.badge}
         path={`${path}.badge`}
@@ -189,7 +189,7 @@ export function StaticNavItem({
   const path = `${basePath}[${index}]`;
   // NavItem is a CTA-like field with label + href
   return (
-    <StaticField
+    <Field
       schema={{ type: "cta" }}
       value={{ text: item.label, href: item.href }}
       path={path}
@@ -209,7 +209,7 @@ export function StaticGalleryImage({
 }: ItemProps & { image: ImageSource }) {
   const path = `${basePath}[${index}]`;
   return (
-    <StaticField
+    <Field
       schema={{ type: "image" }}
       value={image}
       path={path}
@@ -229,7 +229,7 @@ export function StaticLogoItem({
 }: ItemProps & { item: { image: ImageSource, href?: string } }) {
   const path = `${basePath}[${index}]`;
   return (
-    <StaticField
+    <Field
       schema={{ type: "image" }}
       value={item.image}
       path={`${path}.image`}

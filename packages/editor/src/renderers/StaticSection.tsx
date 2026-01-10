@@ -1,7 +1,7 @@
 import type { ReactNode } from "react";
 import type { Section } from "@muse/core";
 import type { LayoutComponent } from "./sectionRegistry";
-import { StaticField } from "./StaticField";
+import { Field } from "./Field";
 import { staticListRenderers } from "./items/StaticListItems";
 
 interface Props {
@@ -18,7 +18,7 @@ interface Props {
  * Used for preview and published pages.
  *
  * For each field defined in the section's schema:
- * 1. Creates a StaticField with the current value
+ * 1. Creates a Field with the current value
  * 2. Passes it to the section component via the slot prop
  */
 export function StaticSection({
@@ -62,7 +62,7 @@ export function StaticSection({
     }
     else {
       slots[fieldSchema.slot] = (
-        <StaticField
+        <Field
           key={fieldName}
           schema={fieldSchema}
           value={value}
