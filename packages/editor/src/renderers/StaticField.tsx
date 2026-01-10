@@ -42,7 +42,14 @@ export function StaticField({
 
   switch (type) {
     case "text": {
-      const text = value as string;
+      // Handle object values like navbar logo {text?, image?}
+      let text = "";
+      if (typeof value === "string") {
+        text = value;
+      }
+      else if (value && typeof value === "object" && "text" in value) {
+        text = (value as { text?: string }).text ?? "";
+      }
       if (!text) return null;
       return <span className={className} {...editAttrs}>{text}</span>;
     }

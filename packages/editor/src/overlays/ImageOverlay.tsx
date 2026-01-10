@@ -85,20 +85,20 @@ export function ImageOverlay({
     return () => document.removeEventListener("keydown", handleKeyDown);
   }, [onCancel]);
 
-  // Close on click outside
+  // Close on click outside - use mousedown to avoid the opening click
   useEffect(() => {
-    const handleClick = (e: MouseEvent) => {
+    const handleMouseDown = (e: MouseEvent) => {
       const target = e.target as HTMLElement;
       const overlay = document.querySelector("[data-image-overlay]");
       if (overlay && !overlay.contains(target) && !targetElement.contains(target)) {
         onCancel();
       }
     };
-    // Delay to avoid immediate close from the click that opened this
-    setTimeout(() => {
-      document.addEventListener("click", handleClick);
-    }, 0);
-    return () => document.removeEventListener("click", handleClick);
+    // Use mousedown instead of click - the opening click has already completed its mousedown
+    document.addEventListener("mousedown", handleMouseDown);
+    return () => {
+      document.removeEventListener("mousedown", handleMouseDown);
+    };
   }, [targetElement, onCancel]);
 
   const handleAltChange = (newAlt: string) => {
@@ -160,13 +160,18 @@ export function ImageOverlay({
   return createPortal(
     <div
       data-image-overlay=""
-      className={styles.content}
       style={{
         position: "absolute",
         top: position.top,
         left: position.left,
         transform: "translateX(-50%)",
         zIndex: 9999,
+        background: "white",
+        border: "1px solid #e5e7eb",
+        padding: "12px",
+        borderRadius: "8px",
+        boxShadow: "0 4px 12px rgba(0,0,0,0.15)",
+        width: "320px",
       }}
     >
       <form className={styles.searchForm} onSubmit={handleSearch}>

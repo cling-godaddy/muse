@@ -73,19 +73,18 @@ export function CtaOverlay({
     }
   }, [handleSave, onCancel]);
 
-  // Close on click outside
+  // Close on click outside - use mousedown to avoid the opening click
   useEffect(() => {
-    const handleClick = (e: MouseEvent) => {
+    const handleMouseDown = (e: MouseEvent) => {
       const target = e.target as HTMLElement;
       if (containerRef.current && !containerRef.current.contains(target) && !targetElement.contains(target)) {
         handleSave();
       }
     };
-    // Delay to avoid immediate close from the click that opened this
-    setTimeout(() => {
-      document.addEventListener("click", handleClick);
-    }, 0);
-    return () => document.removeEventListener("click", handleClick);
+    document.addEventListener("mousedown", handleMouseDown);
+    return () => {
+      document.removeEventListener("mousedown", handleMouseDown);
+    };
   }, [targetElement, handleSave]);
 
   return createPortal(
