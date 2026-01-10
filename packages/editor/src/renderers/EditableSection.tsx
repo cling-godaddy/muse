@@ -22,8 +22,98 @@ interface Props {
 }
 
 /**
+ * List item renderer function signature.
+ * Maps items array to editable React components.
+ */
+type ListItemRenderer = (
+  items: unknown[],
+  updateItem: (index: number, item: unknown) => void,
+  removeItem: (index: number) => void,
+  onUsage?: (usage: Usage) => void,
+) => ReactNode;
+
+/**
+ * Registry of list item renderers by "sectionType:fieldName" key.
+ * Add new entries here to support additional list types.
+ */
+const listRenderers: Record<string, ListItemRenderer> = {
+  "features:items": (items, updateItem, removeItem, onUsage) =>
+    (items as FeatureItem[]).map((item, i) => (
+      <EditableFeatureItem
+        key={i}
+        item={item}
+        onChange={newItem => updateItem(i, newItem)}
+        onRemove={() => removeItem(i)}
+        onUsage={onUsage}
+      />
+    )),
+
+  "stats:stats": (items, updateItem, removeItem) =>
+    (items as StatItem[]).map((item, i) => (
+      <EditableStatItem
+        key={i}
+        item={item}
+        onChange={newItem => updateItem(i, newItem)}
+        onRemove={() => removeItem(i)}
+      />
+    )),
+
+  "testimonials:quotes": (items, updateItem, removeItem, onUsage) =>
+    (items as Quote[]).map((item, i) => (
+      <EditableQuoteItem
+        key={i}
+        item={item}
+        onChange={newItem => updateItem(i, newItem)}
+        onRemove={() => removeItem(i)}
+        onUsage={onUsage}
+      />
+    )),
+
+  "gallery:images": items =>
+    (items as ImageSource[]).map((image, i) => (
+      <img
+        key={i}
+        src={image.url}
+        alt={image.alt}
+        style={{ maxWidth: "100%", height: "auto" }}
+      />
+    )),
+
+  "logos:logos": items =>
+    (items as { image: ImageSource, href?: string }[]).map((logo, i) => (
+      <img
+        key={i}
+        src={logo.image.url}
+        alt={logo.image.alt}
+        style={{ maxWidth: "100px", height: "auto" }}
+      />
+    )),
+
+  "navbar:items": (items, updateItem, removeItem) =>
+    (items as NavItem[]).map((item, i) => (
+      <EditableNavItem
+        key={i}
+        item={item}
+        onChange={newItem => updateItem(i, newItem)}
+        onRemove={() => removeItem(i)}
+      />
+    )),
+
+  "products:items": (items, updateItem, removeItem, onUsage) =>
+    (items as ProductItem[]).map((item, i) => (
+      <EditableProductItem
+        key={i}
+        item={item}
+        onChange={newItem => updateItem(i, newItem)}
+        onRemove={() => removeItem(i)}
+        onUsage={onUsage}
+      />
+    )),
+};
+
+/**
  * Renders list items based on section type and field name.
- * Returns an array of editable item components wrapped in fragments.
+ * Uses the listRenderers registry to find the appropriate renderer.
  */
 function renderListItems(
   sectionType: string,
@@ -42,91 +132,11 @@ function renderListItems(
     onUpdate(items.filter((_, i) => i !== index));
   };
 
-  // Feature items
-  if (fieldName === "items" && sectionType === "features") {
-    return (items as FeatureItem[]).map((item, i) => (
-      <EditableFeatureItem
-        key={i}
-        item={item}
-        onChange={newItem => updateItem(i, newItem)}
-        onRemove={() => removeItem(i)}
-        onUsage={onUsage}
-      />
-    ));
-  }
+  const key = `${sectionType}:${fieldName}`;
+  const renderer = listRenderers[key];
 
-  // Stat items
-  if (fieldName === "stats" && sectionType === "stats") {
-    return (items as StatItem[]).map((item, i) => (
-      <EditableStatItem
-        key={i}
-        item={item}
-        onChange={newItem => updateItem(i, newItem)}
-        onRemove={() => removeItem(i)}
-      />
-    ));
-  }
-
-  // Quote/testimonial items
-  if (fieldName === "quotes" && sectionType === "testimonials") {
-    return (items as Quote[]).map((item, i) => (
-      <EditableQuoteItem
-        key={i}
-        item={item}
-        onChange={newItem => updateItem(i, newItem)}
-        onRemove={() => removeItem(i)}
-        onUsage={onUsage}
-      />
-    ));
-  }
-
-  // Gallery images - render as editable images
-  if (fieldName === "images" && sectionType === "gallery") {
-    return (items as ImageSource[]).map((image, i) => (
-      <img
-        key={i}
-        src={image.url}
-        alt={image.alt}
-        style={{ maxWidth: "100%", height: "auto" }}
-      />
-    ));
-  }
-
-  // Logo items - render images
-  if (fieldName === "logos" && sectionType === "logos") {
-    return (items as { image: ImageSource, href?: string }[]).map((logo, i) => (
-      <img
-        key={i}
-        src={logo.image.url}
-        alt={logo.image.alt}
-        style={{ maxWidth: "100px", height: "auto" }}
-      />
-    ));
-  }
-
-  // Navbar items - editable nav links
-  if (fieldName === "items" && sectionType === "navbar") {
-    return (items as NavItem[]).map((item, i) => (
-      <EditableNavItem
-        key={i}
-        item={item}
-        onChange={newItem => updateItem(i, newItem)}
-        onRemove={() => removeItem(i)}
-      />
-    ));
-  }
-
-  // Product items
-  if (fieldName === "items" && sectionType === "products") {
-    return (items as ProductItem[]).map((item, i) => (
-      <EditableProductItem
-        key={i}
-        item={item}
-        onChange={newItem => updateItem(i, newItem)}
-        onRemove={() => removeItem(i)}
-        onUsage={onUsage}
-      />
-    ));
+  if (renderer) {
+    return renderer(items, updateItem, removeItem, onUsage);
   }
 
   // Fallback: render placeholder for unknown list types
